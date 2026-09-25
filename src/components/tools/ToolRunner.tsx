@@ -119,7 +119,7 @@ export function ToolRunner({ tool, missing, targetOptions, status }: Props) {
             <span className="eyebrow">What you will get</span>
             <h2 className="q-title">{p.promise}</h2>
             <ul className="intro-gets">
-              {p.gets.map((g) => (
+              {p.gets.slice(0, 3).map((g) => (
                 <li key={g.title}><span className="fc-icon"><Icon name={g.icon} /></span><span><b>{g.title}</b><span>{g.text}</span></span></li>
               ))}
             </ul>

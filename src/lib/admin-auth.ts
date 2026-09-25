@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { randomBytes, randomInt, scrypt as scryptCb, timingSafeEqual } from 'node:crypto'
 import { env } from './env'
@@ -158,9 +158,21 @@ export const getCurrentAdmin = cache(async (): Promise<AdminUser | null> => {
   )
 })
 
+/** Only /admin pages (no protocol-relative or odd paths) are accepted as a post-login destination. */
+export function safeAdminNext(value: unknown): string {
+  return typeof value === 'string' && /^\/admin(\/[A-Za-z0-9\-/]*)?(\?[A-Za-z0-9=&%._\-]*)?$/.test(value) && !value.startsWith('/admin/login') ? value : '/admin'
+}
+
+/**
+ * Every admin page calls this itself (not only the layout): layouts are not re-run on every navigation,
+ * so page-level checks are what actually protect the data. Signed-out admins return to this page after login.
+ */
 export async function requireAdmin(): Promise<AdminUser> {
   const admin = await getCurrentAdmin()
-  if (!admin) redirect('/admin/login')
+  if (!admin) {
+    const path = (await headers()).get('x-pathname') ?? '/admin'
+    redirect(`/admin/login?next=${encodeURIComponent(safeAdminNext(path))}`)
+  }
   return admin
 }
 

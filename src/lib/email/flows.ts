@@ -2,6 +2,7 @@ import { env } from '../env'
 import { query, queryOne, transaction } from '../db'
 import { sendMail, type Mail } from '../mailer'
 import { hmac, safeEqualHex } from '../security'
+import { linkSig } from '../links'
 import { isCondition, type ConditionId, type TriggerId } from './catalog'
 import { checkCondition, loadContext, mergeVars, type LearnerContext } from './context'
 import { DEFAULT_FLOWS } from './defaults'
@@ -56,7 +57,7 @@ export function validUnsubscribe(userId: unknown, token: unknown): userId is str
 
 // ---------- Rendering ----------
 
-export function buildMail(step: Pick<StepRow, 'subject' | 'preheader' | 'heading' | 'body' | 'cta_label' | 'cta_path' | 'position'>, flowName: string, vars: MergeVars, to: string, unsubscribe?: string): Mail {
+export function buildMail(step: Pick<StepRow, 'subject' | 'preheader' | 'heading' | 'body' | 'cta_label' | 'cta_path' | 'position'>, flowName: string, vars: MergeVars, to: string, unsubscribe?: string, userId?: string): Mail {
   const body = renderBody(step.body, vars)
   const ctaPath = step.cta_path ? fillTags(step.cta_path, vars) : ''
   return {
@@ -68,7 +69,7 @@ export function buildMail(step: Pick<StepRow, 'subject' | 'preheader' | 'heading
     bodyHtml: body.html,
     bodyText: body.text,
     cta: step.cta_label && ctaPath.startsWith('/')
-      ? { label: fillTags(step.cta_label, vars).trim(), url: trackedUrl(env.appUrl, ctaPath, slug(flowName), `step-${step.position}`) }
+      ? { label: fillTags(step.cta_label, vars).trim(), url: trackedUrl(env.appUrl, ctaPath, slug(flowName), `step-${step.position}`, userId ? linkSig(userId) : undefined) }
       : undefined,
     unsubscribeUrl: unsubscribe,
   }
@@ -170,7 +171,7 @@ async function processOne(e: Claimed, flows: Map<string, { flow: FlowRow; steps:
   if (!eligible) {
     await logSend(ctx.userId, flow.id, step.id, ctx.email, step.subject, 'skipped', `conditions not met: ${conditions.filter((c) => !checkCondition(c, ctx)).join(', ')}`)
   } else {
-    const mail = buildMail(step, flow.name, mergeVars(ctx), ctx.email, unsubscribeUrl(ctx.userId))
+    const mail = buildMail(step, flow.name, mergeVars(ctx), ctx.email, unsubscribeUrl(ctx.userId), ctx.userId)
     try {
       await sendMail(mail)
       await logSend(ctx.userId, flow.id, step.id, ctx.email, mail.subject, 'sent', null)

@@ -5,10 +5,12 @@ import { ensureFlowBaselines } from '@/lib/email/admin'
 import { orphanedVersions } from '@/lib/versions'
 import { TRIGGERS } from '@/lib/email/catalog'
 import { emailOverview } from '@/lib/email/reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Emails' }
 
 export default async function EmailsPage() {
+  await requireAdmin()
   await ensureFlowBaselines()
   const [{ stats, flows }, deleted] = await Promise.all([emailOverview(), orphanedVersions('email_flow', 'email_flows')])
   const smtpReady = Boolean(process.env.SMTP_HOST) && process.env.MAIL_LOG_ONLY !== 'true'

@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { listLeads } from '@/lib/leads'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata: Metadata = { title: 'Leads' }
 
 const fmt = (d: Date | string) => new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const params = await searchParams
   const q = typeof params.q === 'string' ? params.q.slice(0, 100) : ''
   const leads = await listLeads(q)

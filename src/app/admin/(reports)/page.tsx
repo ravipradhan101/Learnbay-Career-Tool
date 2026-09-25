@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Funnel, PageHead, Stat, fmtInr, fmtInt, fmtPct, fmtSecs, fmtTokens } from '@/components/admin/parts'
 import { acquisitionFunnel, activationFunnel, featureUsage, overview, parseRange, tokenUsage, type FunnelStep } from '@/lib/admin-reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Overview' }
 
@@ -19,6 +20,7 @@ function worstDrop(steps: FunnelStep[]) {
 }
 
 export default async function OverviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const range = parseRange((await searchParams).range)
   const [o, acq, act, feats, tokens] = await Promise.all([
     overview(range.since), acquisitionFunnel(range.since), activationFunnel(range.since), featureUsage(range.since), tokenUsage(range.since, ''),

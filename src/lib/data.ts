@@ -4,6 +4,7 @@ import { query, queryOne } from './db'
 import { cookies, headers } from 'next/headers'
 import { SESSION_COOKIE, type User } from './auth'
 import { sha256 } from './security'
+import { linkMatches } from './links'
 import type { Answers } from './questions'
 import type { ToolId } from './tools-meta'
 import type { ResumeAnalysis, ToolResultMap } from './tool-types'
@@ -78,8 +79,11 @@ export const getStudio = cache(async (): Promise<StudioData> => {
   const jar = await cookies()
   const token = jar.get(SESSION_COOKIE)?.value
   // After login, return to the page they asked for (e.g. a tool linked from an email), not just the home.
-  const path = (await headers()).get('x-pathname') ?? ''
-  const loginUrl = `/login?next=${encodeURIComponent(/^\/dashboard(\/[a-z-]+)?$/.test(path) ? path : '/dashboard')}`
+  const h = await headers()
+  const path = h.get('x-pathname') ?? ''
+  const safePath = /^\/dashboard(\/[a-z-]+)?$/.test(path) ? path : '/dashboard'
+  const linkFor = h.get('x-link-for')
+  const loginUrl = `/login?next=${encodeURIComponent(linkFor ? `${safePath}?for=${linkFor}` : safePath)}`
   if (!token || token.length > 100) redirect(loginUrl)
   const row = await queryOne<User & { answers: Answers | null; tools: ToolRow[] | null; latest_session: LatestSession }>(
     `SELECT u.id, u.email, u.name, u.phone_country, u.phone, u.created_at, a.answers,
@@ -94,6 +98,8 @@ export const getStudio = cache(async (): Promise<StudioData> => {
   )
   if (!row) redirect(loginUrl)
   const { answers, tools, latest_session, ...user } = row
+  // An emailed link meant for a different learner: never show or build this account's reports under it.
+  if (!linkMatches(user.id, linkFor)) redirect(`/account/switch?next=${encodeURIComponent(safePath)}`)
   if (!answers || !answers.interest || !user.phone) redirect('/start')
   return { user, answers, tools: tools ?? [], hasSession: Boolean(latest_session), latestSession: latest_session }
 })

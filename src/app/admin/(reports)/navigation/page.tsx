@@ -1,9 +1,11 @@
 import { Empty, PageHead, fmtInt, fmtPct, fmtSecs } from '@/components/admin/parts'
 import { navigation, pageName, parseRange } from '@/lib/admin-reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Navigation' }
 
 export default async function NavigationPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const range = parseRange((await searchParams).range)
   const nav = await navigation(range.since)
   const totalDevices = nav.devices.reduce((s, d) => s + d.visitors, 0)

@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ too
   )
   if (!row) return jsonError(404, 'This report is not ready yet.')
   try {
-    await emailToolReport({ to: user.email, name: firstName(user.name), meta, data: row.data, answers: row.answers })
+    await emailToolReport({ userId: user.id, to: user.email, name: firstName(user.name), meta, data: row.data, answers: row.answers })
   } catch (err) {
     console.error('[report-email] failed', (err as Error).message)
     return jsonError(502, 'We could not send the email just now. Please try again in a minute.')

@@ -49,8 +49,9 @@ export function renderBody(body: string, vars: MergeVars): { html: string; text:
 }
 
 /** Adds campaign tags so returning visits from each email show up under Traffic sources in the admin reports. */
-export function trackedUrl(appUrl: string, path: string, campaign: string, content: string): string {
+export function trackedUrl(appUrl: string, path: string, campaign: string, content: string, forSig?: string): string {
   const url = new URL(path, appUrl)
+  if (forSig) url.searchParams.set('for', forSig)
   url.searchParams.set('utm_source', 'email')
   url.searchParams.set('utm_medium', 'lifecycle')
   url.searchParams.set('utm_campaign', campaign.slice(0, 60))

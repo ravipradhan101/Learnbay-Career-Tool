@@ -5,10 +5,12 @@ import { VersionHistory } from '@/components/admin/QuestionSetControls'
 import { ensureFlowBaselines } from '@/lib/email/admin'
 import { listVersions } from '@/lib/versions'
 import { flowDetail } from '@/lib/email/reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Edit email flow' }
 
 export default async function FlowPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin()
   const { id } = await params
   await ensureFlowBaselines()
   const data = await flowDetail(id)

@@ -7,6 +7,7 @@ import { type Track } from './eligibility-bank'
 import { activeQuestions, activeSetFor, type QuestionSet, type SetQuestion } from './eligibility-sets'
 import { generateJson } from './gemini'
 import { sendMail } from './mailer'
+import { learnerUrl } from './links'
 import { EDU_LEVELS, MATH_COMFORT, PROGRAMMER, experienceLabel, interestLabel, labelOf, roleLabel, type Answers } from './questions'
 
 // Timing, question count and attempts come from the active question set (Admin → Eligibility test) and are
@@ -435,7 +436,7 @@ async function afterCompletion(t: TestRow) {
         ...b.byTopic.map((x) => `${x.topic}: ${x.correct}/${x.total}`),
         `Suggested program: ${program.name}`,
       ] }],
-      cta: { label: 'Choose a time for the call', url: `${env.appUrl}/dashboard/sessions` },
+      cta: { label: 'Choose a time for the call', url: learnerUrl(t.user_id, '/dashboard/sessions') },
     }),
   ]
   const notify = env.counsellorNotifyEmail
@@ -453,7 +454,7 @@ async function afterCompletion(t: TestRow) {
         `Profile: ${u.answers ? `${roleLabel(u.answers)}, ${experienceLabel(u.answers)}, interested in ${interestLabel(u.answers)}` : 'n/a'}`,
         `Suggested program: ${program.name}`,
       ],
-      cta: { label: 'Open the learner journey', url: `${env.appUrl}/admin/users/${t.user_id}` },
+      cta: { label: 'Open this learner in admin', url: `${env.appUrl}/admin/users/${t.user_id}` },
     }))
   }
   await Promise.allSettled(jobs)

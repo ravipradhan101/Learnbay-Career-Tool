@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from 'nodemailer'
 import { env } from './env'
+import { learnerUrl } from './links'
 
 const globalForMail = globalThis as unknown as { __navigatorMailer?: Transporter }
 
@@ -63,7 +64,7 @@ export function renderHtml(mail: Mail): string {
     .filter((sec) => sec.items.length)
     .map((sec) => `<h2 style="margin:22px 0 8px;font-size:16px;color:#0f172a">${escapeHtml(sec.title)}</h2><ul style="margin:0;padding-left:18px;color:#334155;font-size:14px;line-height:1.6">${sec.items.map((i) => `<li style="margin:0 0 6px">${escapeHtml(i)}</li>`).join('')}</ul>`)
     .join('')
-  return `<!doctype html><html><body style="margin:0;background:#f4f6fb;font-family:Segoe UI,Arial,sans-serif">${preheader}
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#f4f6fb;font-family:Segoe UI,Arial,sans-serif">${preheader}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;padding:28px">
 <tr><td>
@@ -137,7 +138,7 @@ export function sendAdminCodeEmail(to: string, code: string) {
   })
 }
 
-export function sendToolReadyEmail(to: string, name: string, toolName: string, route: string) {
+export function sendToolReadyEmail(userId: string, to: string, name: string, toolName: string, route: string) {
   return sendMail({
     to,
     subject: `Your ${toolName} is ready`,
@@ -146,12 +147,12 @@ export function sendToolReadyEmail(to: string, name: string, toolName: string, r
       `Your personalized ${toolName} is saved in your Learnbay Career Studio.`,
       'Sign in with this email any time to see it. We will send you a one-time code.',
     ],
-    cta: { label: `View my ${toolName}`, url: `${env.appUrl}${route}` },
+    cta: { label: `View my ${toolName}`, url: learnerUrl(userId, route) },
   })
 }
 
 export function sendSessionEmails(params: {
-  learner: { name: string; email: string; phone: string }
+  learner: { id: string; name: string; email: string; phone: string }
   type: string
   when: string
   note: string
@@ -166,7 +167,7 @@ export function sendSessionEmails(params: {
         `You asked for ${params.type.toLowerCase()} on ${params.when}.`,
         `Someone from our mentor team will confirm with you on ${params.learner.phone} or by email.`,
       ],
-      cta: { label: 'Open my Career Studio', url: `${env.appUrl}/dashboard` },
+      cta: { label: 'Open my Career Studio', url: learnerUrl(params.learner.id, '/dashboard') },
     }),
   ]
   const notify = env.counsellorNotifyEmail
@@ -184,7 +185,7 @@ export function sendSessionEmails(params: {
           `Note: ${params.note || '(none)'}`,
           `Profile: ${params.summary}`,
         ],
-        cta: { label: 'Open leads', url: `${env.appUrl}/admin` },
+        cta: { label: 'Open this learner in admin', url: `${env.appUrl}/admin/users/${params.learner.id}` },
       }),
     )
   }

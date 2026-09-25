@@ -62,13 +62,9 @@ export async function ToolPage({ id }: { id: ToolId }) {
 
       {id === 'skill-gap' && <ResumeReview initial={resume?.data ?? null} />}
 
-      <section className="advisor no-print" aria-label={`Ask about your ${meta.name}`}>
-        <div className="advisor-head">
-          <div>
-            <b>Questions about this analysis?</b>
-            <span>Ask Career AI — it knows your results.</span>
-          </div>
-        </div>
+      <details className="more ask-more no-print" open={convo.messages.length > 0}>
+        <summary><span><Icon name="message" size="1.1rem" className="text-primary" /> Questions about this report? Ask Career AI</span><Icon name="chevronDown" size="1rem" className="more-chev" /></summary>
+        <div className="more-body">
         <AssistantChat
           context={id}
           signedIn
@@ -77,30 +73,26 @@ export async function ToolPage({ id }: { id: ToolId }) {
           suggestions={CHAT_SUGGESTIONS[id]}
           placeholder={`Ask about your ${meta.name.toLowerCase()}...`}
         />
-      </section>
-
-      <section className="card stack no-print">
-        <h2 className="card-title">What would you like to do next?</h2>
-        <div className="next-panel">
-          {nextTools.map((t) => {
-            const done = tools.find((r) => r.tool === t.id)?.status === 'ready'
-            return (
-              <Link key={t.id} href={t.route} className="tool-card">
-                <span className="fc-icon"><Icon name={t.icon} /></span>
-                <span style={{ flex: 1 }}><b>{done ? 'View' : 'Check'} {t.name}</b><span>{t.tagline}</span></span>
-              </Link>
-            )
-          })}
-          <Link href="/dashboard/sessions" className="tool-card">
-            <span className="fc-icon" style={{ background: 'var(--accent-50)', color: 'var(--accent)' }}><Icon name="calendar" /></span>
-            <span style={{ flex: 1 }}><b>Talk it through with a mentor</b><span>Free career strategy session</span></span>
-          </Link>
         </div>
-        <Link href="/dashboard" className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }}><Icon name="arrowLeft" size="0.9rem" /> Back to my dashboard</Link>
-      </section>
+      </details>
 
-      <Testimonials />
-      <ProofStrip />
+      <nav className="next-tiles no-print" aria-label="What to do next">
+        {nextTools.map((t) => {
+          const done = tools.find((r) => r.tool === t.id)?.status === 'ready'
+          return (
+            <Link key={t.id} href={t.route} className="next-tile">
+              <span className="fc-icon"><Icon name={t.icon} /></span>
+              <b>{done ? 'View' : 'Next:'} {t.name}</b>
+              {done ? <span className="pill success">Ready</span> : <span className="pill primary">~2 min</span>}
+            </Link>
+          )
+        })}
+        <Link href="/dashboard/sessions" className="next-tile accent">
+          <span className="fc-icon"><Icon name="calendar" /></span>
+          <b>Free 1:1 with a mentor</b>
+          <span className="pill">30 min</span>
+        </Link>
+      </nav>
     </>
   )
 }

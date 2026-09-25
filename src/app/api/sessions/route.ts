@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const summary = ctx ? `${roleLabel(ctx.answers)}, ${experienceLabel(ctx.answers)}, interested in ${interestLabel(ctx.answers)}` : 'Not available'
   const when = `${new Date(`${body.date}T00:00:00`).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })} at ${time}`
   try {
-    await sendSessionEmails({ learner: { name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note, summary })
+    await sendSessionEmails({ learner: { id: user.id, name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note, summary })
   } catch (err) {
     console.error('[sessions] email failed', (err as Error).message)
   }

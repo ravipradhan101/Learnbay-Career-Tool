@@ -1,9 +1,11 @@
 import { Empty, Funnel, PageHead, fmtInt, fmtPct, fmtSecs } from '@/components/admin/parts'
 import { STEP_NAMES, acquisitionFunnel, activationFunnel, dropOffs, featureName, pageName, parseRange } from '@/lib/admin-reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Funnel & drop-off' }
 
 export default async function FunnelPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const range = parseRange((await searchParams).range)
   const [acq, act, d] = await Promise.all([acquisitionFunnel(range.since), activationFunnel(range.since), dropOffs(range.since)])
   const exitTotal = d.onboardingExit.reduce((s, x) => s + x.visitors, 0)

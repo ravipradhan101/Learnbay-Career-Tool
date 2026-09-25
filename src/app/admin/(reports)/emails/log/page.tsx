@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { Empty, fmtDate } from '@/components/admin/parts'
 import { sendLog } from '@/lib/email/reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Email send log' }
 
 const FILTERS = [['', 'All'], ['sent', 'Sent'], ['skipped', 'Skipped'], ['failed', 'Failed'], ['test', 'Tests']] as const
 
 export default async function EmailLogPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const p = await searchParams
   const status = typeof p.status === 'string' ? p.status : ''
   const rows = await sendLog(status)

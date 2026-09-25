@@ -7,7 +7,7 @@ import { postJson } from '@/lib/client'
 type Mode = 'login' | 'request' | 'reset'
 
 /** Admin sign-in, plus “set or reset password” with a code emailed to the admin address. */
-export function AdminLoginForm() {
+export function AdminLoginForm({ next = '/admin' }: { next?: string }) {
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -32,7 +32,8 @@ export function AdminLoginForm() {
     setBusy(false)
     if (!res.ok) return setError(res.error)
     if (mode === 'request') { setInfo(String(res.data.message ?? 'Code sent.')); setMode('reset'); return }
-    window.location.href = String(res.data.redirect ?? '/admin')
+    // The server only ever returns an /admin path; `next` was already validated on the server.
+    window.location.href = next
   }
 
   const title = mode === 'login' ? 'Admin reports' : 'Set or reset password'

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Empty, Stat, fmtDate, fmtInr, fmtInt, fmtTokens } from '@/components/admin/parts'
 import { STEP_NAMES, featureName, pageName, userJourney } from '@/lib/admin-reports'
 import { experienceLabel, interestLabel, roleLabel, type Answers } from '@/lib/questions'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Learner journey' }
 
@@ -44,6 +45,7 @@ function describe(e: Ev): { what: string; detail: string } {
 }
 
 export default async function UserJourneyPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin()
   const data = await userJourney((await params).id)
   if (!data) notFound()
   const { user, events, tools, tokens, sessions } = data
@@ -75,6 +77,17 @@ export default async function UserJourneyPage({ params }: { params: Promise<{ id
         <Stat label="AI tokens" value={fmtTokens(totalTokens)} note={`≈${fmtInr(totalCost)}`} />
         <Stat label="1:1 session" value={sessions.length ? 'Booked' : 'Not booked'} note={sessions[0] ? `${sessions[0].preferred_date ?? ''} ${sessions[0].preferred_time ?? ''}` : undefined} />
       </div>
+
+      {tools.some((t) => t.status === 'ready') && (
+        <section className="card stack">
+          <h2 className="card-title">Reports this learner received</h2>
+          <div className="row">
+            {tools.filter((t) => t.status === 'ready').map((t) => (
+              <a key={t.tool} className="btn btn-outline btn-sm" href={`/api/admin/users/${user.id}/report/${t.tool}`} target="_blank" rel="noopener noreferrer">{featureName(t.tool)} (PDF)</a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {tokens.length > 0 && (
         <section className="card stack">

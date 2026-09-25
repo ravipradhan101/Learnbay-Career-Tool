@@ -2,10 +2,12 @@ import Link from 'next/link'
 import { Empty, PageHead, Stat, fmtDate, fmtInr, fmtInt, fmtPct, fmtTokens } from '@/components/admin/parts'
 import { PRICING } from '@/lib/ai-usage'
 import { featureName, parseRange, tokenUsage } from '@/lib/admin-reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'AI tokens & cost' }
 
 export default async function TokensPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const params = await searchParams
   const range = parseRange(params.range)
   const q = typeof params.q === 'string' ? params.q.slice(0, 100) : ''

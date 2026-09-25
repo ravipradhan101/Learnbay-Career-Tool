@@ -5,10 +5,12 @@ import { query, queryOne } from '@/lib/db'
 import { readinessProblem } from '@/lib/eligibility-admin'
 import { AREAS, areaLabel, type QuestionSet } from '@/lib/eligibility-sets'
 import { listVersions } from '@/lib/versions'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Edit question set' }
 
 export default async function QuestionSetPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin()
   const { id } = await params
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
   const set = await queryOne<QuestionSet>(`SELECT * FROM question_sets WHERE id = $1`, [id])

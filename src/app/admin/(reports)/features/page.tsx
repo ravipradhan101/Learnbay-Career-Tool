@@ -1,9 +1,11 @@
 import { Empty, PageHead, fmtInt, fmtPct } from '@/components/admin/parts'
 import { featureName, featureUsage, parseRange } from '@/lib/admin-reports'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Used vs avoided' }
 
 export default async function FeaturesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdmin()
   const range = parseRange((await searchParams).range)
   const f = await featureUsage(range.since)
   const sorted = [...f.table].sort((a, b) => (a.useRate ?? 2) - (b.useRate ?? 2))

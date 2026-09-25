@@ -4,10 +4,12 @@ import { NewSetForm, SetStatusToggle, TestVisibilityToggle } from '@/components/
 import { query } from '@/lib/db'
 import { recentAttempts, setStats } from '@/lib/eligibility-admin'
 import { AREAS, areaLabel, ensureQuestionSets, isEligibilityEnabled, type QuestionSet } from '@/lib/eligibility-sets'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Eligibility test' }
 
 export default async function EligibilityAdminPage() {
+  await requireAdmin()
   await ensureQuestionSets()
   const [enabled, sets, stats, recent] = await Promise.all([
     isEligibilityEnabled(),
