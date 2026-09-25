@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env*.local
+npm-debug.log*
+
+# Content exports from npm run backup (keep copies somewhere safe, outside the repo)
+backups/
+# Local tooling
+.claude/settings.local.json
+.qa-*.mjs

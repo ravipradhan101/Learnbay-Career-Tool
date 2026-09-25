@@ -1,0 +1,28 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
+
+const TABS = [
+  { href: '/admin', label: 'Overview' },
+  { href: '/admin/funnel', label: 'Funnel & drop-off' },
+  { href: '/admin/navigation', label: 'Navigation' },
+  { href: '/admin/features', label: 'Used vs avoided' },
+  { href: '/admin/tokens', label: 'AI tokens & cost' },
+  { href: '/admin/leads', label: 'Leads' },
+  { href: '/admin/eligibility', label: 'Eligibility test' },
+  { href: '/admin/emails', label: 'Emails' },
+]
+
+/** Report tabs; the selected date range carries across tabs. */
+export function AdminNav() {
+  const pathname = usePathname()
+  const range = useSearchParams().get('range')
+  return (
+    <nav className="admin-tabs" aria-label="Reports">
+      {TABS.map((t) => (
+        <Link key={t.href} href={range ? `${t.href}?range=${encodeURIComponent(range)}` : t.href} aria-current={pathname === t.href || (t.href !== '/admin' && pathname.startsWith(`${t.href}/`)) ? 'page' : undefined}>{t.label}</Link>
+      ))}
+    </nav>
+  )
+}

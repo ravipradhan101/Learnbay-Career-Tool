@@ -1,0 +1,461 @@
+<title>Learnbay Career Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#132033; --muted:#566275; --line:#DCE1E8;
+  --accent:#0A7A5C; --accent-soft:#E2F2EB;
+  --warm:#9A6212; --warm-soft:#FBF0DC;
+  --stop:#B42318; --stop-soft:#FCE9E6;
+  --info:#2B4FB8; --info-soft:#E7ECFA;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E141B; --surface:#151D27; --ink:#E4EAF1; --muted:#9AA7B7; --line:#273342;
+    --accent:#45C99F; --accent-soft:#12332A;
+    --warm:#E3B45E; --warm-soft:#382C15;
+    --stop:#F0877B; --stop-soft:#3A1F1C;
+    --info:#8EA8F2; --info-soft:#1C2645;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141B; --surface:#151D27; --ink:#E4EAF1; --muted:#9AA7B7; --line:#273342;
+  --accent:#45C99F; --accent-soft:#12332A;
+  --warm:#E3B45E; --warm-soft:#382C15;
+  --stop:#F0877B; --stop-soft:#3A1F1C;
+  --info:#8EA8F2; --info-soft:#1C2645;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-inline:16px;padding-block:32px 80px}
+.layout{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:48px}
+@media (min-width:1080px){.layout{grid-template-columns:200px minmax(0,1fr)}}
+nav.toc{display:none}
+@media (min-width:1080px){
+  nav.toc{display:block;position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;font-size:13.5px}
+}
+nav.toc p{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+nav.toc a{color:var(--muted);text-decoration:none}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent)}
+main{max-width:780px;min-width:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,6vw,52px);font-weight:700;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,30px);font-weight:700;letter-spacing:-.01em;margin-bottom:16px}
+h3{font-size:19px;font-weight:500;margin-bottom:8px}
+p{margin:0 0 14px;max-width:68ch}
+section{padding-top:56px;margin-top:56px;border-top:1px solid var(--line)}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:18px}
+.lede{font-size:19px;line-height:1.55;margin-top:20px;max-width:62ch}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+
+/* three jobs */
+.jobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-top:28px}
+.job{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.job h3{font-size:16px;margin-bottom:6px}
+.job p{font-size:14.5px;margin:0;color:var(--muted)}
+
+/* decisions */
+.decisions{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.decisions li{display:grid;grid-template-columns:1fr;gap:4px;padding:16px 0;border-bottom:1px solid var(--line)}
+.decisions li:last-child{border-bottom:0}
+.decisions strong{font-weight:600}
+.decisions span{color:var(--muted);font-size:15px}
+
+/* steps */
+.steps{list-style:none;margin:24px 0 0;padding:0;counter-reset:s;display:grid;gap:14px}
+.step{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;display:grid;grid-template-columns:40px 1fr;gap:4px 14px}
+.step::before{content:counter(s);grid-row:span 3;width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:600 15px/32px var(--mono);text-align:center}
+.step-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.step-head h3{margin:0}
+.time{font:500 12px/1 var(--mono);color:var(--muted);white-space:nowrap}
+.step p{font-size:15px;margin:4px 0 0}
+.step .ex{font-size:14px;color:var(--muted);margin-top:8px}
+.step .ex b{color:var(--ink);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.gate{border-color:var(--warm)}
+.gate::before{background:var(--warm-soft);color:var(--warm)}
+
+/* tags */
+.tag{display:inline-block;font:500 11px/1.6 var(--mono);padding:1px 7px;border-radius:4px;white-space:nowrap;letter-spacing:.02em}
+.t-ai{background:var(--info-soft);color:var(--info)}
+.t-db{background:var(--accent-soft);color:var(--accent)}
+.t-mix{background:var(--warm-soft);color:var(--warm)}
+.t-stop{background:var(--stop-soft);color:var(--stop)}
+
+/* tables */
+.tbl{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:620px}
+th,td{text-align:left;vertical-align:top;padding:11px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font:500 11.5px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg)}
+td:first-child{font-weight:500}
+td .dont{color:var(--stop)}
+.num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13.5px}
+
+/* mock blueprint */
+.mock{margin:24px 0;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.mock-bar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);font:500 12px/1.4 var(--mono);color:var(--muted);background:var(--bg)}
+.mock-body{padding:20px;display:grid;gap:18px}
+.who{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.who h3{font-size:22px;margin:0}
+.score{display:flex;align-items:baseline;gap:6px}
+.score b{font:700 38px/1 var(--display);color:var(--accent)}
+.meter{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;background:var(--accent)}
+.mock-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.cell{border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.cell .kicker{margin-bottom:6px}
+.cell p{font-size:14px;margin:0}
+.cov{display:grid;gap:8px;margin-top:6px}
+.cov-row{display:grid;grid-template-columns:150px 1fr 48px;gap:10px;align-items:center;font-size:13.5px}
+.cov-row .meter i.g{background:var(--muted)}
+.illus{font:500 11px/1.4 var(--mono);color:var(--warm)}
+.mock-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px solid var(--line);background:var(--bg)}
+.mock-tabs span{font-size:12.5px;padding:4px 10px;border-radius:6px;color:var(--muted)}
+.mock-tabs span.cur{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.mock-tabs span.cta{margin-left:auto;background:var(--accent);color:var(--surface);font-weight:500}
+
+/* callout */
+.note{border-left:3px solid var(--warm);background:var(--warm-soft);padding:14px 16px;border-radius:0 8px 8px 0;margin:20px 0;font-size:15px}
+.note p{margin:0}
+.note p + p{margin-top:8px}
+
+/* timeline */
+.days{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.days li{position:relative;padding:0 0 18px 22px}
+.days li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.days .d{font:500 12px/1 var(--mono);color:var(--accent);display:block;margin-bottom:4px}
+.days p{margin:0;font-size:15px}
+
+/* funnel */
+.funnel{display:grid;gap:8px;margin:20px 0}
+.f-row{display:grid;grid-template-columns:minmax(120px,190px) 1fr 56px;gap:12px;align-items:center;font-size:14px}
+.f-row .meter{height:14px}
+.f-row .num{text-align:right}
+
+/* arch */
+.arch{display:grid;gap:10px;margin:20px 0}
+.layer{display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:start;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:12px 14px}
+.layer .kicker{margin:3px 0 0}
+.layer .boxes{display:flex;flex-wrap:wrap;gap:6px}
+.layer .boxes span{font-size:13px;border:1px solid var(--line);border-radius:6px;padding:3px 9px;background:var(--bg)}
+@media (max-width:520px){
+  .layer{grid-template-columns:1fr}
+  .cov-row{grid-template-columns:1fr 48px}
+  .cov-row .meter{grid-column:1 / -1;grid-row:2}
+  .f-row{grid-template-columns:1fr 56px}
+  .f-row .meter{grid-column:1 / -1;grid-row:2}
+}
+
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:20px}
+.phase{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--surface)}
+.phase h3{font-size:17px}
+.phase ul{margin:8px 0 0;padding-left:18px;font-size:14.5px}
+.phase li{margin-bottom:4px}
+.asks{margin:16px 0 0;padding-left:20px}
+.asks li{margin-bottom:10px;max-width:68ch}
+footer{margin-top:64px;font-size:13px;color:var(--muted)}
+</style>
+
+<div class="layout">
+<nav class="toc" aria-label="Sections">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#what">What it is</a></li>
+    <li><a href="#decisions">Key decisions</a></li>
+    <li><a href="#session">The guided session</a></li>
+    <li><a href="#blueprint">The Blueprint</a></li>
+    <li><a href="#after">After the Blueprint</a></li>
+    <li><a href="#persuasion">Persuasion playbook</a></li>
+    <li><a href="#nurture">Nurture engine</a></li>
+    <li><a href="#build">How it's built</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#rollout">Rollout</a></li>
+    <li><a href="#open">Decisions needed</a></li>
+  </ol>
+</nav>
+
+<main>
+<header id="what">
+  <div class="eyebrow"><span>Product spec · Draft v1</span><span>24 Sep 2026</span><span>learnbay.co</span></div>
+  <h1>Learnbay Career Navigator</h1>
+  <p class="lede">A free, AI-guided career check on learnbay.co. In about 8 minutes, a working professional answers mostly tap-to-choose questions. The Navigator then builds their personal <strong>Career Blueprint</strong>: target roles, salary range, skills gap, a month-by-month roadmap, portfolio projects, and the Learnbay track that closes the gap.</p>
+  <p>The Blueprint is <strong>locked once it's built</strong>. It lives at a private link and is sent to the learner's email and WhatsApp. After that, the page is their home base. They can re-read the Blueprint, ask a scoped AI assistant, or book a counsellor. For Learnbay it does three jobs: it attracts leads, qualifies them, and gives us a nurture channel.</p>
+
+  <div class="jobs">
+    <div class="job"><h3>For the learner</h3><p>"Tell me what AI means for <em>my</em> career, what to learn, and how long it takes." Answers that are specific to them, in minutes, for free.</p></div>
+    <div class="job"><h3>For sales</h3><p>A verified phone number plus about 25 structured fields, a readiness score, a stated goal and timeline, and a lead score, all before the first call.</p></div>
+    <div class="job"><h3>For marketing</h3><p>One destination for every ad, blog, and WhatsApp campaign, and a personal link we can keep sending people back to.</p></div>
+  </div>
+</header>
+
+<section id="decisions">
+  <div class="kicker">Product calls</div>
+  <h2>Seven decisions that shape everything else</h2>
+  <ol class="decisions">
+    <li><strong>1. Structured first, AI second.</strong><span>About 80% of the session is taps: chips, sliders, and cards. The AI speaks at two points, a follow-up after the learner describes their pain points and the final Blueprint. Taps are faster and finish more often, cost almost nothing, and produce clean CRM fields. A fully open chat intake would be slower, more expensive, and would give us messy data.</span></li>
+    <li><strong>2. Give value before asking for contact details, and ask before the full reveal.</strong><span>We ask for contact details at about 75% of the way through. The learner has already seen their AI Readiness Score and put in six minutes. The full Blueprint is what they're unlocking. Asking at the start kills completion. Asking at the end means people screenshot the result and leave.</span></li>
+    <li><strong>3. A WhatsApp OTP is the only verification.</strong><span>One code, sent to the number they gave us. It proves the lead is real, confirms the channel we'll nurture on, and becomes their login later. Email isn't verified up front because the Blueprint link we send there confirms it.</span></li>
+    <li><strong>4. Facts come from our database. Words come from the AI.</strong><span>Salary ranges, testimonials, placement stats, curriculum coverage, and project briefs are all lookups. The model picks from IDs we give it and writes the narrative around them. It never invents a number, a name, or a company. This is the biggest trust risk and the biggest legal risk in the product.</span></li>
+    <li><strong>5. One Blueprint per person, locked.</strong><span>No editing the profile and no regenerating. A "Something looks off?" button creates a counsellor task instead. That turns a token cost into a sales conversation.</span></li>
+    <li><strong>6. The assistant is scoped and metered.</strong><span>It answers from the learner's Blueprint and Learnbay's course knowledge base only, with a limit of 20 messages a day and 60 in total. Past the limit, and whenever a question is about fees, EMI, or placement guarantees, it hands over to a counsellor.</span></li>
+    <li><strong>7. Built for mobile first.</strong><span>Most traffic will arrive from WhatsApp and paid social on phones. Every screen is designed at 375px first, one question per screen, with the thumb-zone CTA fixed at the bottom.</span></li>
+  </ol>
+</section>
+
+<section id="session">
+  <div class="kicker">First visit · fully guided</div>
+  <h2>The guided session</h2>
+  <p>This is a linear flow with no navigation. It has one question per screen, a progress bar, and a back button. Answers are saved on the device, so a refresh doesn't wipe progress. The worked example throughout is <b>Rahul, a QA engineer with 4 years in fintech</b>.</p>
+
+  <ol class="steps">
+    <li class="step">
+      <div class="step-head"><h3>Hook</h3><span class="time">0:00 · 1 screen</span></div>
+      <p>"See what AI means for your career, and your exact path to the next role." One button: <em>Build my Blueprint · 8 min</em>. Below it are three real outcome lines from people with similar starting points. Traffic from ads or blogs arrives with a persona hint in the UTM, which pre-selects the likely role.</p>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>Who you are</h3><span class="time">≈1:30 · 5 taps</span></div>
+      <p>First name, current role, years of experience, industry, and current CTC band (with a "Prefer not to say" option). We ask for the first name only, so every later screen can address them by name.</p>
+      <div class="chips"><span class="chip on">QA / Testing</span><span class="chip">Software Dev</span><span class="chip">Data / BI</span><span class="chip">Business Analyst</span><span class="chip">Ops / Non-tech</span><span class="chip on">4–6 yrs</span><span class="chip on">BFSI / Fintech</span></div>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>Where you want to go</h3><span class="time">≈1:00 · 2 taps</span></div>
+      <p>"What do you want AI to do for your career?" <em>Move into an AI/data role · Use AI in my current role · Move up to lead/manager · Change domain · Not sure, help me decide.</em> Then a timeline: 3, 6, or 12 months, or "just exploring". The timeline answer is the strongest single intent signal we collect.</p>
+      <p class="ex">Rahul: <b>Move into an AI role, or use AI in testing</b> (multi-select allowed) · <b>within 6 months</b></p>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>What's in the way</h3><span class="time">≈1:30 · taps + 1 AI turn</span></div>
+      <p>Pain points, multi-select: <em>Don't know where to start · No time · Weak in coding/maths · No real projects · Worried about layoffs · Started courses, never finished · Salary stuck · No interview calls.</em> Then an optional box: "Anything else, in your words?" This is where the AI asks <strong>one or two follow-up questions</strong>. They are the only open-ended AI turns in the session.</p>
+      <p class="ex">AI: <b>"You said you've started courses before. What made you stop: time, difficulty, or it didn't feel relevant to testing?"</b></p>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>AI Readiness Check</h3><span class="time">≈2:00 · 5 questions</span></div>
+      <p>Five short scenario questions, not trivia. They cover Python, data handling, ML concepts, GenAI tool use, and "have you applied AI at work?". The output is shown immediately: a <strong>score out of 100</strong>, a band (<em>Explorer · Builder · Practitioner</em>), and an <strong>effort estimate</strong> in hours per week × months. This is the first payoff and the hook for the unlock step.</p>
+      <p class="ex">Rahul: <b>42 / 100 · Builder</b> · "About 8–10 hrs/week for 7 months to be interview-ready for your target role"</p>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>Your call</h3><span class="time">≈1:00 · 3 taps</span></div>
+      <p>This is where the need gets identified. "Based on your answers, here are three paths. Which feels right?" Each path card maps to a track. Then: "What would make you confident to switch?" (<em>projects in my domain · a mentor · interview prep · a recognised certificate</em>) and a preferred learning format. The Blueprint quotes their own choices back to them later, which keeps the pitch consistent with what they said.</p>
+    </li>
+    <li class="step gate">
+      <div class="step-head"><h3>Unlock</h3><span class="time">≈0:40 · the contact step</span></div>
+      <p>"Rahul, your Blueprint is ready to build. Where should we send it?" Fields: email and WhatsApp number (+91 by default). The consent wording sits right above the button: <em>Send my Blueprint</em>. A 6-digit code then arrives on WhatsApp, with SMS as a fallback. <strong>The Blueprint isn't generated until the number is verified</strong>, so bots and fake numbers cost us nothing.</p>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>Build</h3><span class="time">≈0:30 · animated</span></div>
+      <p>While the Blueprint generates, the screen shows honest progress steps ("Matching roles to your profile", "Mapping your skills gap", "Picking projects for fintech") and one testimonial from someone with a similar starting role. The wait is productive: they're reading proof while they wait.</p>
+    </li>
+    <li class="step">
+      <div class="step-head"><h3>Reveal</h3><span class="time">≈8:00 · Blueprint</span></div>
+      <p>The Blueprint opens, and the same link lands on WhatsApp and in email together with a PDF. From this point the flow ends and navigation opens up.</p>
+    </li>
+  </ol>
+</section>
+
+<section id="blueprint">
+  <div class="kicker">The output</div>
+  <h2>The Career Blueprint</h2>
+  <p>The page is generated once and has a fixed section order. Each section is labelled by where its content comes from, and that label is how we keep the AI honest.</p>
+  <p class="small"><span class="tag t-db">Database</span> lookup, never generated &nbsp; <span class="tag t-ai">AI</span> written by the model &nbsp; <span class="tag t-mix">Mixed</span> AI picks from our data and writes around it</p>
+
+  <div class="mock" aria-label="Example Blueprint overview">
+    <div class="mock-bar"><span>learnbay.co/navigator/b/7f3k…</span><span class="illus">Example: all figures illustrative</span></div>
+    <div class="mock-body">
+      <div class="who">
+        <div><div class="kicker">Career Blueprint</div><h3>Rahul · QA Engineer · 4 yrs · Fintech</h3><p class="small muted" style="margin:4px 0 0">Goal: an AI role or AI in testing, within 6 months</p></div>
+        <div class="score"><b>42</b><span class="muted small">/ 100 readiness · Builder</span></div>
+      </div>
+      <div class="meter" aria-hidden="true"><i style="width:42%"></i></div>
+      <div class="mock-grid">
+        <div class="cell"><div class="kicker">Best-fit role</div><p><b>AI Test / LLM Evaluation Engineer</b><br><span class="muted">Also: Data Analyst (BFSI) · ML Engineer (stretch)</span></p></div>
+        <div class="cell"><div class="kicker">Salary move</div><p><b>₹9–12 → ₹16–24 LPA</b><br><span class="muted">Range from placement data, not a promise</span></p></div>
+        <div class="cell"><div class="kicker">Effort</div><p><b>8–10 hrs/week · 7 months</b><br><span class="muted">First project shippable in week 5</span></p></div>
+      </div>
+      <div class="cell">
+        <div class="kicker">How well each option covers your 17 gaps</div>
+        <div class="cov">
+          <div class="cov-row"><span>Generic DS course</span><div class="meter"><i class="g" style="width:53%"></i></div><span class="num">9/17</span></div>
+          <div class="cov-row"><span>AI track for BFSI</span><div class="meter"><i style="width:88%"></i></div><span class="num">15/17</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-tabs"><span class="cur">Overview</span><span>Roadmap</span><span>Roles &amp; salary</span><span>Projects</span><span>Learn</span><span>Ask AI</span><span class="cta">Talk to a counsellor</span></div>
+  </div>
+
+  <div class="tbl"><table>
+    <thead><tr><th>Section</th><th>What it shows</th><th>Source</th><th>Job in the funnel</th></tr></thead>
+    <tbody>
+      <tr><td>Snapshot</td><td>Profile, readiness score and band, effort estimate, and their stated goal in their own words</td><td><span class="tag t-mix">Mixed</span></td><td>"This is about me." Recognition.</td></tr>
+      <tr><td>AI and your current role</td><td>Which everyday tasks in their role AI tools already handle, what's still human, and where demand is growing. Every claim is cited.</td><td><span class="tag t-mix">Mixed</span></td><td>Honest urgency: the cost of standing still</td></tr>
+      <tr><td>Roles you fit</td><td>2–3 target roles with a fit rating, a typical title ladder, and what hiring managers screen for</td><td><span class="tag t-mix">Mixed</span></td><td>Aspiration with a concrete name</td></tr>
+      <tr><td>Salary move</td><td>Current band vs target band by city and experience, with source and date shown</td><td><span class="tag t-db">Database</span></td><td>Makes the gap tangible in rupees</td></tr>
+      <tr><td>Skills &amp; tools gap</td><td>Have / need / nice-to-have, with tools named (Python, SQL, PyTest + LLM evals, LangChain…)</td><td><span class="tag t-mix">Mixed</span></td><td>Makes the path concrete. Feeds the coverage score.</td></tr>
+      <tr><td>Roadmap</td><td>Month by month at their stated hours per week, with a milestone each month</td><td><span class="tag t-ai">AI</span></td><td>"It's doable." Reduces fear of effort.</td></tr>
+      <tr><td>Portfolio projects</td><td>3 projects from their domain, e.g. an LLM test-case generator from PRDs, fraud-transaction anomaly detection, and a RAG assistant over RBI circulars</td><td><span class="tag t-mix">Mixed</span></td><td>Shows why a domain track beats a generic one</td></tr>
+      <tr><td>Specialised vs generic</td><td>Coverage of <em>their</em> gap list: the matched Learnbay track vs a generic course, computed from the curriculum-to-skill map</td><td><span class="tag t-db">Database</span></td><td>The core pitch, argued with their own data</td></tr>
+      <tr><td>How Learnbay gets you there</td><td>The matched track, its domain projects, portfolio and project certification, mentors, and placement support</td><td><span class="tag t-db">Database</span></td><td>Offer</td></tr>
+      <tr><td>People like you</td><td>2–3 testimonials matched on starting role and domain: real, consented, with before and after</td><td><span class="tag t-db">Database</span></td><td>Social proof</td></tr>
+      <tr><td>Your start plan</td><td>The learner's own deadline, worked backwards: "You want to switch within 6 months. The roadmap needs about 7 months at 8–10 hrs/week, so starting this month gets you closest." No batch dates are shown. The counsellor confirms the right cohort on the call.</td><td><span class="tag t-mix">Mixed</span> calculated from their answers</td><td>Urgency that's personal, plus the CTA</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="after">
+  <div class="kicker">Returning visits</div>
+  <h2>After the Blueprint: navigation</h2>
+  <p>Once the Blueprint exists, the learner moves around freely. On mobile, sections are bottom tabs. On desktop they're a left rail. <strong>Talk to a counsellor</strong> is fixed on every screen.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Area</th><th>What they can do</th><th>Changes over time?</th></tr></thead>
+    <tbody>
+      <tr><td>Overview · Roadmap · Roles &amp; salary · Projects</td><td>Read their Blueprint and download the PDF</td><td>Locked</td></tr>
+      <tr><td>Learn</td><td>Tutorials, case studies, and webinar recordings tagged to their role, domain, and gaps. Each item ends with "how this maps to your roadmap".</td><td>Live: new content gets tagged in</td></tr>
+      <tr><td>Resume check</td><td>A one-time add-on, available after OTP verification. Upload a PDF to get a resume-vs-target-role report added as a new section. It doesn't regenerate the profile.</td><td>Once</td></tr>
+      <tr><td>Ask AI</td><td>Questions about their Blueprint and Learnbay programmes, answered from their data only. 20 messages a day, 60 in total, then a counsellor handover.</td><td>Metered</td></tr>
+      <tr><td>Your start plan</td><td>See their personal start-by month, based on the timeline they chose. Book a counsellor to confirm a cohort. We never show fixed batch dates.</td><td>Recalculated monthly</td></tr>
+      <tr><td>Talk to a counsellor</td><td>Book a slot or request a WhatsApp callback. The counsellor sees the full Blueprint and every answer before the call.</td><td>n/a</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted">Returning: the Blueprint link in WhatsApp or email opens it directly, as a signed link valid for 30 days. After that, a WhatsApp OTP logs them back in. There's no password.</p>
+  <p class="small muted">Resume uploads happen only inside a verified session. PDF and DOCX only, 5 MB maximum. We extract the text on the server and delete the file within 7 days. We keep only the parsed text, with consent.</p>
+</section>
+
+<section id="persuasion">
+  <div class="kicker">Selling through the help</div>
+  <h2>Persuasion playbook</h2>
+  <p>Every lever you asked for is in here: fear, need identification, specialised over generic, urgency, and promotion. Each one is built from the learner's own answers or from real data. That's more persuasive than invented pressure, because the learner can check it and it holds up.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Lever</th><th>Where it shows up</th><th>How</th><th>Line we don't cross</th></tr></thead>
+    <tbody>
+      <tr><td>Fear of standing still</td><td>AI and your current role</td><td>A task-level view of what AI already does in their role, with cited sources. "The testing work that's growing is evaluating AI systems."</td><td class="dont">"Your job will be gone by 2027"</td></tr>
+      <tr><td>Cost of waiting</td><td>Salary move</td><td>The gap between their current and target band per month, from their own inputs: "The difference is roughly ₹X a month."</td><td class="dont">Guaranteed salaries or hikes</td></tr>
+      <tr><td>Need identification</td><td>Step 6 · Your call</td><td>They choose their path and what would build their confidence. The Blueprint quotes it back to them.</td><td class="dont">Options where every answer means "buy now"</td></tr>
+      <tr><td>Specialised beats generic</td><td>Coverage score</td><td>Computed from the curriculum map against <em>their</em> gap list. It's an argument they can verify.</td><td class="dont">Tuning the map to inflate our score</td></tr>
+      <tr><td>Social proof</td><td>People like you, the build screen</td><td>Matched on starting role and domain. Real names, with consent.</td><td class="dont">Composite or stock-photo "learners"</td></tr>
+      <tr><td>Urgency</td><td>Your start plan, nurture messages</td><td>Their own deadline, worked backwards. Each month they wait pushes their target role out by a month: "Starting in December moves your switch to mid-2027."</td><td class="dont">Fixed batch dates, countdown timers, fake "3 seats left"</td></tr>
+      <tr><td>Progress and investment</td><td>Readiness score, roadmap month 1</td><td>"You're already 42% of the way. Month 1 starts with skills you have."</td><td class="dont">Dismiss buttons that shame them ("No, I'll stay behind")</td></tr>
+      <tr><td>Authority</td><td>Counsellor and mentor cards</td><td>Real mentor profiles with their industry background</td><td class="dont">Inflated titles</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">
+    <p><strong>Why these lines matter commercially, not just ethically.</strong> India's CCPA Guidelines for Prevention and Regulation of Dark Patterns (2023) specifically name false urgency, confirm shaming, and forced action. ASCI expects placement and salary claims in education advertising to be substantiated. One screenshot of a fake timer on LinkedIn costs more than a month of leads.</p>
+    <p>These references are from memory: get legal to confirm the current rules before launch.</p>
+  </div>
+</section>
+
+<section id="nurture">
+  <div class="kicker">WhatsApp + email</div>
+  <h2>Nurture engine</h2>
+  <p>Every message points back to a section of <em>their</em> Blueprint, so each follow-up feels like a continuation of the help and not like a sales push. Lead temperature decides how fast we move.</p>
+
+  <h3 style="margin-top:24px">Lead score v1 (starting weights, tune after 4 weeks)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Signal</th><th>Points</th><th>Signal</th><th>Points</th></tr></thead>
+    <tbody>
+      <tr><td>Timeline ≤ 3 months</td><td class="num">+25</td><td>Asked Ask AI about fees or EMI</td><td class="num">+20</td></tr>
+      <tr><td>Timeline 6 months</td><td class="num">+15</td><td>Opened Your start plan twice or more</td><td class="num">+15</td></tr>
+      <tr><td>4+ years of experience</td><td class="num">+10</td><td>Uploaded a resume</td><td class="num">+10</td></tr>
+      <tr><td>Chose a track path in step 6</td><td class="num">+10</td><td>Returned to the Blueprint within 7 days</td><td class="num">+10</td></tr>
+      <tr><td>"Just exploring"</td><td class="num">−15</td><td>No opens in 14 days</td><td class="num">−20</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small"><b>Hot, 70 or more:</b> counsellor call within 1 hour. &nbsp;<b>Warm, 40–69:</b> WhatsApp nurture plus a counsellor within 24 hours. &nbsp;<b>Cold, under 40:</b> email nurture, and they're promoted to warm when a behavioural trigger fires.</p>
+
+  <h3 style="margin-top:28px">Default journey (warm lead)</h3>
+  <ol class="days">
+    <li><span class="d">Day 0 · WhatsApp + email</span><p>Blueprint link and PDF. "Your first milestone is in week 5. Here's what it is."</p></li>
+    <li><span class="d">Day 1 · WhatsApp</span><p>A 10-minute tutorial for project #1 in their Blueprint.</p></li>
+    <li><span class="d">Day 3 · Email</span><p>A case study of someone with the same starting role and domain.</p></li>
+    <li><span class="d">Day 5 · WhatsApp</span><p>A mini readiness challenge ("Raise your score by 10 points") or a live webinar invite for their track.</p></li>
+    <li><span class="d">Day 7 · WhatsApp</span><p>The counsellor introduces themselves by name, with 3 slot links.</p></li>
+    <li><span class="d">Day 10 · both</span><p>Their start-by month: "To switch by your 6-month goal, this is the month to begin." It points to the counsellor to confirm a cohort.</p></li>
+    <li><span class="d">Day 14 onward · email</span><p>Fortnightly: new tagged content from Learn.</p></li>
+  </ol>
+  <p class="small muted"><b>Triggers that jump the queue:</b> a fees question in chat, two visits to Your start plan, or a return visit after 7+ days. Each of these alerts the counsellor right away. <b>Stop rules:</b> they book, enrol, or opt out. <b>Caps:</b> at most 1 WhatsApp a day and 3 a week. WhatsApp templates must be approved by Meta ahead of time. The nurture messages are "marketing" category and need opt-in.</p>
+</section>
+
+<section id="build">
+  <div class="kicker">Architecture &amp; cost</div>
+  <h2>How it's built</h2>
+  <div class="arch">
+    <div class="layer"><div class="kicker">Front end</div><div class="boxes"><span>Guided flow</span><span>Blueprint page</span><span>Learn</span><span>Ask AI</span><span>Booking widget</span></div></div>
+    <div class="layer"><div class="kicker">Orchestrator</div><div class="boxes"><span>Session state</span><span>OTP</span><span>Readiness scoring (rules)</span><span>Coverage calculator</span><span>Lead score</span><span>Output validator</span></div></div>
+    <div class="layer"><div class="kicker">AI</div><div class="boxes"><span>Follow-up questions: small model</span><span>Blueprint: strong model, JSON schema</span><span>Resume check</span><span>Ask AI: small model + retrieval</span></div></div>
+    <div class="layer"><div class="kicker">Our data</div><div class="boxes"><span>Tracks + curriculum-to-skill map</span><span>Salary bands</span><span>Testimonials</span><span>Project library</span><span>Content library</span><span>Offer rules</span></div></div>
+    <div class="layer"><div class="kicker">Integrations</div><div class="boxes"><span>CRM</span><span>WhatsApp BSP</span><span>Email ESP</span><span>Counsellor calendar</span><span>Analytics</span></div></div>
+  </div>
+
+  <h3 style="margin-top:24px">AI cost per learner</h3>
+  <p class="small">The budget below is in <strong>tokens</strong>, the units AI models are billed by. One token is roughly ¾ of an English word. "In" is what we send the model: instructions, the learner's answers, our data. "Out" is what it writes back. The last column turns those tokens into rupees.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Call</th><th>When</th><th>Model</th><th>Tokens (rough)</th><th>≈ Cost (₹)</th></tr></thead>
+    <tbody>
+      <tr><td>Follow-up questions</td><td>Step 4, 1–2 turns</td><td>Claude Haiku 4.5</td><td class="num">~1.5k in / 150 out each</td><td class="num">₹0.20 each · ₹0.40 total</td></tr>
+      <tr><td>Blueprint generation</td><td>Once, after OTP</td><td>Claude Sonnet 5</td><td class="num">~12k in (≈10k cached) / ~4k out</td><td class="num">₹4–8</td></tr>
+      <tr><td>Resume check</td><td>Once, optional</td><td>Claude Sonnet 5</td><td class="num">~6k in / ~1.5k out</td><td class="num">₹2.5–4</td></tr>
+      <tr><td>Ask AI</td><td>Up to 60 messages in total</td><td>Claude Haiku 4.5 + retrieval</td><td class="num">~3k in / 300 out each</td><td class="num">₹0.40 per message · ₹24 at the 60-message cap</td></tr>
+      <tr><td>Typical learner</td><td colspan="3">Blueprint, no resume check, about 8 chat messages</td><td class="num"><b>≈ ₹8–12</b></td></tr>
+      <tr><td>Worst case</td><td colspan="3">Blueprint, resume check, and all 60 chat messages</td><td class="num"><b>≈ ₹30–36</b></td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted"><b>How the rupee figures were worked out:</b> Anthropic's list prices per million tokens are Haiku 4.5 at $1 in and $5 out, and Sonnet 5 at $2 in and $10 out. Cached input is billed at about a tenth of the normal input price. I've assumed $1 = ₹88. The ranges allow for the model's extra reasoning tokens and for cache misses. For 1,000 verified leads, AI cost is roughly ₹8,000–12,000.</p>
+  <p class="small muted"><b>Not included:</b> WhatsApp charges and OTP/SMS fees, which your BSP bills per message. Across the nurture journey these will probably cost more than the AI does, so get your BSP's rate card when you budget.</p>
+  <p><strong>Cost controls:</strong> nothing is generated before OTP verification. Prompt caching covers the system prompt and knowledge base. Persona-level caching means the roles and skills for a common combination (e.g. "QA · 4–6 yrs · BFSI · switch") are computed once and personalised on top. The profile is locked and the chat is metered.</p>
+  <p><strong>Honesty guardrail:</strong> the model returns IDs for tracks, projects, testimonials, and salary rows, never raw figures. A validator rejects any output that contains a number or a company name not present in the supplied data, then retries once and falls back to a template.</p>
+
+  <h3 style="margin-top:24px">What lands in the CRM</h3>
+  <p class="small">Name, email, verified WhatsApp, role, years of experience, industry, CTC band, city, goal, timeline, pain points (tags), free-text pain, readiness score and band, chosen path, confidence driver, learning format, matched track, lead score, UTM source, Blueprint link, resume uploaded (y/n), Ask AI topics (tags), and last active date.</p>
+</section>
+
+<section id="metrics">
+  <div class="kicker">Measurement</div>
+  <h2>Metrics</h2>
+  <p>Starting targets for the funnel. They're hypotheses to test, not benchmarks. The two numbers to watch most closely are <strong>unlock-step completion</strong> and <strong>Blueprint → counsellor booking</strong>.</p>
+  <div class="funnel" aria-label="Target funnel, share of landing visitors">
+    <div class="f-row"><span>Land on page</span><div class="meter"><i style="width:100%"></i></div><span class="num">100%</span></div>
+    <div class="f-row"><span>Start session</span><div class="meter"><i style="width:35%"></i></div><span class="num">35%</span></div>
+    <div class="f-row"><span>Reach unlock step</span><div class="meter"><i style="width:21%"></i></div><span class="num">21%</span></div>
+    <div class="f-row"><span>Verified lead</span><div class="meter"><i style="width:12%"></i></div><span class="num">12%</span></div>
+    <div class="f-row"><span>Book counsellor</span><div class="meter"><i style="width:1.8%"></i></div><span class="num">1.8%</span></div>
+  </div>
+  <p class="small muted">Implied step rates: 35% start · 60% of starters reach the unlock step · 55% verify · 15% of verified leads book. Also track cost per verified lead, AI cost per lead, lead-to-enrolment rate by track, and the drop-off screen for each step.</p>
+  <p class="small"><b>First A/B test:</b> unlock placement. Test after the readiness score (current plan) against after step 3, with a readiness preview.</p>
+</section>
+
+<section id="rollout">
+  <div class="kicker">Delivery</div>
+  <h2>Rollout</h2>
+  <div class="phases">
+    <div class="phase"><h3>Phase 1 · MVP</h3><p class="small muted">≈6 weeks</p><ul><li>Guided session, steps 1–9</li><li>Blueprint with all sections</li><li>WhatsApp OTP + delivery, email + PDF</li><li>CRM push + lead score v1</li><li>Counsellor booking + counsellor view of the Blueprint</li></ul></div>
+    <div class="phase"><h3>Phase 2 · Engage</h3><p class="small muted">+4 weeks</p><ul><li>Ask AI (scoped, metered)</li><li>Resume check add-on</li><li>Learn library with tag matching</li><li>Automated nurture + behavioural triggers</li></ul></div>
+    <div class="phase"><h3>Phase 3 · Grow</h3><p class="small muted">After 1,000 Blueprints</p><ul><li>Peer benchmark ("you vs other QA engineers who took this"), from real aggregates</li><li>Share-your-Blueprint referral loop</li><li>Retake the readiness check at 90 days: a nurture touchpoint, not a new Blueprint</li></ul></div>
+  </div>
+</section>
+
+<section id="open">
+  <div class="kicker">Before build starts</div>
+  <h2>Decisions I need from you</h2>
+  <ol class="asks">
+    <li><strong>Track list and curriculum-to-skill map.</strong> The coverage score, the core of the pitch, can't be built without it.</li>
+    <li><strong>Salary data source.</strong> Learnbay placement data by role, experience, and city, plus one named market report. Both are shown with a date on the page.</li>
+    <li><strong>Testimonial library.</strong> Consented stories tagged by starting role, domain, and outcome. We need at least 3 per major persona.</li>
+    <li><strong>Stack.</strong> Which CRM, WhatsApp BSP, and email tool are live today?</li>
+    <li><strong>Consent wording.</strong> Legal needs to approve the single-button consent at the unlock step against DPDP requirements.</li>
+    <li><strong>Correction policy.</strong> My recommendation is no self-serve regeneration, with every correction routed through a counsellor. Confirm, or allow one regeneration within 24 hours.</li>
+  </ol>
+</section>
+
+<footer>Learnbay Career Navigator · product spec draft v1 · the example persona and all figures are illustrative</footer>
+</main>
+</div>

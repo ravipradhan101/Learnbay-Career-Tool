@@ -1,0 +1,30 @@
+{
+  "name": "learnbay-career-navigator",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "db:migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
+    "typecheck": "tsc --noEmit",
+    "admin:password": "node --env-file-if-exists=.env scripts/admin-password.mjs",
+    "backup": "node --env-file-if-exists=.env scripts/backup-content.mjs",
+    "restore": "node --env-file-if-exists=.env scripts/restore-content.mjs"
+  },
+  "dependencies": {
+    "next": "^16.3.6",
+    "nodemailer": "^10.0.10",
+    "pg": "^8.23.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
