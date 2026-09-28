@@ -15,3 +15,11 @@ backups/
 
 # Stray installer that landed in the project folder, not part of the app
 Claude Setup.exe
+
+# Vercel CLI writes project and org ids here when you link the project
+.vercel
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini
