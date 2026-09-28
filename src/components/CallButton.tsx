@@ -41,7 +41,7 @@ export function CallButton({ signedIn, voiceUrl, voicePhone }: { signedIn: boole
             ) : (
               <div className="sheet-option" aria-disabled="true">
                 <span className="fc-icon"><Icon name="mic" /></span>
-                <span><b>AI voice assistant</b><span>Coming soon — chat with Career AI now instead</span></span>
+                <span><b>AI voice assistant</b><span>Coming soon. Chat with Career AI now instead</span></span>
               </div>
             )}
             <button type="button" className="sheet-option" onClick={() => { setOpen(false); openAssistant() }}>

@@ -23,9 +23,9 @@ export function Robot({ className, sparkles = true }: { className?: string; spar
       <rect x="120" y="62" width="12" height="26" rx="6" fill="#6366f1" />
       <rect x="36" y="30" width="88" height="80" rx="30" fill="url(#rb-head)" stroke="#c7d2fe" strokeWidth="2" />
       <rect x="47" y="48" width="66" height="42" rx="18" fill="url(#rb-visor)" />
-      <path d="M62 68q6-8 12 0" stroke="#5eead4" strokeWidth="5" fill="none" strokeLinecap="round" />
-      <path d="M86 68q6-8 12 0" stroke="#5eead4" strokeWidth="5" fill="none" strokeLinecap="round" />
-      <path d="M72 79q8 6 16 0" stroke="#5eead4" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+      <path d="M62 68q6-8 12 0" stroke="#93c5fd" strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d="M86 68q6-8 12 0" stroke="#93c5fd" strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d="M72 79q8 6 16 0" stroke="#93c5fd" strokeWidth="3.5" fill="none" strokeLinecap="round" />
       <path d="M58 112h44a10 10 0 0 1 10 10v10H48v-10a10 10 0 0 1 10-10z" fill="url(#rb-head)" stroke="#c7d2fe" strokeWidth="2" />
       <circle cx="80" cy="124" r="5" fill="#6366f1" />
       {sparkles && (

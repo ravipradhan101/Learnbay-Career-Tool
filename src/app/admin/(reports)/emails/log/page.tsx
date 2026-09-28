@@ -32,7 +32,7 @@ export default async function EmailLogPage({ searchParams }: { searchParams: Pro
                   <tr key={r.id}>
                     <td className="small">{fmtDate(r.created_at)}</td>
                     <td className="small">{r.user_id ? <Link href={`/admin/users/${r.user_id}`}>{r.to_email}</Link> : r.to_email}</td>
-                    <td className="small">{r.flow_name ?? '—'}</td>
+                    <td className="small">{r.flow_name ?? 'None'}</td>
                     <td className="small">{r.subject}</td>
                     <td><span className={`pill ${r.status === 'sent' ? 'success' : r.status === 'failed' ? 'danger' : r.status === 'test' ? 'primary' : ''}`}>{r.status}</span></td>
                     <td className="small muted">{r.reason ?? ''}</td>

@@ -70,7 +70,7 @@ export function NewSetForm({ areas, sets }: { areas: Area[]; sets: { id: string;
     }}>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="email-form-grid">
-        <div className="field"><label className="label" htmlFor="ns-name">Set name</label><input id="ns-name" className="input" maxLength={100} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Cloud & DevOps — October intake" /></div>
+        <div className="field"><label className="label" htmlFor="ns-name">Set name</label><input id="ns-name" className="input" maxLength={100} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Cloud & DevOps, October intake" /></div>
         <div className="field">
           <label className="label" htmlFor="ns-area">Used for learners interested in</label>
           <select id="ns-area" className="select" value={area} onChange={(e) => setArea(e.target.value)}>{areas.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}</select>

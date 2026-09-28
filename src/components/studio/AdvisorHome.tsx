@@ -13,17 +13,14 @@ import { trackEvent } from '@/lib/track'
 function StepArt() {
   return (
     <svg viewBox="0 0 176 120" className="nextstep-art" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id="na-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#bfdbfe" /><stop offset="1" stopColor="#60a5fa" /></linearGradient>
-        <linearGradient id="na-c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#93c5fd" /><stop offset="1" stopColor="#2563eb" /></linearGradient>
-        <linearGradient id="na-o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fed7aa" /><stop offset="1" stopColor="#f97316" /></linearGradient>
-      </defs>
-      <ellipse cx="96" cy="104" rx="76" ry="8" fill="#e0ecff" />
-      <rect x="18" y="70" width="44" height="18" rx="6" fill="url(#na-b)" />
-      <rect x="70" y="52" width="40" height="36" rx="6" fill="url(#na-c)" />
-      <rect x="118" y="26" width="40" height="62" rx="6" fill="url(#na-o)" />
-      <path d="M30 60 C70 50 100 36 132 16" stroke="#fdba74" strokeWidth="2" fill="none" strokeDasharray="3 4" />
-      <path d="M140 4l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2z" fill="#f97316" />
+      {/* Drawn in white at varying opacity so it sits on the brand gradient
+          without introducing a third colour. */}
+      <ellipse cx="96" cy="104" rx="76" ry="8" fill="rgba(255,255,255,0.16)" />
+      <rect x="18" y="70" width="44" height="18" rx="6" fill="rgba(255,255,255,0.38)" />
+      <rect x="70" y="52" width="40" height="36" rx="6" fill="rgba(255,255,255,0.62)" />
+      <rect x="118" y="26" width="40" height="62" rx="6" fill="rgba(255,255,255,0.92)" />
+      <path d="M30 60 C70 50 100 36 132 16" stroke="rgba(255,255,255,0.75)" strokeWidth="2" fill="none" strokeDasharray="3 4" />
+      <path d="M140 4l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2z" fill="#ffffff" />
     </svg>
   )
 }
@@ -70,25 +67,41 @@ export function AdvisorHome({ userId, name, done, initialMessages, initialConver
       : `You have completed every tool, ${name}. The fastest next step is a free session with a mentor who can turn this into a plan.`
 
   return (
-    <section className="advisor" aria-labelledby="advisor-title">
-      <div className="advisor-head">
-        <div className="row" style={{ flexWrap: 'nowrap' }}>
-          <span className="sparkle"><Sparkle size="1.6rem" /></span>
-          <div>
-            <b id="advisor-title">Your AI Career Advisor</b>
-            <span>Personalized guidance for your next move</span>
+    <section className="advisor advisor-split" aria-labelledby="advisor-title">
+      {/* Main column: the whole conversation panel — its own title row, the
+          opening message, the prompts and the input all live inside the card. */}
+      <div className="advisor-chat">
+        <div className="advisor-head">
+          <div className="row" style={{ flexWrap: 'nowrap' }}>
+            <span className="sparkle"><Sparkle size="1.6rem" /></span>
+            <div>
+              <b id="advisor-title">Your AI Career Advisor</b>
+              <span>Personalized guidance for your next move</span>
+            </div>
           </div>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setReset((n) => n + 1)}>
+            <Icon name="plus" size="1rem" /> <span className="cta-long">New conversation</span>
+          </button>
         </div>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setReset((n) => n + 1)}>
-          <Icon name="plus" size="1rem" /> <span className="cta-long">New conversation</span>
-        </button>
+
+        <div className="bubble-row">
+          <span className="sparkle"><Sparkle /></span>
+          <div className="bubble">{greeting}</div>
+        </div>
+
+        <AssistantChat
+          context="advisor"
+          signedIn
+          initialMessages={initialMessages}
+          initialConversationId={initialConversationId}
+          newChatSignal={reset}
+          suggestions={['Which role suits my background?', 'What should I learn first?', 'How much could I earn after switching?']}
+        />
       </div>
 
-      <div className="bubble-row">
-        <span className="sparkle"><Sparkle /></span>
-        <div className="bubble">{greeting}</div>
-      </div>
-
+      {/* Right-hand rail: the recommendation, stacked vertically so it reads
+          top to bottom in a narrow column. */}
+      <aside className="advisor-side">
       {next ? (
         <div className="nextstep">
           <div>
@@ -104,7 +117,7 @@ export function AdvisorHome({ userId, name, done, initialMessages, initialConver
               {next.bullets.map((b) => <li key={b}><Icon name="check" size="1.1rem" />{b}</li>)}
             </ul>
             <div className="nextstep-actions">
-              <Link href={next.route} className="btn btn-primary">Start {next.name} <Icon name="arrowRight" size="1rem" /></Link>
+              <Link href={next.route} className="btn btn-primary">Start {next.name}</Link>
               <button type="button" className="btn btn-outline" aria-expanded={showOther} onClick={() => setShowOther((s) => !s)}>
                 {showOther ? 'Hide other options' : 'Show Me Other Options'}
               </button>
@@ -122,7 +135,7 @@ export function AdvisorHome({ userId, name, done, initialMessages, initialConver
               <div><h2>Career Strategy Session</h2><p className="small muted">Walk through your results with a Learnbay mentor.</p></div>
             </div>
             <div className="nextstep-actions">
-              <Link href="/dashboard/sessions" className="btn btn-primary">Book a free session <Icon name="arrowRight" size="1rem" /></Link>
+              <Link href="/dashboard/sessions" className="btn btn-primary">Book a free session</Link>
               <button type="button" className="btn btn-outline" onClick={() => setShowOther((s) => !s)}>{showOther ? 'Hide results' : 'Review my results'}</button>
             </div>
           </div>
@@ -149,15 +162,7 @@ export function AdvisorHome({ userId, name, done, initialMessages, initialConver
           </Link>
         </div>
       )}
-
-      <AssistantChat
-        context="advisor"
-        signedIn
-        initialMessages={initialMessages}
-        initialConversationId={initialConversationId}
-        newChatSignal={reset}
-        suggestions={['Which role suits my background?', 'What should I learn first?', 'How much could I earn after switching?']}
-      />
+      </aside>
 
       {pick && (
         <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) { track('action', 'first_pick_dismissed'); setPick(false) } }}>

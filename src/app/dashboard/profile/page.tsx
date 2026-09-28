@@ -12,21 +12,21 @@ export const metadata = { title: 'My Profile' }
 export default async function ProfilePage() {
   const { user, answers } = await getStudio()
   const flag = COUNTRY_CODES.find((c) => c.code === user.phone_country)?.flag ?? ''
-  const skills = !answers.skills?.length ? '—' : answers.skills.includes(SKILL_NONE) ? 'None yet' : answers.skills.map((s) => labelOf(SKILLS, s)).join(', ')
+  const skills = !answers.skills?.length ? 'Not set' : answers.skills.includes(SKILL_NONE) ? 'None yet' : answers.skills.map((s) => labelOf(SKILLS, s)).join(', ')
   const rows: [string, string][] = [
-    ['Name', user.name ?? '—'],
+    ['Name', user.name ?? 'Not set'],
     ['Email', user.email],
-    ['Phone', user.phone ? `${flag} ${user.phone_country} ${user.phone}` : '—'],
+    ['Phone', user.phone ? `${flag} ${user.phone_country} ${user.phone}` : 'Not set'],
     ['Current role', roleLabel(answers)],
     ['Experience', experienceLabel(answers)],
-    ['Codes at work', labelOf(PROGRAMMER, answers.programmer) ?? '—'],
+    ['Codes at work', labelOf(PROGRAMMER, answers.programmer) ?? 'Not set'],
     ['Program area', interestLabel(answers)],
-    ['Target role', answers.targetRole ? targetRoleLabel(answers) : '—'],
+    ['Target role', answers.targetRole ? targetRoleLabel(answers) : 'Not set'],
     ['Skills', skills],
-    ['Current CTC', labelOf(CTC_BANDS, answers.ctc) ?? '—'],
-    ['City', labelOf(CITIES, answers.city) ?? '—'],
-    ['Weekly learning time', labelOf(WEEKLY_HOURS, answers.weeklyHours) ?? '—'],
-    ['Timeline', labelOf(TIMELINES, answers.timeline) ?? '—'],
+    ['Current CTC', labelOf(CTC_BANDS, answers.ctc) ?? 'Not set'],
+    ['City', labelOf(CITIES, answers.city) ?? 'Not set'],
+    ['Weekly learning time', labelOf(WEEKLY_HOURS, answers.weeklyHours) ?? 'Not set'],
+    ['Timeline', labelOf(TIMELINES, answers.timeline) ?? 'Not set'],
   ]
   return (
     <>
@@ -35,8 +35,8 @@ export default async function ProfilePage() {
         <dl style={{ margin: 0, display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))' }}>
           {rows.map(([k, v]) => (
             <div key={k}>
-              <dt className="xsmall muted" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k}</dt>
-              <dd style={{ margin: '0.125rem 0 0', fontWeight: 600, overflowWrap: 'anywhere' }}>{v}</dd>
+              <dt className="small muted">{k}</dt>
+              <dd style={{ margin: '0.25rem 0 0', fontWeight: 500, overflowWrap: 'anywhere' }}>{v}</dd>
             </div>
           ))}
         </dl>

@@ -52,8 +52,15 @@ export function SessionBooking({ phone }: { phone: string }) {
 
   if (done) {
     return (
-      <section className="card stack" style={{ alignItems: 'flex-start' }}>
-        <span className="fc-icon" style={{ background: 'var(--success-50)', color: 'var(--success)' }}><Icon name="checkCircle" /></span>
+      <section className="card stack session-done" style={{ alignItems: 'flex-start' }}>
+        {/* The ring and tick draw themselves in once, so a completed booking
+            lands as a moment rather than appearing fully formed. */}
+        <span className="done-mark" aria-hidden="true">
+          <svg viewBox="0 0 52 52" width="46" height="46">
+            <circle className="done-ring" cx="26" cy="26" r="23" fill="none" stroke="currentColor" strokeWidth="2.5" />
+            <path className="done-tick" d="M15.5 26.5l7 7 14-15" fill="none" stroke="currentColor" strokeWidth="3.25" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
         <h2 className="card-title">You&apos;re booked in</h2>
         <p className="muted">{done}</p>
         <button type="button" className="btn btn-soft btn-sm" onClick={() => { setDone(''); setDate(''); setTime(''); setNote('') }}>Book another session</button>

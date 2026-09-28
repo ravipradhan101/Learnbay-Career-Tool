@@ -274,7 +274,7 @@ function ContactStep({ answers, contact, setContact, signedIn, next, onBack, onD
         <input id="ob-otp" className="input otp-input" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus
           value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
         <button className="btn btn-primary btn-lg btn-block" disabled={busy || code.length !== 6}>
-          {busy ? <span className="spinner" /> : <>{existing ? 'Log in' : 'Confirm & open my Career Studio'} <Icon name="arrowRight" size="1rem" /></>}
+          {busy ? <span className="spinner" /> : <>{existing ? 'Log in' : 'Confirm & open my Career Studio'}</>}
         </button>
         <div className="row between">
           <button type="button" className="link-btn small" onClick={() => { setOtp(null); setCode(''); setError('') }}>Use a different email</button>
@@ -317,7 +317,7 @@ function ContactStep({ answers, contact, setContact, signedIn, next, onBack, onD
         <span>I agree to receive my personalized insights and relevant learning resources via email and WhatsApp, and to be contacted by Learnbay.</span>
       </label>
       <button className="btn btn-primary btn-lg btn-block" disabled={busy}>
-        {busy ? <span className="spinner" /> : <>Open my Career Studio <Icon name="arrowRight" size="1.1rem" /></>}
+        {busy ? <span className="spinner" /> : <>Open my Career Studio</>}
       </button>
       <p className="secure-note"><Icon name="lock" size="0.9rem" /> Your information is secure with us</p>
     </form>

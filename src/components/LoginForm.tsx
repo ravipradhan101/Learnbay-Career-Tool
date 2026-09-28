@@ -44,7 +44,7 @@ export function LoginForm({ next = '', compact = false }: { next?: string; compa
       <div>
         <Heading className={compact ? 'login-title' : undefined}>{step === 'id' ? 'Welcome back' : 'Enter your code'}</Heading>
         <p className="muted small" style={{ marginTop: '0.375rem' }}>
-          {step === 'id' ? 'Log in with your email. We’ll send you a 6-digit code — no password needed.' : info}
+          {step === 'id' ? 'Log in with your email. We’ll send you a 6-digit code, so no password needed.' : info}
         </p>
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
@@ -54,7 +54,7 @@ export function LoginForm({ next = '', compact = false }: { next?: string; compa
           <input id={compact ? 'lp-id' : 'login-id'} className="input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false}
             value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
           <button className="btn btn-primary btn-block" disabled={busy || !/\S+@\S+\.\S+/.test(email.trim())}>
-            {busy ? <span className="spinner" /> : <>Send code <Icon name="arrowRight" size="1rem" /></>}
+            {busy ? <span className="spinner" /> : <>Send code</>}
           </button>
         </form>
       ) : (
@@ -63,7 +63,7 @@ export function LoginForm({ next = '', compact = false }: { next?: string; compa
           <input id={compact ? 'lp-code' : 'login-code'} className="input otp-input" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus
             value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••" />
           <button className="btn btn-primary btn-block" disabled={busy || code.length !== 6}>
-            {busy ? <span className="spinner" /> : <>Log in <Icon name="arrowRight" size="1rem" /></>}
+            {busy ? <span className="spinner" /> : <>Log in</>}
           </button>
           <div className="row between">
             <button type="button" className="link-btn small" onClick={() => { setStep('id'); setCode(''); setError('') }}>Change</button>

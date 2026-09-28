@@ -18,7 +18,7 @@ export default async function SessionsPage() {
       <div className="grid-2" style={{ alignItems: 'start' }}>
         <SessionBooking phone={phone} />
         <div className="stack">
-          <section className="card stack">
+          <section className="card stack session-aside">
             <h2 className="card-title"><Icon name="users" className="text-primary" /> What you get</h2>
             <ul className="list-check">
               {['Your results reviewed with an expert', 'The right program for your background', 'Clear answers on fees, EMI and batch timings', 'A plan that fits your work schedule'].map((t) => (

@@ -43,7 +43,7 @@ export default async function SharedPage({ params }: { params: Promise<{ token: 
             <h2>Get your own {meta.name}</h2>
             <p style={{ opacity: 0.9, marginTop: '0.5rem' }}>Personalised to your role and goals • about 2 minutes • free</p>
           </div>
-          <Link href={`/start?tool=${row.tool}`} className="btn btn-primary btn-lg">Start My Free Analysis <Icon name="arrowRight" size="1.1rem" /></Link>
+          <Link href={`/start?tool=${row.tool}`} className="btn btn-primary btn-lg">Start My Free Analysis</Link>
         </section>
         <Testimonials />
       </main>

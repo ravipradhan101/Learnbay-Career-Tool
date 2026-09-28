@@ -79,7 +79,7 @@ export function EligibilityStrip({ area }: { area: string }) {
   return (
     <Link href="/dashboard/eligibility" className="elig-strip">
       <span className="usp-icon"><Icon name="award" size="1.1rem" /></span>
-      <span><b>Are you eligible for a {area} program?</b><small>10 quick questions · about 4 minutes · score straight away</small></span>
+      <span><b>Are you eligible for a {area} program?</b><small>Ten questions, about four minutes, and you get your score right away.</small></span>
       <Icon name="arrowRight" size="1rem" />
     </Link>
   )

@@ -14,7 +14,7 @@ export function JourneyProgress({ steps }: { steps: JourneyStep[] }) {
     <section className="journey" aria-label="Your progress">
       <div className="row between">
         <b>Your career plan: {done} of {steps.length} steps done</b>
-        {next >= 0 && <Link href={steps[next].href} className="btn btn-primary btn-sm">Next: {steps[next].label} <Icon name="arrowRight" size="0.9rem" /></Link>}
+        {next >= 0 && <Link href={steps[next].href} className="btn btn-primary btn-sm">Next: {steps[next].label}</Link>}
       </div>
       <div className="journey-bar" aria-hidden="true"><i style={{ width: `${(done / steps.length) * 100}%` }} /></div>
       <div className="journey-steps">

@@ -22,7 +22,7 @@ export default async function TokensPage({ searchParams }: { searchParams: Promi
         <Stat label="Total tokens" value={fmtTokens(t.totals.total)} note={`${fmtTokens(t.totals.prompt)} in · ${fmtTokens(t.totals.output)} out`} />
         <Stat label="Estimated cost" value={fmtInr(t.totals.costInr)} note={`at $${PRICING.inputUsdPerM}/M in, $${PRICING.outputUsdPerM}/M out, ₹${PRICING.inrPerUsd}/$`} />
         <Stat label="AI calls" value={fmtInt(t.totals.calls)} note={`${fmtInt(t.totals.failed)} failed or blocked (${fmtPct(t.totals.calls ? t.totals.failed / t.totals.calls : null)})`} />
-        <Stat label="Avg cost per learner" value={learners ? fmtInr(t.users.reduce((s, u) => s + u.costInr, 0) / learners) : '—'} note={`${fmtInt(learners)} learners used AI`} />
+        <Stat label="Avg cost per learner" value={learners ? fmtInr(t.users.reduce((s, u) => s + u.costInr, 0) / learners) : 'None'} note={`${fmtInt(learners)} learners used AI`} />
       </div>
 
       <section className="card stack">
@@ -34,7 +34,7 @@ export default async function TokensPage({ searchParams }: { searchParams: Promi
               <tbody>
                 {t.tools.map((x) => (
                   <tr key={x.tool}><td><b>{x.tool}</b></td><td className="num">{fmtInt(x.calls)}</td><td className="num">{fmtInt(x.failed)}</td><td className="num">{fmtInt(x.prompt)}</td><td className="num">{fmtInt(x.output)}</td>
-                    <td className="num">{fmtInt(x.total)}</td><td className="num">{fmtPct(t.totals.total ? x.total / t.totals.total : null)}</td><td className="num">{fmtInr(x.costInr)}</td><td className="num">{x.calls ? fmtInt(Math.round(x.total / x.calls)) : '—'}</td></tr>
+                    <td className="num">{fmtInt(x.total)}</td><td className="num">{fmtPct(t.totals.total ? x.total / t.totals.total : null)}</td><td className="num">{fmtInr(x.costInr)}</td><td className="num">{x.calls ? fmtInt(Math.round(x.total / x.calls)) : 'None'}</td></tr>
                 ))}
               </tbody>
               <tfoot><tr><td>Total</td><td className="num">{fmtInt(t.totals.calls)}</td><td className="num">{fmtInt(t.totals.failed)}</td><td className="num">{fmtInt(t.totals.prompt)}</td><td className="num">{fmtInt(t.totals.output)}</td><td className="num">{fmtInt(t.totals.total)}</td><td className="num">100%</td><td className="num">{fmtInr(t.totals.costInr)}</td><td /></tr></tfoot>

@@ -2,12 +2,12 @@ import Link from 'next/link'
 import { RANGES, type FunnelStep, type RangeKey } from '@/lib/admin-reports'
 
 export const fmtInt = (v: number) => v.toLocaleString('en-IN')
-export const fmtPct = (v: number | null) => (v === null || !Number.isFinite(v) ? '—' : `${Math.round(v * 100)}%`)
+export const fmtPct = (v: number | null) => (v === null || !Number.isFinite(v) ? 'None' : `${Math.round(v * 100)}%`)
 export const fmtInr = (v: number) => (v < 1 ? `₹${v.toFixed(2)}` : `₹${v.toLocaleString('en-IN', { maximumFractionDigits: v < 100 ? 2 : 0 })}`)
 export const fmtTokens = (v: number) => (v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)}M` : v >= 10_000 ? `${(v / 1000).toFixed(1)}k` : fmtInt(v))
-export const fmtSecs = (v: number | null) => (v === null ? '—' : v >= 60 ? `${Math.floor(v / 60)}m ${v % 60}s` : `${v}s`)
+export const fmtSecs = (v: number | null) => (v === null ? 'None' : v >= 60 ? `${Math.floor(v / 60)}m ${v % 60}s` : `${v}s`)
 export const fmtDate = (d: Date | string | null) =>
-  d ? new Date(d).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
+  d ? new Date(d).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'None'
 
 export function PageHead({ title, sub, range, base }: { title: string; sub: string; range?: RangeKey; base?: string }) {
   return (

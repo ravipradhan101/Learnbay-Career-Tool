@@ -72,7 +72,7 @@ export default async function UserJourneyPage({ params }: { params: Promise<{ id
         </div>
       </div>
       <div className="stat-grid">
-        <Stat label="Profile" value={user.answers ? roleLabel(a) : '—'} note={user.answers ? `${experienceLabel(a)} · ${interestLabel(a)}` : undefined} />
+        <Stat label="Profile" value={user.answers ? roleLabel(a) : 'None'} note={user.answers ? `${experienceLabel(a)} · ${interestLabel(a)}` : undefined} />
         <Stat label="Tools" value={`${tools.filter((t) => t.status === 'ready').length} / 3 ready`} note={tools.map((t) => `${featureName(t.tool)}: ${t.status}`).join(' · ') || 'none started'} />
         <Stat label="AI tokens" value={fmtTokens(totalTokens)} note={`≈${fmtInr(totalCost)}`} />
         <Stat label="1:1 session" value={sessions.length ? 'Booked' : 'Not booked'} note={sessions[0] ? `${sessions[0].preferred_date ?? ''} ${sessions[0].preferred_time ?? ''}` : undefined} />

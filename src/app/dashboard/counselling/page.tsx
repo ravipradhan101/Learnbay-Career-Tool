@@ -15,7 +15,7 @@ export default async function CounsellingPage() {
   const voiceHref = env.voiceAssistantUrl || (env.voiceAssistantPhone ? `tel:${env.voiceAssistantPhone.replace(/[^\d+]/g, '')}` : '')
   return (
     <>
-      <StudioHeader title="AI Counselling" subtitle="Talk your career decision through with AI, any time — and book a 1:1 with a mentor when you are ready." />
+      <StudioHeader title="AI Counselling" subtitle="Talk your career decision through with AI, any time, and book a 1:1 with a mentor when you are ready." />
       <div className="grid-2" style={{ alignItems: 'start' }}>
         <section className="advisor">
           <div className="advisor-head">
@@ -29,7 +29,7 @@ export default async function CounsellingPage() {
             signedIn
             initialMessages={convo.messages}
             initialConversationId={convo.conversationId}
-            greeting="Tell me what is on your mind — a role you are unsure about, a switch you are weighing, or where to start."
+            greeting="Tell me what is on your mind: a role you are unsure about, a switch you are weighing, or where to start."
             suggestions={['Is a career switch right for me?', 'Which program fits my background?', 'How do I balance learning with work?']}
           />
         </section>
@@ -42,7 +42,7 @@ export default async function CounsellingPage() {
           </section>
           <section className="card stack">
             <h2 className="card-title"><Icon name="headset" className="text-primary" /> 1:1 counselling & mentor guidance</h2>
-            <p className="small muted">Your path, the right program, fees, EMI and batch timings — pick a date and time and a Learnbay mentor will connect with you.</p>
+            <p className="small muted">Your path, the right program, fees, EMI and batch timings. Pick a date and time and a Learnbay mentor will connect with you.</p>
             <Link href="/dashboard/sessions" className="btn btn-accent" style={{ alignSelf: 'flex-start' }}><Icon name="calendar" size="1rem" /> Book a 1:1 session</Link>
           </section>
         </div>

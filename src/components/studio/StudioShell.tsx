@@ -8,7 +8,6 @@ import { Logo } from '../Logo'
 import { LogoutButton } from '../LogoutButton'
 import { CAREER_TOOLS, STUDIO_HOME } from './nav'
 import { openWhyLearnbay } from '../why/WhyLearnbayButton'
-import { initials } from '@/lib/questions'
 
 function Nav({ toolStatus, onNavigate, eligibilityVisible }: { toolStatus: Record<string, string>; onNavigate?: () => void; eligibilityVisible: boolean }) {
   const pathname = usePathname()
@@ -19,7 +18,7 @@ function Nav({ toolStatus, onNavigate, eligibilityVisible }: { toolStatus: Recor
       <Link href={STUDIO_HOME.href} aria-current={pathname === STUDIO_HOME.href ? 'page' : undefined} onClick={onNavigate}>
         <Icon name={STUDIO_HOME.icon} size="1.15rem" /> {STUDIO_HOME.label}
       </Link>
-      <p className="side-label">CAREER TOOLS</p>
+      <p className="side-label">Career tools</p>
       {CAREER_TOOLS.filter((item) => eligibilityVisible || item.href !== '/dashboard/eligibility').map((item) => (
         <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} onClick={onNavigate}>
           <Icon name={item.icon} size="1.15rem" />
@@ -28,30 +27,19 @@ function Nav({ toolStatus, onNavigate, eligibilityVisible }: { toolStatus: Recor
           {item.tool && item.tool === nextTool && <span className="dot" aria-label="Recommended next" />}
         </Link>
       ))}
+      {/* Last item in the menu. Opens the comparison overlay rather than navigating. */}
+      <button type="button" className="side-why" onClick={() => { onNavigate?.(); openWhyLearnbay('sidebar') }}>
+        <Icon name="sparkles" size="1.15rem" /> Why Learnbay?
+      </button>
     </nav>
   )
 }
 
-function Foot({ name, email, onNavigate }: { name: string; email: string; onNavigate?: () => void }) {
-  const pathname = usePathname()
+/** Profile lives in the header's account menu now, so the sidebar foot is
+ *  just the sign-out control. */
+function Foot() {
   return (
     <div className="side-foot">
-      <nav className="side-nav" aria-label="Support">
-        <button type="button" className="side-why" onClick={() => { onNavigate?.(); openWhyLearnbay('sidebar') }}>
-          <Icon name="sparkles" size="1.15rem" /> Why Learnbay?
-        </button>
-        <Link href="/dashboard/help" aria-current={pathname === '/dashboard/help' ? 'page' : undefined} onClick={onNavigate}>
-          <Icon name="lifebuoy" size="1.15rem" /> Help &amp; support
-        </Link>
-      </nav>
-      <Link href="/dashboard/profile" className="profile-link" onClick={onNavigate}>
-        <span className="avatar" aria-hidden="true">{initials(name)}</span>
-        <span style={{ minWidth: 0, flex: 1 }}>
-          <b style={{ display: 'block', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</b>
-          <span className="xsmall muted" style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={email}>My profile</span>
-        </span>
-        <Icon name="chevronRight" size="1rem" className="muted" />
-      </Link>
       <LogoutButton className="btn btn-ghost btn-sm" showIcon />
     </div>
   )
@@ -74,7 +62,7 @@ export function StudioShell({ children, name, email, toolStatus, eligibilityVisi
       <aside className="sidebar">
         <Logo href="/dashboard" />
         <Nav toolStatus={toolStatus} eligibilityVisible={eligibilityVisible} />
-        <Foot name={name} email={email} />
+        <Foot />
       </aside>
       <div style={{ minWidth: 0 }}>
         <div className="topbar no-print">
@@ -90,7 +78,7 @@ export function StudioShell({ children, name, email, toolStatus, eligibilityVisi
           <div className="drawer" role="dialog" aria-modal="true" aria-label="Menu">
             <div className="row between"><Logo href="/dashboard" /><button type="button" className="icon-btn" aria-label="Close menu" onClick={() => setOpen(false)}><Icon name="x" /></button></div>
             <Nav toolStatus={toolStatus} onNavigate={() => setOpen(false)} eligibilityVisible={eligibilityVisible} />
-            <Foot name={name} email={email} onNavigate={() => setOpen(false)} />
+            <Foot />
           </div>
         </>
       )}

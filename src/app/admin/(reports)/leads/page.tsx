@@ -14,12 +14,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const leads = await listLeads(q)
   const count = (f: (l: (typeof leads)[number]) => boolean) => leads.filter(f).length
   const cols: [string, (l: (typeof leads)[number]) => React.ReactNode][] = [
-    ['Created', (l) => fmt(l.createdAt)], ['Name', (l) => <Link href={`/admin/users/${l.id}`}>{l.name || '—'}</Link>], ['Email', (l) => <>{l.email}{!l.verified && <span className="pill warning" style={{ marginLeft: '0.375rem' }}>Unconfirmed</span>}{l.emailsOff && <span className="pill" style={{ marginLeft: '0.375rem' }}>Unsubscribed</span>}</>], ['Phone', (l) => l.phone || '—'],
+    ['Created', (l) => fmt(l.createdAt)], ['Name', (l) => <Link href={`/admin/users/${l.id}`}>{l.name || 'None'}</Link>], ['Email', (l) => <>{l.email}{!l.verified && <span className="pill warning" style={{ marginLeft: '0.375rem' }}>Unconfirmed</span>}{l.emailsOff && <span className="pill" style={{ marginLeft: '0.375rem' }}>Unsubscribed</span>}</>], ['Phone', (l) => l.phone || 'None'],
     ['Score', (l) => <span className={`pill ${l.temperature === 'Hot' ? 'danger' : l.temperature === 'Warm' ? 'warning' : ''}`}>{l.score} {l.temperature}</span>],
     ['Role', (l) => l.role], ['Exp', (l) => l.experience], ['Codes', (l) => l.codes], ['Interest', (l) => l.interest], ['Target', (l) => l.targetRole],
-    ['CTC', (l) => l.ctc], ['City', (l) => l.city], ['Timeline', (l) => l.timeline], ['Tools done', (l) => l.tools || '—'],
-    ['Readiness', (l) => l.readiness ?? '—'], ['Program', (l) => l.program], ['Resume', (l) => l.resumeScore ?? '—'], ['Eligibility', (l) => (l.eligibilityScore === null ? '—' : `${l.eligibilityScore}/100`)], ['Chats', (l) => l.chatQuestions],
-    ['Session', (l) => l.session || '—'], ['Engagement', (l) => l.events || '—'], ['Source', (l) => l.source || '—'],
+    ['CTC', (l) => l.ctc], ['City', (l) => l.city], ['Timeline', (l) => l.timeline], ['Tools done', (l) => l.tools || 'None'],
+    ['Readiness', (l) => l.readiness ?? 'None'], ['Program', (l) => l.program], ['Resume', (l) => l.resumeScore ?? 'None'], ['Eligibility', (l) => (l.eligibilityScore === null ? 'None' : `${l.eligibilityScore}/100`)], ['Chats', (l) => l.chatQuestions],
+    ['Session', (l) => l.session || 'None'], ['Engagement', (l) => l.events || 'None'], ['Source', (l) => l.source || 'None'],
   ]
   return (
     <>

@@ -33,7 +33,7 @@ export function EligibilityNudge({ area, done }: { area: string; done?: boolean 
         <span className="eyebrow">Next step, when you are ready</span>
         <b>Are you eligible for a {area} program?</b>
         <p className="small">A friendly 4-minute test: 10 short, easy questions on aptitude, common full forms and {area} basics. You get your score straight away, and a counsellor helps you choose the right track.</p>
-        <Link href="/dashboard/eligibility" className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }}>Take the eligibility test <Icon name="arrowRight" size="0.9rem" /></Link>
+        <Link href="/dashboard/eligibility" className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }}>Take the eligibility test</Link>
       </div>
     </aside>
   )

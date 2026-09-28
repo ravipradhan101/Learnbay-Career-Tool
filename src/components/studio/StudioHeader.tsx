@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Icon } from '../Icon'
+import { AccountMenu } from './AccountMenu'
 import { Notifications, type Note } from './Notifications'
 import { getStudio } from '@/lib/data'
 import { initials } from '@/lib/questions'
@@ -14,7 +15,7 @@ export async function StudioHeader({ title, subtitle }: { title: string; subtitl
     const row = tools.find((r) => r.tool === t.id)
     if (row?.status === 'ready') notes.push({ href: t.route, text: `Your ${t.name} is ready` })
   }
-  if (session) notes.push({ href: '/dashboard/sessions', text: `${sessionTypeLabel(session.session_type)} requested — our team will confirm shortly` })
+  if (session) notes.push({ href: '/dashboard/sessions', text: `${sessionTypeLabel(session.session_type)} requested. Our team will confirm shortly` })
   const nextTool = TOOLS.find((t) => tools.find((r) => r.tool === t.id)?.status !== 'ready')
   if (nextTool) notes.push({ href: nextTool.route, text: `Next up: ${nextTool.name}` })
 
@@ -25,11 +26,12 @@ export async function StudioHeader({ title, subtitle }: { title: string; subtitl
         {subtitle && <p>{subtitle}</p>}
       </div>
       <div className="studio-head-actions no-print">
-        <Link href="/dashboard/sessions" className="btn btn-accent btn-sm desktop-only">
-          <Icon name="calendar" size="1rem" /> Book mentor session
+        <Link href="/dashboard/sessions" className="btn btn-accent btn-sm book-mentor">
+          <Icon name="calendar" size="1rem" />
+          <span className="book-mentor-label">Book Mentor Session</span>
         </Link>
         <Notifications notes={notes} />
-        <Link href="/dashboard/profile" className="avatar desktop-only" aria-label="My profile" style={{ textDecoration: 'none' }}>{initials(user.name)}</Link>
+        <AccountMenu initials={initials(user.name)} name={user.name ?? user.email} />
       </div>
     </header>
   )

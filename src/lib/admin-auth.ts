@@ -133,12 +133,18 @@ export async function resetAdminPassword(email: string, code: string, password: 
         WHERE admin_id = $1 AND consumed_at IS NULL AND expires_at > now() ORDER BY created_at DESC LIMIT 1 FOR UPDATE`,
       [admin.id],
     )).rows[0]
-    if (!row || row.attempts >= 5) return false
-    if (!safeEqualHex(row.code_hash, hmac(`admin:${admin.id}:${code}`))) {
-      await db.query(`UPDATE admin_codes SET attempts = attempts + 1 WHERE id = $1`, [row.id])
-      return false
+    // Same development-only bypass as the learner code. Requires a development
+    // build AND DEV_SKIP_OTP=true, so a production build ignores it.
+    const skip = process.env.NODE_ENV === 'development' && process.env.DEV_SKIP_OTP === 'true'
+    if (skip) console.warn(`[admin] DEV_SKIP_OTP is on — accepting any code for ${email}. Development only.`)
+    if (!skip) {
+      if (!row || row.attempts >= 5) return false
+      if (!safeEqualHex(row.code_hash, hmac(`admin:${admin.id}:${code}`))) {
+        await db.query(`UPDATE admin_codes SET attempts = attempts + 1 WHERE id = $1`, [row.id])
+        return false
+      }
     }
-    await db.query(`UPDATE admin_codes SET consumed_at = now() WHERE id = $1`, [row.id])
+    if (row) await db.query(`UPDATE admin_codes SET consumed_at = now() WHERE id = $1`, [row.id])
     await db.query(`UPDATE admin_users SET password_hash = $2, failed_attempts = 0, locked_until = NULL, last_login_at = now() WHERE id = $1`, [admin.id, hash])
     await db.query(`DELETE FROM admin_sessions WHERE admin_id = $1`, [admin.id])
     return true

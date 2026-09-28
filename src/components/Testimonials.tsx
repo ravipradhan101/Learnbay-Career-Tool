@@ -38,12 +38,18 @@ export function Testimonials({ title = 'Career moves that started with clarity' 
       >
         {TESTIMONIALS.map((t) => (
           <article className="t-card" key={t.name}>
-            {t.photo
-              // eslint-disable-next-line @next/next/no-img-element
-              ? <img className="t-avatar" src={t.photo} alt="" width={68} height={68} />
-              : <span className="t-avatar" aria-hidden="true">{initials(t.name)}</span>}
-            <div>
-              <b>{t.name}</b>
+            <div className="t-photo">
+              {t.photo
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={t.photo} alt="" width={320} height={336} loading="lazy" />
+                : <span className="t-initials" aria-hidden="true">{initials(t.name)}</span>}
+            </div>
+            <div className="t-body">
+              <b className="t-name">
+                {t.name}
+                {/* The tick appears only once a story is a real, consented one. */}
+                {!t.illustrative && <Icon name="checkCircle" size="1.05rem" className="t-verified" />}
+              </b>
               <span className="t-meta">{t.role} · {t.company}</span>
               <p className="t-quote">“{t.quote}”</p>
               <span className="t-move">{t.from} → {t.to}</span>

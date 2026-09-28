@@ -120,7 +120,7 @@ function Intro({ rules, trackLabel, needs, edu, setEdu, math, setMath, onStart }
         </section>
       )}
       <button type="button" className="btn btn-primary btn-lg" style={{ alignSelf: 'flex-start' }} disabled={!ready} onClick={onStart}>
-        Start the test <Icon name="arrowRight" size="1rem" />
+        Start the test
       </button>
     </div>
   )

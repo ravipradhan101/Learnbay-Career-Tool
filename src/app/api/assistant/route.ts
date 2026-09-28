@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     [user.id],
   )
   if ((usage?.total ?? 0) >= LIMITS.userTotal || (usage?.today ?? 0) >= LIMITS.userPerDay) {
-    return jsonError(429, 'You have reached your question limit for now. A mentor can take it from here — book a free session.', { limit: true })
+    return jsonError(429, 'You have reached your question limit for now. A mentor can take it from here. Book a free session.', { limit: true })
   }
   if (!(await rateLimit(`assist:user:${user.id}`, 8, 60))) return jsonError(429, 'Please slow down a little and try again in a minute.')
 

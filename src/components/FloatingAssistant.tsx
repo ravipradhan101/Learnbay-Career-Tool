@@ -36,16 +36,16 @@ export function FloatingAssistant({ signedIn, context = signedIn ? 'advisor' : '
   return (
     <>
       <button type="button" className={`fab fab-bot no-print${open ? ' is-open' : ''}`} aria-label={open ? 'Close Career AI' : 'Chat with Career AI'} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        {open ? <Icon name="x" size="1.5rem" /> : <><BotIcon /><span className="fab-label">Ask Career AI</span></>}
+        {open ? <Icon name="x" size="1.5rem" /> : <><span className="bot-avatar" aria-hidden="true"><BotIcon size="1.15rem" /></span><span className="fab-label">Ask Career AI</span></>}
         {!open && <span className="fab-badge" aria-hidden="true"><Sparkle size="0.85rem" /></span>}
       </button>
       <div className="assistant-panel no-print" role="dialog" aria-label="Career AI assistant" hidden={!open}>
         <div className="panel-head">
           <div className="row" style={{ flexWrap: 'nowrap' }}>
-            <span className="sparkle" style={{ background: 'var(--primary)', color: '#fff' }}><BotIcon size="1.5rem" /></span>
+            <span className="bot-avatar lg" aria-hidden="true"><BotIcon size="1.4rem" /></span>
             <div>
-              <b>Career AI</b>
-              <span className="xsmall muted">{signedIn ? 'Ask anything or let me take you there' : 'Ask me about AI careers'}</span>
+              <b>Ask Career AI</b>
+              <span className="panel-status">Learnbay AI assistant</span>
             </div>
           </div>
           <div className="row" style={{ gap: '0.25rem', flexWrap: 'nowrap' }}>
@@ -58,8 +58,8 @@ export function FloatingAssistant({ signedIn, context = signedIn ? 'advisor' : '
           signedIn={signedIn}
           scrollBody
           greeting={signedIn
-            ? 'Hi! I can answer career questions and take you to the right tool — skill gaps, salaries, your roadmap or a mentor session.'
-            : 'Hi! I’m Learnbay’s Career AI. Ask me about AI careers, skills or salaries — or I can start your free analysis.'}
+            ? 'Hi! I can answer career questions and take you to the right tool: skill gaps, salaries, your roadmap or a mentor session.'
+            : 'Hi! I’m Learnbay’s Career AI. Ask me about AI careers, skills or salaries, or I can start your free analysis.'}
           suggestions={signedIn ? STUDIO_SUGGESTIONS : HOME_SUGGESTIONS}
           placeholder="Ask about your career..."
           autoQuestion={question}

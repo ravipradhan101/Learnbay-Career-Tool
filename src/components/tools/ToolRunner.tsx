@@ -127,8 +127,8 @@ export function ToolRunner({ tool, missing, targetOptions, status }: Props) {
           <ToolPreviewVisual id={tool.id} />
         </div>
         <div className="row between tool-intro-foot">
-          <span className="small muted"><Icon name="clock" size="0.9rem" /> {missing.length ? `${missing.length} quick question${missing.length === 1 ? '' : 's'}, then` : 'No questions needed,'} about 30 seconds to build · saved to your studio</span>
-          <button type="button" className="btn btn-primary btn-lg" onClick={begin}>{missing.length ? "Let's start" : `Build my ${tool.name}`} <Icon name="arrowRight" size="1rem" /></button>
+          <span className="small muted"><Icon name="clock" size="0.9rem" /> {missing.length ? `${missing.length} quick question${missing.length === 1 ? '' : 's'}, then` : 'No questions needed,'} about 30 seconds to build. It stays in your studio.</span>
+          <button type="button" className="btn btn-primary btn-lg" onClick={begin}>{missing.length ? "Let's start" : `Build my ${tool.name}`}</button>
         </div>
       </section>
     )
@@ -199,7 +199,7 @@ function Question({ k, value, targetOptions, onAnswer }: { k: ToolQuestionKey; v
     )
   }
   const options: Option[] =
-    k === 'targetRole' ? [...targetOptions, { id: TARGET_NOT_SURE, label: 'Not sure — suggest one for me' }]
+    k === 'targetRole' ? [...targetOptions, { id: TARGET_NOT_SURE, label: 'Not sure, suggest one for me' }]
       : k === 'ctc' ? CTC_BANDS
         : k === 'city' ? CITIES
           : k === 'weeklyHours' ? WEEKLY_HOURS

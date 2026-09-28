@@ -101,7 +101,7 @@ export function AssistantChat({
               {m.action && (
                 <div className="msg-action">
                   <Link href={m.action.href} className="btn btn-primary btn-sm" onClick={onNavigate}>
-                    {m.action.label} <Icon name="arrowRight" size="0.9rem" />
+                    {m.action.label}
                   </Link>
                 </div>
               )}

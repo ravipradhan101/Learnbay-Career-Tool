@@ -68,7 +68,7 @@ export function EngagementPopup({ signedIn, hasSession, program }: { signedIn: b
     <div className="modal-backdrop no-print" onClick={(e) => e.target === e.currentTarget && close()}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="exit-title">
         <button type="button" className="icon-btn modal-close" aria-label="Close" onClick={close}><Icon name="x" /></button>
-        <h2 id="exit-title">Before you go — have you seen these?</h2>
+        <h2 id="exit-title">Before you go, have you seen these?</h2>
         <p className="muted small">A few things learners in your shoes usually find useful.</p>
         <a className="sheet-option" href={program.url} target="_blank" rel="noopener noreferrer" onClick={act('brochure')}>
           <span className="fc-icon"><Icon name="file" /></span>

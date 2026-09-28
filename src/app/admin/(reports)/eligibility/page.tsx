@@ -65,7 +65,7 @@ export default async function EligibilityAdminPage() {
                   <td className="num">{s.seconds_per_question}s · {Math.round(s.total_seconds / 6) / 10} min</td>
                   <td className="num">{s.max_attempts}</td>
                   <td className="num">{fmtInt(byId[s.id]?.attempts ?? 0)}</td>
-                  <td className="num">{byId[s.id]?.avg_score ?? '—'}</td>
+                  <td className="num">{byId[s.id]?.avg_score ?? 'None'}</td>
                   <td>
                     <span className={`pill ${s.status === 'active' ? 'success' : 'warning'}`}>{s.status === 'active' ? 'Active' : 'Paused'}</span>
                     {live.has(s.id) && <span className="pill primary" style={{ marginLeft: '0.25rem' }}>Live</span>}
@@ -96,7 +96,7 @@ export default async function EligibilityAdminPage() {
                     <td><Link href={`/admin/users/${r.user_id}`}>{r.name || r.email}</Link></td>
                     <td className="num">{r.attempt}</td>
                     <td className="num"><b>{r.score}</b>/100</td>
-                    <td className="small">{r.set_name ?? '—'}</td>
+                    <td className="small">{r.set_name ?? 'None'}</td>
                     <td className="small">{r.source === 'ai' ? 'AI-generated' : 'From the set'}</td>
                     <td className="small">{fmtDate(r.completed_at)}</td>
                   </tr>

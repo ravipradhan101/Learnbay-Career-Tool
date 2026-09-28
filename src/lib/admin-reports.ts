@@ -27,7 +27,7 @@ export const PAGE_NAMES: Record<string, string> = {
   '/dashboard/sessions': '1:1 session booking', '/dashboard/counselling': '1:1 counselling', '/dashboard/masterclasses': 'Masterclasses',
   '/dashboard/profile': 'Profile', '/dashboard/help': 'Help', '/r/[token]': 'Shared report (public link)',
 }
-export const pageName = (path: string | null) => (path ? PAGE_NAMES[path] ?? path : '—')
+export const pageName = (path: string | null) => (path ? PAGE_NAMES[path] ?? path : 'None')
 
 export const STEP_NAMES: Record<string, string> = {
   role: 'Current role', experience: 'Years of experience', programmer: 'Codes at work?', interest: 'Program area', contact: 'Contact details',

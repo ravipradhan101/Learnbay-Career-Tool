@@ -27,7 +27,7 @@ export default async function NavigationPage({ searchParams }: { searchParams: P
               <tbody>
                 {nav.pages.map((p) => (
                   <tr key={p.path}><td>{pageName(p.path)} <span className="muted small">{p.path}</span></td><td className="num">{fmtInt(p.views)}</td><td className="num">{fmtInt(p.visitors)}</td>
-                    <td className="num">{fmtSecs(p.avgSeconds)}</td><td className="num">{fmtSecs(p.medianSeconds)}</td><td className="num">{p.avgScroll === null ? '—' : `${p.avgScroll}%`}</td></tr>
+                    <td className="num">{fmtSecs(p.avgSeconds)}</td><td className="num">{fmtSecs(p.medianSeconds)}</td><td className="num">{p.avgScroll === null ? 'None' : `${p.avgScroll}%`}</td></tr>
                 ))}
               </tbody>
             </table>
@@ -64,7 +64,7 @@ export default async function NavigationPage({ searchParams }: { searchParams: P
             {nav.sources.length ? (
               <table className="admin-table compact">
                 <thead><tr><th>Source</th><th>Medium / campaign</th><th className="num">Visitors</th></tr></thead>
-                <tbody>{nav.sources.map((s) => <tr key={`${s.source}|${s.medium}|${s.campaign}`}><td>{s.source}</td><td>{[s.medium, s.campaign].filter(Boolean).join(' / ') || '—'}</td><td className="num">{fmtInt(s.visitors)}</td></tr>)}</tbody>
+                <tbody>{nav.sources.map((s) => <tr key={`${s.source}|${s.medium}|${s.campaign}`}><td>{s.source}</td><td>{[s.medium, s.campaign].filter(Boolean).join(' / ') || 'None'}</td><td className="num">{fmtInt(s.visitors)}</td></tr>)}</tbody>
               </table>
             ) : <Empty>No first visits recorded yet.</Empty>}
             {nav.devices.length > 0 && <p className="small">Devices: {nav.devices.map((d) => `${d.device} ${fmtPct(totalDevices ? d.visitors / totalDevices : null)}`).join(' · ')}</p>}
@@ -83,7 +83,7 @@ export default async function NavigationPage({ searchParams }: { searchParams: P
               <thead><tr><th>Button / link</th><th>On page</th><th>Goes to</th><th className="num">Clicks</th><th className="num">Visitors</th></tr></thead>
               <tbody>
                 {nav.clicks.map((c, i) => (
-                  <tr key={i}><td>{c.label}</td><td>{pageName(c.path)}</td><td className="muted">{c.href ? pageName(c.href) : '—'}</td><td className="num">{fmtInt(c.clicks)}</td><td className="num">{fmtInt(c.visitors)}</td></tr>
+                  <tr key={i}><td>{c.label}</td><td>{pageName(c.path)}</td><td className="muted">{c.href ? pageName(c.href) : 'None'}</td><td className="num">{fmtInt(c.clicks)}</td><td className="num">{fmtInt(c.visitors)}</td></tr>
                 ))}
               </tbody>
             </table>

@@ -118,8 +118,23 @@ export async function issueOtp(email: string, ip: string): Promise<OtpRequestRes
   return { ok: true }
 }
 
+/**
+ * LOCAL DEVELOPMENT ONLY. Accepts any six digits as a login code so the
+ * sign-in flow can be walked without a working mailbox.
+ *
+ * Two independent conditions are required: the build must be a development
+ * build AND DEV_SKIP_OTP must be "true". A production build ignores the flag
+ * entirely, so this cannot be shipped switched on by an .env mistake.
+ */
+const DEV_SKIP_OTP = process.env.NODE_ENV === 'development' && process.env.DEV_SKIP_OTP === 'true'
+
 export async function verifyOtp(email: string, code: string): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!/^\d{6}$/.test(code)) return { ok: false, error: 'Enter the 6-digit code from your email.' }
+  if (DEV_SKIP_OTP) {
+    console.warn(`[otp] DEV_SKIP_OTP is on — accepting any code for ${email}. Development only.`)
+    await query(`UPDATE otp_codes SET consumed_at = now() WHERE email = $1 AND consumed_at IS NULL`, [email])
+    return { ok: true }
+  }
   const row = await queryOne<{ id: number; code_hash: string; attempts: number }>(
     `SELECT id, code_hash, attempts FROM otp_codes
       WHERE email = $1 AND consumed_at IS NULL AND expires_at > now()

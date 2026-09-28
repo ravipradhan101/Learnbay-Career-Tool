@@ -12,3 +12,6 @@ backups/
 # Local tooling
 .claude/settings.local.json
 .qa-*.mjs
+
+# Stray installer that landed in the project folder, not part of the app
+Claude Setup.exe
