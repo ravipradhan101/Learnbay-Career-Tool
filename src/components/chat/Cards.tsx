@@ -1,0 +1,931 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
+import { Icon, type IconName } from '../Icon'
+import { openWhyLearnbay } from '../why/WhyLearnbayButton'
+import { ActionPlan } from '../report/ActionPlan'
+import { Gauge, KpiTiles, PhaseTimeline, RangeChart, SkillBars } from '../report/Charts'
+import type { Card, EligCompleted, EligInProgress } from './engine'
+import { CURRICULUM } from '@/config/curriculum'
+import { TRACK_PATHS } from '@/config/paths'
+import { REFUND_POLICY } from '@/config/policies'
+import { programFor } from '@/config/programs'
+import { RESOURCES } from '@/config/resources'
+import { CERTIFICATIONS, SAMPLE_STORIES, TRACK_PROJECTS } from '@/config/stories'
+import { PUBLISHED_STORY } from '@/config/usps'
+import { COUNSELLOR_TITLE, getCounsellor } from '@/lib/counsellors'
+import { SKILL_LEVELS, trackOf } from '@/lib/questions'
+import { Avatar } from './Avatar'
+import { PartnerLogos } from '../PartnerLogos'
+import { USPS } from '@/config/usps'
+import { track } from '@/lib/analytics'
+import { postJson } from '@/lib/client'
+import { COUNTRY_CODES, isValidPhone } from '@/lib/questions'
+import type { ReportCard } from '@/lib/report-card'
+import { SESSION_TIMES } from '@/lib/sessions'
+import { getTool } from '@/lib/tools-meta'
+import type { TestState } from '@/lib/eligibility'
+
+type Done = (value: unknown) => void
+
+export function CardView({ card, live, onDone }: { card: Card; live: boolean; onDone: Done }) {
+  switch (card.type) {
+    case 'readiness': return <ReadinessCard />
+    case 'preparing': return <PreparingCard steps={card.steps} />
+    case 'contact': return <ContactCard answers={card.answers} prefill={card.prefill} live={live} onDone={onDone} />
+    case 'otp': return <OtpCard email={card.email} existing={card.existing} live={live} onDone={onDone} />
+    case 'intro': return <IntroCard tool={card.tool} />
+    case 'generating': return <GeneratingCard tool={card.tool} />
+    case 'report': return <ReportCardView card={card.card} />
+    case 'elig-intro': return <EligIntroCard {...card} />
+    case 'elig-run': return live ? <EligRunner initial={card.state} onDone={onDone} /> : null
+    case 'elig-result': return <EligResultCard result={card.result} />
+    case 'usp': return <UspCard ids={card.ids} lead={card.lead} />
+    case 'booking': return <BookingCard live={live} onDone={onDone} />
+    case 'masterclass': return <MasterclassCard interest={card.interest} label={card.label} />
+    case 'call': return <CallCard source={card.source} phone={card.phone} by={card.by} />
+    case 'call-guest': return <GuestCallCard />
+    case 'login': return <LoginCard live={live} onDone={onDone} />
+    case 'matching': return live ? <MatchingCard area={card.track} onDone={onDone} /> : null
+    case 'counsellor': return <CounsellorCard id={card.id} track={card.track} />
+    case 'skill-levels': return <SkillLevelsCard skills={card.skills} live={live} onDone={onDone} />
+    case 'program': return <ProgramCard interest={card.interest} />
+    case 'proof': return <ProofCard />
+    case 'projects': return <ProjectsCard interest={card.interest} />
+    case 'career-path': return <CareerPathCard interest={card.interest} from={card.from} />
+    case 'why': return <WhyCard interest={card.interest} />
+    case 'curriculum': return <CurriculumCard interest={card.interest} />
+    case 'refund': return <RefundCard />
+  }
+}
+
+// ---------- Guest ----------
+
+const READINESS: { icon: IconName; b: string; t: string }[] = [
+  { icon: 'target', b: 'Readiness score', t: ' for your target AI role' },
+  { icon: 'chart', b: 'Skill gaps', t: ', ranked by what matters most' },
+  { icon: 'route', b: 'A custom track', t: ' to your next role with AI' },
+]
+
+function ReadinessCard() {
+  return (
+    <div className="tc-card tc-readiness">
+      <div className="tc-readiness-head">
+        <span className="tc-ring" aria-hidden="true"><b>?</b></span>
+        <div>
+          <span className="tc-eyebrow">Your AI career readiness check</span>
+          <h3>Ready in about 2 minutes</h3>
+        </div>
+      </div>
+      <ul className="tc-list">
+        {READINESS.map((r) => (
+          <li key={r.b}><span className="tc-soft-icon"><Icon name={r.icon} size="1.05rem" /></span><span><b>{r.b}</b>{r.t}</span></li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function PreparingCard({ steps }: { steps: string[] }) {
+  const [done, setDone] = useState(0)
+  useEffect(() => {
+    const t = window.setInterval(() => setDone((d) => Math.min(d + 1, steps.length)), 750)
+    return () => window.clearInterval(t)
+  }, [steps.length])
+  return (
+    <div className="tc-card tc-steps" role="status" aria-live="polite">
+      {steps.map((s, i) => (
+        <div key={s} className={`tc-step ${i < done ? 'done' : i === done ? 'active' : ''}`}>
+          <span className="tc-step-dot">{i < done ? <Icon name="check" size="0.8rem" /> : null}</span>{s}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const SOURCE_KEY = 'lcn_source'
+
+function ContactCard({ answers, prefill, live, onDone }: { answers: object; prefill: { name: string; email: string; phoneCountry: string; phone: string } | null; live: boolean; onDone: Done }) {
+  const [name, setName] = useState(prefill?.name ?? '')
+  const [email, setEmail] = useState(prefill?.email ?? '')
+  const [cc, setCc] = useState(prefill?.phoneCountry || '+91')
+  const [phone, setPhone] = useState(prefill?.phone ?? '')
+  const [consent, setConsent] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    const digits = phone.replace(/[\s-]/g, '')
+    if (name.trim().length < 2) return setError('Please enter your full name.')
+    if (!/\S+@\S+\.\S+/.test(email)) return setError('Please enter a valid email address.')
+    if (!isValidPhone(cc, digits)) return setError('Please enter a valid phone number.')
+    if (!consent) return setError('Please tick the box so I can send you your results.')
+    setBusy(true)
+    setError('')
+    let source: Record<string, string> = {}
+    try { source = JSON.parse(window.sessionStorage.getItem(SOURCE_KEY) ?? '{}') } catch { /* ignore */ }
+    const contact = { name, email, phoneCountry: cc, phone: digits, consent: true }
+    const res = await postJson('/api/onboarding', { answers, contact, source })
+    if (!res.ok) { setBusy(false); track('error', 'contact:server', { status: res.status }); return setError(res.error) }
+    if (res.data.needsOtp) {
+      const r = await postJson('/api/auth/request-otp', { email: String(res.data.email) })
+      setBusy(false)
+      if (!r.ok) return setError(r.error)
+      track('action', res.data.existing ? 'onboarding_existing_email' : 'onboarding_completed')
+      setSent(true)
+      return onDone({ email: String(res.data.email), existing: Boolean(res.data.existing), contact })
+    }
+    track('action', 'onboarding_completed')
+    setSent(true)
+    onDone({ redirect: String(res.data.redirect ?? '/dashboard') })
+  }
+
+  if (!live || sent) {
+    return <div className="tc-card tc-done"><Icon name="checkCircle" size="1.1rem" /> Details saved{name ? ` for ${name.split(' ')[0]}` : ''}</div>
+  }
+  return (
+    <form className="tc-card tc-form" onSubmit={submit} noValidate>
+      <div className="tc-field">
+        <label htmlFor="tc-name">Your name</label>
+        <input id="tc-name" autoComplete="name" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rahul Kumar" autoFocus />
+      </div>
+      <div className="tc-field">
+        <label htmlFor="tc-email">Email</label>
+        <input id="tc-email" type="email" inputMode="email" autoComplete="email" maxLength={254} value={email} readOnly={Boolean(prefill?.email)} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+      </div>
+      <div className="tc-field">
+        <label htmlFor="tc-phone">Phone</label>
+        <div className="tc-phone">
+          <select aria-label="Country code" value={cc} onChange={(e) => setCc(e.target.value)}>
+            {COUNTRY_CODES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
+          </select>
+          <input id="tc-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s-]/g, ''))} placeholder="98765 43210" />
+        </div>
+      </div>
+      <label className="tc-check">
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span>Send me my results and relevant learning updates by email and WhatsApp, and let Learnbay contact me.</span>
+      </label>
+      {error && <p className="tc-error" role="alert">{error}</p>}
+      <button className="tc-btn tc-btn-primary" disabled={busy}>{busy ? <span className="spinner" /> : <>Save &amp; continue <Icon name="arrowRight" size="1rem" /></>}</button>
+      <p className="tc-fine"><Icon name="lock" size="0.8rem" /> Private. Used only to send your results and help you plan.</p>
+    </form>
+  )
+}
+
+function OtpCard({ email, existing, live, onDone }: { email: string; existing: boolean; live: boolean; onDone: Done }) {
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
+  const [ok, setOk] = useState(false)
+
+  async function verify(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    const r = await postJson('/api/auth/verify-otp', { email, code })
+    setBusy(false)
+    if (!r.ok) { track('error', 'contact:otp'); return setError(r.error) }
+    track('action', existing ? 'login_completed' : 'email_verified')
+    setOk(true)
+    onDone({ onboarded: Boolean(r.data.onboarded) })
+  }
+  async function resend() {
+    setInfo('')
+    const r = await postJson('/api/auth/request-otp', { email })
+    if (r.ok) setInfo('New code sent.')
+    else setError(r.error)
+  }
+
+  if (!live || ok) return <div className="tc-card tc-done"><Icon name="checkCircle" size="1.1rem" /> Email confirmed</div>
+  return (
+    <form className="tc-card tc-form" onSubmit={verify} noValidate>
+      <div className="tc-field">
+        <label htmlFor="tc-otp">6-digit code sent to {email}</label>
+        <input id="tc-otp" className="tc-otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} />
+      </div>
+      {error && <p className="tc-error" role="alert">{error}</p>}
+      {info && <p className="tc-fine" role="status">{info}</p>}
+      <button className="tc-btn tc-btn-primary" disabled={busy || code.length !== 6}>{busy ? <span className="spinner" /> : <>{existing ? 'Log in' : 'Confirm & meet your counsellor'} <Icon name="arrowRight" size="1rem" /></>}</button>
+      <p className="tc-fine">Can&apos;t find it? Check Promotions or Spam. <button type="button" className="tc-link" onClick={resend}>Resend code</button></p>
+    </form>
+  )
+}
+
+// ---------- Reports ----------
+
+function IntroCard({ tool }: { tool: string }) {
+  const meta = getTool(tool)
+  if (!meta) return null
+  return (
+    <div className="tc-card">
+      <span className="tc-eyebrow">What you will get · about {meta.preview.minutes} min</span>
+      <ul className="tc-list">
+        {meta.preview.gets.slice(0, 3).map((g) => (
+          <li key={g.title}><span className="tc-soft-icon"><Icon name={g.icon} size="1.05rem" /></span><span><b>{g.title}</b> · {g.text}</span></li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function GeneratingCard({ tool }: { tool: string }) {
+  const meta = getTool(tool)
+  const [done, setDone] = useState(0)
+  useEffect(() => {
+    const t = window.setInterval(() => setDone((d) => Math.min(d + 1, (meta?.generating.length ?? 1) - 1)), 2600)
+    return () => window.clearInterval(t)
+  }, [meta])
+  if (!meta) return null
+  return (
+    <div className="tc-card tc-steps" role="status" aria-live="polite">
+      <b className="tc-card-title">Building your {meta.name}…</b>
+      <div className="tc-pulse" aria-hidden="true"><i /></div>
+      {meta.generating.map((s, i) => (
+        <div key={s} className={`tc-step ${i < done ? 'done' : i === done ? 'active' : ''}`}>
+          <span className="tc-step-dot">{i < done ? <Icon name="check" size="0.8rem" /> : null}</span>{s}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ReportCardView({ card }: { card: ReportCard }) {
+  const meta = getTool(card.tool)
+  const [mail, setMail] = useState<'idle' | 'busy' | string>('idle')
+  const h = card.summary.headline
+  async function email() {
+    setMail('busy')
+    const r = await postJson(`/api/tools/${card.tool}/email`, {})
+    track(r.ok ? 'action' : 'error', 'report_email', { tool: card.tool, from: 'chat' })
+    setMail(r.ok ? String(r.data.message ?? 'Sent to your email') : r.error)
+  }
+  return (
+    <div className="tc-card tc-report">
+      <div className="tc-report-top">
+        <span className="tc-icon-tile"><Icon name={meta?.icon ?? 'chart'} size="1.1rem" /></span>
+        <b>{meta?.name}</b>
+        <span className="tc-pill-ok"><Icon name="checkCircle" size="0.85rem" /> Ready</span>
+      </div>
+      <div className="tc-hero">
+        {card.gauge !== undefined ? <Gauge value={card.gauge} size={132} label={h.label} /> : <p className="tc-big">{h.value}</p>}
+        <div>
+          <b className="tc-hero-label">{card.gauge !== undefined ? h.label.replace(/^\/100 /, '') : h.label}</b>
+          <p>{h.note}</p>
+        </div>
+      </div>
+      <KpiTiles items={card.summary.kpis} />
+      <div className="tc-chart">
+        {card.chart.kind === 'skills' && <><span className="tc-eyebrow">Biggest gaps · bar = you, line = needed</span><SkillBars skills={card.chart.skills} limit={4} /></>}
+        {card.chart.kind === 'ranges' && <><span className="tc-eyebrow">What you could earn · ₹ lakh per year</span><RangeChart rows={card.chart.rows} /></>}
+        {card.chart.kind === 'phases' && <><span className="tc-eyebrow">Your plan at a glance</span><PhaseTimeline phases={card.chart.phases} months={card.chart.months} /></>}
+      </div>
+      <ActionPlan tool={card.tool} actions={card.summary.actions} />
+      <div className="tc-actions">
+        <Link href={`/dashboard/${card.tool}/report`} className="tc-btn tc-btn-primary tc-btn-sm" scroll={false}>Open full report <Icon name="arrowRight" size="0.9rem" /></Link>
+        <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={email} disabled={mail !== 'idle' && mail !== 'busy' ? true : mail === 'busy'}>
+          {mail === 'busy' ? <span className="spinner" /> : <><Icon name="mail" size="0.9rem" /> {mail === 'idle' ? 'Email me the PDF' : mail}</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------- Eligibility test ----------
+
+function EligIntroCard({ questions, seconds, attemptsLeft, area }: { questions: number; seconds: number; attemptsLeft: number; area: string }) {
+  return (
+    <div className="tc-card">
+      <span className="tc-eyebrow">{area} eligibility test</span>
+      <div className="tc-facts">
+        <span><b>{questions}</b> questions</span>
+        <span><b>{seconds}s</b> each</span>
+        <span><b>No</b> maths</span>
+        <span><b>{attemptsLeft}</b> {attemptsLeft === 1 ? 'attempt' : 'attempts'} left</span>
+      </div>
+      <p className="tc-muted">Reasoning, key terms and tools for {area}. Your score comes straight away.</p>
+    </div>
+  )
+}
+
+function EligRunner({ initial, onDone }: { initial: EligInProgress; onDone: Done }) {
+  const [state, setState] = useState<EligInProgress>(initial)
+  const [offset, setOffset] = useState(() => initial.serverNow - Date.now())
+  const [now, setNow] = useState(() => Date.now())
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const sentFor = useRef(-1)
+
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 250)
+    return () => window.clearInterval(t)
+  }, [])
+
+  const remaining = Math.max(0, state.questionEndsAt - (now + offset))
+  const secs = Math.ceil(remaining / 1000)
+
+  async function send(choice: number | null) {
+    if (sentFor.current === state.index) return
+    sentFor.current = state.index
+    setBusy(true)
+    setError('')
+    const r = await postJson('/api/eligibility/answer', { index: state.index, choice })
+    setBusy(false)
+    if (!r.ok) { sentFor.current = -1; return setError(r.error) }
+    const next = r.data.state as TestState
+    if (next.status === 'in_progress') { setOffset(next.serverNow - Date.now()); setState(next); return }
+    onDone(next)
+  }
+
+  useEffect(() => {
+    if (remaining <= 0 && !busy && sentFor.current !== state.index) send(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remaining <= 0, state.index])
+
+  const q = state.question
+  const pct = Math.max(0, Math.min(100, (remaining / (q.seconds * 1000)) * 100))
+  return (
+    <div className="tc-card tc-quiz" aria-live="polite">
+      <div className="tc-quiz-top">
+        <span className="tc-eyebrow">Question {state.index + 1} of {state.total} · {q.topic}</span>
+        <span className={`tc-timer ${secs <= 5 ? 'low' : ''}`} aria-label={`${secs} seconds left`}><Icon name="clock" size="0.85rem" /> {secs}s</span>
+      </div>
+      <div className="tc-quiz-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></div>
+      <h3 className="tc-quiz-q">{q.text}</h3>
+      <div className="tc-quiz-options">
+        {q.options.map((o, i) => (
+          <button key={`${state.index}-${i}`} type="button" className="tc-option" disabled={busy} onClick={() => send(i)}>
+            <span className="tc-option-key">{String.fromCharCode(65 + i)}</span>{o}
+          </button>
+        ))}
+      </div>
+      {error && <p className="tc-error" role="alert">{error} <button type="button" className="tc-link" onClick={() => send(null)}>Skip</button></p>}
+    </div>
+  )
+}
+
+function EligResultCard({ result }: { result: EligCompleted }) {
+  const tone = result.band.id === 'ready' ? 'ok' : result.band.id === 'primer' ? 'mid' : 'low'
+  return (
+    <div className="tc-card tc-elig-result">
+      <div className="tc-hero">
+        <Gauge value={result.score} size={132} label="/100 score" />
+        <div>
+          <span className={`tc-band ${tone}`}>{result.band.title}</span>
+          <p>{result.correct} of {result.total} correct · attempt {result.attempt} of {result.attempts.max}</p>
+        </div>
+      </div>
+      <div className="tc-topics">
+        {result.breakdown.byTopic.map((t) => (
+          <div key={t.topic} className="tc-topic">
+            <span>{t.topic}</span>
+            <div className="tc-topic-bar"><i style={{ width: `${(t.correct / Math.max(1, t.total)) * 100}%` }} /></div>
+            <b>{t.correct}/{t.total}</b>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ---------- Learnbay, subtly ----------
+
+function UspCard({ ids, lead }: { ids: (keyof typeof USPS)[]; lead?: string }) {
+  return (
+    <div className="tc-card tc-usp">
+      {lead && <span className="tc-eyebrow">{lead}</span>}
+      <div className="tc-usp-list">
+        {ids.map((id) => (
+          <div key={id} className="tc-usp-item">
+            <span className="tc-soft-icon"><Icon name={USPS[id].icon} size="1rem" /></span>
+            <span><b>{USPS[id].title}</b><small>{USPS[id].short}</small></span>
+          </div>
+        ))}
+      </div>
+      <button type="button" className="tc-link" onClick={() => openWhyLearnbay('chat-usp')}>How Learnbay is different <Icon name="arrowRight" size="0.8rem" /></button>
+    </div>
+  )
+}
+
+// ---------- Mentor call ----------
+
+function nextDays(count: number) {
+  const now = new Date()
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
+    return {
+      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+      day: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short' }),
+      date: d.getDate(),
+      isToday: i === 0,
+    }
+  })
+}
+function timeAvailable(time: string, isToday: boolean) {
+  if (!isToday) return true
+  const [hm, ap] = time.split(' ')
+  let h = Number(hm.split(':')[0])
+  if (ap === 'PM' && h !== 12) h += 12
+  return h > new Date().getHours() + 1
+}
+
+function BookingCard({ live, onDone }: { live: boolean; onDone: Done }) {
+  const days = useMemo(() => nextDays(10), [])
+  const [date, setDate] = useState('')
+  const [time, setTime] = useState('')
+  const [note, setNote] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [when, setWhen] = useState('')
+  const day = days.find((d) => d.value === date)
+
+  async function book() {
+    setBusy(true)
+    setError('')
+    const res = await postJson('/api/sessions', { date, time, note })
+    setBusy(false)
+    if (!res.ok) { track('error', 'session_booking', { status: res.status }); return setError(res.error) }
+    track('action', 'session_booked', { time, from: 'chat' })
+    setWhen(String(res.data.when))
+    onDone({ when: String(res.data.when) })
+  }
+
+  if (!live || when) return <div className="tc-card tc-done"><Icon name="calendar" size="1.1rem" /> Requested{when ? ` for ${when}` : ''}</div>
+  return (
+    <div className="tc-card tc-booking">
+      <span className="tc-eyebrow">Pick a day</span>
+      <div className="tc-days" role="radiogroup" aria-label="Day">
+        {days.map((d) => (
+          <button key={d.value} type="button" role="radio" aria-checked={date === d.value} className="tc-day" onClick={() => { setDate(d.value); setTime('') }}>
+            <small>{d.day}</small><b>{d.date}</b>
+          </button>
+        ))}
+      </div>
+      {date && (
+        <>
+          <span className="tc-eyebrow">Pick a time (IST)</span>
+          <div className="tc-chips" role="radiogroup" aria-label="Time">
+            {SESSION_TIMES.filter((t) => timeAvailable(t, Boolean(day?.isToday))).map((t) => (
+              <button key={t} type="button" role="radio" aria-checked={time === t} className="tc-chip" onClick={() => setTime(t)}>{t}</button>
+            ))}
+          </div>
+        </>
+      )}
+      {time && (
+        <input className="tc-note" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anything to discuss? e.g. fees, EMI, weekend batches (optional)" aria-label="Anything to discuss" />
+      )}
+      {error && <p className="tc-error" role="alert">{error}</p>}
+      <button type="button" className="tc-btn tc-btn-accent" disabled={busy || !date || !time} onClick={book}>
+        {busy ? <span className="spinner" /> : <><Icon name="calendar" size="1rem" /> Book my free call</>}
+      </button>
+    </div>
+  )
+}
+
+// ---------- Masterclasses ----------
+
+const TOPICS: Record<string, string[]> = {
+  ai: ['GenAI / LLMs', 'Agentic AI', 'RAG', 'Prompt engineering', 'Python', 'LLM evaluation'],
+  'cloud-devops': ['Cloud (AWS/Azure)', 'Docker', 'Kubernetes', 'Deployment', 'MLOps', 'LLMOps'],
+  fde: ['GenAI / LLMs', 'RAG', 'Agentic AI', 'API Development', 'AI apps', 'Deployment'],
+  'data-science': ['Python', 'Machine Learning', 'Deep Learning', 'Data analysis', 'GenAI / LLMs'],
+  analytics: ['SQL', 'Data analysis', 'Python', 'Databases', 'Prompt engineering'],
+}
+
+function MasterclassCard({ interest, label }: { interest: string; label: string }) {
+  const [on, setOn] = useState(false)
+  const topics = TOPICS[interest] ?? TOPICS.ai
+  const picked = RESOURCES.filter((r) => r.topics.some((t) => topics.includes(t))).slice(0, 4)
+  return (
+    <div className="tc-card">
+      <div className="tc-mc-head">
+        <span className="tc-icon-tile"><Icon name="play" size="1.05rem" /></span>
+        <span><b>Live masterclasses on {label}</b><small>Taught live by industry mentors. Free.</small></span>
+        <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" disabled={on} onClick={() => { track('action', 'masterclass_interest', { topic: label, from: 'chat' }); setOn(true) }}>
+          {on ? <><Icon name="check" size="0.9rem" /> On the list</> : <><Icon name="bell" size="0.9rem" /> Notify me</>}
+        </button>
+      </div>
+      <span className="tc-eyebrow">Free to start this week</span>
+      <div className="tc-res">
+        {picked.map((r) => (
+          <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className="tc-res-item">
+            <span><b>{r.title}</b><small>{r.provider} · {r.type}</small></span>
+            <Icon name="external" size="0.9rem" />
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ---------- Calls ----------
+
+/** "Shall I call you now?" One tap places the call (or asks the counsellor team to call back). */
+function CallCard({ source, phone, by }: { source: 'button' | 'chat'; phone: string; by: string }) {
+  const [state, setState] = useState<'ask' | 'busy' | 'no' | string>('ask')
+  async function call() {
+    setState('busy')
+    const r = await postJson('/api/call', { source })
+    track(r.ok ? 'action' : 'error', 'call_requested', { source })
+    setState(r.ok ? String(r.data.message) : r.error)
+  }
+  if (state === 'no') return <div className="tc-card tc-done tc-muted-done">No problem. Tap the phone icon at the top whenever you want a call.</div>
+  if (state !== 'ask' && state !== 'busy') return <div className="tc-card tc-done"><Icon name="phone" size="1.1rem" /> {state}</div>
+  return (
+    <div className="tc-card tc-call-card">
+      <span className="tc-call-icon" aria-hidden="true"><Icon name="phone" size="1.2rem" /></span>
+      <div className="tc-call-text">
+        <b>Talk to {by} on a call</b>
+        <small>I’ll call you on {phone}. It’s free and takes about 10 minutes.</small>
+      </div>
+      <div className="tc-actions">
+        <button type="button" className="tc-btn tc-btn-accent tc-btn-sm" onClick={call} disabled={state === 'busy'}>{state === 'busy' ? <span className="spinner" /> : <><Icon name="phone" size="0.9rem" /> Yes, call me now</>}</button>
+        <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => { track('action', 'call_declined', { source }); setState('no') }} disabled={state === 'busy'}>Not now</button>
+      </div>
+    </div>
+  )
+}
+
+/** Before sign-up: a name and a number are enough to get a call. */
+function GuestCallCard() {
+  const [name, setName] = useState('')
+  const [cc, setCc] = useState('+91')
+  const [phone, setPhone] = useState('')
+  const [consent, setConsent] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [done, setDone] = useState('')
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    const r = await postJson('/api/call', { name, phoneCountry: cc, phone: phone.replace(/[\s-]/g, ''), consent })
+    setBusy(false)
+    track(r.ok ? 'action' : 'error', 'call_requested', { source: 'guest' })
+    if (!r.ok) return setError(r.error)
+    setDone(String(r.data.message))
+  }
+  if (done) return <div className="tc-card tc-done"><Icon name="phone" size="1.1rem" /> {done}</div>
+  return (
+    <form className="tc-card tc-form" onSubmit={submit} noValidate>
+      <b className="tc-card-title"><Icon name="phone" size="1rem" /> Get a call from a Learnbay counsellor</b>
+      <div className="tc-field">
+        <label htmlFor="tc-call-name">Your name</label>
+        <input id="tc-call-name" autoComplete="name" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+      </div>
+      <div className="tc-field">
+        <label htmlFor="tc-call-phone">Phone</label>
+        <div className="tc-phone">
+          <select aria-label="Country code" value={cc} onChange={(e) => setCc(e.target.value)}>
+            {COUNTRY_CODES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
+          </select>
+          <input id="tc-call-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s-]/g, ''))} placeholder="98765 43210" />
+        </div>
+      </div>
+      <label className="tc-check">
+        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span>Call me about my career options. Learnbay may also follow up on WhatsApp.</span>
+      </label>
+      {error && <p className="tc-error" role="alert">{error}</p>}
+      <button className="tc-btn tc-btn-accent" disabled={busy || !consent}>{busy ? <span className="spinner" /> : <><Icon name="phone" size="1rem" /> Call me</>}</button>
+    </form>
+  )
+}
+
+// ---------- Log in (existing learners) ----------
+
+function LoginCard({ live, onDone }: { live: boolean; onDone: Done }) {
+  const [email, setEmail] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    const r = await postJson('/api/auth/request-otp', { email })
+    setBusy(false)
+    if (!r.ok) return setError(r.error)
+    track('action', 'login_code_requested', { from: 'chat' })
+    setSent(true)
+    onDone({ email: email.trim() })
+  }
+  if (!live || sent) return <div className="tc-card tc-done"><Icon name="mail" size="1.1rem" /> Code sent{email ? ` to ${email.trim()}` : ''}</div>
+  return (
+    <form className="tc-card tc-form" onSubmit={submit} noValidate>
+      <div className="tc-field">
+        <label htmlFor="tc-login-email">Email you signed up with</label>
+        <input id="tc-login-email" type="email" inputMode="email" autoComplete="email" maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoFocus />
+      </div>
+      {error && <p className="tc-error" role="alert">{error}</p>}
+      <button className="tc-btn tc-btn-primary" disabled={busy || !email.includes('@')}>{busy ? <span className="spinner" /> : <>Send my login code <Icon name="arrowRight" size="1rem" /></>}</button>
+      <p className="tc-fine">New here? <button type="button" className="tc-link" onClick={() => { setSent(true); onDone({ fresh: true }) }}>Start the quick check instead</button></p>
+    </form>
+  )
+}
+
+// ---------- Richa finds a counsellor ----------
+
+type Slide =
+  | { kind: 'story'; name: string; photo: string; from: string; to: string; hike: string }
+  | { kind: 'usp'; icon: IconName; title: string; text: string }
+  | { kind: 'project'; title: string; tools: string }
+
+/** 6–9 seconds of proof while the counsellor is being matched: stories, strengths and projects. */
+function MatchingCard({ area, onDone }: { area: string; onDone: Done }) {
+  const slides = useMemo<Slide[]>(() => {
+    const stories = SAMPLE_STORIES.map((s) => ({ kind: 'story' as const, ...s }))
+    const usps = (['projects', 'mentors', 'placement'] as const).map((id) => ({ kind: 'usp' as const, icon: USPS[id].icon, title: USPS[id].title, text: USPS[id].short }))
+    const projects = (TRACK_PROJECTS[area] ?? TRACK_PROJECTS.ai).map((p) => ({ kind: 'project' as const, ...p }))
+    const out: Slide[] = []
+    for (let i = 0; i < 4; i++) {
+      if (stories[i]) out.push(stories[i])
+      if (i < 3 && usps[i]) out.push(usps[i])
+      if (i < 3 && projects[i]) out.push(projects[i])
+    }
+    return out
+  }, [area])
+  const [i, setI] = useState(0)
+  const [phase, setPhase] = useState(0)
+  const done = useRef(false)
+  const t = trackOf(area)
+
+  useEffect(() => {
+    const tick = window.setInterval(() => setI((n) => (n + 1) % slides.length), 2200)
+    const steps = window.setInterval(() => setPhase((p) => Math.min(p + 1, 2)), 2600)
+    return () => { window.clearInterval(tick); window.clearInterval(steps) }
+  }, [slides.length])
+
+  useEffect(() => {
+    const started = Date.now()
+    postJson('/api/counsellor', { action: 'assign' }).then(async (r) => {
+      const wait = Math.max(0, 7000 - (Date.now() - started))
+      await new Promise((res) => setTimeout(res, wait))
+      if (done.current) return
+      done.current = true
+      track(r.ok ? 'action' : 'error', 'counsellor_matched', { track: area })
+      onDone(r.ok ? { id: String((r.data.counsellor as { id?: string })?.id ?? '') } : null)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const s = slides[i]
+  const steps = [`Checking ${t ? t.label : 'track'} specialists`, 'Matching your experience and goal', 'Confirming who’s available now']
+  return (
+    <div className="tc-card tc-match" role="status" aria-live="polite">
+      <div className="tc-match-head">
+        <span className="tc-match-spin" aria-hidden="true" />
+        <div>
+          <b>Finding your counsellor…</b>
+          <small>{steps[phase]}</small>
+        </div>
+      </div>
+      <div className="tc-match-bar" aria-hidden="true"><i /></div>
+      <div className="tc-slide" key={i}>
+        {s.kind === 'story' && (
+          <div className="tc-story">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={s.photo} alt="" width={56} height={56} />
+            <div>
+              <span className="tc-eyebrow">Sample story</span>
+              <b>{s.name}</b>
+              <div className="tc-story-move"><span>{s.from}</span><Icon name="arrowRight" size="0.8rem" /><span>{s.to}</span></div>
+            </div>
+            <span className="tc-hike">{s.hike}<small>hike</small></span>
+          </div>
+        )}
+        {s.kind === 'usp' && (
+          <div className="tc-slide-usp">
+            <span className="tc-soft-icon"><Icon name={s.icon} size="1rem" /></span>
+            <div><span className="tc-eyebrow">Why Learnbay</span><b>{s.title}</b><small>{s.text}</small></div>
+          </div>
+        )}
+        {s.kind === 'project' && (
+          <div className="tc-slide-usp">
+            <span className="tc-soft-icon"><Icon name="folder" size="1rem" /></span>
+            <div><span className="tc-eyebrow">A project you’ll build</span><b>{s.title}</b><small>{s.tools}</small></div>
+          </div>
+        )}
+      </div>
+      <div className="tc-dots" aria-hidden="true">{slides.map((_, n) => <i key={n} className={n === i ? 'on' : ''} />)}</div>
+    </div>
+  )
+}
+
+function CounsellorCard({ id, track }: { id: string; track: string }) {
+  const c = getCounsellor(id)
+  const t = trackOf(track)
+  return (
+    <div className="tc-card tc-counsellor">
+      <Avatar who={c.id} size={52} online />
+      <div>
+        <span className="tc-eyebrow">Your counsellor</span>
+        <b>{c.name}</b>
+        <small>{COUNSELLOR_TITLE}{t ? ` · ${t.label}` : ''}</small>
+      </div>
+    </div>
+  )
+}
+
+// ---------- Skill levels ----------
+
+function SkillLevelsCard({ skills, live, onDone }: { skills: { id: string; label: string }[]; live: boolean; onDone: Done }) {
+  const [levels, setLevels] = useState<Record<string, string>>({})
+  const [sent, setSent] = useState(false)
+  const complete = skills.every((s) => levels[s.id])
+  if (!live || sent) {
+    return (
+      <div className="tc-card tc-levels-done">
+        {skills.map((s) => <span key={s.id}>{s.label} · <b>{SKILL_LEVELS.find((l) => l.id === levels[s.id])?.label ?? '—'}</b></span>)}
+      </div>
+    )
+  }
+  return (
+    <div className="tc-card tc-levels">
+      {skills.map((s) => (
+        <div key={s.id} className="tc-level-row">
+          <span>{s.label}</span>
+          <div className="tc-seg" role="radiogroup" aria-label={`${s.label} level`}>
+            {SKILL_LEVELS.map((l) => (
+              <button key={l.id} type="button" role="radio" aria-checked={levels[s.id] === l.id} onClick={() => setLevels((v) => ({ ...v, [s.id]: l.id }))}>{l.label}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button type="button" className="tc-btn tc-btn-primary tc-btn-sm" disabled={!complete} onClick={() => { setSent(true); onDone(levels) }}>
+        Done <Icon name="arrowRight" size="0.9rem" />
+      </button>
+    </div>
+  )
+}
+
+// ---------- The pitch: program, proof, projects ----------
+
+function ProgramCard({ interest }: { interest: string }) {
+  const p = programFor(interest)
+  if (!p) return null
+  return (
+    <div className="tc-card tc-program">
+      <span className="tc-eyebrow">Recommended for you</span>
+      <b className="tc-program-name">{p.name}</b>
+      <ul>{p.features.map((f) => <li key={f}><Icon name="checkCircle" size="0.9rem" />{f}</li>)}</ul>
+      <div className="tc-actions">
+        <Link href="/dashboard/sessions" scroll={false} className="tc-btn tc-btn-primary tc-btn-sm">Talk to a mentor, free</Link>
+        <a href={p.url} target="_blank" rel="noopener noreferrer" className="tc-btn tc-btn-ghost tc-btn-sm">Program details <Icon name="external" size="0.8rem" /></a>
+      </div>
+    </div>
+  )
+}
+
+function ProofCard() {
+  return (
+    <div className="tc-card tc-proof">
+      <figure>
+        <blockquote>“{PUBLISHED_STORY.quote}”</blockquote>
+        <figcaption><b>{PUBLISHED_STORY.name}</b> · {PUBLISHED_STORY.role}</figcaption>
+      </figure>
+      <div className="tc-proof-row">
+        <span className="tc-proof-stat"><b>350+</b><small>hiring companies</small></span>
+        <div className="tc-proof-certs">{CERTIFICATIONS.map((c) => <span key={c}><Icon name="award" size="0.8rem" />{c}</span>)}</div>
+      </div>
+      <PartnerLogos size={18} className="tc-proof-logos" />
+    </div>
+  )
+}
+
+function ProjectsCard({ interest }: { interest: string }) {
+  const list = TRACK_PROJECTS[interest] ?? TRACK_PROJECTS.ai
+  return (
+    <div className="tc-card tc-projects">
+      <span className="tc-eyebrow">Projects you’ll build</span>
+      {list.map((p, n) => (
+        <div key={p.title} className="tc-project">
+          <span className="tc-project-n">{n + 1}</span>
+          <div><b>{p.title}</b><small>{p.tools}</small></div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** A link to the learner's course page, bold italic (only catalog URLs). */
+export function CourseLink({ interest, label }: { interest: string; label?: string }) {
+  const p = programFor(interest)
+  if (!p) return null
+  return (
+    <a href={p.url} target="_blank" rel="noopener noreferrer" className="tc-course-link" onClick={() => track('action', 'course_link', { program: p.id })}>
+      <b><i>{label ?? `Explore the ${p.name}`}</i></b> <Icon name="external" size="0.8rem" />
+    </a>
+  )
+}
+
+/** The career path of a track: where it leads, the stages, and the program that takes you there. */
+function CareerPathCard({ interest, from }: { interest: string; from?: string }) {
+  const t = trackOf(interest)
+  const path = TRACK_PATHS[interest]
+  if (!t || !path) return null
+  const was = from ? trackOf(from) : null
+  return (
+    <div className="tc-card tc-path">
+      <div className="tc-path-head">
+        <span className="tc-soft-icon"><Icon name={path.icon} size="1.05rem" /></span>
+        <div>
+          <span className="tc-eyebrow">{was && was.interest !== interest ? `${was.label} → ${t.label}` : 'Your career path'}</span>
+          <b className="tc-path-title">{t.label} · {t.hint}</b>
+        </div>
+      </div>
+      <p className="tc-path-why">{path.why}</p>
+      <ol className="tc-path-steps">
+        {path.stages.map((s, n) => (
+          <li key={s.title}>
+            <span className="tc-path-n">{n + 1}</span>
+            <div><b>{s.title}</b><small>{s.skills}</small></div>
+          </li>
+        ))}
+      </ol>
+      <div className="tc-path-roles">
+        <span className="tc-eyebrow">Roles this leads to</span>
+        <div>{t.roles.map((r) => <span key={r} className="tc-chip-static"><Icon name="briefcase" size="0.8rem" />{r}</span>)}</div>
+      </div>
+      <CourseLink interest={interest} />
+    </div>
+  )
+}
+
+/** Comparing institutes: what you get at Learnbay, with the projects you'd build and a link to your course. */
+function WhyCard({ interest }: { interest: string }) {
+  const ids = ['customisation', 'projects', 'mentors', 'placement', 'domain'] as const
+  const projects = (TRACK_PROJECTS[interest] ?? TRACK_PROJECTS.ai).slice(0, 3)
+  return (
+    <div className="tc-card tc-why">
+      <span className="tc-eyebrow">What you get with Learnbay</span>
+      <div className="tc-why-list">
+        {ids.map((id) => (
+          <div key={id} className="tc-why-item">
+            <span className="tc-soft-icon"><Icon name={USPS[id].icon} size="1rem" /></span>
+            <span><b>{USPS[id].title}</b><small>{USPS[id].short}</small></span>
+          </div>
+        ))}
+      </div>
+      <div className="tc-why-projects">
+        <span className="tc-eyebrow">Projects you’d build</span>
+        {projects.map((p) => <span key={p.title} className="tc-chip-static"><Icon name="folder" size="0.8rem" />{p.title}</span>)}
+      </div>
+      <PartnerLogos size={16} className="tc-proof-logos" />
+      <CourseLink interest={interest} />
+    </div>
+  )
+}
+
+/** The program's curriculum as published: headline numbers, every module in order, electives, and the syllabus link. */
+function CurriculumCard({ interest }: { interest: string }) {
+  const p = programFor(interest)
+  const c = p ? CURRICULUM[p.id] : undefined
+  if (!p) return null
+  return (
+    <div className="tc-card tc-curriculum">
+      <span className="tc-eyebrow">Curriculum · {p.name}</span>
+      {c && (
+        <div className="tc-cur-stats">
+          <span><Icon name="users" size="0.95rem" /><b>{c.liveHours.split(' of ')[0]}</b><small>live mentor-led classes</small></span>
+          <span><Icon name="folder" size="0.95rem" /><b>{c.projects.split(' ')[0]}</b><small>guided hands-on projects</small></span>
+          <span><Icon name="clock" size="0.95rem" /><b>3-year</b><small>flexible access</small></span>
+        </div>
+      )}
+      <ol className="tc-cur-list">
+        {(c?.modules ?? p.focusAreas).map((m, n) => <li key={m}><span className="tc-path-n">{n + 1}</span><span>{m}</span></li>)}
+      </ol>
+      {c?.electives && (
+        <div className="tc-why-projects">
+          <span className="tc-eyebrow">Electives matched to your background</span>
+          {c.electives.map((e) => <span key={e} className="tc-chip-static"><Icon name="target" size="0.8rem" />{e}</span>)}
+        </div>
+      )}
+      <div className="tc-cur-certs"><Icon name="award" size="0.9rem" /> Microsoft & IBM certification · dedicated project mentor · AI Co-Lab startup projects</div>
+      <CourseLink interest={interest} label="See the full syllabus" />
+    </div>
+  )
+}
+
+/** Learnbay's published refund policy, in plain words, with the link to the full policy. */
+function RefundCard() {
+  const icons: IconName[] = ['calendar', 'checkCircle', 'rupee', 'refresh', 'mail']
+  return (
+    <div className="tc-card tc-why">
+      <span className="tc-eyebrow">Refund & cancellation policy</span>
+      <div className="tc-why-list">
+        {REFUND_POLICY.points.map((pt, n) => (
+          <div key={pt.title} className="tc-why-item">
+            <span className="tc-soft-icon"><Icon name={icons[n] ?? 'checkCircle'} size="1rem" /></span>
+            <span><b>{pt.title}</b><small>{pt.detail}</small></span>
+          </div>
+        ))}
+      </div>
+      <a href={REFUND_POLICY.url} target="_blank" rel="noopener noreferrer" className="tc-course-link"><b><i>Read the full refund policy</i></b> <Icon name="external" size="0.8rem" /></a>
+    </div>
+  )
+}

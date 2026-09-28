@@ -1,6 +1,6 @@
 import type { PoolClient } from 'pg'
 import { query, queryOne, transaction } from './db'
-import { BANK, type Track } from './eligibility-bank'
+import { BANKS, type Area } from './eligibility-bank'
 import { INTERESTS } from './questions'
 import { saveVersion } from './versions'
 
@@ -110,40 +110,51 @@ export function validSnapshot(v: unknown): v is SetSnapshot {
     && o.questions.every((q) => typeof q.id === 'string' && /^[0-9a-f-]{36}$/i.test(q.id) && typeof q.text === 'string' && Array.isArray(q.options) && Number.isInteger(q.correct)))
 }
 
-// ---------- Starter sets (copied from the built-in bank once) ----------
+// ---------- Question banks (seeded once) ----------
 
-const TRACK_NAMES: Record<Exclude<Track, 'aptitude'>, string> = {
+const AREA_NAMES: Record<Area, string> = {
   ai: 'AI & GenAI', 'cloud-devops': 'Cloud & DevOps', fde: 'Forward Deployed Engineering', 'data-science': 'Data Science', analytics: 'Data & Business Analytics',
 }
 
 const g = globalThis as unknown as { __setsSeeded?: boolean }
 
+/**
+ * Seeds one fixed 50-question set per program area (source 'bank': no AI, no maths) and pauses the older
+ * AI starter sets for those areas. Runs once per database; nothing is deleted, and every change is versioned.
+ */
 export async function ensureQuestionSets(): Promise<void> {
   if (g.__setsSeeded) return
-  const seeded = await queryOne(`SELECT 1 FROM app_meta WHERE key = 'question_sets_seeded'`)
+  const seeded = await queryOne(`SELECT 1 FROM app_meta WHERE key = 'question_sets_bank50'`)
   if (seeded) { g.__setsSeeded = true; return }
   await transaction(async (db) => {
-    const lock = await db.query(`INSERT INTO app_meta (key, value) VALUES ('question_sets_seeded', 'v1') ON CONFLICT (key) DO NOTHING RETURNING key`)
+    const lock = await db.query(`INSERT INTO app_meta (key, value) VALUES ('question_sets_bank50', 'v1') ON CONFLICT (key) DO NOTHING RETURNING key`)
     if (!lock.rowCount) return
-    for (const [track, label] of Object.entries(TRACK_NAMES) as [Exclude<Track, 'aptitude'>, string][]) {
+    // The older starter sets are never created on a fresh database any more.
+    await db.query(`INSERT INTO app_meta (key, value) VALUES ('question_sets_seeded', 'v1') ON CONFLICT (key) DO NOTHING`)
+    for (const [area, label] of Object.entries(AREA_NAMES) as [Area, string][]) {
       const set = (await db.query<{ id: string }>(
-        `INSERT INTO question_sets (name, description, program_area, source, seed_key) VALUES ($1, $2, $3, 'ai', $4)
+        `INSERT INTO question_sets (name, description, program_area, source, seed_key) VALUES ($1, $2, $3, 'bank', $4)
          ON CONFLICT (seed_key) DO NOTHING RETURNING id`,
-        [`${label} eligibility test`, `Starter set: general aptitude plus easy ${label} basics. Questions are AI-generated for each learner; these questions are the fallback.`, track, `starter-${track}`],
+        [`${label} eligibility test`, `Fixed bank of 50 questions (no maths). Each attempt draws 10 at random across topics; options are shuffled.`, area, `bank50-${area}`],
       )).rows[0]
       if (!set) continue
-      const questions = [...BANK.filter((b) => b.track === 'aptitude'), ...BANK.filter((b) => b.track === track)]
-      let pos = 0
-      for (const b of questions) {
-        pos += 10
-        await db.query(
-          `INSERT INTO set_questions (set_id, position, topic, text, options, correct) VALUES ($1, $2, $3, $4, $5, 0)`,
-          [set.id, pos, b.track === 'aptitude' ? 'Aptitude' : 'Concept', b.text, b.options],
-        )
-      }
-      await saveVersion(db, 'question_set', set.id, await snapshotSet(db, set.id), 'Starter set created', 'system')
+      // One statement per area: the database may be far away, so 50 separate inserts would take a minute.
+      const rows = BANKS[area].map(([topic, text, options], i) => ({ p: (i + 1) * 10, t: topic, x: text, o: options }))
+      await db.query(
+        `INSERT INTO set_questions (set_id, position, topic, text, options, correct)
+         SELECT $1, (q->>'p')::int, q->>'t', q->>'x', ARRAY(SELECT e FROM jsonb_array_elements_text(q->'o') WITH ORDINALITY AS o(e, n) ORDER BY n), 0
+           FROM jsonb_array_elements($2::jsonb) q`,
+        [set.id, JSON.stringify(rows)],
+      )
+      await saveVersion(db, 'question_set', set.id, await snapshotSet(db, set.id), 'Question bank created (50 questions)', 'system')
+    }
+    const starters = await db.query<{ id: string }>(`SELECT id FROM question_sets WHERE seed_key LIKE 'starter-%' AND status = 'active'`)
+    for (const { id } of starters.rows) {
+      await db.query(`UPDATE question_sets SET status = 'paused', version = version + 1, updated_at = now() WHERE id = $1`, [id])
+      await saveVersion(db, 'question_set', id, await snapshotSet(db, id), 'Paused: replaced by the fixed 50-question bank', 'system')
     }
   })
+  g.__setsSeeded = true
 }
 
 // ---------- What a learner gets ----------

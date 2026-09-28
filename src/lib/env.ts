@@ -73,6 +73,17 @@ export const env = {
   get voiceAssistantPhone() {
     return optional('VOICE_ASSISTANT_PHONE')
   },
+  /**
+   * Optional outbound-call provider (an AI voice agent). When set, "Call me" asks it to call the learner now;
+   * without it the request is saved and the counsellor team is emailed to call back.
+   */
+  get callTriggerUrl() {
+    const url = optional('CALL_TRIGGER_URL')
+    return url && url.startsWith('https://') ? url : undefined
+  },
+  get callTriggerSecret() {
+    return optional('CALL_TRIGGER_SECRET')
+  },
   get isProduction() {
     return process.env.NODE_ENV === 'production'
   },

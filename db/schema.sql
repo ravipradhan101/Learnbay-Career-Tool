@@ -370,3 +370,33 @@ ALTER TABLE eligibility_tests ADD COLUMN IF NOT EXISTS set_id uuid;
 ALTER TABLE eligibility_tests ADD COLUMN IF NOT EXISTS set_version integer;
 ALTER TABLE eligibility_prepared ADD COLUMN IF NOT EXISTS set_id uuid;
 ALTER TABLE eligibility_prepared ADD COLUMN IF NOT EXISTS set_version integer;
+
+-- v9: AI counsellors allocated round robin after sign-up, and call requests (from the call button or the chat)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS counsellor text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS counsellor_prev text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS counsellor_active boolean NOT NULL DEFAULT false;
+CREATE TABLE IF NOT EXISTS call_requests (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       uuid REFERENCES users(id) ON DELETE SET NULL,
+  name          text,
+  phone_country text,
+  phone         text NOT NULL,
+  counsellor    text,
+  source        text NOT NULL DEFAULT 'button',
+  status        text NOT NULL DEFAULT 'new',
+  detail        text,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS call_requests_created_idx ON call_requests(created_at);
+
+-- v10: saved chat threads (a new chat starts a new thread; old ones stay available after login on any device)
+CREATE TABLE IF NOT EXISTS chat_threads (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title       text NOT NULL DEFAULT 'New chat',
+  counsellor  text,
+  items       jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS chat_threads_user_idx ON chat_threads(user_id, updated_at DESC);

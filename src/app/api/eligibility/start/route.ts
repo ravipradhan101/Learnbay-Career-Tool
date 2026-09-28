@@ -15,8 +15,8 @@ export async function POST(request: Request) {
   if (!(await rateLimit(`elig:start:${user.id}`, 10, 3600))) return jsonError(429, 'Please wait a little and try again.')
   const body = await readJson<{ answers?: unknown }>(request, 2_000)
   const incoming = sanitizeAnswers(body?.answers)
-  // Only the two pre-test questions are accepted here; the rest of the profile stays locked.
-  const extra: Answers = { eduLevel: incoming.eduLevel, mathComfort: incoming.mathComfort }
+  // Only the pre-test question is accepted here; the rest of the profile stays locked.
+  const extra: Answers = { eduLevel: incoming.eduLevel }
   // One round trip: existing answers win (the profile is locked); the new ones only fill gaps.
   const filled = Object.fromEntries(Object.entries(extra).filter(([, v]) => v !== undefined))
   const row = await queryOne<{ answers: Answers }>(
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   )
   const answers = row?.answers ?? null
   if (!answers?.interest) return jsonError(400, 'Please complete the quick start first.', { redirect: '/start' })
-  if (!answers.eduLevel || !answers.mathComfort) return jsonError(400, 'Please answer both questions before starting.')
+  if (!answers.eduLevel) return jsonError(400, 'Please tell us your highest qualification before starting.')
   const result = await startTest(user.id, answers)
   if (!result.state) return jsonError(400, result.error ?? 'Could not start the test.')
   track(user.id, 'eligibility_started')

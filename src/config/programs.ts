@@ -114,3 +114,10 @@ export function programsForInterest(interest: string | undefined): Program[] {
   const list = PROGRAMS.filter((p) => interest && p.interests.includes(interest))
   return list.length ? list : PROGRAMS
 }
+
+/** The flagship program for a track picked on the start screen (falls back to the first match for other areas). */
+export function programFor(interest: string | null | undefined): Program | undefined {
+  const flagship: Record<string, string> = { ai: 'genai-agentic-ai-master', fde: 'forward-deployed-ai-engineer', 'cloud-devops': 'ai-cloud-devops-master' }
+  const id = interest ? flagship[interest] : undefined
+  return (id ? PROGRAMS.find((p) => p.id === id) : undefined) ?? programsForInterest(interest ?? undefined)[0]
+}

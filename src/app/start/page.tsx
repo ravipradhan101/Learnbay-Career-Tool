@@ -1,44 +1,56 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { SiteHeader } from '@/components/SiteHeader'
-import { Onboarding } from '@/components/Onboarding'
-import { ProofStrip } from '@/components/ProofStrip'
-import { Testimonials } from '@/components/Testimonials'
+import { Icon } from '@/components/Icon'
+import { Logo } from '@/components/Logo'
+import { ResetGuestChat } from '@/components/ResetGuestChat'
+import { programFor } from '@/config/programs'
 import { getCurrentUser } from '@/lib/auth'
 import { getAnswers } from '@/lib/data'
-import { getTool } from '@/lib/tools-meta'
+import { TRACKS } from '@/lib/questions'
 
-export const metadata: Metadata = {
-  title: 'Start your free AI career analysis',
-  description: 'Answer 4 quick questions and open your personal Career Studio: skill gaps, salary benchmark and a roadmap built for you.',
-}
+export const metadata: Metadata = { title: 'Choose your track' }
 
-export default async function StartPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const params = await searchParams
-  const toolParam = typeof params.tool === 'string' ? params.tool : ''
-  const next = toolParam === 'sessions' || getTool(toolParam) ? toolParam : ''
+/** Step 2: pick a track. Each card says who it is for, the roles it leads to and the program behind it. */
+export default async function StartPage() {
   const user = await getCurrentUser()
   const answers = user ? await getAnswers(user.id) : null
-  if (user && answers?.interest && user.phone) {
-    redirect(next === 'sessions' ? '/dashboard/sessions' : getTool(next)?.route ?? '/dashboard')
-  }
-
+  if (user && answers?.interest && user.phone) redirect('/dashboard')
   return (
-    <>
-      <SiteHeader />
-      <main className="onboard-page">
-        <div className="container">
-          <Onboarding
-            next={next}
-            signedIn={user ? { email: user.email, name: user.name ?? '', phoneCountry: user.phone_country ?? '+91', phone: user.phone ?? '' } : null}
-            initial={answers ?? {}}
-          />
-          <div className="onboard-proof stack" style={{ gap: '1.5rem' }}>
-            <ProofStrip />
-            <Testimonials />
-          </div>
+    <div className="lp">
+      <ResetGuestChat />
+      <header className="lp-top">
+        <Logo />
+        <Link href="/start/chat?login=1" className="lp-login">Log in</Link>
+      </header>
+      <main className="lp-main lp-tracks-main">
+        <div className="lp-head">
+          <span className="lp-step">Step 1 of 2</span>
+          <h1>Choose your track</h1>
+          <p>Pick the direction you’re most interested in. Your counsellor will confirm the right fit with you.</p>
         </div>
+        <div className="lp-tracks">
+          {TRACKS.map((t) => {
+            const program = programFor(t.interest)
+            return (
+              <Link key={t.id} href={`/start/chat?track=${t.id}`} className="lp-track">
+                <span className="lp-track-icon"><Icon name={t.icon} size="1.25rem" /></span>
+                <div className="lp-track-title">
+                  <b>{t.label}</b>
+                  <small>{t.hint}</small>
+                </div>
+                <dl>
+                  <div><dt>Best for</dt><dd>{t.bestFor}</dd></div>
+                  <div><dt>Roles you can target</dt><dd>{t.roles.join(' · ')}</dd></div>
+                  {program && <div><dt>Program</dt><dd>{program.name}</dd></div>}
+                </dl>
+                <span className="lp-track-go">Choose this track <Icon name="arrowRight" size="0.95rem" /></span>
+              </Link>
+            )
+          })}
+        </div>
+        <p className="lp-fine">Not sure? Pick the closest one; your counsellor will help you decide.</p>
       </main>
-    </>
+    </div>
   )
 }

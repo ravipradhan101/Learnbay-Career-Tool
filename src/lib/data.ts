@@ -81,7 +81,7 @@ export const getStudio = cache(async (): Promise<StudioData> => {
   // After login, return to the page they asked for (e.g. a tool linked from an email), not just the home.
   const h = await headers()
   const path = h.get('x-pathname') ?? ''
-  const safePath = /^\/dashboard(\/[a-z-]+)?$/.test(path) ? path : '/dashboard'
+  const safePath = /^\/dashboard(\/[a-z-]+(\/report)?)?$/.test(path) ? path : '/dashboard'
   const linkFor = h.get('x-link-for')
   const loginUrl = `/login?next=${encodeURIComponent(linkFor ? `${safePath}?for=${linkFor}` : safePath)}`
   if (!token || token.length > 100) redirect(loginUrl)

@@ -1,55 +1,65 @@
 import Link from 'next/link'
-import { SiteHeader } from '@/components/SiteHeader'
-import { SiteFooter } from '@/components/SiteFooter'
-import { EngagementPopup } from '@/components/EngagementPopup'
-import { Icon } from '@/components/Icon'
-import { LoginForm } from '@/components/LoginForm'
-import { Testimonials } from '@/components/Testimonials'
-import { PROGRAMS } from '@/config/programs'
-import { PROOF_POINTS } from '@/config/testimonials'
+import { Icon, type IconName } from '@/components/Icon'
+import { Logo } from '@/components/Logo'
+import { ResetGuestChat } from '@/components/ResetGuestChat'
+import { PartnerLogos } from '@/components/PartnerLogos'
 import { getCurrentUser } from '@/lib/auth'
-import { getLatestSession } from '@/lib/data'
-import { TOOLS } from '@/lib/tools-meta'
+import { getAnswers } from '@/lib/data'
+
+// The landing page: one clean card that says what the learner gets, and one button.
+
+const GETS: { icon: IconName; title: string; text: string }[] = [
+  { icon: 'target', title: 'Readiness score', text: 'Where you stand for your target role' },
+  { icon: 'chart', title: 'Skill-gap map', text: 'What to learn first, and what to skip' },
+  { icon: 'rupee', title: 'Salary benchmark', text: 'What your next role could pay' },
+  { icon: 'route', title: 'Personal roadmap', text: 'Month by month, paced to your time' },
+]
 
 export default async function HomePage() {
   const user = await getCurrentUser()
-  const hasSession = user ? Boolean(await getLatestSession(user.id)) : false
+  const answers = user ? await getAnswers(user.id) : null
+  const inStudio = Boolean(user && answers?.interest && user.phone)
   return (
-    <>
-      <SiteHeader />
-      <main>
-        <section className="hero">
-          <div className="container hero-grid">
-            <div>
-              <span className="hero-pill"><Icon name="sparkles" size="0.9rem" /> Free AI career studio by Learnbay</span>
-              <h1>Your career, with a <span className="gradient-text">clear next step.</span></h1>
-              <p className="hero-sub">See your skill gaps, what your next role pays, and a roadmap built for you — in about 2 minutes.</p>
-              <ul className="tool-chips" aria-label="What you get">
-                {TOOLS.map((t) => <li key={t.id}><Icon name={t.icon} size="1rem" />{t.name}</li>)}
-              </ul>
-              <div className="hero-cta">
-                <Link href={user ? '/dashboard' : '/start'} className="btn btn-primary btn-lg">
-                  {user ? 'Open my Career Studio' : 'Start My Free Analysis'} <Icon name="arrowRight" size="1.1rem" />
-                </Link>
-                <p className="hero-meta">4 quick questions · about 2 minutes · free</p>
-              </div>
-            </div>
-            {!user && <LoginForm compact />}
-          </div>
+    <div className="lp">
+      <ResetGuestChat />
+      <header className="lp-top">
+        <Logo />
+        <Link href={inStudio ? '/dashboard' : '/start/chat?login=1'} className="lp-login">{inStudio ? 'Open my studio' : 'Log in'}</Link>
+      </header>
+
+      <main className="lp-main">
+        <section className="lp-card">
+          <span className="lp-badge"><Icon name="sparkles" size="0.8rem" /> Career readiness · 2026</span>
+          <h1>Your next tech role,<br /><span>planned with a counsellor.</span></h1>
+          <p className="lp-sub">Pick your track, talk to a Learnbay career counsellor and get a clear, personal plan for AI, FDE or Cloud &amp; DevOps roles.</p>
+
+          <dl className="lp-facts">
+            <div><dt>Best for</dt><dd>Working professionals &amp; graduates</dd></div>
+            <div><dt>Time needed</dt><dd>About 5 minutes</dd></div>
+            <div><dt>You receive</dt><dd>Readiness report + 1:1 guidance</dd></div>
+          </dl>
+
+          <Link href={inStudio ? '/dashboard' : '/start'} className="lp-cta">
+            {inStudio ? 'Continue to my studio' : 'Start my free career check'} <Icon name="arrowRight" size="1.1rem" />
+          </Link>
+          <p className="lp-fine">Private responses · Free · No spam</p>
         </section>
 
-        <section className="section-tight" id="stories">
-          <div className="container stack" style={{ gap: '1.75rem' }}>
-            <Testimonials />
-            <ul className="proof-line" aria-label="Why Learnbay">
-              {PROOF_POINTS.map((p) => <li key={p.title}><Icon name={p.icon} size="1.1rem" />{p.title}</li>)}
-            </ul>
-          </div>
+        <section className="lp-gets" aria-label="What you get">
+          {GETS.map((g) => (
+            <div key={g.title} className="lp-get">
+              <span className="lp-get-icon"><Icon name={g.icon} size="1.05rem" /></span>
+              <b>{g.title}</b>
+              <small>{g.text}</small>
+            </div>
+          ))}
+        </section>
+
+        <section className="lp-partners" aria-label="Certifications and partners">
+          <span>Certifications &amp; partners</span>
+          <PartnerLogos size={24} />
         </section>
       </main>
-      <SiteFooter />
-      {/* Career AI and the call button live inside the Studio, after sign-up; the landing page only has the exit prompt. */}
-      <EngagementPopup signedIn={Boolean(user)} hasSession={hasSession} program={{ name: PROGRAMS[0].name, url: PROGRAMS[0].url }} />
-    </>
+    </div>
   )
 }

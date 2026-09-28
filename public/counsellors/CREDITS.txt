@@ -1,0 +1,11 @@
+Counsellor photos: free-licence images from Unsplash (https://unsplash.com/license), downloaded 2026-09-28 as 256x256 face-centred crops (fit=facearea).
+They are stock photos of models, not Learnbay staff. The chat always labels these counsellors as AI.
+
+tanya.jpg  https://images.unsplash.com/photo-1728141123512-87c415cecc9d
+siya.jpg  https://images.unsplash.com/photo-1685540942176-90a32486ba6f
+riya.jpg  https://images.unsplash.com/photo-1582828835690-22a88e8dd257
+elanor.jpg  https://images.unsplash.com/photo-1609371497456-3a55a205d5eb
+mangesh.jpg  https://images.unsplash.com/photo-1787724779241-cb5c250ed70b
+kshitij.jpg  https://images.unsplash.com/photo-1589386417686-0d34b5903d23
+imran.jpg  https://images.unsplash.com/photo-1649433658557-54cf58577c68
+richa.jpg  https://images.unsplash.com/photo-1590650153855-d9e808231d41 (guide, Richa)

@@ -3,7 +3,7 @@ import { RESOURCES } from '@/config/resources'
 import { generateJson } from './gemini'
 import {
   CITIES, CTC_BANDS, PROGRAMMER, SKILLS, SKILL_NONE, TIMELINES, WEEKLY_HOURS, experienceLabel, interestLabel, labelOf,
-  roleLabel, targetRoleLabel, type Answers,
+  DIFFICULTIES, LEARNING_SOURCES, SKILL_LEVELS, domainLabel, goalLabel, roleLabel, targetRoleLabel, type Answers,
 } from './questions'
 import type { ToolId } from './tools-meta'
 import type { RoadmapResult, ResumeAnalysis, SalaryResult, SkillGapResult, SkillLevelLabel, ToolResultMap } from './tool-types'
@@ -11,8 +11,13 @@ import type { RoadmapResult, ResumeAnalysis, SalaryResult, SkillGapResult, Skill
 // ---------- Learner description used in every prompt ----------
 
 export function describeLearner(a: Answers): string {
-  const skills = !a.skills?.length ? 'Not answered' : a.skills.includes(SKILL_NONE) ? 'None yet' : a.skills.map((s) => labelOf(SKILLS, s) ?? s).join(', ')
+  const level = (s: string) => (a.skillLevels?.[s] ? ` (${labelOf(SKILL_LEVELS, a.skillLevels[s])})` : '')
+  const skills = !a.skills?.length ? 'Not answered' : a.skills.includes(SKILL_NONE) ? 'None yet' : a.skills.map((s) => `${labelOf(SKILLS, s) ?? s}${level(s)}`).join(', ')
   return [
+    ...(goalLabel(a) ? [`Career goal: ${goalLabel(a)}`] : []),
+    ...(domainLabel(a) ? [`Industry / domain: ${domainLabel(a)}`] : []),
+    ...(a.learning ? [`Already learning: ${labelOf(LEARNING_SOURCES, a.learning)}`] : []),
+    ...(a.difficulty ? [`Biggest difficulty so far: ${labelOf(DIFFICULTIES, a.difficulty)}`] : []),
     `Current role: ${roleLabel(a)}`,
     `Experience: ${experienceLabel(a)}`,
     `Codes at work: ${labelOf(PROGRAMMER, a.programmer) ?? 'Not answered'}`,
@@ -182,7 +187,7 @@ const SCHEMAS: Record<ToolId, Record<string, unknown>> = {
       targetRole: str('The target role.'),
       summary: str('2 sentences on the plan.'),
       durationMonths: int('Months to be job-ready at their weekly hours.', 3, 18),
-      weeklyHours: str('e.g. "5-7 hours/week".'),
+      weeklyHours: str('e.g. "8-10 hours/week".'),
       phases: {
         type: 'array', minItems: 4, maxItems: 4,
         items: {

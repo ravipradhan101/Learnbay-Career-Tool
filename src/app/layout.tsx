@@ -1,15 +1,18 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import { headers } from 'next/headers'
 import { AnalyticsTracker } from '@/components/AnalyticsTracker'
 import './globals.css'
+import './chat.css'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
+// The chat uses Plus Jakarta Sans (self-hosted by Next at build time, so no external font requests).
+const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap', variable: '--font-jakarta' })
 
 export const metadata: Metadata = {
   title: { default: 'Learnbay Career Studio — your career, with a clear next step', template: '%s | Learnbay Career Studio' },
   description:
-    'Answer 4 quick questions and get your skill gap analysis, salary benchmark and career roadmap — with an AI advisor and free mentor sessions. By Learnbay.',
+    'Pick your track and talk to a Learnbay career counsellor: readiness score, skill gaps, salary benchmark and a personal roadmap for AI, FDE and Cloud & DevOps roles. Free.',
   applicationName: 'Learnbay Career Studio',
   openGraph: {
     title: 'Learnbay Career Studio',
@@ -28,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Reading request headers renders every page per request, which the CSP nonce needs.
   await headers()
   return (
-    <html lang="en" className={inter.className}>
+    <html lang="en" className={`${inter.className} ${jakarta.variable}`}>
       <body>{children}<AnalyticsTracker /></body>
     </html>
   )

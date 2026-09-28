@@ -2,7 +2,72 @@
 
 export type Option = { id: string; label: string; hint?: string }
 
-// ---------- Onboarding (asked before contact details) ----------
+// ---------- Onboarding (asked in the chat before contact details) ----------
+
+/** Career goal (asked by Richa). Shapes how the counsellor talks to them and what they pitch. */
+export const GOALS: Option[] = [
+  { id: 'switch', label: 'Switch to a better tech role' },
+  { id: 'upskill', label: 'Grow faster in my current role' },
+  { id: 'salary', label: 'Get a strong salary hike' },
+  { id: 'start', label: 'Start my career in tech' },
+  { id: 'explore', label: 'Explore where AI fits for me' },
+]
+
+/** The three tracks offered on the start screen; each maps to a program area (interest). */
+export const TRACKS: (Option & { interest: string; programId: string; roles: string[]; bestFor: string; icon: 'sparkles' | 'briefcase' | 'cloud' })[] = [
+  {
+    id: 'ai', interest: 'ai', programId: 'genai-agentic-ai-master', icon: 'sparkles', label: 'AI track', hint: 'GenAI & Agentic AI',
+    bestFor: 'Engineers, data, QA and IT professionals moving into AI', roles: ['AI Engineer', 'GenAI Developer', 'Agentic AI Engineer'],
+  },
+  {
+    id: 'fde', interest: 'fde', programId: 'forward-deployed-ai-engineer', icon: 'briefcase', label: 'FDE track', hint: 'Forward Deployed Engineering',
+    bestFor: 'Engineers who enjoy building AI solutions with clients', roles: ['Forward Deployed AI Engineer', 'AI Solutions Engineer'],
+  },
+  {
+    id: 'cloud-devops', interest: 'cloud-devops', programId: 'ai-cloud-devops-master', icon: 'cloud', label: 'Cloud & DevOps track', hint: 'AI-powered cloud and DevOps',
+    bestFor: 'SysAdmin, support, network, QA and DevOps professionals', roles: ['Cloud Engineer', 'DevOps / SRE Engineer', 'MLOps Engineer'],
+  },
+]
+
+/** The role a track aims at, so the learner is not asked again after picking the track. */
+export const TRACK_TARGET: Record<string, string> = { ai: 'ai-engineer', fde: 'fde', 'cloud-devops': 'cloud-engineer' }
+
+/** Industry or domain the learner comes from (asked by Richa). */
+export const DOMAINS: Option[] = [
+  { id: 'it-services', label: 'IT services / consulting' },
+  { id: 'product', label: 'Product / SaaS company' },
+  { id: 'bfsi', label: 'Banking, finance & insurance' },
+  { id: 'telecom', label: 'Telecom & networking' },
+  { id: 'manufacturing', label: 'Manufacturing & automotive' },
+  { id: 'healthcare', label: 'Healthcare & pharma' },
+  { id: 'retail', label: 'Retail & e-commerce' },
+  { id: 'education', label: 'Education' },
+  { id: 'government', label: 'Government / PSU' },
+  { id: 'non-tech', label: 'Non-tech / business role' },
+  { id: 'student', label: 'Student / fresher' },
+  { id: 'other', label: 'Other' },
+]
+
+/** Probing questions the counsellor asks in the first conversation. */
+export const LEARNING_SOURCES: Option[] = [
+  { id: 'free', label: 'Yes, on YouTube / free content' },
+  { id: 'paid', label: 'Yes, a paid course (Udemy, Coursera…)' },
+  { id: 'stopped', label: 'I started, but couldn’t keep going' },
+  { id: 'none', label: 'Not yet' },
+]
+export const DIFFICULTIES: Option[] = [
+  { id: 'roadmap', label: 'No clear roadmap: what to learn first' },
+  { id: 'time', label: 'Finding time next to my job' },
+  { id: 'concepts', label: 'Concepts feel hard to learn alone' },
+  { id: 'projects', label: 'No real projects to show' },
+  { id: 'interviews', label: 'Not getting interview calls' },
+  { id: 'fit', label: 'Not sure which role fits me' },
+]
+export const SKILL_LEVELS: Option[] = [
+  { id: 'beginner', label: 'Beginner' },
+  { id: 'intermediate', label: 'Intermediate' },
+  { id: 'advanced', label: 'Advanced' },
+]
 
 export const ROLES: Option[] = [
   { id: 'software-engineer', label: 'Software Engineer' },
@@ -114,10 +179,10 @@ export const CITIES: Option[] = [
 ]
 
 export const WEEKLY_HOURS: Option[] = [
-  { id: '2-4', label: '2–4 hours', hint: 'Part time' },
-  { id: '5-7', label: '5–7 hours', hint: 'Working professional' },
-  { id: '8-12', label: '8–12 hours', hint: 'Dedicated learner' },
-  { id: '12+', label: '12+ hours', hint: 'Fast track' },
+  { id: '5-7', label: '5–7 hours', hint: 'Light pace, a busy schedule' },
+  { id: '8-10', label: '8–10 hours', hint: 'Working professional (most learners)' },
+  { id: '12-15', label: '12–15 hours', hint: 'Accelerated, weekdays + weekends' },
+  { id: '20+', label: '20+ hours', hint: 'Full-time learner or between jobs' },
 ]
 
 export const TIMELINES: Option[] = [
@@ -155,7 +220,13 @@ export const COUNTRY_CODES: { code: string; label: string; flag: string; digits:
 ]
 
 export type Answers = {
-  // onboarding
+  // onboarding (Richa)
+  goal?: string
+  domain?: string
+  // first conversation with the counsellor
+  learning?: string
+  difficulty?: string
+  skillLevels?: Record<string, string>
   role?: string
   roleOther?: string
   experience?: string
@@ -186,6 +257,9 @@ export function roleLabel(a: Answers): string {
 }
 export const experienceLabel = (a: Answers) => labelOf(EXPERIENCE, a.experience) ?? 'Not specified'
 export const interestLabel = (a: Answers) => labelOf(INTERESTS, a.interest) ?? 'Not specified'
+export const goalLabel = (a: Answers) => labelOf(GOALS, a.goal)
+export const domainLabel = (a: Answers) => labelOf(DOMAINS, a.domain)
+export const trackOf = (interest: string | undefined) => TRACKS.find((t) => t.interest === interest) ?? null
 export function targetRoleOptions(a: Answers): Option[] {
   return TARGET_ROLES[a.interest ?? 'ai'] ?? TARGET_ROLES.ai
 }

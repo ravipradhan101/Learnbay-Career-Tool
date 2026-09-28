@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Icon } from './Icon'
-import { postJson } from '@/lib/client'
+import { postJson, clearGuestChat } from '@/lib/client'
 
 export function SwitchAccount({ next, first, masked }: { next: string; first: string; masked: string }) {
   const [busy, setBusy] = useState(false)
@@ -18,6 +18,7 @@ export function SwitchAccount({ next, first, masked }: { next: string; first: st
       </div>
       <button type="button" className="btn btn-primary btn-block" disabled={busy} onClick={async () => {
         setBusy(true)
+        clearGuestChat()
         await postJson('/api/auth/logout', {})
         window.location.href = `/login?next=${encodeURIComponent(next)}`
       }}>

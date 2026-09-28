@@ -8,7 +8,7 @@ import { activeQuestions, activeSetFor, type QuestionSet, type SetQuestion } fro
 import { generateJson } from './gemini'
 import { sendMail } from './mailer'
 import { learnerUrl } from './links'
-import { EDU_LEVELS, MATH_COMFORT, PROGRAMMER, experienceLabel, interestLabel, labelOf, roleLabel, type Answers } from './questions'
+import { EDU_LEVELS, PROGRAMMER, experienceLabel, interestLabel, labelOf, roleLabel, type Answers } from './questions'
 
 // Timing, question count and attempts come from the active question set (Admin → Eligibility test) and are
 // copied onto each attempt when it starts, so admin edits never change a test that is already running.
@@ -131,10 +131,9 @@ Learner:
 - Current role: ${roleLabel(a)}, ${experienceLabel(a)}
 - Codes at work: ${labelOf(PROGRAMMER, a.programmer) ?? 'unknown'}
 - Highest qualification: ${labelOf(EDU_LEVELS, a.eduLevel) ?? 'unknown'}
-- Comfort with maths: ${labelOf(MATH_COMFORT, a.mathComfort) ?? 'unknown'}
 
 Mix (in random order):
-- ${apt} x "Aptitude": quick mental maths or simple logic that takes under 10 seconds (e.g. 10% of 500, next number in 2, 4, 8). Forward calculations only: no reverse percentages, no multi-step word problems.${a.mathComfort === 'low' ? ' Keep the numbers very small.' : ''}
+- ${apt} x "Aptitude": simple verbal or logical reasoning WITHOUT numbers (analogies, odd one out by meaning, what must be true). No maths, no calculations, no number series.
 - ${full} x "Full form": what a common ${TRACK_TOPIC[track]} or IT abbreviation stands for (e.g. API, SQL, LLM, CI/CD, KPI).
 - ${ask - apt - full} x "Concept" or "Tools": basic, well-known ideas or tools in ${TRACK_TOPIC[track]}.${coder ? '' : ' No code snippets and no programming syntax: this learner does not code.'}
 

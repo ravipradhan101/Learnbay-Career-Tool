@@ -1,5 +1,5 @@
 import {
-  CITIES, CTC_BANDS, EXPERIENCE, INTERESTS, PROGRAMMER, ROLES, ROLE_OTHER, SKILLS, SKILL_NONE, TARGET_NOT_SURE, TARGET_ROLES,
+  CITIES, CTC_BANDS, DIFFICULTIES, DOMAINS, EXPERIENCE, GOALS, INTERESTS, LEARNING_SOURCES, SKILL_LEVELS, PROGRAMMER, ROLES, ROLE_OTHER, SKILLS, SKILL_NONE, TARGET_NOT_SURE, TARGET_ROLES,
   TIMELINES, WEEKLY_HOURS, EDU_LEVELS, MATH_COMFORT, isValidPhone, type Answers, type Option,
 } from './questions'
 import { cleanText, normalizeEmail } from './security'
@@ -23,6 +23,17 @@ export function sanitizeAnswers(input: unknown): Answers {
     if (other) out.roleOther = other
   }
   const set = <K extends keyof Answers>(key: K, value: Answers[K] | undefined) => { if (value !== undefined) out[key] = value }
+  set('goal', pickOne(GOALS, a.goal))
+  set('domain', pickOne(DOMAINS, a.domain))
+  set('learning', pickOne(LEARNING_SOURCES, a.learning))
+  set('difficulty', pickOne(DIFFICULTIES, a.difficulty))
+  if (a.skillLevels && typeof a.skillLevels === 'object' && !Array.isArray(a.skillLevels)) {
+    const levels: Record<string, string> = {}
+    for (const [k, v] of Object.entries(a.skillLevels as Record<string, unknown>)) {
+      if (SKILLS.some((s) => s.id === k) && SKILL_LEVELS.some((l) => l.id === v)) levels[k] = v as string
+    }
+    if (Object.keys(levels).length) out.skillLevels = levels
+  }
   set('experience', pickOne(EXPERIENCE, a.experience))
   set('programmer', pickOne(PROGRAMMER, a.programmer))
   set('interest', pickOne(INTERESTS, a.interest))

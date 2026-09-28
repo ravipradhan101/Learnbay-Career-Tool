@@ -33,8 +33,8 @@ export async function POST(request: Request) {
   if (!body) return jsonError(400, 'Invalid request.')
 
   const answers = sanitizeAnswers(body.answers)
-  if (!answers.role || !answers.experience || !answers.programmer || !answers.interest) {
-    return jsonError(400, 'Please answer the four quick questions first.')
+  if (!answers.experience || !answers.interest) {
+    return jsonError(400, 'Please answer the quick questions first.')
   }
   const current = await getCurrentUser()
   const contactInput = { ...(body.contact as Record<string, unknown> | undefined) }

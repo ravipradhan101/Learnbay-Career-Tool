@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Icon } from '@/components/Icon'
-import { StudioHeader } from '@/components/studio/StudioHeader'
+import { Sheet } from '@/components/chat/Sheet'
 import { getStudio } from '@/lib/data'
 import {
   CITIES, COUNTRY_CODES, CTC_BANDS, PROGRAMMER, SKILLS, SKILL_NONE, TIMELINES, WEEKLY_HOURS,
@@ -29,8 +29,8 @@ export default async function ProfilePage() {
     ['Timeline', labelOf(TIMELINES, answers.timeline) ?? '—'],
   ]
   return (
-    <>
-      <StudioHeader title="My profile" subtitle="The answers your analyses are built on." />
+    <Sheet title="My profile" closeHref="/dashboard">
+      <p className="small muted">The answers your reports are built on.</p>
       <section className="card">
         <dl style={{ margin: 0, display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))' }}>
           {rows.map(([k, v]) => (
@@ -49,8 +49,8 @@ export default async function ProfilePage() {
             <p className="small muted">Each analysis is personalised to these answers. Need a correction? A mentor can update it with you in a 1:1 session.</p>
           </div>
         </div>
-        <Link href="/dashboard/sessions" className="btn btn-outline btn-sm">Book a 1:1 session</Link>
+        <Link href="/dashboard/sessions" scroll={false} className="btn btn-outline btn-sm">Book a 1:1 session</Link>
       </section>
-    </>
+    </Sheet>
   )
 }

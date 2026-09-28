@@ -1,0 +1,6 @@
+PLACEHOLDER photos for sample success stories (free-licence Unsplash images of models, downloaded 2026-09-28).
+Replace them with real, consented alumni photos and stories in src/config/stories.ts.
+story-1.jpg  https://images.unsplash.com/photo-1749700332031-cf99864959ea
+story-2.jpg  https://images.unsplash.com/photo-1761980958548-7babac83ef3d
+story-3.jpg  https://images.unsplash.com/photo-1626855367255-6cab7d8726d0
+story-4.jpg  https://images.unsplash.com/photo-1752853872902-cecf7cc3a4e4
