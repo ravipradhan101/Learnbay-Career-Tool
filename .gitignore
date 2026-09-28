@@ -15,3 +15,4 @@ backups/
 
 .vercel
 .env*
+!.env.example
