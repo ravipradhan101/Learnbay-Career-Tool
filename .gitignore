@@ -12,3 +12,6 @@ backups/
 # Local tooling
 .claude/settings.local.json
 .qa-*.mjs
+
+.vercel
+.env*
