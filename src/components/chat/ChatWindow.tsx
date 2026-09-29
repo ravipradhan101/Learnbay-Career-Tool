@@ -16,13 +16,14 @@ export const nameOf = (who: string) => (who === 'bot' ? BOT_NAME : getCounsellor
 export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }: {
   chat: ChatApi
   onSend: (text: string) => void
-  onCall: () => void
+  /** Omitted before login (with Richa): no call button. */
+  onCall?: () => void
   headerRight?: React.ReactNode
   footer?: React.ReactNode
   onLink?: (href: string) => void
 }) {
   const bodyRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const [text, setText] = useState('')
   const { items, prompt, asking, suggestions, thinking, who, callOffer } = chat
   const isBot = who === 'bot'
@@ -44,13 +45,39 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
     if (asking) inputRef.current?.focus()
   }, [asking])
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault()
+  function submit(e?: React.FormEvent) {
+    e?.preventDefault()
     const value = text.trim()
     if (!value) return
     setText('')
     onSend(value.slice(0, asking?.maxLength ?? 600))
   }
+
+  /** Enter sends; Shift+Enter or Alt+Enter starts a new line (not for one-line answers like a name or email). */
+  function onKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return
+    if ((e.shiftKey || e.altKey) && !asking) {
+      if (e.altKey) {
+        e.preventDefault()
+        const el = e.currentTarget
+        const at = el.selectionStart ?? text.length
+        const next = `${text.slice(0, at)}\n${text.slice(el.selectionEnd ?? at)}`
+        setText(next)
+        requestAnimationFrame(() => { el.selectionStart = el.selectionEnd = at + 1 })
+      }
+      return
+    }
+    e.preventDefault()
+    submit()
+  }
+
+  // The box grows with the text, up to about five lines.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 140)}px`
+  }, [text])
 
   return (
     <section className="tc" aria-label={`Chat with ${nameOf(who)}, ${isBot ? 'your career guide' : 'your career counsellor'}`}>
@@ -58,20 +85,22 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
         <Avatar who={who} size={38} online />
         <div className="tc-who">
           <div className="tc-name"><b>{nameOf(who)}</b><span className="tc-badge">{isBot ? GUIDE_TITLE : COUNSELLOR_TITLE}</span></div>
-          <span className="tc-status"><i /> Online · {isBot ? 'virtual career guide' : 'virtual counsellor'}</span>
+          <span className="tc-status">Online · {isBot ? 'virtual career guide' : 'virtual counsellor'}</span>
         </div>
         <div className="tc-header-right">
           {headerRight}
-          <button type="button" className="tc-call" aria-label={`Get a call from ${isBot ? 'a Learnbay counsellor' : nameOf(who)}`} title="Get a call" onClick={onCall}>
-            <Icon name="phone" size="1.25rem" />
-          </button>
+          {onCall && (
+            <button type="button" className="tc-call" aria-label={`Get a call from ${isBot ? 'a Learnbay counsellor' : nameOf(who)}`} title="Get a call" onClick={onCall}>
+              <Icon name="phone" size="1.1rem" /><span className="tc-call-label">Call me</span>
+            </button>
+          )}
         </div>
       </header>
 
       <div className="tc-body" ref={bodyRef} aria-live="polite">
         {items.map((item, i) => <Row key={item.id} item={item} prev={items[i - 1]} next={items[i + 1]} chat={chat} onLink={onLink} />)}
 
-        {callOffer && !asking && (
+        {callOffer && !asking && onCall && (
           <div className="tc-suggest">
             <button type="button" className="tc-chip tc-chip-call" onClick={() => { chat.setCallOffer(false); onCall() }}><Icon name="phone" size="0.9rem" /> Yes, call me now</button>
             <button type="button" className="tc-chip" onClick={() => chat.setCallOffer(false)}>Not now</button>
@@ -84,7 +113,7 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
           </div>
         )}
 
-        {prompt && <PromptView prompt={prompt} onPick={chat.pick} onPickMany={chat.pickMany} />}
+        {prompt && <PromptView key={`${prompt.question ?? ''}|${prompt.choices.map((c) => c.id).join(',')}`} prompt={prompt} onPick={chat.pick} onPickMany={chat.pickMany} />}
       </div>
 
       {asking?.label && (
@@ -94,10 +123,11 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
       )}
       <form className={`tc-composer${asking ? ' tc-composer-asking' : ''}`} onSubmit={submit}>
         <label className="sr-only" htmlFor="tc-input">{asking ? asking.label ?? asking.placeholder : 'Type your question'}</label>
-        <input
-          id="tc-input" ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} autoComplete="off"
+        <textarea
+          id="tc-input" ref={inputRef} value={text} rows={1} onKeyDown={onKey} autoComplete="off"
+          onChange={(e) => setText(asking ? e.target.value.replace(/\n/g, ' ') : e.target.value)}
           maxLength={asking?.maxLength ?? 600} inputMode={asking?.inputMode ?? 'text'}
-          placeholder={asking ? asking.placeholder : 'Or type your question…'}
+          placeholder={asking ? asking.placeholder : 'Or type your question… (Shift+Enter for a new line)'}
         />
         <button className="tc-send" aria-label="Send" disabled={!text.trim() || thinking}>
           {thinking ? <span className="spinner" /> : <Icon name="send" size="1.15rem" />}
@@ -150,12 +180,16 @@ function Row({ item, prev, next, chat, onLink }: { item: Item; prev?: Item; next
 
 function PromptView({ prompt, onPick, onPickMany }: { prompt: NonNullable<ChatApi['prompt']>; onPick: (c: Choice) => void; onPickMany: (c: Choice[]) => void }) {
   const [picked, setPicked] = useState<string[]>([])
+  // Every option stays visible (people rarely open "show more"); long lists use a compact grid instead.
+  const shown = prompt.choices
+  const moreButton = null
   if (prompt.multi) {
     const toggle = (id: string) => setPicked((p) => (id === 'none' ? (p.includes('none') ? [] : ['none']) : p.includes(id) ? p.filter((x) => x !== id) : [...p.filter((x) => x !== 'none'), id]))
     return (
       <div className="tc-prompt">
         <div className="tc-chips">
-          {prompt.choices.map((c) => <button key={c.id} type="button" className="tc-chip" aria-pressed={picked.includes(c.id)} onClick={() => toggle(c.id)}>{picked.includes(c.id) && <Icon name="check" size="0.85rem" />}{c.label}</button>)}
+          {shown.map((c) => <button key={c.id} type="button" className="tc-chip" aria-pressed={picked.includes(c.id)} onClick={() => toggle(c.id)}>{picked.includes(c.id) && <Icon name="check" size="0.85rem" />}{c.label}</button>)}
+          {moreButton}
         </div>
         <button type="button" className="tc-btn tc-btn-primary tc-btn-sm" disabled={!picked.length} onClick={() => onPickMany(prompt.choices.filter((c) => picked.includes(c.id)))}>
           {prompt.doneLabel ?? 'Continue'} <Icon name="arrowRight" size="0.9rem" />
@@ -167,24 +201,26 @@ function PromptView({ prompt, onPick, onPickMany }: { prompt: NonNullable<ChatAp
     return (
       <div className="tc-prompt">
         <div className="tc-chips">
-          {prompt.choices.map((c) => (
+          {shown.map((c) => (
             <button key={c.id} type="button" className={`tc-chip ${c.id === 'call' ? 'tc-chip-call' : ''}`} onClick={() => onPick(c)}>
               {c.icon && <Icon name={c.icon} size="0.95rem" />}{c.label}
             </button>
           ))}
+          {moreButton}
         </div>
       </div>
     )
   }
   return (
-    <div className="tc-prompt tc-choices">
-      {prompt.choices.map((c) => (
-        <button key={c.id} type="button" className="tc-choice" onClick={() => onPick(c)}>
+    <div className={`tc-prompt tc-choices${shown.length > 3 ? ' tc-choices-grid' : ''}`}>
+      {shown.map((c, n) => (
+        <button key={c.id} type="button" className={`tc-choice${n === 0 && c.id !== 'later' ? ' tc-choice-main' : ''}`} onClick={() => onPick(c)}>
           <span className="tc-choice-icon"><Icon name={c.icon ?? 'arrowRight'} size="1.2rem" /></span>
           <span className="tc-choice-text"><b>{c.label}</b>{c.hint && <small>{c.hint}</small>}</span>
           <Icon name="arrowRight" size="1.1rem" className="tc-choice-arrow" />
         </button>
       ))}
+      {moreButton}
     </div>
   )
 }

@@ -8,18 +8,24 @@
 // skill-gap report → solution (program) → proof (alumni, certification) → projects → next step (call / 1:1 / test).
 
 import type { IconName } from '../Icon'
-import type { AiResult, Bot, Choice, Detour, EligCompleted, EligInProgress } from './engine'
+import type { AiResult, Bot, Choice, Detour, EligCompleted, EligInProgress, ProjectItem } from './engine'
 import type { UspId } from '@/config/usps'
 import { track } from '@/lib/analytics'
 import { getJson, postJson, sessionGet as storageGet, sessionRemove as storageRemove, sessionSet as storageSet } from '@/lib/client'
 import { getCounsellor } from '@/lib/counsellors'
 import type { TestState } from '@/lib/eligibility'
 import {
-  CITIES, CTC_BANDS, DIFFICULTIES, DOMAINS, EDU_LEVELS, EXPERIENCE, GOALS, INTERESTS, LEARNING_SOURCES, PROGRAMMER, ROLES, ROLE_OTHER, SKILLS,
+  CITIES, CLOUD_ROLES, COMPANY_TYPES, CTC_BANDS, DIFFICULTIES, DOMAINS, EDU_LEVELS, EXPERIENCE, GOALS, INTERESTS, LEARNING_SOURCES, PROGRAMMER, ROLES, ROLE_OTHER, SKILLS,
   SKILL_NONE, TARGET_NOT_SURE, TIMELINES, TRACK_TARGET, WEEKLY_HOURS, isAnswered, labelOf, targetRoleOptions, trackOf, type Answers, type ToolQuestionKey,
 } from '@/lib/questions'
 import type { ReportCard, ToolState } from '@/lib/report-card'
 import { QUESTION_TITLES, TOOLS, getTool, type ToolId } from '@/lib/tools-meta'
+import { getProgram } from '@/config/programs'
+import { skillsFor } from '@/lib/skills'
+import { payNote, rolesFor } from '@/lib/roles'
+import { fitComparison, fitFor } from '@/lib/fit'
+import { bridgeFor } from '@/lib/bridge'
+import { DIFFICULTIES_FOR, PROBES, STUDY_STAGES, inferredProgrammer, inferredRole, programForLearner, segmentOf, triggersFor } from '@/lib/segments'
 
 export const GUEST_ITEMS_KEY = 'lcn_chat_v2:guest'
 export const GUEST_ANSWERS_KEY = 'lcn_chat_guest_answers_v2'
@@ -33,9 +39,25 @@ const GOAL_ICONS: Record<string, IconName> = { switch: 'route', upskill: 'trend'
 const ROLE_ICONS: Record<string, IconName> = {
   'software-engineer': 'code', 'qa-engineer': 'bug', 'data-analyst': 'database', 'devops-cloud': 'cloud',
   'product-manager': 'cube', 'business-non-tech': 'users', student: 'award',
+  'network-admin': 'cloud', sysadmin: 'grid', 'it-support': 'lifebuoy', dba: 'database',
 }
 const PROGRAMMER_ICONS: Record<string, IconName> = { yes: 'code', some: 'file', no: 'users' }
 const LEARNING_ICONS: Record<string, IconName> = { free: 'play', paid: 'book', stopped: 'clock', none: 'plus' }
+const TRIGGER_ICONS: Record<string, IconName> = {
+  appraisal: 'rupee', 'job-worry': 'alert', 'ai-at-work': 'sparkles', stuck: 'route', exploring: 'target',
+  'job-hunt': 'briefcase', 'no-calls': 'mail', peers: 'users',
+}
+/** A short, human reply to their reason for looking now. */
+const TRIGGER_REPLY: Record<string, string> = {
+  appraisal: 'Good timing. New skills change what you can ask for.',
+  'job-worry': 'That’s a real concern for many people right now. Let’s make you harder to replace.',
+  'ai-at-work': 'Then you’re early, and that’s the best time to move.',
+  stuck: 'That usually means you’ve outgrown the role. Let’s find the way forward.',
+  exploring: 'Perfect, no pressure. We’ll see where you fit best.',
+  'job-hunt': 'Great, let’s make sure you stand out when you apply.',
+  'no-calls': 'That’s frustrating, and very fixable. It usually comes down to proof on your CV.',
+  peers: 'That feeling is common. Let’s get you moving too.',
+}
 const DIFFICULTY_ICONS: Record<string, IconName> = { roadmap: 'route', time: 'clock', concepts: 'bulb', projects: 'folder', interviews: 'briefcase', fit: 'target' }
 
 /** Lower-cases the first letter for mid-sentence use, but leaves acronyms (IT, AI, SQL) alone. */
@@ -131,6 +153,13 @@ export async function guestFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
     a.experience = c.id; save()
     track('step_answer', 'onboarding:experience', { value: c.id })
   }
+  if ((a.experience === '0' || a.domain === 'student') && !a.studyStage) {
+    step('studyStage')
+    await bot.say('Are you in your final year, or have you graduated?')
+    const c = await bot.choose(STUDY_STAGES)
+    a.studyStage = c.id; save()
+    track('step_answer', 'onboarding:studyStage', { value: c.id })
+  }
   const exp = labelOf(EXPERIENCE, a.experience) ?? ''
   const dom = labelOf(DOMAINS, a.domain) ?? ''
   await bot.say(`Got it: ${exp === 'Fresher' ? 'starting out' : `${exp} of experience`}${dom && a.domain !== 'other' ? ` in ${lower(dom)}` : ''}, and you want to ${lower(labelOf(GOALS, a.goal))}.${t ? ` Our ${t.label} counsellors guide people with exactly this profile.` : ''}`)
@@ -148,24 +177,23 @@ export async function guestFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
     }
     returning = Boolean(saved.existing && v.onboarded)
   }
-  if (returning) {
-    await bot.say('Your Career Studio and reports are all saved. Taking you back to your counsellor…', { quick: true })
-  } else {
-    await bot.say(`You’re verified, ${first}. Let me find the best counsellor for you…`, { quick: true })
-    const m = await bot.live<{ id: string } | null>({ type: 'matching', track: a.interest ?? 'ai' })
-    if (m?.id) {
-      bot.card({ type: 'counsellor', id: m.id, track: a.interest ?? 'ai' })
-      await bot.say(`${getCounsellor(m.id).name} is available now. Connecting you…`)
-    }
-  }
+  await bot.say(returning ? `You’re in, ${first}! Your reports are all saved. Let me find the right counsellor for you…` : `You’re verified, ${first}. Let me find the best counsellor for you…`, { quick: true })
+  await findCounsellor(bot, a.interest ?? 'ai')
   storageRemove(GUEST_ANSWERS_KEY)
   storageRemove(GUEST_NAME_KEY)
-  try {
-    const items = window.sessionStorage.getItem(GUEST_ITEMS_KEY)
-    if (items) window.sessionStorage.setItem(ADOPT_KEY, items)
-    window.sessionStorage.removeItem(GUEST_ITEMS_KEY)
-  } catch { /* ignore */ }
-  window.location.href = saved.redirect ?? '/dashboard'
+  // Richa's chat stays behind: the counsellor starts a clean conversation, knowing everything from the profile.
+  try { window.sessionStorage.removeItem(GUEST_ITEMS_KEY); window.sessionStorage.removeItem(ADOPT_KEY) } catch { /* ignore */ }
+  const dest = saved.redirect ?? '/dashboard'
+  window.location.href = dest === '/dashboard' && a.interest ? `/dashboard?track=${a.interest}` : dest
+}
+
+/** The counsellor search (10-13 seconds of stories, projects and strengths), then who is joining. */
+async function findCounsellor(bot: Bot, interest: string) {
+  const m = await bot.live<{ id: string } | null>({ type: 'matching', track: interest })
+  if (m?.id) {
+    bot.card({ type: 'counsellor', id: m.id, track: interest })
+    await bot.say(`${getCounsellor(m.id).name} is available now. Connecting you…`)
+  }
 }
 
 /** Log in inside the chat: email, 6-digit code, then straight to the studio (or the quick questions if the profile is incomplete). */
@@ -180,7 +208,8 @@ export async function loginFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
   await bot.say(`I sent a 6-digit code to ${r.email}. Can’t find it? Check Promotions or Spam.`)
   const v = await bot.live<{ onboarded: boolean }>({ type: 'otp', email: r.email, existing: true })
   if (v.onboarded) {
-    await bot.say('You’re in. Taking you to your counsellor…', { quick: true })
+    await bot.say('You’re in! Your reports are all saved. Let me find the right counsellor for you…', { quick: true })
+    await findCounsellor(bot, ctx.initial.interest ?? ctx.track ?? 'ai')
     try { window.sessionStorage.removeItem(GUEST_ITEMS_KEY); window.sessionStorage.removeItem(GUEST_ANSWERS_KEY) } catch { /* ignore */ }
     window.location.href = '/dashboard'
     return
@@ -214,8 +243,16 @@ export type StudioCtx = {
   newChat: () => void
   /** A Learnbay card under the counsellor's answer (projects, program, proof, strengths, compare). */
   showCard: (show?: string) => void
+  /** Four projects for this learner from the project library (a fresh rotation each time). */
+  projects: (programId?: string) => Promise<ProjectItem[]>
   /** Moves the learner to another track (only after they approve it in the chat). */
   switchTrack: (interest: string) => Promise<boolean>
+  /** Sets the program the learner approved in the chat. */
+  switchProgram: (programId: string) => Promise<boolean>
+  /** The chat being shown (reviews are one per chat). */
+  threadId: () => string | null
+  /** Richa's feedback pop-up (counsellor, eligibility test, suggestions); skipped if already given. */
+  askRating: (why: 'end' | 'milestones' | 'leaving') => Promise<void>
 }
 
 const USPS_FOR: Record<ToolId, UspId[]> = {
@@ -247,14 +284,14 @@ export function menu(ctx: StudioCtx): Choice[] {
   }
   const tools = TOOLS.map((t) => ({ id: t.route, label: labels[t.id][ready(ctx, t.id) ? 1 : 0], icon: t.icon, done: ready(ctx, t.id) }))
   const list: (Choice & { done?: boolean })[] = [...tools.filter((t) => !t.done), ...tools.filter((t) => t.done)]
-  if (ctx.eligibilityVisible && !ctx.done.eligibility) list.splice(Math.min(2, list.length), 0, { id: '/dashboard/eligibility', label: 'Am I eligible? Quick test, no maths', icon: 'award' })
+  if (ctx.eligibilityVisible && !ctx.done.eligibility) list.unshift({ id: '/dashboard/eligibility', label: 'Check my eligibility · 2 min, no maths', icon: 'award' })
   list.push({ id: '/dashboard/sessions', label: ctx.done.sessions ? 'Book another mentor call' : 'Talk to a mentor, free', icon: 'calendar' })
   return list.map(({ id, label, icon }) => ({ id, label, icon }))
 }
 
 function progressLine(ctx: StudioCtx) {
   const done = TOOLS.filter((t) => ready(ctx, t.id)).length
-  if (!done) return 'Shall we start with your skill gaps? It’s the quickest way to see where you stand.'
+  if (!done) return ctx.eligibilityVisible && !ctx.done.eligibility ? 'Let’s start with a 2-minute eligibility check, then your skill gaps.' : 'Shall we start with your skill gaps? It’s the quickest way to see where you stand.'
   if (done < TOOLS.length) return `You have ${done} of ${TOOLS.length} reports ready. Here’s what I’d look at next.`
   return 'All three reports are ready. The best next step is a free 1:1 with a mentor to turn them into a plan.'
 }
@@ -302,13 +339,14 @@ export async function counsellorFirstFlow(bot: Bot, ctx: StudioCtx): Promise<voi
     bot.alive()
   }
   // Already introduced in this chat, or already answering: never repeat the introduction.
-  const introduced = bot.hasSaid((x) => x.startsWith(`Hi ${ctx.first}, I’m ${me.name}`))
-  const started = Boolean(a.role || a.learning) || introduced
+  // Already talking in this chat (e.g. after a track change): no second introduction.
+  const introduced = bot.hasSaid((x) => x.startsWith(`Hi ${ctx.first}, I’m ${me.name}`) || x.includes(`It’s ${me.name}.`) || x.startsWith('Done, '))
+  const started = Boolean(a.trigger || a.learning) || introduced
   if (started) {
-    await bot.say(`Welcome back, ${ctx.first}. Let’s pick up where we left off.`)
+    await bot.say(introduced && !a.trigger ? `Now let’s get to know you a little better, ${ctx.first}, so your plan fits exactly.` : `Welcome back, ${ctx.first}. Let’s pick up where we left off.`)
   } else {
     // Introduce themselves, then open with a personal read of the profile Richa collected.
-    await bot.say(`Hi ${ctx.first}, I’m ${me.name}, a senior career counsellor at Learnbay.${t ? ` I specialise in the ${t.label} and guide people moving into roles like ${t.roles.slice(0, 2).join(' and ')}.` : ''}`)
+    await bot.say(`Hi ${ctx.first}, I’m ${me.name}, a senior career counsellor at Learnbay.${t ? ` I specialise in the ${t.label} and guide people moving into roles like ${rolesFor(a).slice(0, 2).join(' and ')}.` : ''}`)
     await bot.say(`I’ve gone through what you shared with Richa${exp ? `: ${exp === 'Fresher' ? 'just starting out' : `${exp} of experience`}` : ''}${dom && a.domain !== 'other' ? ` in ${lower(dom)}` : ''}${goal ? `, aiming to ${lower(goal)}` : ''}. Here’s my first read.`)
     await bot.ai({ intent: 'analysis', context: 'advisor' })
   }
@@ -319,39 +357,72 @@ export async function counsellorFirstFlow(bot: Bot, ctx: StudioCtx): Promise<voi
     ctx.userSays(q)
     await bot.ai({ message: q, context: 'advisor' })
   }
-  if (!started) await bot.say('To make my advice exact, a few quick questions. It takes about a minute.')
+  if (!started) await bot.say('A few quick questions so my advice fits you exactly.')
   if (a.interest && !a.targetRole && TRACK_TARGET[a.interest]) await keep({ targetRole: TRACK_TARGET[a.interest] })
-  if (!a.role) {
-    await bot.say('What’s your current role?')
-    const c = await bot.choose([...ROLES.map((r) => ({ ...r, icon: ROLE_ICONS[r.id] })), { id: ROLE_OTHER, label: 'Something else', icon: 'plus' as IconName }], { style: 'chips' })
-    const patch: Answers = { role: c.id }
-    if (c.id === ROLE_OTHER) {
-      await bot.say('What’s your role called?')
-      patch.roleOther = (await bot.ask({ placeholder: 'Type your role, e.g. Business Analyst', label: 'Your current role', maxLength: 60 })).slice(0, 60)
+  const seg = segmentOf(ctx.answers)
+  // 1. Why now: their own reason is the only urgency the counsellor ever uses.
+  if (!ctx.answers.trigger) {
+    await bot.say(seg === 'fresher' ? 'First, what’s got you thinking about this now?' : 'First, what made you start looking at this now?')
+    const c = await bot.choose(triggersFor(seg).map((o) => ({ ...o, icon: TRIGGER_ICONS[o.id] })))
+    await keep({ trigger: c.id })
+    track('action', 'counsel:why_now', { value: c.id, segment: seg })
+    await bot.say(TRIGGER_REPLY[c.id] ?? 'Thanks, that helps.')
+  }
+  // 2. Role and coding, only when their background doesn't already say it.
+  if (!ctx.answers.role) {
+    const role = inferredRole(ctx.answers)
+    if (role) await keep({ role })
+    else {
+      await bot.say('What’s your current role?')
+      const roles = ROLES.filter((r) => r.id !== 'student' && (ctx.answers.interest === 'cloud-devops' || !CLOUD_ROLES.includes(r.id)))
+      const c = await bot.choose([...roles.map((r) => ({ ...r, icon: ROLE_ICONS[r.id] })), { id: ROLE_OTHER, label: 'Something else', icon: 'plus' as IconName }], { style: 'chips' })
+      const patch: Answers = { role: c.id }
+      if (c.id === ROLE_OTHER) {
+        await bot.say('What’s your role called?')
+        patch.roleOther = (await bot.ask({ placeholder: 'Type your role, e.g. Business Analyst', label: 'Your current role', maxLength: 60 })).slice(0, 60)
+      }
+      await keep(patch)
     }
-    await keep(patch)
   }
-  if (!a.programmer) {
-    await bot.say('Do you write code in your work?')
-    await keep({ programmer: (await bot.choose(PROGRAMMER.map((p) => ({ ...p, icon: PROGRAMMER_ICONS[p.id] })))).id })
+  if (!ctx.answers.programmer) {
+    const coding = inferredProgrammer(ctx.answers)
+    if (coding) await keep({ programmer: coding })
+    else {
+      await bot.say(seg === 'fresher' ? 'Do you code at all, in college or on your own?' : 'Do you write code in your work?')
+      await keep({ programmer: (await bot.choose(PROGRAMMER.map((p) => ({ ...p, icon: PROGRAMMER_ICONS[p.id] })))).id })
+    }
   }
-  if (!a.learning) {
-    await bot.say(`Have you already started learning for this${t ? ` ${t.hint}` : ''}? On YouTube, Udemy or anywhere else?`)
+  // 3. One question for their segment, to find the specific pain.
+  if (!ctx.answers.probe) {
+    const probe = PROBES[seg]
+    await bot.say(probe.question)
+    const c = await bot.choose(probe.options)
+    await keep({ probe: c.id })
+    track('action', 'counsel:probe', { value: c.id, segment: seg })
+  }
+  if (!ctx.answers.learning) {
+    await bot.say(`Have you already tried learning this${t ? ` (${t.hint})` : ''}? On YouTube, Udemy or anywhere else?`)
     const learning = (await bot.choose(LEARNING_SOURCES.map((l) => ({ ...l, icon: LEARNING_ICONS[l.id] })))).id
     await keep({ learning })
     await bot.say(LEARNING_REPLY[learning] ?? 'Thanks for sharing.')
   }
-  if (!a.difficulty) {
+  if (!ctx.answers.difficulty) {
     await bot.say('What’s been the hardest part so far?')
-    await keep({ difficulty: (await bot.choose(DIFFICULTIES.map((d) => ({ ...d, icon: DIFFICULTY_ICONS[d.id] })))).id })
+    const options = DIFFICULTIES.filter((d) => DIFFICULTIES_FOR[seg].includes(d.id))
+    await keep({ difficulty: (await bot.choose(options.map((d) => ({ ...d, icon: DIFFICULTY_ICONS[d.id] })))).id })
   }
-  if (!a.weeklyHours) {
-    await bot.say('And how much time can you give to learning each week?')
-    await keep({ weeklyHours: (await bot.choose(WEEKLY_HOURS)).id })
-  }
-  track('action', 'counsellor_probing_done', { learning: ctx.answers.learning ?? '', difficulty: ctx.answers.difficulty ?? '' })
-  // Need generation: the counsellor reflects the situation back and what it costs to stay stuck.
+  track('action', 'counsellor_probing_done', { segment: seg, trigger: ctx.answers.trigger ?? '', difficulty: ctx.answers.difficulty ?? '' })
+  // 4. Need: mirror their situation and what waiting costs, from their own answers; then check it lands.
   await bot.ai({ intent: 'need', context: 'advisor' })
+  await bot.say('Does that sound like where you are?')
+  const agreed = await bot.choose([{ id: 'yes', label: 'Yes, that’s me', icon: 'check' }, { id: 'partly', label: 'Partly', icon: 'message' }], { style: 'chips' })
+  track('action', 'counsel:need_agreed', { value: agreed.id, segment: seg })
+  if (agreed.id === 'partly') await bot.say('Fair enough. The report will show us exactly where you stand.')
+  // 5. Their own target date: the deadline we plan to (never an invented one).
+  if (!ctx.answers.timeline) {
+    await bot.say(seg === 'fresher' ? 'When would you like to land your first tech role?' : 'When would you like to be in your new role?')
+    await keep({ timeline: (await bot.choose(TIMELINES, { style: 'chips' })).id })
+  }
   await bot.say('Let’s measure exactly where you stand. I’ll build your skill-gap report now.')
   return toolFlow(bot, ctx, 'skill-gap', true)
 }
@@ -411,10 +482,10 @@ async function buildReport(bot: Bot, ctx: StudioCtx, tool: ToolId, alreadyRunnin
 
 async function nextMoves(bot: Bot, ctx: StudioCtx, current: ToolId | 'eligibility' | 'sessions', withCall = false) {
   const opts: Choice[] = []
+  if (ctx.eligibilityVisible && !ctx.done.eligibility && current !== 'eligibility') opts.push({ id: '/dashboard/eligibility', label: 'Check my eligibility · 2 min', icon: 'award' })
   if (withCall) opts.push({ id: 'call', label: 'Call me to discuss', icon: 'phone' })
   if (current !== 'sessions' && !ctx.done.sessions) opts.push({ id: '/dashboard/sessions', label: 'Book a free 1:1 with a mentor', icon: 'calendar' })
   for (const t of TOOLS) if (t.id !== current && !ready(ctx, t.id)) opts.push({ id: t.route, label: `Next: ${t.name}`, icon: t.icon })
-  if (ctx.eligibilityVisible && !ctx.done.eligibility && current !== 'eligibility') opts.push({ id: '/dashboard/eligibility', label: 'Check my eligibility', icon: 'award' })
   if (current === 'eligibility' && !withCall) opts.push({ id: 'call', label: 'Call me to discuss', icon: 'phone' })
   if (!opts.length) opts.push({ id: '/dashboard', label: 'What else can I do?', icon: 'message' })
   const c = await bot.choose(opts.slice(0, 4), { style: 'chips' })
@@ -423,13 +494,10 @@ async function nextMoves(bot: Bot, ctx: StudioCtx, current: ToolId | 'eligibilit
 
 /** Skills with a level for each one. */
 async function askSkills(bot: Bot, ctx: StudioCtx, patch: Answers) {
-  const picked = await bot.chooseMany(choicesFor('skills', ctx.answers), 'Done')
-  const ids = picked.map((p) => p.id)
-  patch.skills = ids.includes(SKILL_NONE) ? [SKILL_NONE] : ids
-  if (!ids.includes(SKILL_NONE) && ids.length) {
-    await bot.say('And how strong are you in each? Be honest, it makes the report far more useful.')
-    patch.skillLevels = await bot.live<Record<string, string>>({ type: 'skill-levels', skills: picked.map((p) => ({ id: p.id, label: p.label })) })
-  }
+  // One card: the tools and concepts their target role needs, each rated in place.
+  const r = await bot.live<{ skills: string[]; levels: Record<string, string> }>({ type: 'skill-matrix', skills: skillsFor(ctx.answers).map((s) => ({ id: s.id, label: s.label })) })
+  patch.skills = r.skills.length ? r.skills : [SKILL_NONE]
+  if (Object.keys(r.levels).length) patch.skillLevels = r.levels
 }
 
 /**
@@ -443,7 +511,7 @@ export async function toolFlow(bot: Bot, ctx: StudioCtx, tool: ToolId, sales = f
   if (state?.status === 'ready' && state.card) {
     await bot.say(`Here’s your ${meta.name}, ${ctx.first}. The big number first, then your next 3 moves.`)
     bot.card({ type: 'report', card: state.card })
-    if (sales) return pitch(bot, ctx, tool)
+    if (sales) return eligibilityPush(bot, ctx, tool, true)
     await bot.say('Ask me anything about it, or pick what’s next.')
     return nextMoves(bot, ctx, tool)
   }
@@ -469,7 +537,7 @@ export async function toolFlow(bot: Bot, ctx: StudioCtx, tool: ToolId, sales = f
     const patch: Answers = {}
     if (!ctx.answers.role) {
       await bot.say('First, what’s your current role?')
-      patch.role = (await bot.choose(ROLES.map((r) => ({ ...r, icon: ROLE_ICONS[r.id] })), { style: 'chips' })).id
+      patch.role = (await bot.choose(ROLES.filter((r) => ctx.answers.interest === 'cloud-devops' || !CLOUD_ROLES.includes(r.id)).map((r) => ({ ...r, icon: ROLE_ICONS[r.id] })), { style: 'chips' })).id
     }
     for (const key of missing) {
       track('step_view', `${tool}:${key}`)
@@ -481,6 +549,12 @@ export async function toolFlow(bot: Bot, ctx: StudioCtx, tool: ToolId, sales = f
       }
       track('step_answer', `${tool}:${key}`)
     }
+    // High earners: the salary advice depends on the kind of company they're in.
+    const ctc = patch.ctc ?? ctx.answers.ctc
+    if (tool === 'salary' && ctc === 'gt50' && !ctx.answers.companyType) {
+      await bot.say('At your level, the kind of company matters a lot. Where do you work today?')
+      patch.companyType = (await bot.choose(COMPANY_TYPES, { style: 'chips' })).id
+    }
     if (Object.keys(patch).length && !(await ctx.saveAnswers(patch))) { await bot.say('I couldn’t save that. Please try again.'); return }
     bot.alive()
     await bot.say('Perfect. Building it now, this takes about 30 seconds.')
@@ -489,24 +563,110 @@ export async function toolFlow(bot: Bot, ctx: StudioCtx, tool: ToolId, sales = f
   if (!card) return
   bot.card({ type: 'report', card })
   await bot.ai({ intent: 'report', context: tool })
-  if (sales) return pitch(bot, ctx, tool)
+  if (sales) return eligibilityPush(bot, ctx, tool, true)
   bot.card({ type: 'usp', ids: USPS_FOR[tool], lead: 'How Learnbay helps with this' })
-  return nextMoves(bot, ctx, tool)
+  return eligibilityPush(bot, ctx, tool, false)
 }
 
-/** Solution → proof → projects → next step, matched to what the learner told the counsellor. */
-async function pitch(bot: Bot, ctx: StudioCtx, tool: ToolId) {
-  const interest = ctx.answers.interest ?? 'ai'
-  const diff = ctx.answers.difficulty ?? 'roadmap'
-  await bot.say(`Here’s how we’d close these gaps for you, ${ctx.first}, especially “${lower(labelOf(DIFFICULTIES, diff))}”:`)
-  bot.card({ type: 'usp', ids: USP_FOR_DIFFICULTY[diff] ?? USPS_FOR[tool], lead: 'Made for exactly this' })
-  bot.card({ type: 'program', interest })
-  await bot.say('You won’t be learning alone, and your work will count on your CV:')
-  bot.card({ type: 'proof' })
-  bot.card({ type: 'projects', interest })
-  track('action', 'counsellor_pitch_shown', { difficulty: diff, interest })
-  await bot.say('The best next step is a free 1:1 with a Learnbay mentor: they’ll confirm the right program, batch timings and fees for you. Or I can call you right now.')
-  return nextMoves(bot, ctx, tool, true)
+/** "Is this transition realistic for you? Yes.": what they already have, what the program adds, the role it leads to. */
+function bridgeCard(bot: Bot, ctx: StudioCtx) {
+  const readiness = ctx.tools()['skill-gap']?.card?.gauge ?? null
+  const b = bridgeFor(ctx.answers, readiness)
+  if (!b.have.length || !b.add.length) return
+  bot.card({ type: 'bridge', ...b, program: programForLearner(ctx.answers)?.name ?? '' })
+}
+
+/** Set when the learner said yes to the test elsewhere, so the test page starts without asking again. */
+let startTestNow = false
+/** "Maybe later" to the test in this visit: asked at most twice, then left alone. */
+let testDeclines = 0
+
+/**
+ * The eligibility test, right after a report and before the pitch: "Do you qualify, and where would you start?"
+ * `first` = after the counsellor's first conversation (then the pitch follows even if they skip the test).
+ */
+async function eligibilityPush(bot: Bot, ctx: StudioCtx, from: ToolId, first: boolean) {
+  if (!ctx.eligibilityVisible || ctx.done.eligibility) return pitch(bot, ctx, from, null)
+  if (!first && testDeclines >= 2) return nextMoves(bot, ctx, from)
+  await bot.say(first
+    ? `Before I show you the program, let’s check you qualify, ${ctx.first}. It takes 2 minutes and tells us where you’d start.`
+    : 'One important step: let’s check you qualify. It takes 2 minutes.')
+  bot.card({ type: 'elig-push' })
+  track('action', 'elig:push_shown', { from })
+  const c = await bot.choose([
+    { id: 'test', label: 'Check if I qualify · 2 min', icon: 'award' },
+    ...(first ? [{ id: 'program', label: 'Show me the program first', icon: 'folder' as IconName }] : []),
+    { id: 'later', label: 'Maybe later', icon: 'clock' },
+  ])
+  if (c.id === 'test') {
+    track('action', 'elig:push_accepted', { from })
+    startTestNow = true
+    return ctx.go('/dashboard/eligibility')
+  }
+  testDeclines++
+  track('action', 'elig:push_declined', { from })
+  if (first) return pitch(bot, ctx, from, null)
+  await bot.say('No problem, it’s here whenever you’re ready.')
+  return nextMoves(bot, ctx, from)
+}
+
+/** The plan, built on the test result when there is one: their program, then the two strengths that answer their pain. */
+async function pitch(bot: Bot, ctx: StudioCtx, from: ToolId | 'eligibility', band: string | null) {
+  const a = ctx.answers
+  const diff = a.difficulty ?? 'roadmap'
+  const program = programForLearner(a)
+  const lead = band === 'ready' ? `You qualify, ${ctx.first}. Here’s your path from where you are:`
+    : band === 'primer' ? `You qualify, with a short primer first. Here’s your path:`
+      : band === 'foundation' ? 'Here’s the path I’d suggest, starting with the foundations:'
+        : `Here’s how we’d close these gaps, especially “${lower(labelOf(DIFFICULTIES, diff))}”:`
+  await bot.say(lead)
+  bot.card({ type: 'program', interest: a.interest ?? 'ai', programId: program?.id })
+  bridgeCard(bot, ctx)
+  bot.card({ type: 'roles', roles: rolesFor(a), note: payNote(a), programId: program?.id })
+  bot.card({ type: 'usp', ids: USP_FOR_DIFFICULTY[diff] ?? ['customisation', 'projects'], lead: 'Made for what you told me' })
+  track('action', 'counsellor_pitch_shown', { difficulty: diff, interest: a.interest ?? '', program: program?.id ?? '', tested: String(band !== null) })
+  return decisionAsk(bot, ctx, from, band, true)
+}
+
+/** The decision: a mentor call that confirms batch, seats, fee and any scholarship; or a call now; or the plan by email. */
+async function decisionAsk(bot: Bot, ctx: StudioCtx, from: ToolId | 'eligibility', band: string | null, offerProjects: boolean) {
+  const tested = band !== null
+  const program = programForLearner(ctx.answers)
+  bot.card({ type: 'decision', eligible: band === 'ready' || band === 'primer' ? true : band === 'foundation' ? false : null, programId: program?.id })
+  await bot.say(tested
+    ? 'The last step is a free call with a mentor. They’ll confirm your batch, seats and fee, and check any scholarship for you. Shall I book it?'
+    : 'Next, a free call with a mentor: they’ll confirm the right program, your batch and fee, and check any scholarship.')
+  track('action', 'decision:asked', { from, tested: String(tested) })
+  const opts: Choice[] = [
+    ...(!tested && ctx.eligibilityVisible && !ctx.done.eligibility ? [{ id: 'test', label: 'Check if I qualify · 2 min', icon: 'award' as IconName }] : []),
+    { id: '/dashboard/sessions', label: 'Book my mentor call', icon: 'calendar' },
+    { id: 'call', label: 'Call me now', icon: 'phone' },
+    { id: 'email', label: 'Email me my plan', icon: 'mail' },
+    ...(offerProjects ? [{ id: 'projects', label: 'Show me the projects first', icon: 'folder' as IconName }] : []),
+  ]
+  const c = await bot.choose(opts)
+  if (c.id === 'test') { startTestNow = true; track('action', 'elig:push_accepted', { from: 'decision' }); return ctx.go('/dashboard/eligibility') }
+  if (c.id === 'projects') {
+    const programId = programForLearner(ctx.answers)?.id
+    const items = await ctx.projects(programId)
+    bot.alive()
+    bot.card({ type: 'projects', interest: ctx.answers.interest ?? 'ai', programId, items })
+    bot.card({ type: 'proof' })
+    await bot.say('That’s the work you’d have on your CV.')
+    return decisionAsk(bot, ctx, from, band, false)
+  }
+  track('action', 'decision:taken', { choice: c.id === '/dashboard/sessions' ? 'mentor' : c.id, from })
+  if (c.id === 'call') return ctx.call('chat')
+  if (c.id === 'email') {
+    const tool = (['roadmap', 'skill-gap', 'salary'] as ToolId[]).find((t) => ready(ctx, t))
+    const sent = tool ? await postJson(`/api/tools/${tool}/email`, {}) : null
+    bot.alive()
+    await bot.say(sent?.ok
+      ? 'Sent to your email. Whenever you’re ready, your mentor call is one tap away.'
+      : 'I’ll email your plan once your first report is ready. Your mentor call is one tap away whenever you want it.')
+    return nextMoves(bot, ctx, from === 'eligibility' ? 'eligibility' : from)
+  }
+  return ctx.go(c.id)
 }
 
 // ---------- Eligibility test (fixed questions) ----------
@@ -544,8 +704,12 @@ export async function eligibilityFlow(bot: Bot, ctx: StudioCtx) {
     } else {
       await bot.say(`This checks if you’re ready for Learnbay’s ${area} program. It’s quick, and there’s no maths: just reasoning, key terms and tools.`)
       bot.card({ type: 'elig-intro', questions: rules?.questions ?? 10, seconds: rules?.perQuestionSeconds ?? 20, attemptsLeft: state.attempts.left, area })
-      const c = await bot.choose([{ id: 'start', label: 'Start the test', icon: 'arrowRight' }, { id: 'later', label: 'Not now', icon: 'clock' }])
-      if (c.id === 'later') return homeFlow(bot, ctx, 'menu')
+      // Already said yes (from the counsellor's push): no second "are you sure?".
+      if (!startTestNow) {
+        const c = await bot.choose([{ id: 'start', label: 'Start the test', icon: 'arrowRight' }, { id: 'later', label: 'Not now', icon: 'clock' }])
+        if (c.id === 'later') return homeFlow(bot, ctx, 'menu')
+      }
+      startTestNow = false
     }
     if (!ctx.answers.eduLevel) {
       await bot.say('Before we begin: what’s your highest qualification?')
@@ -564,10 +728,10 @@ export async function eligibilityFlow(bot: Bot, ctx: StudioCtx) {
   ctx.markDone('eligibility')
   const done = state as EligCompleted
   bot.card({ type: 'elig-result', result: done })
+  track('action', 'elig:completed', { band: done.band.id })
   await bot.say(`${done.band.title}. ${done.band.text}`)
-  bot.card({ type: 'usp', ids: ['mentors', 'customisation'], lead: 'Whatever your score, you won’t learn alone' })
-  await bot.say('A counsellor will call to walk you through it. Want to pick the time yourself?')
-  return nextMoves(bot, ctx, 'eligibility')
+  // Peak interest: the plan is built on the result, then the decision.
+  return pitch(bot, ctx, 'eligibility', done.band.id)
 }
 
 // ---------- Mentor call ----------
@@ -610,6 +774,8 @@ export type CounselOpts = {
   fallback: () => void
   /** The next counselling turn number (the counsellor stops probing and recommends after two). */
   round: () => number
+  /** Leaves the side conversation for a new flow (drops the question that was set aside). */
+  restart: (flow: (bot: Bot) => Promise<void>) => void
 }
 
 /**
@@ -619,19 +785,25 @@ export type CounselOpts = {
  */
 export async function counselFlow(bot: Bot, ctx: StudioCtx, d: Detour, first: AiResult, o: CounselOpts): Promise<void> {
   let r = first
+  let profileChanged = false
   for (let turn = 0; ; turn++) {
+    profileChanged = profileChanged || Boolean(r.profileUpdated)
     const better = r.suggestTrack && r.suggestTrack !== ctx.answers.interest ? trackOf(r.suggestTrack) : null
     const opts: Choice[] = []
+    // Their profile changed: the question from before may no longer apply, so lead to the path that fits now.
+    if (profileChanged) opts.push({ id: 'c-fit', label: 'Show my best-fit path', hint: 'Roadmap, tools, projects and how well it fits you', icon: 'route' })
     if (r.followUp && r.followUp.options.length >= 2) {
       await bot.say(r.followUp.question)
       r.followUp.options.forEach((label, i) => opts.push({ id: `c-say-${i}`, label, icon: 'message' }))
-    } else if (better || r.action) {
+    } else if (better || r.action || profileChanged) {
       await bot.say(turn ? 'Here’s what I’d suggest:' : 'Where would you like to go from here?', { quick: !turn })
     }
+    const betterProgram = !better && r.suggestProgram && r.suggestProgram !== programForLearner(ctx.answers)?.id ? getProgram(r.suggestProgram) : null
     if (better) opts.push({ id: 'c-track', label: `Show me the ${better.label} path`, hint: better.hint, icon: 'route' })
+    if (betterProgram) opts.push({ id: 'c-program', label: `Tell me about the ${betterProgram.name}`, icon: 'book' })
     if (r.action) opts.push({ id: r.action.href, label: r.action.label, icon: 'arrowRight' })
     if (!opts.length) opts.push({ id: 'c-call', label: 'Talk it through on a quick call', icon: 'phone' })
-    opts.push({ id: 'c-resume', label: o.resumeLabel, icon: 'refresh' })
+    if (!profileChanged) opts.push({ id: 'c-resume', label: o.resumeLabel, icon: 'refresh' })
     const c = await bot.choose(opts.slice(0, 6))
     if (c.id.startsWith('c-say-')) {
       r = await bot.ai({ message: c.label, context: o.context, counsel: { was: o.was, round: o.round() } })
@@ -640,7 +812,9 @@ export async function counselFlow(bot: Bot, ctx: StudioCtx, d: Detour, first: Ai
       continue
     }
     if (c.id === 'c-track' && better) return trackSwitch(bot, ctx, d, better.interest, o)
+    if (c.id === 'c-program' && betterProgram) return programSwitch(bot, ctx, d, betterProgram.id, o)
     if (c.id === 'c-resume') return resume(bot, d, o)
+    if (c.id === 'c-fit') return o.restart((b) => programFitFlow(b, ctx))
     if (c.id === 'c-call') { ctx.call('chat'); return resume(bot, d, o, true) }
     track('action', 'counsel_route', { to: c.id })
     return ctx.go(c.id)
@@ -654,6 +828,39 @@ async function resume(bot: Bot, d: Detour, o: CounselOpts, quiet = false) {
   if (!d.restore()) o.fallback()
 }
 
+/** Shows another program (e.g. Applied AI Practitioner for a non-programmer) and switches to it only if they say yes. */
+async function programSwitch(bot: Bot, ctx: StudioCtx, d: Detour, programId: string, o: CounselOpts) {
+  const next = getProgram(programId)
+  const now = programForLearner(ctx.answers)
+  track('action', 'program_suggested', { from: now?.id ?? '', to: programId })
+  await bot.say(`Here’s the ${next.name}, and what you’d learn:`)
+  bot.card({ type: 'program', interest: ctx.answers.interest ?? 'ai', programId })
+  bot.card({ type: 'curriculum', interest: ctx.answers.interest ?? 'ai', programId })
+  await bot.say(`Shall I make the ${next.name} your recommended program${now ? ` instead of the ${now.name}` : ''}?`)
+  const c = await bot.choose([
+    { id: 'yes', label: 'Yes, switch my program', icon: 'check' },
+    { id: 'no', label: now ? `Keep the ${now.name}` : 'Not now', icon: 'arrowLeft' },
+    { id: 'call', label: 'Help me decide on a quick call', icon: 'phone' },
+  ])
+  if (c.id === 'call') { ctx.call('chat'); return resume(bot, d, o, true) }
+  if (c.id === 'no') { await bot.say('No problem, we’ll keep your current program.'); return resume(bot, d, o) }
+  const hadReports = TOOLS.some((t) => ready(ctx, t.id))
+  const ok = await ctx.switchProgram(programId)
+  bot.alive()
+  if (!ok) { await bot.say('I couldn’t update your plan just now. A mentor can do it with you on a free call.'); return resume(bot, d, o) }
+  track('action', 'program_switched', { from: now?.id ?? '', to: programId })
+  bot.event(`Program updated · ${next.name}`, 'info')
+  const rebuilt = hadReports && TOOLS.every((t) => !ready(ctx, t.id))
+  await bot.say(`Done! Your plan now follows the ${next.name}.${rebuilt ? ' Your reports will be rebuilt for it.' : ''} Where shall we start?`)
+  const n = await bot.choose([
+    { id: '/dashboard/skill-gap', label: 'Check my skill gaps for this program', icon: 'chart' },
+    { id: '/dashboard/roadmap', label: 'Build my roadmap', icon: 'route' },
+    { id: 'c-resume', label: o.resumeLabel, icon: 'refresh' },
+  ])
+  if (n.id === 'c-resume') return resume(bot, d, o)
+  return ctx.go(n.id)
+}
+
 /** Shows the other track's career path and moves the learner to it only if they say yes. */
 async function trackSwitch(bot: Bot, ctx: StudioCtx, d: Detour, to: string, o: CounselOpts) {
   const next = trackOf(to)
@@ -663,7 +870,10 @@ async function trackSwitch(bot: Bot, ctx: StudioCtx, d: Detour, to: string, o: C
   track('action', 'track_path_shown', { from: now?.interest ?? '', to })
   await bot.say(`Here’s how the ${next.label} path would look for you, ${ctx.first}:`)
   bot.card({ type: 'career-path', interest: to, from: now?.interest })
-  bot.card({ type: 'projects', interest: to })
+  const toProgram = programForLearner({ ...ctx.answers, interest: to, program: undefined })?.id
+  const toItems = await ctx.projects(toProgram)
+  bot.alive()
+  bot.card({ type: 'projects', interest: to, programId: toProgram, items: toItems })
   await bot.say(`Shall I move your plan to the ${next.label}? Your recommended program will change to match${hadReports ? ' and your reports will be rebuilt for it' : ''}. You can always switch back.`)
   const c = await bot.choose([
     { id: 'yes', label: `Yes, move me to the ${next.label}`, icon: 'check' },
@@ -695,6 +905,114 @@ async function trackSwitch(bot: Bot, ctx: StudioCtx, d: Detour, to: string, o: C
   return ctx.go(n.id)
 }
 
+// ---------- Re-enquiry: a returning learner picked a different track ----------
+
+/**
+ * They came back and picked another track (e.g. FDE last time, AI today). Nothing changes without a yes: the counsellor
+ * shows the new path, and on yes the profile moves to it and the skill-gap analysis runs again for the new program.
+ */
+export async function trackChangeFlow(bot: Bot, ctx: StudioCtx, to: string) {
+  const next = trackOf(to)
+  const now = trackOf(ctx.answers.interest)
+  if (!next || !now || next.interest === now.interest) return homeFlow(bot, ctx, 'menu')
+  const me = getCounsellor(ctx.counsellor().id)
+  track('action', 'track_reenquiry', { from: now.interest, to })
+  await bot.say(`Welcome back, ${ctx.first}! It’s ${me.name}. Last time you were exploring the ${now.label}, and today you picked the ${next.label}.`)
+  bot.card({ type: 'career-path', interest: to, from: now.interest })
+  // Honest advice: if the track they picked fits their profile poorly, say so and offer the better fit.
+  const picked = programForLearner({ ...ctx.answers, interest: to, program: undefined })
+  const best = fitComparison(ctx.answers)[0]
+  const pickedFit = picked ? fitFor(ctx.answers, picked.id) : null
+  const betterFit = best && pickedFit && best.programId !== pickedFit.programId && best.score - pickedFit.score >= 3 ? best : null
+  if (betterFit && pickedFit) {
+    await bot.say(`To be honest with you: from your profile, the ${next.label} fits you about ${pickedFit.score}/10, while the ${betterFit.name} fits ${betterFit.score}/10.`)
+  }
+  await bot.say(`Shall I map the ${next.label} for you instead? Your profile and reports will move to it.`)
+  const c = await bot.choose([
+    ...(betterFit ? [{ id: 'fit', label: `Show me my best-fit path (${betterFit.score}/10)`, icon: 'route' as IconName }] : []),
+    { id: 'yes', label: `Yes, map the ${next.label} for me`, icon: 'check' },
+    { id: 'no', label: `No, stay on the ${now.label}`, icon: 'arrowLeft' },
+    { id: 'call', label: 'Help me decide on a quick call', icon: 'phone' },
+  ])
+  if (c.id === 'fit') return programFitFlow(bot, ctx)
+  if (c.id === 'call') { ctx.call('chat'); return homeFlow(bot, ctx, 'menu') }
+  if (c.id === 'no') {
+    await bot.say(`No problem, we’ll continue with the ${now.label}.`)
+    return homeFlow(bot, ctx, 'menu')
+  }
+  if (!(await ctx.switchTrack(to))) {
+    bot.alive()
+    await bot.say('I couldn’t update your profile just now. A mentor can do it with you on a free call.')
+    return homeFlow(bot, ctx, 'menu')
+  }
+  bot.alive()
+  track('action', 'track_switched', { from: now.interest, to, via: 'reenquiry' })
+  bot.event(`Profile updated · ${next.label}`, 'info')
+  await bot.say(`Done! You’re now on the ${next.label}. Let’s redo your skill-gap analysis for it, so everything we plan fits the new goal.`)
+  // Not probed yet: the counsellor's first conversation (which ends with the skill-gap report) comes first.
+  return probed(ctx) ? toolFlow(bot, ctx, 'skill-gap', true) : counsellorFirstFlow(bot, ctx)
+}
+
+// ---------- Best-fit path: compare, show the roadmap, then switch only on a yes ----------
+
+/**
+ * The program that fits their profile best, shown properly before anything changes: how each option scores for
+ * them, the roadmap (modules), the tools they'd use, the projects they'd build and the roles it opens. On yes, the
+ * track and program change in the system and the conversation and reports carry on for it.
+ */
+export async function programFitFlow(bot: Bot, ctx: StudioCtx) {
+  const keep = async (patch: Answers) => { if (!(await ctx.saveAnswers(patch))) throw new Error('save failed'); bot.alive() }
+  // Understand the profile first if anything important is missing.
+  if (!ctx.answers.programmer) {
+    await bot.say('One thing so I get this right: do you write code in your work?')
+    await keep({ programmer: (await bot.choose(PROGRAMMER.map((p) => ({ ...p, icon: PROGRAMMER_ICONS[p.id] })))).id })
+  }
+  if (!ctx.answers.role && !inferredRole(ctx.answers)) {
+    await bot.say('And what’s your current role?')
+    const roles = ROLES.filter((r) => r.id !== 'student')
+    const c = await bot.choose([...roles.map((r) => ({ ...r, icon: ROLE_ICONS[r.id] })), { id: ROLE_OTHER, label: 'Something else', icon: 'plus' as IconName }], { style: 'chips' })
+    await keep({ role: c.id })
+  }
+  const fits = fitComparison(ctx.answers)
+  const best = fits[0]
+  if (!best) return homeFlow(bot, ctx, 'menu')
+  const program = getProgram(best.programId)
+  track('action', 'fit_shown', { best: best.programId, score: best.score, others: fits.slice(1).map((f) => `${f.programId}:${f.score}`).join(',') })
+  await bot.say(`Here’s how the options fit you, ${ctx.first}, based on everything you’ve told me:`)
+  bot.card({ type: 'fit', rows: fits })
+  bridgeCard(bot, { ...ctx, answers: { ...ctx.answers, program: best.programId } })
+  await bot.say(`The ${program.name} fits you best. Here’s your roadmap, the tools you’d use and the projects you’d build:`)
+  bot.card({ type: 'curriculum', interest: ctx.answers.interest ?? 'ai', programId: program.id })
+  const items = await ctx.projects(program.id)
+  bot.alive()
+  bot.card({ type: 'projects', interest: ctx.answers.interest ?? 'ai', programId: program.id, items })
+  bot.card({ type: 'roles', roles: rolesFor({ ...ctx.answers, program: program.id }), note: payNote(ctx.answers), programId: program.id })
+  const current = programForLearner(ctx.answers)
+  const already = ctx.answers.program === program.id
+  await bot.say(already ? `You’re already set up for the ${program.name}. Shall we carry on?` : `Shall we go ahead with the ${program.name}? It fits your profile ${best.score}/10. I’ll set your track and program to it, and all your reports will follow.`)
+  const c = await bot.choose([
+    { id: 'yes', label: already ? 'Yes, carry on' : `Yes, go ahead with the ${program.name}`, icon: 'check' },
+    ...fits.slice(1, 2).map((f) => ({ id: `other:${f.programId}`, label: `I’d rather do the ${f.name} (${f.score}/10)`, icon: 'arrowLeft' as IconName })),
+    { id: 'call', label: 'Help me decide on a quick call', icon: 'phone' },
+  ])
+  if (c.id === 'call') { ctx.call('chat'); return }
+  const chosen = c.id.startsWith('other:') ? c.id.slice(6) : program.id
+  if (!already || chosen !== program.id) {
+    const hadReports = TOOLS.some((t) => ready(ctx, t.id))
+    const ok = await ctx.switchProgram(chosen)
+    bot.alive()
+    if (!ok) { await bot.say('I couldn’t update your plan just now. A mentor can do it with you on a free call.'); return homeFlow(bot, ctx, 'menu') }
+    const name = getProgram(chosen).name
+    track('action', 'program_switched', { from: current?.id ?? '', to: chosen, via: 'fit' })
+    bot.event(`Track and program updated · ${name}`, 'info')
+    await bot.say(`Done, ${ctx.first}! You’re now on the ${name}.${hadReports ? ' Your reports will be rebuilt for it.' : ''}`)
+  }
+  // Carry on for the new program: the first conversation if it isn't done, otherwise the skill-gap report and pitch.
+  if (!probed(ctx)) return counsellorFirstFlow(bot, ctx)
+  await bot.say('Let’s measure exactly where you stand for this path. I’ll build your skill-gap report now.')
+  return toolFlow(bot, ctx, 'skill-gap', true)
+}
+
 // ---------- Counsellors: reconnect, end the chat ----------
 
 /** The learner asked for a particular counsellor (usually the previous one): a short disconnect, then they reconnect. */
@@ -722,7 +1040,9 @@ export async function switchFlow(bot: Bot, ctx: StudioCtx, to: string) {
 /** Ends the chat. The next visit gets the next counsellor in the rotation, unless the learner asks for this one again. */
 export async function endFlow(bot: Bot, ctx: StudioCtx) {
   const me = getCounsellor(ctx.counsellor().id)
-  await bot.say(`Thanks for chatting, ${ctx.first}. Your reports and plan are saved. Good luck, and come back any time!`)
+  await ctx.askRating('end')
+  bot.alive()
+  await bot.say(`Thank you for your time, ${ctx.first}! Your reports and plan are saved, and we’re right here whenever you want to continue.`)
   const res = await postJson('/api/counsellor', { action: 'end' })
   bot.alive()
   if (!res.ok) { await bot.say(res.error); return }

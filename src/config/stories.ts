@@ -1,16 +1,18 @@
 // Content shown while Richa finds a counsellor, and in the studio's right pane.
 //
-// SAMPLE_STORIES are PLACEHOLDERS (stock photos, invented names and numbers) and are always labelled
-// "Sample stories" on screen. Replace them with real, consented alumni stories and set `sample: false`.
+// Only real content here. ALUMNI_STORIES is for real, consented learner stories (name, photo, before → after role,
+// company, hike) once the team shares them; until then it stays empty and nothing invented is shown as a story.
+// CAREER_MOVES are common transitions for each track: no names, photos or numbers, so they need no label.
 
-export type Story = { name: string; photo: string; from: string; to: string; hike: string; sample: boolean }
+export type Story = { name: string; photo?: string; from: string; to: string; company?: string; hike?: string }
 
-export const SAMPLE_STORIES: Story[] = [
-  { name: 'Ananya R.', photo: '/stories/story-1.jpg', from: 'QA Engineer', to: 'AI Engineer', hike: '+65%', sample: true },
-  { name: 'Rohit M.', photo: '/stories/story-2.jpg', from: 'Support Engineer', to: 'Cloud Engineer', hike: '+48%', sample: true },
-  { name: 'Karthik S.', photo: '/stories/story-3.jpg', from: 'Java Developer', to: 'GenAI Developer', hike: '+72%', sample: true },
-  { name: 'Imtiaz A.', photo: '/stories/story-4.jpg', from: 'System Admin', to: 'DevOps Engineer', hike: '+55%', sample: true },
-]
+export const ALUMNI_STORIES: Story[] = []
+
+export const CAREER_MOVES: Record<string, { from: string; to: string }[]> = {
+  ai: [{ from: 'QA Engineer', to: 'AI Engineer' }, { from: 'Java Developer', to: 'GenAI Developer' }, { from: 'Data Analyst', to: 'Data Scientist' }],
+  fde: [{ from: 'Software Engineer', to: 'Forward Deployed AI Engineer' }, { from: 'Solutions Consultant', to: 'AI Solutions Engineer' }, { from: 'Backend Developer', to: 'AI Engineer' }],
+  'cloud-devops': [{ from: 'Support Engineer', to: 'Cloud Engineer' }, { from: 'System Admin', to: 'DevOps Engineer' }, { from: 'QA Engineer', to: 'SDET / QA DevOps' }],
+}
 
 /** Example capstone-style projects per track (what learners build). Illustrative project themes, not guarantees. */
 export const TRACK_PROJECTS: Record<string, { title: string; tools: string }[]> = {

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { Icon } from '@/components/Icon'
 import { Logo } from '@/components/Logo'
 import { ResetGuestChat } from '@/components/ResetGuestChat'
@@ -15,13 +14,14 @@ export const metadata: Metadata = { title: 'Choose your track' }
 export default async function StartPage() {
   const user = await getCurrentUser()
   const answers = user ? await getAnswers(user.id) : null
-  if (user && answers?.interest && user.phone) redirect('/dashboard')
+  // Signed in already: picking a track goes to the studio, where the counsellor confirms the change.
+  const signedIn = Boolean(user && answers?.interest && user.phone)
   return (
     <div className="lp">
       <ResetGuestChat />
       <header className="lp-top">
         <Logo />
-        <Link href="/start/chat?login=1" className="lp-login">Log in</Link>
+        {signedIn ? <Link href="/dashboard" className="lp-login">My studio</Link> : <Link href="/start/chat?login=1" className="lp-login">Log in</Link>}
       </header>
       <main className="lp-main lp-tracks-main">
         <div className="lp-head">
@@ -33,7 +33,7 @@ export default async function StartPage() {
           {TRACKS.map((t) => {
             const program = programFor(t.interest)
             return (
-              <Link key={t.id} href={`/start/chat?track=${t.id}`} className="lp-track">
+              <Link key={t.id} href={signedIn ? `/dashboard?track=${t.id}` : `/start/chat?track=${t.id}`} className="lp-track">
                 <span className="lp-track-icon"><Icon name={t.icon} size="1.25rem" /></span>
                 <div className="lp-track-title">
                   <b>{t.label}</b>

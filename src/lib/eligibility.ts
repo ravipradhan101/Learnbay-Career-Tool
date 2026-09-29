@@ -1,3 +1,4 @@
+import { background } from './background'
 import { randomInt } from 'node:crypto'
 import { getProgram, programsForInterest } from '@/config/programs'
 import { query, queryOne } from './db'
@@ -398,7 +399,7 @@ async function complete(t: TestRow): Promise<TestRow> {
     [t.id, correct, total, score, band.id, JSON.stringify(breakdown)],
   )
   if (!done) return (await latest(t.user_id))!
-  afterCompletion(done).catch((err) => console.error('[eligibility] follow-up failed', (err as Error).message))
+  background('eligibility:follow-up', () => afterCompletion(done))
   return done
 }
 

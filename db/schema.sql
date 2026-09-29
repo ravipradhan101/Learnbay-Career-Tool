@@ -400,3 +400,61 @@ CREATE TABLE IF NOT EXISTS chat_threads (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS chat_threads_user_idx ON chat_threads(user_id, updated_at DESC);
+
+-- v11: learners rate their conversation with a counsellor (one review per chat; the average shows on the counsellor's profile)
+CREATE TABLE IF NOT EXISTS counsellor_reviews (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  thread_id   uuid REFERENCES chat_threads(id) ON DELETE SET NULL,
+  counsellor  text NOT NULL,
+  rating      integer NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment     text,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS counsellor_reviews_thread_idx ON counsellor_reviews(user_id, thread_id);
+CREATE INDEX IF NOT EXISTS counsellor_reviews_counsellor_idx ON counsellor_reviews(counsellor, created_at);
+-- v12: the rating pop-up also asks about the eligibility test and for suggestions
+ALTER TABLE counsellor_reviews ADD COLUMN IF NOT EXISTS test_rating integer CHECK (test_rating BETWEEN 1 AND 5);
+ALTER TABLE counsellor_reviews ADD COLUMN IF NOT EXISTS suggestion text;
+
+-- v13: topics learners asked about that the published syllabus doesn't list (the counsellor says trainers cover relevant
+-- ones; the team confirms: already in the course -> publish it, or add it). Also a learner-approved program choice.
+CREATE TABLE IF NOT EXISTS topic_requests (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id         uuid REFERENCES users(id) ON DELETE SET NULL,
+  program_id      text,
+  topic           text NOT NULL,
+  verdict         text NOT NULL CHECK (verdict IN ('covered', 'not-needed', 'other-program')),
+  learner_message text,
+  status          text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'in-course', 'to-add', 'not-relevant')),
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS topic_requests_status_idx ON topic_requests(status, created_at DESC);
+
+-- v14: the project library (from the brochures, plus projects written in the same style), editable in Admin → Projects.
+-- Learners see 4 at a time that fit their program and industry; project_views keeps the rotation fresh.
+CREATE TABLE IF NOT EXISTS projects (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title        text NOT NULL,
+  description  text NOT NULL DEFAULT '',
+  tools        text[] NOT NULL DEFAULT '{}',
+  kind         text NOT NULL DEFAULT 'module' CHECK (kind IN ('module', 'capstone', 'domain')),
+  module       text,
+  domain       text,
+  programs     text[] NOT NULL DEFAULT '{}',
+  source       text NOT NULL DEFAULT 'admin' CHECK (source IN ('brochure', 'generated', 'admin')),
+  source_ref   text,
+  status       text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused')),
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS projects_programs_idx ON projects USING gin (programs);
+CREATE UNIQUE INDEX IF NOT EXISTS projects_title_domain_idx ON projects (lower(title), coalesce(domain, ''));
+CREATE TABLE IF NOT EXISTS project_views (
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_id  uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  shown_at    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, project_id)
+);

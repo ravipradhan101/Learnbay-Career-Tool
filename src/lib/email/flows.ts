@@ -1,3 +1,4 @@
+import { background } from '../background'
 import { env } from '../env'
 import { query, queryOne, transaction } from '../db'
 import { sendMail, type Mail } from '../mailer'
@@ -79,10 +80,15 @@ export function buildMail(step: Pick<StepRow, 'subject' | 'preheader' | 'heading
 
 /**
  * Starts every active flow for this trigger, unless the learner is already in it, or went through it
- * recently (re-entry window; 0 = only ever once). Fire-and-forget: never slows the request that caused it.
+ * recently (re-entry window; 0 = only ever once). Never slows the request that caused it, but always completes
+ * (on serverless hosts too: see `background`).
  */
 export function triggerFlows(userId: string, trigger: TriggerId): void {
-  query<{ due: number }>(
+  background(`email:${trigger}`, () => enrol(userId, trigger))
+}
+
+async function enrol(userId: string, trigger: TriggerId) {
+  const rows = await query<{ due: number }>(
     `INSERT INTO email_enrollments (flow_id, user_id, next_run_at)
      SELECT f.id, $1, now() + make_interval(mins => first.delay_minutes)
        FROM email_flows f
@@ -96,11 +102,8 @@ export function triggerFlows(userId: string, trigger: TriggerId): void {
      RETURNING (next_run_at <= now() + interval '1 minute')::int AS due`,
     [userId, trigger],
   )
-    .then((rows) => {
-      // Welcome-style emails (no delay) go out right away instead of waiting for the next worker tick.
-      if (rows.some((r) => r.due)) setTimeout(() => processDueEmails().catch((e) => console.error('[email] run failed', (e as Error).message)), 500)
-    })
-    .catch((err) => console.error(`[email] trigger ${trigger} failed`, (err as Error).message))
+  // Welcome-style emails (no delay) go out right away instead of waiting for the next run.
+  if (rows.some((r) => r.due)) await processDueEmails()
 }
 
 // ---------- The worker ----------

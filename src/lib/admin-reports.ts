@@ -30,6 +30,7 @@ export const PAGE_NAMES: Record<string, string> = {
 export const pageName = (path: string | null) => (path ? PAGE_NAMES[path] ?? path : '—')
 
 export const STEP_NAMES: Record<string, string> = {
+  name: 'Name', goal: 'Career goal', domain: 'Industry / background', studyStage: 'Final year or graduated?',
   role: 'Current role', experience: 'Years of experience', programmer: 'Codes at work?', interest: 'Program area', contact: 'Contact details',
   targetRole: 'Target role', skills: 'Current skills', ctc: 'Current CTC', city: 'City', weeklyHours: 'Weekly hours', timeline: 'Timeline',
 }
@@ -94,11 +95,11 @@ export async function acquisitionFunnel(since: Date): Promise<FunnelStep[]> {
     `SELECT
        count(DISTINCT visitor_id) AS visitors,
        count(DISTINCT visitor_id) FILTER (WHERE type = 'page_view' AND path = '/') AS landing,
-       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_view' AND name = 'onboarding:role') AS started,
-       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_answer' AND name = 'onboarding:role') AS role,
+       count(DISTINCT visitor_id) FILTER (WHERE type = 'page_view' AND path = '/start') AS tracks,
+       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_view' AND name IN ('onboarding:name', 'onboarding:goal')) AS started,
+       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_answer' AND name = 'onboarding:goal') AS goal,
+       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_answer' AND name = 'onboarding:domain') AS domain,
        count(DISTINCT visitor_id) FILTER (WHERE type = 'step_answer' AND name = 'onboarding:experience') AS experience,
-       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_answer' AND name = 'onboarding:programmer') AS programmer,
-       count(DISTINCT visitor_id) FILTER (WHERE type = 'step_answer' AND name = 'onboarding:interest') AS interest,
        count(DISTINCT visitor_id) FILTER (WHERE type = 'action' AND name = 'contact_field_focus') AS contact_started,
        count(DISTINCT visitor_id) FILTER (WHERE type = 'action' AND name IN ('onboarding_completed', 'onboarding_existing_email')) AS submitted,
        count(DISTINCT visitor_id) FILTER (WHERE type = 'action' AND name IN ('email_verified', 'login_completed')) AS verified,
@@ -109,17 +110,51 @@ export async function acquisitionFunnel(since: Date): Promise<FunnelStep[]> {
   return [
     { label: 'Visited any page', count: n(r?.visitors) },
     { label: 'Saw the landing page', count: n(r?.landing), note: 'Some visitors arrive on /start or /login directly' },
-    { label: 'Started quick start (Q1 shown)', count: n(r?.started) },
-    { label: 'Answered Q1: current role', count: n(r?.role) },
-    { label: 'Answered Q2: experience', count: n(r?.experience) },
-    { label: 'Answered Q3: codes at work', count: n(r?.programmer) },
-    { label: 'Answered Q4: program area', count: n(r?.interest) },
+    { label: 'Saw the track picker', count: n(r?.tracks) },
+    { label: 'Started chatting with Richa', count: n(r?.started) },
+    { label: 'Answered: career goal', count: n(r?.goal) },
+    { label: 'Answered: industry / background', count: n(r?.domain) },
+    { label: 'Answered: experience', count: n(r?.experience) },
     { label: 'Started typing contact details', count: n(r?.contact_started) },
     { label: 'Submitted contact details', count: n(r?.submitted) },
     { label: 'Confirmed email with the code', count: n(r?.verified) },
     { label: 'Opened Career Studio', count: n(r?.dashboard), note: 'Includes returning learners who logged in' },
   ]
 }
+
+/** The counsellor's conversation (Counsellor Conversation Playbook): learners reaching each stage in the range. */
+export async function conversationFunnel(since: Date): Promise<FunnelStep[]> {
+  const r = await queryOne<Record<string, string>>(
+    `SELECT
+       count(DISTINCT user_id) FILTER (WHERE type = 'page_view' AND path LIKE '/dashboard%') AS studio,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'counsel:why_now') AS why_now,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'counsel:probe') AS probe,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'counsel:need_agreed') AS need,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'counsel:need_agreed' AND props->>'value' = 'yes') AS need_yes,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'tool_ready' AND props->>'tool' = 'skill-gap') AS report,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'elig:push_shown') AS push,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'elig:push_accepted') AS accepted,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'elig:completed') AS tested,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'decision:asked') AS asked,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'decision:taken' AND props->>'choice' IN ('mentor', 'call')) AS decided,
+       count(DISTINCT user_id) FILTER (WHERE type = 'action' AND name = 'decision:taken' AND props->>'choice' = 'email') AS emailed
+     FROM analytics_events WHERE created_at >= $1 AND user_id IS NOT NULL`,
+    [since],
+  )
+  return [
+    { label: 'Opened Career Studio', count: n(r?.studio) },
+    { label: 'Answered "why now?"', count: n(r?.why_now), note: 'Their own reason: the only urgency the counsellor uses' },
+    { label: 'Answered their segment question', count: n(r?.probe) },
+    { label: 'Reached the need check', count: n(r?.need), note: `${fmtN(r?.need_yes)} said "Yes, that's me"` },
+    { label: 'Got the skill-gap report', count: n(r?.report) },
+    { label: 'Saw "Check if I qualify"', count: n(r?.push) },
+    { label: 'Said yes to the test', count: n(r?.accepted) },
+    { label: 'Finished the test', count: n(r?.tested) },
+    { label: 'Were asked to decide', count: n(r?.asked) },
+    { label: 'Booked a mentor call or asked for a call', count: n(r?.decided), note: `${fmtN(r?.emailed)} more asked for the plan by email` },
+  ]
+}
+const fmtN = (v: string | undefined) => n(v).toLocaleString('en-IN')
 
 /** What people who signed up in the range went on to do. */
 export async function activationFunnel(since: Date): Promise<FunnelStep[]> {

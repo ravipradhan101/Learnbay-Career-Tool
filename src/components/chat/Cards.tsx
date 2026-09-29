@@ -6,13 +6,15 @@ import { Icon, type IconName } from '../Icon'
 import { openWhyLearnbay } from '../why/WhyLearnbayButton'
 import { ActionPlan } from '../report/ActionPlan'
 import { Gauge, KpiTiles, PhaseTimeline, RangeChart, SkillBars } from '../report/Charts'
-import type { Card, EligCompleted, EligInProgress } from './engine'
+import type { Card, EligCompleted, EligInProgress, ProjectItem } from './engine'
 import { CURRICULUM } from '@/config/curriculum'
 import { TRACK_PATHS } from '@/config/paths'
+import { curriculumOf, projectsFor } from '@/lib/roles'
+import { DOMAIN_TAG } from '@/lib/project-domains'
 import { REFUND_POLICY } from '@/config/policies'
-import { programFor } from '@/config/programs'
+import { getProgram, programFor } from '@/config/programs'
 import { RESOURCES } from '@/config/resources'
-import { CERTIFICATIONS, SAMPLE_STORIES, TRACK_PROJECTS } from '@/config/stories'
+import { ALUMNI_STORIES, CAREER_MOVES, CERTIFICATIONS, TRACK_PROJECTS } from '@/config/stories'
 import { PUBLISHED_STORY } from '@/config/usps'
 import { COUNSELLOR_TITLE, getCounsellor } from '@/lib/counsellors'
 import { SKILL_LEVELS, trackOf } from '@/lib/questions'
@@ -50,13 +52,19 @@ export function CardView({ card, live, onDone }: { card: Card; live: boolean; on
     case 'matching': return live ? <MatchingCard area={card.track} onDone={onDone} /> : null
     case 'counsellor': return <CounsellorCard id={card.id} track={card.track} />
     case 'skill-levels': return <SkillLevelsCard skills={card.skills} live={live} onDone={onDone} />
-    case 'program': return <ProgramCard interest={card.interest} />
+    case 'skill-matrix': return <SkillMatrixCard skills={card.skills} live={live} onDone={onDone} />
+    case 'program': return <ProgramCard interest={card.interest} programId={card.programId} />
     case 'proof': return <ProofCard />
-    case 'projects': return <ProjectsCard interest={card.interest} />
+    case 'projects': return <ProjectsCard interest={card.interest} programId={card.programId} items={card.items} />
+    case 'roles': return <RolesCard roles={card.roles} note={card.note} />
     case 'career-path': return <CareerPathCard interest={card.interest} from={card.from} />
-    case 'why': return <WhyCard interest={card.interest} />
-    case 'curriculum': return <CurriculumCard interest={card.interest} />
+    case 'why': return <WhyCard interest={card.interest} programId={card.programId} />
+    case 'curriculum': return <CurriculumCard interest={card.interest} programId={card.programId} />
     case 'refund': return <RefundCard />
+    case 'elig-push': return <EligPushCard />
+    case 'decision': return <DecisionCard eligible={card.eligible} programId={card.programId} />
+    case 'fit': return <FitCard rows={card.rows} />
+    case 'bridge': return <BridgeCard have={card.have} add={card.add} role={card.role} readiness={card.readiness} program={card.program} />
   }
 }
 
@@ -631,14 +639,21 @@ function LoginCard({ live, onDone }: { live: boolean; onDone: Done }) {
 // ---------- Richa finds a counsellor ----------
 
 type Slide =
-  | { kind: 'story'; name: string; photo: string; from: string; to: string; hike: string }
+  | { kind: 'story'; name: string; photo?: string; from: string; to: string; company?: string; hike?: string }
+  | { kind: 'quote'; quote: string; name: string; role: string }
+  | { kind: 'move'; from: string; to: string }
   | { kind: 'usp'; icon: IconName; title: string; text: string }
   | { kind: 'project'; title: string; tools: string }
 
 /** 6–9 seconds of proof while the counsellor is being matched: stories, strengths and projects. */
 function MatchingCard({ area, onDone }: { area: string; onDone: Done }) {
   const slides = useMemo<Slide[]>(() => {
-    const stories = SAMPLE_STORIES.map((s) => ({ kind: 'story' as const, ...s }))
+    // Real content only: the published learner story, real alumni stories once added, and common career moves.
+    const stories: Slide[] = [
+      { kind: 'quote', quote: PUBLISHED_STORY.quote, name: PUBLISHED_STORY.name, role: PUBLISHED_STORY.role },
+      ...ALUMNI_STORIES.map((s) => ({ kind: 'story' as const, ...s })),
+      ...(CAREER_MOVES[area] ?? CAREER_MOVES.ai).map((m) => ({ kind: 'move' as const, ...m })),
+    ]
     const usps = (['projects', 'mentors', 'placement'] as const).map((id) => ({ kind: 'usp' as const, icon: USPS[id].icon, title: USPS[id].title, text: USPS[id].short }))
     const projects = (TRACK_PROJECTS[area] ?? TRACK_PROJECTS.ai).map((p) => ({ kind: 'project' as const, ...p }))
     const out: Slide[] = []
@@ -663,7 +678,7 @@ function MatchingCard({ area, onDone }: { area: string; onDone: Done }) {
   useEffect(() => {
     const started = Date.now()
     postJson('/api/counsellor', { action: 'assign' }).then(async (r) => {
-      const wait = Math.max(0, 7000 - (Date.now() - started))
+      const wait = Math.max(0, 10_000 + Math.random() * 3000 - (Date.now() - started))
       await new Promise((res) => setTimeout(res, wait))
       if (done.current) return
       done.current = true
@@ -686,16 +701,28 @@ function MatchingCard({ area, onDone }: { area: string; onDone: Done }) {
       </div>
       <div className="tc-match-bar" aria-hidden="true"><i /></div>
       <div className="tc-slide" key={i}>
+        {s.kind === 'quote' && (
+          <div className="tc-slide-usp">
+            <span className="tc-soft-icon"><Icon name="message" size="1rem" /></span>
+            <div><span className="tc-eyebrow">From a Learnbay learner</span><b>“{s.quote.length > 110 ? `${s.quote.slice(0, 107)}…` : s.quote}”</b><small>{s.name} · {s.role}</small></div>
+          </div>
+        )}
         {s.kind === 'story' && (
           <div className="tc-story">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={s.photo} alt="" width={56} height={56} />
+            {s.photo && <img src={s.photo} alt="" width={56} height={56} />}
             <div>
-              <span className="tc-eyebrow">Sample story</span>
-              <b>{s.name}</b>
+              <span className="tc-eyebrow">Learner story</span>
+              <b>{s.name}{s.company ? ` · ${s.company}` : ''}</b>
               <div className="tc-story-move"><span>{s.from}</span><Icon name="arrowRight" size="0.8rem" /><span>{s.to}</span></div>
             </div>
-            <span className="tc-hike">{s.hike}<small>hike</small></span>
+            {s.hike && <span className="tc-hike">{s.hike}<small>hike</small></span>}
+          </div>
+        )}
+        {s.kind === 'move' && (
+          <div className="tc-slide-usp">
+            <span className="tc-soft-icon"><Icon name="route" size="1rem" /></span>
+            <div><span className="tc-eyebrow">A common move on this track</span><div className="tc-story-move"><span>{s.from}</span><Icon name="arrowRight" size="0.8rem" /><span>{s.to}</span></div></div>
           </div>
         )}
         {s.kind === 'usp' && (
@@ -765,8 +792,8 @@ function SkillLevelsCard({ skills, live, onDone }: { skills: { id: string; label
 
 // ---------- The pitch: program, proof, projects ----------
 
-function ProgramCard({ interest }: { interest: string }) {
-  const p = programFor(interest)
+function ProgramCard({ interest, programId }: { interest: string; programId?: string }) {
+  const p = programId ? getProgram(programId) : programFor(interest)
   if (!p) return null
   return (
     <div className="tc-card tc-program">
@@ -797,8 +824,30 @@ function ProofCard() {
   )
 }
 
-function ProjectsCard({ interest }: { interest: string }) {
-  const list = TRACK_PROJECTS[interest] ?? TRACK_PROJECTS.ai
+function ProjectsCard({ interest, programId, items }: { interest: string; programId?: string; items?: ProjectItem[] }) {
+  // From the project library (picked for this learner); older chats and empty libraries fall back to the program page.
+  if (items?.length) {
+    return (
+      <div className="tc-card tc-projects">
+        <span className="tc-eyebrow">Projects you’ll build</span>
+        {items.map((p, n) => (
+          <div key={p.title} className="tc-project">
+            <span className="tc-project-n">{n + 1}</span>
+            <div>
+              <b>{p.title}</b>
+              {p.description && <small className="tc-project-desc">{p.description}</small>}
+              <span className="tc-project-meta">
+                {p.kind === 'capstone' && <span className="tc-project-tag">Capstone</span>}
+                {p.domain && <span className="tc-project-tag domain">{DOMAIN_TAG[p.domain] ?? p.domain}</span>}
+                {p.tools.length > 0 && <small>{p.tools.join(' · ')}</small>}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+  const list = projectsFor(programId, interest)
   return (
     <div className="tc-card tc-projects">
       <span className="tc-eyebrow">Projects you’ll build</span>
@@ -812,9 +861,10 @@ function ProjectsCard({ interest }: { interest: string }) {
   )
 }
 
+
 /** A link to the learner's course page, bold italic (only catalog URLs). */
-export function CourseLink({ interest, label }: { interest: string; label?: string }) {
-  const p = programFor(interest)
+export function CourseLink({ interest, label, programId }: { interest: string; label?: string; programId?: string }) {
+  const p = programId ? getProgram(programId) : programFor(interest)
   if (!p) return null
   return (
     <a href={p.url} target="_blank" rel="noopener noreferrer" className="tc-course-link" onClick={() => track('action', 'course_link', { program: p.id })}>
@@ -857,9 +907,9 @@ function CareerPathCard({ interest, from }: { interest: string; from?: string })
 }
 
 /** Comparing institutes: what you get at Learnbay, with the projects you'd build and a link to your course. */
-function WhyCard({ interest }: { interest: string }) {
+function WhyCard({ interest, programId }: { interest: string; programId?: string }) {
   const ids = ['customisation', 'projects', 'mentors', 'placement', 'domain'] as const
-  const projects = (TRACK_PROJECTS[interest] ?? TRACK_PROJECTS.ai).slice(0, 3)
+  const projects = projectsFor(programId, interest).slice(0, 3)
   return (
     <div className="tc-card tc-why">
       <span className="tc-eyebrow">What you get with Learnbay</span>
@@ -876,37 +926,47 @@ function WhyCard({ interest }: { interest: string }) {
         {projects.map((p) => <span key={p.title} className="tc-chip-static"><Icon name="folder" size="0.8rem" />{p.title}</span>)}
       </div>
       <PartnerLogos size={16} className="tc-proof-logos" />
-      <CourseLink interest={interest} />
+      <CourseLink interest={interest} programId={programId} />
     </div>
   )
 }
 
 /** The program's curriculum as published: headline numbers, every module in order, electives, and the syllabus link. */
-function CurriculumCard({ interest }: { interest: string }) {
-  const p = programFor(interest)
-  const c = p ? CURRICULUM[p.id] : undefined
+function CurriculumCard({ interest, programId }: { interest: string; programId?: string }) {
+  const p = programId ? getProgram(programId) : programFor(interest)
+  const cur = p ? curriculumOf(p.id) : undefined
+  const c = cur && cur.modules.length ? {
+    liveHours: cur.liveHours ?? '', projects: cur.projectsCount ?? '', modules: cur.modules,
+    electives: cur.electives.length ? cur.electives : undefined, certs: cur.certifications, tools: cur.tools.slice(0, 14),
+  } : undefined
   if (!p) return null
   return (
     <div className="tc-card tc-curriculum">
-      <span className="tc-eyebrow">Curriculum · {p.name}</span>
-      {c && (
+      <span className="tc-eyebrow">Your roadmap · {p.name}</span>
+      {c && (c.liveHours || c.projects) && (
         <div className="tc-cur-stats">
-          <span><Icon name="users" size="0.95rem" /><b>{c.liveHours.split(' of ')[0]}</b><small>live mentor-led classes</small></span>
-          <span><Icon name="folder" size="0.95rem" /><b>{c.projects.split(' ')[0]}</b><small>guided hands-on projects</small></span>
+          {c.liveHours && <span><Icon name="users" size="0.95rem" /><b>{c.liveHours.split(/ of | live/)[0]}</b><small>live mentor-led classes</small></span>}
+          {c.projects && <span><Icon name="folder" size="0.95rem" /><b>{c.projects.split(' ')[0]}</b><small>guided hands-on projects</small></span>}
           <span><Icon name="clock" size="0.95rem" /><b>3-year</b><small>flexible access</small></span>
         </div>
       )}
       <ol className="tc-cur-list">
         {(c?.modules ?? p.focusAreas).map((m, n) => <li key={m}><span className="tc-path-n">{n + 1}</span><span>{m}</span></li>)}
       </ol>
+      {c?.tools && c.tools.length > 0 && (
+        <div className="tc-why-projects">
+          <span className="tc-eyebrow">Tools you’ll use</span>
+          {c.tools.map((t) => <span key={t} className="tc-chip-static"><Icon name="code" size="0.8rem" />{t}</span>)}
+        </div>
+      )}
       {c?.electives && (
         <div className="tc-why-projects">
           <span className="tc-eyebrow">Electives matched to your background</span>
           {c.electives.map((e) => <span key={e} className="tc-chip-static"><Icon name="target" size="0.8rem" />{e}</span>)}
         </div>
       )}
-      <div className="tc-cur-certs"><Icon name="award" size="0.9rem" /> Microsoft & IBM certification · dedicated project mentor · AI Co-Lab startup projects</div>
-      <CourseLink interest={interest} label="See the full syllabus" />
+      <div className="tc-cur-certs"><Icon name="award" size="0.9rem" /> {c?.certs?.length ? c.certs.slice(0, 2).map((x) => x.split(/[(:—–-]/)[0].trim()).join(' · ') : 'Industry certification'} · live mentors · real projects</div>
+      <CourseLink interest={interest} programId={p.id} label="See the full syllabus" />
     </div>
   )
 }
@@ -926,6 +986,153 @@ function RefundCard() {
         ))}
       </div>
       <a href={REFUND_POLICY.url} target="_blank" rel="noopener noreferrer" className="tc-course-link"><b><i>Read the full refund policy</i></b> <Icon name="external" size="0.8rem" /></a>
+    </div>
+  )
+}
+
+/** The eligibility test, made hard to miss: what it is, how short it is and what it unlocks. */
+function EligPushCard() {
+  return (
+    <div className="tc-card tc-elig-push">
+      <span className="tc-elig-badge"><Icon name="award" size="1.2rem" /></span>
+      <div>
+        <b>Check your eligibility in 2 minutes</b>
+        <ul>
+          <li><Icon name="checkCircle" size="0.85rem" />10 quick questions, no maths</li>
+          <li><Icon name="checkCircle" size="0.85rem" />See where you’d start in the program</li>
+          <li><Icon name="checkCircle" size="0.85rem" />Then a mentor can check scholarships for you on the call</li>
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+/** Where the learner stands and what the mentor call settles: the decision, in one glance. */
+function DecisionCard({ eligible, programId }: { eligible: boolean | null; programId?: string }) {
+  const p = programId ? getProgram(programId) : null
+  const rows: { icon: IconName; label: string; value: string; tone: 'ok' | 'todo' | 'info' }[] = [
+    eligible === true ? { icon: 'checkCircle', label: 'Eligibility', value: 'You qualify', tone: 'ok' }
+      : eligible === false ? { icon: 'route', label: 'Eligibility', value: 'Foundation first, then the program', tone: 'info' }
+        : { icon: 'award', label: 'Eligibility', value: 'Not checked yet · 2 min', tone: 'todo' },
+    ...(p ? [{ icon: 'book' as IconName, label: 'Program', value: p.name, tone: 'info' as const }] : []),
+    { icon: 'calendar', label: 'Mentor call confirms', value: 'Batch and seats · fee and EMI · scholarship (only a mentor can activate one)', tone: 'info' },
+  ]
+  return (
+    <div className="tc-card tc-decision">
+      <span className="tc-eyebrow">Your next step</span>
+      {rows.map((r) => (
+        <div key={r.label} className={`tc-decision-row ${r.tone}`}>
+          <Icon name={r.icon} size="1rem" />
+          <span><small>{r.label}</small><b>{r.value}</b></span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** Skills and levels in one step: every tool the target role needs, each rated Basic / Intermediate / Advanced (or left blank). */
+function SkillMatrixCard({ skills, live, onDone }: { skills: { id: string; label: string }[]; live: boolean; onDone: Done }) {
+  const [levels, setLevels] = useState<Record<string, string>>({})
+  const [sent, setSent] = useState(false)
+  const LEVELS = [{ id: 'beginner', label: 'Basic' }, { id: 'intermediate', label: 'Intermediate' }, { id: 'advanced', label: 'Advanced' }]
+  const rated = skills.filter((s) => levels[s.id])
+  if (!live || sent) {
+    return (
+      <div className="tc-card tc-matrix-done">
+        {rated.length
+          ? rated.map((s) => <span key={s.id} className={`tc-lv tc-lv-${levels[s.id]}`}>{s.label} · {LEVELS.find((l) => l.id === levels[s.id])?.label}</span>)
+          : <span className="tc-lv">New to all of these</span>}
+      </div>
+    )
+  }
+  const pick = (id: string, level: string) => setLevels((v) => {
+    const next = { ...v }
+    if (next[id] === level) delete next[id]
+    else next[id] = level
+    return next
+  })
+  return (
+    <div className="tc-card tc-matrix">
+      <div className="tc-matrix-head"><span>Tap your level for each one. Leave it blank if you haven’t used it.</span></div>
+      {skills.map((s) => (
+        <div key={s.id} className={`tc-matrix-row ${levels[s.id] ? 'on' : ''}`}>
+          <span className="tc-matrix-skill">{s.label}</span>
+          <div className="tc-matrix-seg" role="radiogroup" aria-label={`${s.label}: your level`}>
+            {LEVELS.map((l) => (
+              <button key={l.id} type="button" role="radio" aria-checked={levels[s.id] === l.id} className={`tc-lv-${l.id}`} onClick={() => pick(s.id, l.id)}>{l.label}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button type="button" className="tc-btn tc-btn-primary tc-btn-sm" onClick={() => {
+        setSent(true)
+        const ids = skills.filter((s) => levels[s.id]).map((s) => s.id)
+        onDone({ skills: ids, levels })
+      }}>
+        {rated.length ? `Done · ${rated.length} rated` : 'I’m new to all of these'} <Icon name="arrowRight" size="0.9rem" />
+      </button>
+    </div>
+  )
+}
+
+/** The roles this path opens for them, and how we think about pay (a target, never a promise). */
+function RolesCard({ roles, note }: { roles: string[]; note: string | null }) {
+  return (
+    <div className="tc-card tc-roles">
+      <span className="tc-eyebrow">Roles you can aim for</span>
+      <div className="tc-roles-list">
+        {roles.map((r, n) => (
+          <span key={r} className="tc-role"><span className="tc-path-n">{n + 1}</span><b>{r}</b></span>
+        ))}
+      </div>
+      {note && <p className="tc-roles-note"><Icon name="trend" size="0.9rem" /> {note}</p>}
+    </div>
+  )
+}
+
+/** How well each program fits the learner (out of 10), best first, with the reasons. */
+function FitCard({ rows }: { rows: { programId: string; name: string; score: number; reasons: string[] }[] }) {
+  return (
+    <div className="tc-card tc-fit">
+      <span className="tc-eyebrow">How well each option fits you</span>
+      {rows.map((r, n) => (
+        <div key={r.programId} className={`tc-fit-row ${n === 0 ? 'best' : ''}`}>
+          <div className="tc-fit-top">
+            <b>{r.name}</b>
+            <span className="tc-fit-score">{r.score}/10{n === 0 ? ' · Best fit' : ''}</span>
+          </div>
+          <div className="tc-fit-bar" aria-hidden="true"><i style={{ width: `${r.score * 10}%` }} /></div>
+          {r.reasons.length > 0 && <small>{r.reasons.join(' · ')}</small>}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** The brochure's "Is this transition realistic?" section, personal: you have ✓ + just add + → the role you step into. */
+function BridgeCard({ have, add, role, readiness, program }: { have: string[]; add: string[]; role: string; readiness: number | null; program: string }) {
+  return (
+    <div className="tc-card tc-bridge">
+      <span className="tc-eyebrow">Is this transition realistic for you?</span>
+      <b className="tc-bridge-yes">Yes. You’re not starting from zero: you’re upgrading what you already have.</b>
+      <div className="tc-bridge-cols">
+        <div className="tc-bridge-col have">
+          <span className="tc-bridge-label">You have</span>
+          {have.map((h) => <span key={h} className="tc-bridge-item"><Icon name="check" size="0.8rem" />{h}</span>)}
+        </div>
+        <span className="tc-bridge-plus" aria-hidden="true">+</span>
+        <div className="tc-bridge-col add">
+          <span className="tc-bridge-label">Just add{program ? ` · ${program}` : ''}</span>
+          {add.map((s) => <span key={s} className="tc-bridge-item"><Icon name="plus" size="0.8rem" />{s}</span>)}
+        </div>
+      </div>
+      {readiness !== null && (
+        <div className="tc-bridge-meter" aria-label={`Your readiness today ${readiness}%, full with the program`}>
+          <div className="tc-bridge-bar"><i style={{ width: `${Math.max(8, Math.min(100, readiness))}%` }} /><em /></div>
+          <div className="tc-bridge-scale"><span>You today · {readiness}% ready</span><span>With the program · job-ready</span></div>
+        </div>
+      )}
+      <div className="tc-bridge-to"><Icon name="arrowRight" size="0.9rem" /> You step into: <b>{role}</b></div>
     </div>
   )
 }

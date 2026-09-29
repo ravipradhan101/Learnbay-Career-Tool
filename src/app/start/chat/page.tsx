@@ -16,7 +16,7 @@ export default async function StartChatPage({ searchParams }: { searchParams: Pr
   const track = TRACKS.find((t) => t.id === params.track)?.interest ?? null
   const user = await getCurrentUser()
   const answers = user ? await getAnswers(user.id) : null
-  if (user && answers?.interest && user.phone) redirect('/dashboard')
+  if (user && answers?.interest && user.phone) redirect(track ? `/dashboard?track=${track}` : '/dashboard')
   if (!login && !track && !answers?.interest) redirect('/start')
   return (
     <div className="tg-page">

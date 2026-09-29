@@ -7,9 +7,13 @@ import { Icon, type IconName } from '../Icon'
 import { Logo } from '../Logo'
 import { LogoutButton } from '../LogoutButton'
 import { ChatWindow } from './ChatWindow'
-import { matchTyped, useChat, type Bot, type Item } from './engine'
-import { ADOPT_KEY, counselFlow, eligibilityFlow, endFlow, homeFlow, masterclassFlow, restartFlow, sessionsFlow, switchFlow, toolFlow, type StudioCtx } from './flows'
+import { matchTyped, useChat, type Bot, type Item, type ProjectItem } from './engine'
+import { ADOPT_KEY, counselFlow, trackChangeFlow, eligibilityFlow, endFlow, homeFlow, masterclassFlow, restartFlow, sessionsFlow, switchFlow, toolFlow, type StudioCtx } from './flows'
 import { StudioPanel } from './StudioPanel'
+import { RichaGuide, type GuideHandle, type GuideLine } from './RichaGuide'
+import { Avatar } from './Avatar'
+import { skillFamily } from '@/lib/skills'
+import { programForLearner } from '@/lib/segments'
 import { clearGuestChat, getJson, postJson, sessionGet as storageGet, sessionSet as storageSet } from '@/lib/client'
 import { COUNSELLOR_TITLE, askedFor, getCounsellor } from '@/lib/counsellors'
 import { initials, trackOf, type Answers } from '@/lib/questions'
@@ -33,6 +37,7 @@ export type StudioData = {
   firstTime: boolean
   /** The allocated counsellor (round robin); isNew = allocated on this visit. */
   counsellor: { id: string; prev: string | null; isNew: boolean }
+  counsellorRating: { avg: number; count: number } | null
   phoneMasked: string
 }
 
@@ -58,11 +63,33 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
   const lastKey = `lcn_thread:${data.userId}`
   const [threads, setThreads] = useState<Thread[]>([])
   const [threadId, setThreadId] = useState<string | null>(null)
-  const chat = useChat({ storageKey: null, signedIn: true, speaker: data.counsellor.id, threadId })
+  const chat = useChat({
+    storageKey: null, signedIn: true, speaker: data.counsellor.id, threadId,
+    onProfile: (next, reportsReset) => {
+      answersRef.current = { ...answersRef.current, ...next }
+      setAnswers(answersRef.current)
+      if (reportsReset) {
+        const tools = Object.fromEntries(Object.entries(toolsRef.current).map(([id, s]) => [id, s?.status === 'ready' || s?.status === 'failed' ? { status: 'none', card: null } : s])) as Record<ToolId, ToolState>
+        toolsRef.current = tools
+        setTools(tools)
+      }
+      chat.event('Plan updated from what you told me', 'info')
+    },
+  })
   const counsellorRef = useRef({ id: data.counsellor.id, prev: data.counsellor.prev })
   const [tools, setTools] = useState(data.tools)
   const [answers, setAnswers] = useState<Answers>({ ...data.answers })
   const [drawer, setDrawer] = useState<'left' | 'right' | null>(null)
+  const [rating, setRating] = useState(data.counsellorRating)
+  const guide = useRef<GuideHandle>(null)
+  const askRatingRef = useRef<(why: 'end' | 'milestones' | 'leaving') => Promise<void>>(async () => {})
+  const threadRef = useRef<string | null>(null)
+  // A rating sent from the chat updates the stars on the counsellor's profile straight away.
+  useEffect(() => {
+    const on = (e: Event) => { const r = (e as CustomEvent).detail; if (r && typeof r.avg === 'number') setRating(r) }
+    window.addEventListener('lcn:rated', on)
+    return () => window.removeEventListener('lcn:rated', on)
+  }, [])
   const toolsRef = useRef(tools)
   toolsRef.current = tools
   const answersRef = useRef(answers)
@@ -170,15 +197,37 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
       return true
     },
     newChat: () => { void newChat() },
+    threadId: () => threadRef.current,
+    askRating: (why: 'end' | 'milestones' | 'leaving') => askRatingRef.current(why),
     showCard: (show?: string) => {
       const interest = answersRef.current.interest ?? 'ai'
-      if (show === 'projects') chat.addStaticCard({ type: 'projects', interest })
-      else if (show === 'program') chat.addStaticCard({ type: 'program', interest })
+      const programId = programForLearner(answersRef.current)?.id
+      if (show === 'projects') void ctx.projects(programId).then((items) => chat.addStaticCard({ type: 'projects', interest, programId, items }))
+      else if (show === 'program') chat.addStaticCard({ type: 'program', interest, programId })
       else if (show === 'proof') chat.addStaticCard({ type: 'proof' })
       else if (show === 'strengths') chat.addStaticCard({ type: 'usp', ids: ['mentors', 'projects', 'placement'], lead: 'How Learnbay helps' })
-      else if (show === 'compare') chat.addStaticCard({ type: 'why', interest })
-      else if (show === 'curriculum') chat.addStaticCard({ type: 'curriculum', interest })
+      else if (show === 'compare') chat.addStaticCard({ type: 'why', interest, programId })
+      else if (show === 'curriculum') chat.addStaticCard({ type: 'curriculum', interest, programId })
       else if (show === 'refund') chat.addStaticCard({ type: 'refund' })
+    },
+    projects: async (programId?: string) => {
+      const r = await getJson(`/api/projects${programId ? `?program=${encodeURIComponent(programId)}` : ''}`)
+      return r.ok ? ((r.data.projects as ProjectItem[] | undefined) ?? []) : []
+    },
+    switchProgram: async (program: string) => {
+      const before = answersRef.current
+      const r = await postJson('/api/profile/track', { program })
+      if (!r.ok) return false
+      const next = { ...before, ...((r.data.answers as Answers | undefined) ?? { program }) }
+      answersRef.current = next
+      setAnswers(next)
+      // The server rebuilds reports when the kind of program changes; mirror that here.
+      if (skillFamily(next) !== skillFamily(before) || next.interest !== before.interest) {
+        const tools = Object.fromEntries(Object.entries(toolsRef.current).map(([id, s]) => [id, s?.status === 'ready' || s?.status === 'failed' ? { status: 'none', card: null } : s])) as Record<ToolId, ToolState>
+        toolsRef.current = tools
+        setTools(tools)
+      }
+      return true
     },
     switchTrack: async (interest: string) => {
       const r = await postJson('/api/profile/track', { interest })
@@ -217,29 +266,43 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     const key = `${threadId}|${t}`
     if (key === runKey.current) return
     const threadChanged = !runKey.current.startsWith(`${threadId}|`)
+    const prevTopic = runKey.current.split('|')[1]
     runKey.current = key
+    // Opening another section (eligibility, salary, a mentor call…) starts a fresh chat for it; the one before
+    // stays in "Your chats". A chat the learner hasn't said anything in yet is simply reused.
+    if (!threadChanged && !firstRun.current && prevTopic && prevTopic !== t && chat.items.some((i) => i.kind === 'user')) {
+      topicRef.current = t
+      chat.run(async () => {})
+      void createThread().then((id) => {
+        if (id) { pendingMode.current = 'menu'; setThreadId(id) } else startTopic.current(t, 'menu')
+      })
+      return
+    }
     topicRef.current = t
     if (threadChanged && quietThread.current === threadId) { quietThread.current = null; return }
     let mode: Mode = pendingMode.current ?? 'menu'
     pendingMode.current = null
     if (firstRun.current) {
       firstRun.current = false
-      // The conversation with Richa continues here after sign-up.
-      try {
-        const raw = window.sessionStorage.getItem(ADOPT_KEY)
-        if (raw) {
-          const earlier = (JSON.parse(raw) as { items?: Item[] }).items ?? []
-          window.sessionStorage.removeItem(ADOPT_KEY)
-          if (earlier.length && chat.items.length === 0) chat.adopt(earlier)
-        }
-      } catch { /* ignore */ }
       const c = data.counsellor
       if (c.isNew) chat.event(`${getCounsellor(c.id).name} joined the chat`, 'join')
       mode = noThreadsAtStart.current || data.firstTime ? 'first' : c.isNew && c.prev ? 'handover' : 'returning'
     }
-    startTopic.current(t, t === 'home' ? mode : 'menu')
+    // Came back with a different track (re-enquiry): the counsellor asks before changing anything.
+    const params = new URLSearchParams(window.location.search)
+    const wanted = trackOf(params.get('track') ?? undefined)
+    if (wanted) {
+      params.delete('track')
+      const rest = params.toString()
+      window.history.replaceState(null, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`)
+    }
+    if (wanted && t === 'home' && wanted.interest !== answersRef.current.interest) {
+      chat.run((bot) => trackChangeFlow(bot, ctx, wanted.interest))
+    } else {
+      startTopic.current(t, t === 'home' ? mode : 'menu')
+    }
     void refreshThreads()
-  }, [pathname, chat, chat.restored, threadId, data.firstTime, data.counsellor, refreshThreads])
+  }, [pathname, chat, chat.restored, threadId, data.firstTime, data.counsellor, refreshThreads, createThread])
 
   // Counselling (the learner went off the script): what was set aside, and how many counselling turns so far.
   const counselRound = useRef(0)
@@ -302,6 +365,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
       chat.detour((bot, d) => counselFlow(bot, ctx, d, r, {
         context, was, resumeLabel,
         fallback: () => chat.run((b) => homeFlow(b, ctx, 'menu')),
+        restart: (flow) => chat.run(flow),
         round: () => counselRound.current++,
       }))
     })
@@ -318,11 +382,82 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
   }
   const nextTool = TOOLS.find((t) => !done[t.id])?.id
   const who = getCounsellor(chat.who)
+  threadRef.current = threadId
+
+  // ---------- Richa, the guide ----------
+  const guideHelp = (): GuideLine => ({
+    text: `What can I help you with, ${data.first}?`,
+    actions: [
+      ...(data.eligibilityVisible && !done.eligibility ? [{ id: '/dashboard/eligibility', label: 'Check my eligibility · 2 min', icon: 'award' as IconName, primary: true }] : []),
+      ...(!done.roadmap ? [{ id: '/dashboard/roadmap', label: 'Build my roadmap', icon: 'route' as IconName }] : []),
+      { id: '/dashboard/sessions', label: 'Talk to a mentor, free', icon: 'calendar' as IconName },
+      { id: 'how', label: 'How does this work?', icon: 'bulb' as IconName },
+    ].slice(0, 4),
+  })
+  const guideNudge = (): GuideLine | null => {
+    const lines: string[] = []
+    const actions: GuideLine['actions'] = []
+    if (data.eligibilityVisible && !done.eligibility) {
+      lines.push('Checking if you qualify takes just 2 minutes, no maths. Then a mentor can check scholarships for you on the call.')
+      actions.push({ id: '/dashboard/eligibility', label: 'Check my eligibility · 2 min', icon: 'award', primary: true })
+    }
+    if (!done.roadmap) {
+      lines.push('Your roadmap isn’t built yet: the skills to learn, in order, and the projects to build.')
+      actions.push({ id: '/dashboard/roadmap', label: 'Build my roadmap', icon: 'route' })
+    }
+    if (!lines.length && !done.sessions) {
+      lines.push('A free 1:1 with a mentor turns your reports into a real plan.')
+      actions.push({ id: '/dashboard/sessions', label: 'Book my free 1:1', icon: 'calendar', primary: true })
+    }
+    if (!lines.length) return null
+    return { text: `Leaving already, ${data.first}? ${lines.join(' ')}`, actions: [...actions, { id: 'later', label: 'I’ll come back later' }] }
+  }
+  // ---------- feedback: asked by Richa after a few tasks, or at the end (never after a single task) ----------
+  const tasksDone = [done['skill-gap'], done.salary, done.roadmap, done.eligibility, done.sessions].filter(Boolean).length
+  const ratedKey = `lcn_rated:${data.userId}:${who.id}`
+  const alreadyRated = () => { try { return window.localStorage.getItem(ratedKey) === '1' } catch { return false } }
+  askRatingRef.current = async (why) => {
+    if (alreadyRated() || !guide.current) return
+    try { window.sessionStorage.setItem('lcn_rating_asked', '1') } catch { /* ignore */ }
+    const text = why === 'milestones'
+      ? `Great progress, ${data.first}! You’ve done ${tasksDone} steps already. Mind rating your experience so far? It takes 10 seconds.`
+      : `Before you go, ${data.first}: how was your time with ${who.name} today?`
+    const sent = await guide.current.askRating({ counsellor: who.id, counsellorName: who.name, testTaken: done.eligibility, threadId }, text)
+    if (sent) { try { window.localStorage.setItem(ratedKey, '1') } catch { /* ignore */ } }
+  }
+  // After a few tasks, once per visit, Richa asks (a short pause first, so it never interrupts a step).
+  useEffect(() => {
+    if (tasksDone < 3) return
+    try { if (window.sessionStorage.getItem('lcn_rating_asked') === '1') return } catch { return }
+    const t = window.setTimeout(() => { void askRatingRef.current('milestones') }, 8000)
+    return () => window.clearTimeout(t)
+  }, [tasksDone])
+
+  const onGuide = (id: string) => {
+    if (id === 'later') {
+      if (!alreadyRated() && tasksDone > 0) { void askRatingRef.current('leaving'); return }
+      guide.current?.say({ text: `Thank you for your time, ${data.first}! Your plan and chat are saved, and we’re right here whenever you want to continue.`, autoCloseMs: 12000 })
+      return
+    }
+    if (id === 'how') {
+      guide.current?.say({
+        text: `${who.name}, your counsellor, builds three free reports with you (skill gaps, salary, roadmap), then a 2-minute eligibility check, and a mentor turns it into a plan on a free call.`,
+        actions: guideHelp().actions?.filter((a) => a.id !== 'how'),
+      })
+      return
+    }
+    guide.current?.close()
+    setDrawer(null)
+    ctx.go(id)
+  }
+  const sayGoodbye = async () => {
+    guide.current?.say({ text: `Thank you for your time, ${data.first}! We’re right here whenever you want to continue.` })
+    await new Promise((r) => setTimeout(r, 1200))
+  }
 
   const left = (
     <>
       <nav className="ts-nav" aria-label="Career Studio">
-        <NavItem href="/dashboard" icon="message" label={`Chat with ${who.name}`} active={topicOf(pathname) === 'home'} onSame={sameTopic} />
         <p className="ts-label">Your reports</p>
         {TOOLS.map((t) => (
           <NavItem key={t.id} href={t.route} icon={t.icon} label={t.name} active={topicOf(pathname) === t.id} done={done[t.id]} dot={t.id === nextTool} onSame={sameTopic} />
@@ -332,37 +467,22 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
         <NavItem href="/dashboard/sessions" icon="calendar" label="Talk to a mentor" active={topicOf(pathname) === 'sessions'} done={done.sessions} onSame={sameTopic} accent />
         <NavItem href="/dashboard/masterclasses" icon="play" label="Masterclasses" active={topicOf(pathname) === 'masterclasses'} onSame={sameTopic} />
       </nav>
-      {threads.length > 0 && (
-        <div className="ts-threads">
-          <p className="ts-label">Your chats</p>
-          <ul>
-            {threads.slice(0, 12).map((t) => (
-              <li key={t.id}>
-                <button type="button" className={`ts-thread ${t.id === threadId ? 'on' : ''}`} onClick={() => openThread(t.id)} aria-current={t.id === threadId ? 'true' : undefined}>
-                  <span className="ts-thread-title">{t.title}</span>
-                  <span className="ts-thread-time">{ago(t.updated_at)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
       <div className="ts-foot">
-        <Link href="/dashboard/profile" className="ts-me" scroll={false}>
-          <span className="ts-initials" aria-hidden="true">{initials(data.name)}</span>
-          <span><b>{data.name}</b><small>My profile</small></span>
-        </Link>
+        <button type="button" className="ts-richa" onClick={() => { setDrawer(null); guide.current?.say(guideHelp()) }}>
+          <Avatar who="bot" size={40} online />
+          <span><b>Richa · your guide</b><small>Ask me anything</small></span>
+          <Icon name="message" size="1rem" />
+        </button>
         <div className="ts-foot-row">
-          <button type="button" className="ts-link" onClick={() => { setDrawer(null); chat.run((bot) => endFlow(bot, ctx)) }}><Icon name="x" size="1rem" /> End chat</button>
           <Link href="/dashboard/help" className="ts-link" scroll={false}><Icon name="lifebuoy" size="1rem" /> Help</Link>
-          <LogoutButton className="ts-link" showIcon />
+          <LogoutButton className="ts-link" showIcon before={sayGoodbye} />
         </div>
       </div>
     </>
   )
 
   const right = (
-    <StudioPanel counsellor={who.id} answers={answers} tools={tools} eligibilityDone={done.eligibility} eligibilityVisible={data.eligibilityVisible} onCall={() => ctx.call('button')} onNavigate={() => setDrawer(null)} />
+    <StudioPanel counsellor={who.id} rating={who.id === data.counsellor.id ? rating : null} answers={answers} tools={tools} eligibilityDone={done.eligibility} eligibilityVisible={data.eligibilityVisible} onCall={() => ctx.call('button')} onNavigate={() => setDrawer(null)} />
   )
 
   const track = trackOf(answers.interest)
@@ -407,6 +527,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
           </aside>
         </>
       )}
+      <RichaGuide ref={guide} first={data.first} help={guideHelp} nudge={guideNudge} onAction={onGuide} />
       {children}
     </div>
   )

@@ -2,8 +2,8 @@ import { timingSafeEqual } from 'node:crypto'
 import { ensureDefaultFlows, processDueEmails } from '@/lib/email/flows'
 
 /**
- * For hosts without a long-running server (serverless): call this every minute from a scheduler with
- * `Authorization: Bearer <CRON_SECRET>`. Disabled (404) unless CRON_SECRET is set.
+ * For hosts without a long-running server (serverless): call this from a scheduler with
+ * `Authorization: Bearer <CRON_SECRET>` (Vercel Cron sends it with GET). Disabled (404) unless CRON_SECRET is set.
  */
 export async function POST(request: Request) {
   const secret = process.env.CRON_SECRET
@@ -14,3 +14,5 @@ export async function POST(request: Request) {
   await ensureDefaultFlows()
   return Response.json(await processDueEmails())
 }
+
+export const GET = POST

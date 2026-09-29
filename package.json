@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "admin:password": "node --env-file-if-exists=.env scripts/admin-password.mjs",
     "backup": "node --env-file-if-exists=.env scripts/backup-content.mjs",
-    "restore": "node --env-file-if-exists=.env scripts/restore-content.mjs"
+    "restore": "node --env-file-if-exists=.env scripts/restore-content.mjs",
+    "db:seed-projects": "node --env-file-if-exists=.env scripts/seed-projects.mjs"
   },
   "dependencies": {
     "next": "^16.3.6",

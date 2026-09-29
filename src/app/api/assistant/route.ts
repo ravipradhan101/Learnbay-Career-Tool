@@ -8,6 +8,10 @@ import { getAnswers, getReadyResults } from '@/lib/data'
 import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
 import { firstName } from '@/lib/validation'
 import type { ToolResultMap } from '@/lib/tool-types'
+import { TRACK_TARGET, type Answers } from '@/lib/questions'
+import { skillFamily } from '@/lib/skills'
+import { projectTitles } from '@/lib/projects'
+import { programForLearner } from '@/lib/segments'
 
 export const maxDuration = 60
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -58,18 +62,34 @@ export async function POST(request: Request) {
   const conversationId = typeof body?.conversationId === 'string' && UUID_RE.test(body.conversationId) ? body.conversationId : randomUUID()
   const history = await query<{ role: 'user' | 'model'; content: string }>(
     `SELECT role, content FROM (
-       SELECT role, content, created_at, id FROM chat_messages WHERE user_id = $1 AND conversation_id = $2
+       SELECT role, content, created_at, id FROM chat_messages WHERE user_id = $1 AND (conversation_id = $2 OR created_at > now() - interval '30 days')
         ORDER BY created_at DESC, id DESC LIMIT 10
      ) h ORDER BY created_at, id`,
     [user.id, conversationId],
   )
 
+  // The projects the program's library holds for this learner (so the counsellor names real ones).
+  const recommended = answers ? programForLearner(answers) : undefined
+  const projectTitlesList = recommended ? await projectTitles(recommended.id, answers?.domain, 12, answers?.role).catch(() => []) : []
   let out
   try {
-    out = await askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel })
+    out = await askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel, projectTitles: projectTitlesList })
   } catch (err) {
     console.error('[assistant] failed', (err as Error).message)
     return jsonError(502, 'I am busy right now. Please try again in a moment.')
+  }
+  // The learner said something that changes their profile (e.g. "I don't code", "I'm a designer now", "I want data
+  // science instead"): save it, so the recommended program, cards and reports follow straight away.
+  let updated: { answers: Answers; reportsReset: boolean } | null = null
+  if (out.profileUpdate && answers) {
+    const prev = answers
+    const next: Answers = { ...prev, ...out.profileUpdate }
+    if (out.profileUpdate.interest) next.targetRole = TRACK_TARGET[out.profileUpdate.interest] ?? prev.targetRole
+    delete next.program
+    const reportsReset = next.interest !== prev.interest || skillFamily(next) !== skillFamily(prev)
+    await query(`UPDATE assessments SET answers = $2, updated_at = now() WHERE user_id = $1`, [user.id, JSON.stringify(next)])
+    if (reportsReset) await query(`UPDATE tool_results SET status = 'pending', attempts = 0, error = NULL, updated_at = now() WHERE user_id = $1 AND status IN ('ready', 'failed')`, [user.id])
+    updated = { answers: next, reportsReset }
   }
   if (intent) {
     await query(`INSERT INTO chat_messages (user_id, conversation_id, role, content, context) VALUES ($1, $2, 'model', $3, $4)`, [user.id, conversationId, out.reply, context])
@@ -79,5 +99,5 @@ export async function POST(request: Request) {
       [user.id, conversationId, message, out.reply, context],
     )
   }
-  return jsonOk({ ...out, conversationId })
+  return jsonOk({ ...out, conversationId, ...(updated ? { answers: updated.answers, reportsReset: updated.reportsReset } : {}) })
 }

@@ -12,6 +12,9 @@ const TABS = [
   { href: '/admin/leads', label: 'Leads' },
   { href: '/admin/eligibility', label: 'Eligibility test' },
   { href: '/admin/emails', label: 'Emails' },
+  { href: '/admin/reviews', label: 'Reviews & suggestions' },
+  { href: '/admin/topics', label: 'Topic requests' },
+  { href: '/admin/projects', label: 'Projects' },
 ]
 
 /** Report tabs; the selected date range carries across tabs. */

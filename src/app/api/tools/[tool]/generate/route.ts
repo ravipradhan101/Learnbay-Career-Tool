@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { query, queryOne } from '@/lib/db'
 import { getReadyResults } from '@/lib/data'
 import { triggerFlows } from '@/lib/email/flows'
+import { background } from '@/lib/background'
 import { sendToolReadyEmail } from '@/lib/mailer'
 import { isAnswered, type Answers } from '@/lib/questions'
 import { clientIp, isSameOrigin, jsonError, jsonOk, rateLimits } from '@/lib/security'
@@ -52,6 +53,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ too
     return jsonError(502, 'We could not build this just now. Please try again.')
   }
   triggerFlows(user.id, 'tool_completed')
-  sendToolReadyEmail(user.id, user.email, firstName(user.name), meta.name, meta.route).catch((e) => console.error('[tool] email failed', (e as Error).message))
+  background('tool:email', () => sendToolReadyEmail(user.id, user.email, firstName(user.name), meta.name, meta.route))
   return jsonOk({ status: 'ready' })
 }

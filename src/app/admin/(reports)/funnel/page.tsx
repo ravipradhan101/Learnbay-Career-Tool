@@ -1,5 +1,5 @@
 import { Empty, Funnel, PageHead, fmtInt, fmtPct, fmtSecs } from '@/components/admin/parts'
-import { STEP_NAMES, acquisitionFunnel, activationFunnel, dropOffs, featureName, pageName, parseRange } from '@/lib/admin-reports'
+import { STEP_NAMES, acquisitionFunnel, activationFunnel, conversationFunnel, dropOffs, featureName, pageName, parseRange } from '@/lib/admin-reports'
 import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata = { title: 'Funnel & drop-off' }
@@ -7,7 +7,7 @@ export const metadata = { title: 'Funnel & drop-off' }
 export default async function FunnelPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requireAdmin()
   const range = parseRange((await searchParams).range)
-  const [acq, act, d] = await Promise.all([acquisitionFunnel(range.since), activationFunnel(range.since), dropOffs(range.since)])
+  const [acq, act, conv, d] = await Promise.all([acquisitionFunnel(range.since), activationFunnel(range.since), conversationFunnel(range.since), dropOffs(range.since)])
   const exitTotal = d.onboardingExit.reduce((s, x) => s + x.visitors, 0)
   const maxField = Math.max(1, ...d.contactFields.map((f) => f.focused))
 
@@ -25,6 +25,14 @@ export default async function FunnelPage({ searchParams }: { searchParams: Promi
           <Funnel steps={act} />
         </section>
       </div>
+
+      <section className="card stack">
+        <div>
+          <h2 className="card-title">Counsellor conversation</h2>
+          <p className="card-sub">Signed-in learners reaching each stage of the counsellor's conversation: why now, their situation, the need check, the report, the eligibility test and the decision.</p>
+        </div>
+        <Funnel steps={conv} />
+      </section>
 
       <div className="admin-grid-2">
         <section className="card stack">

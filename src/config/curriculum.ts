@@ -68,6 +68,21 @@ export const CURRICULUM: Record<string, Curriculum> = {
   },
 }
 
+CURRICULUM['genai-agentic-ai-managers-leaders'] = {
+  liveHours: '150+ hours of live instructor-led classes',
+  projects: '10+ guided hands-on projects',
+  modules: [
+    'Induction & orientation: AI career paths and role mapping',
+    'Python for GenAI',
+    'Foundation for GenAI',
+    'Generative AI for managers',
+    'Agentic AI',
+    'GenAI for digital business transformation',
+    'GenAI for project management',
+  ],
+  capstones: ['Business transformation use cases with GenAI', 'Workflow automation with AI agents'],
+}
+
 /** Published on every flagship program page ("Others Vs Learnbay" and the program highlights). */
 export const CURRICULUM_EDGE = [
   'Live, mentor-led, interactive classes (not mostly recorded sessions)',

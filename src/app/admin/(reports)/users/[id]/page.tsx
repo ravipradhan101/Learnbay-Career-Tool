@@ -5,6 +5,8 @@ import { Empty, Stat, fmtDate, fmtInr, fmtInt, fmtTokens } from '@/components/ad
 import { STEP_NAMES, featureName, pageName, userJourney } from '@/lib/admin-reports'
 import { experienceLabel, interestLabel, roleLabel, type Answers } from '@/lib/questions'
 import { requireAdmin } from '@/lib/admin-auth'
+import { query } from '@/lib/db'
+import { getCounsellor } from '@/lib/counsellors'
 
 export const metadata = { title: 'Learner journey' }
 
@@ -49,6 +51,11 @@ export default async function UserJourneyPage({ params }: { params: Promise<{ id
   const data = await userJourney((await params).id)
   if (!data) notFound()
   const { user, events, tools, tokens, sessions } = data
+  // Every chat the learner had (learners only see the current one; the history is here for the team).
+  const chats = await query<{ id: string; title: string; counsellor: string | null; items: { kind: string; text?: string; by?: string; card?: { type?: string } }[]; updated_at: Date }>(
+    `SELECT id, title, counsellor, items, updated_at FROM chat_threads WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 30`,
+    [user.id],
+  )
   const a = (user.answers ?? {}) as Answers
   const totalTokens = tokens.reduce((s, t) => s + t.total, 0)
   const totalCost = tokens.reduce((s, t) => s + t.costInr, 0)
@@ -122,6 +129,25 @@ export default async function UserJourneyPage({ params }: { params: Promise<{ id
             ))}
           </ul>
         ) : <Empty>No activity recorded for this learner yet (tracking started with this release).</Empty>}
+      </section>
+      <section className="card stack">
+        <div>
+          <h2 className="card-title">Chats</h2>
+          <p className="card-sub">Every conversation this learner had with their counsellors, newest first. Learners only see their current chat.</p>
+        </div>
+        {chats.length ? chats.map((c) => (
+          <details key={c.id}>
+            <summary><b>{c.title}</b> <span className="muted small">· {c.counsellor ? getCounsellor(c.counsellor).name : 'Counsellor'} · {fmtDate(c.updated_at)} · {c.items.length} items</span></summary>
+            <ol className="small" style={{ margin: '0.5rem 0 0', paddingLeft: '1.2rem', display: 'grid', gap: '0.35rem' }}>
+              {c.items.filter((it) => it.kind === 'user' || it.kind === 'bot' || it.kind === 'event' || it.kind === 'card').map((it, n) => (
+                <li key={n} style={{ whiteSpace: 'pre-wrap' }}>
+                  {it.kind === 'user' ? <b>Learner: </b> : it.kind === 'bot' ? <span className="muted">{it.by ? getCounsellor(it.by).name : 'Counsellor'}: </span> : null}
+                  {it.kind === 'card' ? <span className="muted">[{it.card?.type ?? 'card'} card]</span> : it.kind === 'event' ? <span className="muted">— {it.text} —</span> : it.text}
+                </li>
+              ))}
+            </ol>
+          </details>
+        )) : <Empty>No saved chats for this learner.</Empty>}
       </section>
     </>
   )

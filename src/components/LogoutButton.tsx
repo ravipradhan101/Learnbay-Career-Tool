@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { Icon } from './Icon'
 import { clearCachedChats, clearGuestChat } from '@/lib/client'
 
-export function LogoutButton({ className = 'btn btn-ghost', showIcon = false }: { className?: string; showIcon?: boolean }) {
+export function LogoutButton({ className = 'btn btn-ghost', showIcon = false, before }: { className?: string; showIcon?: boolean; before?: () => Promise<void> }) {
   const [busy, setBusy] = useState(false)
   async function logout() {
     setBusy(true)
+    if (before) await before().catch(() => {})
     clearGuestChat()
     clearCachedChats()
     try {

@@ -1,8 +1,10 @@
+import { programForLearner } from './segments'
+import { ALL_PROBES, ALL_TRIGGERS, PROBES, SEGMENT_LABEL, STUDY_STAGES, segmentOf } from './segments'
 import { PROGRAMS, programsForInterest } from '@/config/programs'
 import { RESOURCES } from '@/config/resources'
 import { generateJson } from './gemini'
 import {
-  CITIES, CTC_BANDS, PROGRAMMER, SKILLS, SKILL_NONE, TIMELINES, WEEKLY_HOURS, experienceLabel, interestLabel, labelOf,
+  CITIES, COMPANY_TYPES, CTC_BANDS, PROGRAMMER, SKILLS, SKILL_NONE, TIMELINES, WEEKLY_HOURS, experienceLabel, interestLabel, labelOf,
   DIFFICULTIES, LEARNING_SOURCES, SKILL_LEVELS, domainLabel, goalLabel, roleLabel, targetRoleLabel, type Answers,
 } from './questions'
 import type { ToolId } from './tools-meta'
@@ -16,6 +18,10 @@ export function describeLearner(a: Answers): string {
   return [
     ...(goalLabel(a) ? [`Career goal: ${goalLabel(a)}`] : []),
     ...(domainLabel(a) ? [`Industry / domain: ${domainLabel(a)}`] : []),
+    `Segment: ${SEGMENT_LABEL[segmentOf(a)]}`,
+    ...(a.studyStage ? [`Study stage: ${labelOf(STUDY_STAGES, a.studyStage)}`] : []),
+    ...(a.trigger ? [`Why they are looking now (their own words): ${labelOf(ALL_TRIGGERS, a.trigger)}`] : []),
+    ...(a.probe ? [`About their situation: ${PROBES[segmentOf(a)].question} → ${labelOf(ALL_PROBES, a.probe)}`] : []),
     ...(a.learning ? [`Already learning: ${labelOf(LEARNING_SOURCES, a.learning)}`] : []),
     ...(a.difficulty ? [`Biggest difficulty so far: ${labelOf(DIFFICULTIES, a.difficulty)}`] : []),
     `Current role: ${roleLabel(a)}`,
@@ -28,6 +34,8 @@ export function describeLearner(a: Answers): string {
     `City: ${labelOf(CITIES, a.city) ?? 'Not answered'}`,
     `Weekly learning time: ${labelOf(WEEKLY_HOURS, a.weeklyHours) ?? 'Not answered'}`,
     `Timeline: ${labelOf(TIMELINES, a.timeline) ?? 'Not answered'}`,
+    ...(a.companyType ? [`Company type: ${labelOf(COMPANY_TYPES, a.companyType)}`] : []),
+    ...(a.program ? [`Program they chose with their counsellor: ${PROGRAMS.find((p) => p.id === a.program)?.name ?? a.program}`] : []),
   ].join('\n')
 }
 
@@ -40,8 +48,10 @@ Rules:
 - Keep every string concise; UI space is limited.`
 
 function programCatalog(a: Answers): string {
+  const chosen = programForLearner(a)
   const preferred = programsForInterest(a.interest)
-  return `Learnbay program catalog (prefer these for their interest: ${preferred.map((p) => p.id).join(', ')}):\n` +
+  return `${chosen ? `The learner's counsellor recommends ${chosen.name} (programId ${chosen.id}). Use programId ${chosen.id}, and build the plan, skills and projects around what that program teaches.\n` : ''}` +
+    `Learnbay program catalog (prefer these for their interest: ${preferred.map((p) => p.id).join(', ')}):\n` +
     PROGRAMS.map((p) => `- ${p.id}: ${p.name}. ${p.summary} Best for: ${p.bestFor}.`).join('\n')
 }
 
@@ -229,7 +239,7 @@ const SCHEMAS: Record<ToolId, Record<string, unknown>> = {
 
 const TASKS: Record<ToolId, string> = {
   'skill-gap': 'Produce a detailed skill gap analysis for the target role: readiness, skill-by-skill levels, how to close each top gap, what employers look for, interview topics, proof projects, a 4-week starter plan and common mistakes.',
-  salary: 'Produce a detailed, indicative India salary benchmark in INR lakhs per annum (LPA) for their experience level and city: target role ranges, employer types, cities, the career ladder, skill premiums and negotiation tips. Keep every range realistic and internally consistent.',
+  salary: 'Produce a detailed, indicative India salary benchmark in INR lakhs per annum (LPA) for their experience level and city: target role ranges, employer types, cities, the career ladder, skill premiums and negotiation tips. Keep every range realistic and internally consistent. Target roles: pick roles (fitting their recommended program) whose typical range sits at least 20% above their current CTC band, so the move is a real step up; the growth range starts at 20% or more. These are indicative market ranges, never a promise. If their current CTC is above ₹50 LPA: a 20% jump is not automatic at that level, so be honest; use their company type to explain how an AI-focused role or AI leadership adds career value (scope, leadership, staying relevant) and where it can move pay, and if an AI role would not help them, say so and suggest the Learnbay program that fits better (for leaders, the GenAI & Agentic AI Program for Managers & Leaders).',
   roadmap: 'Produce a detailed month-by-month career roadmap paced to their weekly hours and timeline: phases with deliverables and practice, projects, monthly checkpoints, interview preparation, portfolio tips and risks.',
 }
 
@@ -250,7 +260,8 @@ function range(v: unknown, fb: [number, number]) {
 }
 function programFit(r: Record<string, unknown>, a: Answers) {
   const preferred = programsForInterest(a.interest)
-  const program = PROGRAMS.find((p) => p.id === r.programId) ?? preferred[0]
+  // The counsellor's program wins, so every report recommends the same course the chat does.
+  const program = programForLearner(a) ?? PROGRAMS.find((p) => p.id === r.programId) ?? preferred[0]
   return { programId: program.id, whyProgram: strList(r.whyProgram, 3) }
 }
 
@@ -306,6 +317,8 @@ function sanitize(tool: ToolId, raw: unknown, a: Answers): ToolResultMap[ToolId]
     const growth = obj(r.growth)
     let minP = Math.round(n(growth.minPercent, 0, 300, 20)), maxP = Math.round(n(growth.maxPercent, 0, 300, 60))
     if (minP > maxP) [minP, maxP] = [maxP, minP]
+    // Below ₹50 LPA the target is always a real step up: at least 20% (an indicative range, not a promise).
+    if (a.ctc && a.ctc !== 'gt50' && a.ctc !== 'na') { minP = Math.max(minP, 20); maxP = Math.max(maxP, minP + 10) }
     const result: SalaryResult = {
       ...base,
       currentRoleMarket: range(r.currentRoleMarket, [6, 12]),

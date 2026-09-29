@@ -1,6 +1,8 @@
+import { PROGRAMS } from '@/config/programs'
+import { ALL_PROBES, ALL_TRIGGERS, STUDY_STAGES } from './segments'
 import {
   CITIES, CTC_BANDS, DIFFICULTIES, DOMAINS, EXPERIENCE, GOALS, INTERESTS, LEARNING_SOURCES, SKILL_LEVELS, PROGRAMMER, ROLES, ROLE_OTHER, SKILLS, SKILL_NONE, TARGET_NOT_SURE, TARGET_ROLES,
-  TIMELINES, WEEKLY_HOURS, EDU_LEVELS, MATH_COMFORT, isValidPhone, type Answers, type Option,
+  TIMELINES, WEEKLY_HOURS, COMPANY_TYPES, EDU_LEVELS, MATH_COMFORT, isValidPhone, type Answers, type Option,
 } from './questions'
 import { cleanText, normalizeEmail } from './security'
 
@@ -25,6 +27,11 @@ export function sanitizeAnswers(input: unknown): Answers {
   const set = <K extends keyof Answers>(key: K, value: Answers[K] | undefined) => { if (value !== undefined) out[key] = value }
   set('goal', pickOne(GOALS, a.goal))
   set('domain', pickOne(DOMAINS, a.domain))
+  set('studyStage', pickOne(STUDY_STAGES, a.studyStage))
+  if (typeof a.program === 'string' && PROGRAMS.some((p) => p.id === a.program)) out.program = a.program
+  set('companyType', pickOne(COMPANY_TYPES, a.companyType))
+  set('trigger', pickOne(ALL_TRIGGERS, a.trigger))
+  set('probe', pickOne(ALL_PROBES, a.probe))
   set('learning', pickOne(LEARNING_SOURCES, a.learning))
   set('difficulty', pickOne(DIFFICULTIES, a.difficulty))
   if (a.skillLevels && typeof a.skillLevels === 'object' && !Array.isArray(a.skillLevels)) {

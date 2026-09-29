@@ -1,6 +1,8 @@
 import { getCurrentUser } from '@/lib/auth'
 import { transaction } from '@/lib/db'
+import { PROGRAMS } from '@/config/programs'
 import { TRACKS, TRACK_TARGET, type Answers } from '@/lib/questions'
+import { skillFamily } from '@/lib/skills'
 import { isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
 
 /**
@@ -13,18 +15,25 @@ export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) return jsonError(401, 'Please sign in again.')
   if (!(await rateLimit(`track:user:${user.id}`, 5, 24 * 3600))) return jsonError(429, 'You’ve changed tracks a few times today. A mentor can help you decide on a free call.')
-  const body = await readJson<{ interest?: unknown }>(request, 1_000)
-  const target = TRACKS.find((t) => t.interest === body?.interest)
-  if (!target) return jsonError(400, 'Unknown track.')
+  const body = await readJson<{ interest?: unknown; program?: unknown }>(request, 1_000)
+  // A program the learner approved (e.g. Applied AI Practitioner instead of GenAI & Agentic AI), or a whole track.
+  const program = PROGRAMS.find((p) => p.id === body?.program)
+  const target = program ? TRACKS.find((t) => program.interests.includes(t.interest)) : TRACKS.find((t) => t.interest === body?.interest)
+  if (!target && !program) return jsonError(400, 'Unknown track.')
 
   const answers = await transaction(async (db) => {
     const row = await db.query<{ answers: Answers }>(`SELECT answers FROM assessments WHERE user_id = $1 FOR UPDATE`, [user.id])
     if (!row.rows[0]) return null
     const prev = row.rows[0].answers
-    if (prev.interest === target.interest) return prev
-    const next: Answers = { ...prev, interest: target.interest, targetRole: TRACK_TARGET[target.interest] }
+    const interest = target?.interest ?? prev.interest
+    if (!program && prev.interest === interest) return prev
+    const next: Answers = { ...prev, interest, targetRole: interest && interest !== prev.interest ? TRACK_TARGET[interest] : prev.targetRole, program: program?.id }
+    if (!program) delete next.program
     await db.query(`UPDATE assessments SET answers = $2, updated_at = now() WHERE user_id = $1`, [user.id, JSON.stringify(next)])
-    await db.query(`UPDATE tool_results SET status = 'pending', attempts = 0, error = NULL, updated_at = now() WHERE user_id = $1 AND status IN ('ready', 'failed')`, [user.id])
+    // Reports built for another track or kind of program are rebuilt for the new one.
+    if (interest !== prev.interest || skillFamily(next) !== skillFamily(prev)) {
+      await db.query(`UPDATE tool_results SET status = 'pending', attempts = 0, error = NULL, updated_at = now() WHERE user_id = $1 AND status IN ('ready', 'failed')`, [user.id])
+    }
     return next
   })
   if (!answers) return jsonError(400, 'Please complete the quick start first.', { redirect: '/start' })

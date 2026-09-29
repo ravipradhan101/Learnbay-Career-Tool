@@ -6,6 +6,7 @@ import { getStudio } from '@/lib/data'
 import { queryOne } from '@/lib/db'
 import { activeSetFor } from '@/lib/eligibility-sets'
 import { allocateCounsellor } from '@/lib/counsellor-server'
+import { ratingOf } from '@/lib/reviews'
 import { interestLabel, roleLabel } from '@/lib/questions'
 import { reportCard, type ToolState } from '@/lib/report-card'
 import { currentCtcRange } from '@/lib/tools'
@@ -29,6 +30,7 @@ export default async function StudioLayout({ children }: { children: React.React
       [user.id],
     ),
   ])
+  const counsellorRating = await ratingOf(counsellor.id)
   const current = currentCtcRange(answers)
   const toolStates = Object.fromEntries(TOOLS.map((t) => {
     const row = tools.find((r) => r.tool === t.id)
@@ -48,6 +50,7 @@ export default async function StudioLayout({ children }: { children: React.React
     latestSession: latestSession ? { preferred_date: latestSession.preferred_date, preferred_time: latestSession.preferred_time, status: latestSession.status } : null,
     firstTime: !meta?.chat,
     counsellor,
+    counsellorRating,
     phoneMasked: user.phone ? `${user.phone_country ?? ''} ••••• ${user.phone.slice(-4)}`.trim() : 'your registered number',
   }
   return (

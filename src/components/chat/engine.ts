@@ -13,6 +13,9 @@ import type { Answers } from '@/lib/questions'
 import type { ReportCard } from '@/lib/report-card'
 import type { ToolId } from '@/lib/tools-meta'
 
+/** A project picked from the library for this learner (kept in the card so a reopened chat shows the same ones). */
+export type ProjectItem = { title: string; description: string; tools: string[]; kind: string; domain: string | null }
+
 export type Choice = { id: string; label: string; hint?: string; icon?: IconName }
 export type EligInProgress = Extract<TestState, { status: 'in_progress' }>
 export type EligCompleted = Extract<TestState, { status: 'completed' }>
@@ -37,13 +40,19 @@ export type Card =
   | { type: 'matching'; track: string }
   | { type: 'counsellor'; id: string; track: string }
   | { type: 'skill-levels'; skills: { id: string; label: string }[] }
-  | { type: 'program'; interest: string }
+  | { type: 'skill-matrix'; skills: { id: string; label: string }[] }
+  | { type: 'program'; interest: string; programId?: string }
   | { type: 'proof' }
-  | { type: 'projects'; interest: string }
+  | { type: 'projects'; interest: string; programId?: string; items?: ProjectItem[] }
+  | { type: 'roles'; roles: string[]; note: string | null; programId?: string }
   | { type: 'career-path'; interest: string; from?: string }
-  | { type: 'why'; interest: string }
-  | { type: 'curriculum'; interest: string }
+  | { type: 'why'; interest: string; programId?: string }
+  | { type: 'curriculum'; interest: string; programId?: string }
   | { type: 'refund' }
+  | { type: 'elig-push' }
+  | { type: 'decision'; eligible: boolean | null; programId?: string }
+  | { type: 'bridge'; have: string[]; add: string[]; role: string; readiness: number | null; program: string }
+  | { type: 'fit'; rows: { programId: string; name: string; score: number; reasons: string[] }[] }
 
 type Base = { id: string; at: number }
 export type Item = Base & (
@@ -62,7 +71,7 @@ type Picked = Choice & { typed?: boolean }
 export type Asking = { placeholder: string; label?: string; inputMode?: 'text' | 'email' | 'numeric'; maxLength?: number }
 
 /** Cards worth keeping when the chat is reopened; interactive ones (forms, the running test) are not. */
-const PERSIST = new Set<Card['type']>(['readiness', 'report', 'elig-result', 'usp', 'intro', 'counsellor', 'program', 'proof', 'projects', 'career-path', 'why', 'curriculum', 'refund'])
+const PERSIST = new Set<Card['type']>(['readiness', 'report', 'elig-result', 'usp', 'intro', 'counsellor', 'program', 'proof', 'projects', 'career-path', 'why', 'curriculum', 'refund', 'elig-push', 'decision', 'roles', 'fit', 'bridge'])
 const MAX_SAVED = 70
 
 export const CANCELLED = Symbol('cancelled')
@@ -70,7 +79,9 @@ export const CANCELLED = Symbol('cancelled')
 export type AiResult = {
   choice?: string; goNow?: boolean; action?: { href: string; label: string } | null; show?: string
   /** Counselling: a probing question with the learner's likely answers, and a better-fitting track (if any). */
-  followUp?: { question: string; options: string[] }; suggestTrack?: string
+  followUp?: { question: string; options: string[] }; suggestTrack?: string; suggestProgram?: string
+  /** The counsellor updated the learner's profile from this message (the question on screen may no longer apply). */
+  profileUpdated?: boolean
 }
 export type AiOpts = {
   message?: string; intent?: 'welcome' | 'report' | 'need' | 'analysis'; context: string
@@ -134,7 +145,13 @@ export type Bot = {
   alive: () => void
 }
 
-export function useChat({ storageKey, signedIn, speaker, threadId = null }: { storageKey: string | null; signedIn: boolean; speaker: string; threadId?: string | null }) {
+export function useChat({ storageKey, signedIn, speaker, threadId = null, onProfile }: {
+  storageKey: string | null; signedIn: boolean; speaker: string; threadId?: string | null
+  /** The counsellor updated the profile from what the learner said (so cards and suggestions follow). */
+  onProfile?: (answers: Answers, reportsReset: boolean) => void
+}) {
+  const onProfileRef = useRef(onProfile)
+  onProfileRef.current = onProfile
   const [items, setItems] = useState<Item[]>([])
   const [prompt, setPrompt] = useState<Prompt | null>(null)
   const [asking, setAsking] = useState<Asking | null>(null)
@@ -162,6 +179,13 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
   whoRef.current = who
   const [callOffer, setCallOffer] = useState(false)
   const itemsRef = useRef<Item[]>([])
+  // The latest unsaved state of the chat; switching chats sends it straight away instead of dropping it.
+  const unsaved = useRef<{ id: string; body: string } | null>(null)
+  const flush = () => {
+    const p = unsaved.current
+    unsaved.current = null
+    if (p) fetch(`/api/chats/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: p.body, keepalive: true }).catch(() => {})
+  }
   itemsRef.current = items
 
   // ---------- persistence ----------
@@ -171,6 +195,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
   useEffect(() => {
     reduced.current = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     clearCachedChats()
+    flush()
     let cancelled = false
     setLoadedKey(null)
     if (threadId) {
@@ -199,10 +224,10 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
       if (!keep.length) return
       const firstUser = keep.find((i) => i.kind === 'user')
       const firstTopic = keep.find((i) => i.kind === 'divider')
-      const title = (firstUser?.kind === 'user' ? firstUser.text : firstTopic?.kind === 'divider' ? firstTopic.text : '').slice(0, 60) || undefined
-      const t = window.setTimeout(() => {
-        fetch(`/api/chats/${threadId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ items: keep, title }) }).catch(() => {})
-      }, 900)
+      // A section's chat is named after the section ("Salary Benchmark"); a free chat after the first thing asked.
+      const title = (firstTopic?.kind === 'divider' ? firstTopic.text : firstUser?.kind === 'user' ? firstUser.text : '').slice(0, 60) || undefined
+      unsaved.current = { id: threadId, body: JSON.stringify({ items: keep, title }) }
+      const t = window.setTimeout(flush, 900)
       return () => window.clearTimeout(t)
     }
     if (storageKey) sessionSet(storageKey, { items: clean(items), conversationId: conversationId.current })
@@ -226,18 +251,23 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
    */
   const typeOut = useCallback(async (id: string, text: string, base: Omit<Extract<Item, { kind: 'bot' }>, 'text'>, alive?: () => void) => {
     const words = text.split(/(\s+)/)
-    if (reduced.current || words.length < 6) { replace(id, { ...base, text }); return }
-    const step = Math.max(14, Math.min(42, 1100 / words.length))
+    if (reduced.current || words.length < 4) { replace(id, { ...base, text }); return }
+    // About 5 words a second with small, uneven gaps and a beat after punctuation, like someone typing quickly.
+    // Long answers speed up so no message takes more than about 5 seconds.
+    const count = Math.ceil(words.length / 2)
+    const base_ = Math.max(28, Math.min(150, 5000 / count))
     for (let n = 2; n < words.length; n += 2) {
       replace(id, { ...base, text: words.slice(0, n).join('') })
-      await sleep(step)
+      const prev = words[n - 2] ?? ''
+      const beat = /[.!?:]$/.test(prev) ? 220 : /,$/.test(prev) ? 90 : 0
+      await sleep(base_ * (0.7 + Math.random() * 0.6) + Math.min(beat, base_ * 2))
       try { alive?.() } catch (e) { replace(id, { ...base, text }); throw e }
     }
     replace(id, { ...base, text })
   }, [replace])
 
-  /** A short, slightly varied pause before typing starts (people pause to read and think). */
-  const thinkMs = (text: string) => Math.round(260 + Math.random() * 320 + Math.min(260, text.length * 2))
+  /** A varied pause before typing starts (people read, think, then type). */
+  const thinkMs = (text: string) => Math.round(650 + Math.random() * 550 + Math.min(900, text.length * 6))
 
   /** Adds the learner's own message (a tap or typed text) to the conversation. */
   const userSays = useCallback((text: string) => add({ id: newId(), at: Date.now(), kind: 'user', text }), [add])
@@ -256,6 +286,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
       return {}
     }
     if (typeof res.data.conversationId === 'string') conversationId.current = res.data.conversationId
+    if (res.data.answers && typeof res.data.answers === 'object') onProfileRef.current?.(res.data.answers as Answers, res.data.reportsReset === true)
     const action = (res.data.action as { href: string; label: string } | null) ?? null
     const f = res.data.followUp as AiResult['followUp'] | undefined
     const out: AiResult = {
@@ -263,11 +294,13 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
       show: typeof res.data.show === 'string' ? res.data.show : undefined,
       followUp: f && typeof f.question === 'string' && Array.isArray(f.options) ? { question: f.question, options: f.options.filter((o) => typeof o === 'string') } : undefined,
       suggestTrack: typeof res.data.suggestTrack === 'string' ? res.data.suggestTrack : undefined,
+      suggestProgram: typeof res.data.suggestProgram === 'string' ? res.data.suggestProgram : undefined,
+      profileUpdated: Boolean(res.data.answers && typeof res.data.answers === 'object'),
     }
     const reply = String(res.data.reply ?? '').trim()
     if (!reply) { replace(typingId, null); return out }
     // While counselling, the route becomes one of the options instead of a button on the message.
-    await typeOut(typingId, reply, { id: typingId, at: Date.now(), kind: 'bot', by: whoRef.current, action: out.goNow || counsel ? null : action })
+    await typeOut(typingId, reply, { id: typingId, at: Date.now(), kind: 'bot', by: whoRef.current, action: out.goNow || counsel || intent ? null : action })
     // While a question is waiting, the learner answers that; suggestions would only compete with it.
     setSuggestions(!pending && !counsel && Array.isArray(res.data.suggestions) ? (res.data.suggestions as string[]).slice(0, 3) : [])
     if (res.data.offerCall === true) setCallOffer(true)
@@ -320,6 +353,8 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null }: { st
       remove(id) { replace(id, null) },
       async choose(choices, opts) {
         alive()
+        // Options on screen: suggested questions would only crowd them.
+        setSuggestions([])
         setPrompt({ choices, style: opts?.style ?? 'rows', question: lastQuestion() })
         const picked = await waitFor<Picked>({ kind: 'choose' })
         alive()

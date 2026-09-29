@@ -77,7 +77,14 @@ export const ROLES: Option[] = [
   { id: 'product-manager', label: 'Product Manager' },
   { id: 'business-non-tech', label: 'Business / Non-Technical' },
   { id: 'student', label: 'Student / Fresher' },
+  // Asked for the Cloud & DevOps track, where each has its own specialisation program
+  { id: 'network-admin', label: 'Network Engineer / Admin' },
+  { id: 'sysadmin', label: 'System Administrator' },
+  { id: 'it-support', label: 'IT Support / Operations' },
+  { id: 'dba', label: 'Database Administrator' },
 ]
+/** Roles shown only to Cloud & DevOps learners. */
+export const CLOUD_ROLES = ['network-admin', 'sysadmin', 'it-support', 'dba']
 export const ROLE_OTHER = 'other'
 
 export const EXPERIENCE: Option[] = [
@@ -139,7 +146,7 @@ export const TARGET_NOT_SURE = 'not-sure'
 export const SKILLS: Option[] = [
   { id: 'python', label: 'Python' },
   { id: 'sql', label: 'SQL' },
-  { id: 'excel', label: 'Excel / BI tools' },
+  { id: 'excel', label: 'Excel' },
   { id: 'api', label: 'API Development' },
   { id: 'java', label: 'Java' },
   { id: 'javascript', label: 'JavaScript' },
@@ -149,6 +156,25 @@ export const SKILLS: Option[] = [
   { id: 'genai', label: 'GenAI / LLMs' },
   { id: 'rag', label: 'RAG' },
   { id: 'prompting', label: 'Prompt Engineering' },
+  // Added for role-specific skill lists (lib/skills.ts)
+  { id: 'git', label: 'Git' },
+  { id: 'statistics', label: 'Statistics' },
+  { id: 'pandas', label: 'Data wrangling (Pandas)' },
+  { id: 'deep-learning', label: 'Deep Learning' },
+  { id: 'agents', label: 'AI agents (LangChain, tools)' },
+  { id: 'vector-db', label: 'Vector databases' },
+  { id: 'linux', label: 'Linux' },
+  { id: 'networking', label: 'Networking' },
+  { id: 'scripting', label: 'Scripting (Bash / Python)' },
+  { id: 'kubernetes', label: 'Kubernetes' },
+  { id: 'cicd', label: 'CI/CD pipelines' },
+  { id: 'terraform', label: 'Terraform / IaC' },
+  { id: 'monitoring', label: 'Monitoring (Prometheus, Grafana)' },
+  { id: 'bi', label: 'Power BI / Tableau' },
+  { id: 'ai-tools', label: 'ChatGPT / Copilot at work' },
+  { id: 'no-code', label: 'No-code automation' },
+  { id: 'data-literacy', label: 'Reading data and dashboards' },
+  { id: 'system-design', label: 'System design' },
 ]
 export const SKILL_NONE = 'none'
 
@@ -176,6 +202,16 @@ export const CITIES: Option[] = [
   { id: 'kolkata', label: 'Kolkata' },
   { id: 'other-india', label: 'Other city in India' },
   { id: 'remote', label: 'Remote / flexible' },
+]
+
+/** Asked only for high earners (₹50 LPA+), so the salary advice fits their employer. */
+export const COMPANY_TYPES: Option[] = [
+  { id: 'product', label: 'Product company / big tech' },
+  { id: 'gcc', label: 'Global capability centre (GCC)' },
+  { id: 'services', label: 'IT services / consulting' },
+  { id: 'bfsi', label: 'Bank, fintech or insurer' },
+  { id: 'startup', label: 'Startup / scale-up' },
+  { id: 'other', label: 'Other' },
 ]
 
 export const WEEKLY_HOURS: Option[] = [
@@ -223,7 +259,13 @@ export type Answers = {
   // onboarding (Richa)
   goal?: string
   domain?: string
+  /** Freshers: final year, job hunting, or working outside tech (asked by Richa). */
+  studyStage?: string
   // first conversation with the counsellor
+  /** "What made you start looking at this now?" (their own reason: the only source of urgency). */
+  trigger?: string
+  /** The answer to their segment's question (see lib/segments). */
+  probe?: string
   learning?: string
   difficulty?: string
   skillLevels?: Record<string, string>
@@ -232,6 +274,10 @@ export type Answers = {
   experience?: string
   programmer?: string
   interest?: string
+  /** A program the learner approved in the chat (overrides the automatic choice). */
+  program?: string
+  /** Asked for the salary benchmark when the current CTC is ₹50 LPA or more. */
+  companyType?: string
   // tool questions
   targetRole?: string
   skills?: string[]

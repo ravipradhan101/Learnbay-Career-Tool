@@ -45,10 +45,6 @@ export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestC
     <ChatWindow
       chat={chat}
       onSend={onSend}
-      onCall={() => {
-        chat.note('Happy to set up a call. Leave your name and number and a Learnbay counsellor will ring you.')
-        chat.addCard({ type: 'call-guest' })
-      }}
       footer={<><Icon name="lock" size="0.85rem" /> Private · Takes about 2 minutes · Free</>}
     />
   )

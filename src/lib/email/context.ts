@@ -31,7 +31,7 @@ export async function loadContext(userId: string): Promise<LearnerContext | null
   }>(
     `SELECT u.id, u.email, u.name, u.phone, u.marketing_opt_out_at IS NOT NULL AS opted_out, u.email_verified_at IS NOT NULL AS verified, a.answers,
             (SELECT array_agg(tool) FROM tool_results t WHERE t.user_id = u.id AND t.status = 'ready') AS ready,
-            EXISTS (SELECT 1 FROM counsellor_requests c WHERE c.user_id = u.id) AS booked,
+            (EXISTS (SELECT 1 FROM counsellor_requests c WHERE c.user_id = u.id) OR EXISTS (SELECT 1 FROM call_requests cr WHERE cr.user_id = u.id)) AS booked,
             (SELECT json_build_object('status', 'completed', 'score', max(e.score)) FROM eligibility_tests e WHERE e.user_id = u.id AND e.status = 'completed' HAVING count(*) > 0) AS elig,
             EXISTS (SELECT 1 FROM resume_analyses r WHERE r.user_id = u.id) AS resume,
             GREATEST(u.created_at, coalesce(u.last_login_at, u.created_at),

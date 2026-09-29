@@ -5,7 +5,7 @@ import { Icon } from '../Icon'
 import { openWhyLearnbay } from '../why/WhyLearnbayButton'
 import { Avatar } from './Avatar'
 import { PartnerLogos } from '../PartnerLogos'
-import { programFor } from '@/config/programs'
+import { programForLearner } from '@/lib/segments'
 import { PUBLISHED_STORY, USPS } from '@/config/usps'
 import { COUNSELLOR_TITLE, getCounsellor } from '@/lib/counsellors'
 import { trackOf, type Answers } from '@/lib/questions'
@@ -16,8 +16,10 @@ import { TOOLS, type ToolId } from '@/lib/tools-meta'
  * Right pane: who is guiding you, your saved reports (always here when you log in), the program your
  * counsellor recommends once they know you, and why Learnbay.
  */
-export function StudioPanel({ counsellor, answers, tools, eligibilityDone, eligibilityVisible, onCall, onNavigate }: {
+export function StudioPanel({ counsellor, rating, answers, tools, eligibilityDone, eligibilityVisible, onCall, onNavigate }: {
   counsellor: string
+  /** From real learner reviews; null until someone has rated this counsellor. */
+  rating: { avg: number; count: number } | null
   answers: Answers
   tools: Record<ToolId, ToolState>
   eligibilityDone: boolean
@@ -27,7 +29,7 @@ export function StudioPanel({ counsellor, answers, tools, eligibilityDone, eligi
 }) {
   const c = getCounsellor(counsellor)
   const t = trackOf(answers.interest)
-  const program = programFor(answers.interest)
+  const program = programForLearner(answers)
   const probed = Boolean(answers.difficulty)
   return (
     <div className="sp">
@@ -36,7 +38,13 @@ export function StudioPanel({ counsellor, answers, tools, eligibilityDone, eligi
         <div className="sp-me-text">
           <b>{c.name}</b>
           <small>{COUNSELLOR_TITLE}{t ? ` · ${t.label}` : ''}</small>
-          <small className="sp-online"><i /> Online · virtual counsellor</small>
+          {rating ? (
+            <span className="sp-rating" aria-label={`Rated ${rating.avg.toFixed(1)} out of 5 by ${rating.count} learner${rating.count === 1 ? '' : 's'}`}>
+              <span className="sp-stars" aria-hidden="true"><span style={{ width: `${(rating.avg / 5) * 100}%` }}>★★★★★</span>★★★★★</span>
+              <b>{rating.avg.toFixed(1)}</b><small>({rating.count})</small>
+            </span>
+          ) : <span className="sp-rating sp-rating-new">★ New · no ratings yet</span>}
+          <small className="sp-online">Online · virtual counsellor</small>
         </div>
         <button type="button" className="sp-call" onClick={onCall} aria-label={`Get a call from ${c.name}`}><Icon name="phone" size="1rem" /></button>
       </section>
