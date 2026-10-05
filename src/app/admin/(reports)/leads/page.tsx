@@ -39,7 +39,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <button className="btn btn-outline">Search</button>
       </form>
       <div className="table-scroll" style={{ background: 'var(--surface)' }}>
-        <table className="admin-table">
+        <table className="admin-table pin-2">
           <thead><tr>{cols.map(([h]) => <th key={h}>{h}</th>)}</tr></thead>
           <tbody>
             {leads.map((l) => <tr key={l.id}>{cols.map(([h, get]) => <td key={h}>{get(l)}</td>)}</tr>)}

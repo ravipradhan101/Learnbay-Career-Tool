@@ -27,6 +27,10 @@ export function sanitizeAnswers(input: unknown): Answers {
   const set = <K extends keyof Answers>(key: K, value: Answers[K] | undefined) => { if (value !== undefined) out[key] = value }
   set('goal', pickOne(GOALS, a.goal))
   set('domain', pickOne(DOMAINS, a.domain))
+  if (out.domain === 'other') {
+    const other = cleanText(a.domainOther, 60)
+    if (other) out.domainOther = other
+  }
   set('studyStage', pickOne(STUDY_STAGES, a.studyStage))
   if (typeof a.program === 'string' && PROGRAMS.some((p) => p.id === a.program)) out.program = a.program
   set('companyType', pickOne(COMPANY_TYPES, a.companyType))

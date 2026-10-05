@@ -79,7 +79,7 @@ export function ProjectLibrary({ projects, programs, domains }: { projects: Admi
   }
 
   const form = (
-    <div className="card stack" style={{ borderColor: '#bfdbfe' }}>
+    <div className="card stack" style={{ borderColor: '#c7d2fe' }}>
       <h3 className="card-title">{editing === 'new' ? 'Add a project' : 'Edit project'}</h3>
       <label className="field"><span className="label">Title</span><input className="input" value={draft.title} maxLength={120} onChange={(e) => setDraft({ ...draft, title: e.target.value })} /></label>
       <label className="field"><span className="label">Description (what they build and the outcome)</span><textarea className="textarea" rows={3} maxLength={600} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></label>
@@ -134,7 +134,7 @@ export function ProjectLibrary({ projects, programs, domains }: { projects: Admi
             <thead><tr><th>Track</th><th>Program</th><th className="num">General</th><th className="num">Domain</th></tr></thead>
             <tbody>
               {counts.map((c) => (
-                <tr key={c.id} style={{ cursor: 'pointer', background: f.program === c.id ? '#eff6ff' : undefined }} onClick={() => setF({ ...f, program: f.program === c.id ? '' : c.id })}>
+                <tr key={c.id} style={{ cursor: 'pointer', background: f.program === c.id ? '#eef2ff' : undefined }} onClick={() => setF({ ...f, program: f.program === c.id ? '' : c.id })}>
                   <td>{c.track}</td><td><b>{c.name}</b></td>
                   <td className="num" style={{ color: c.core < 7 ? '#b45309' : undefined }}>{c.core}</td>
                   <td className="num">{c.domain}</td>

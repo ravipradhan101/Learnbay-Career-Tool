@@ -4,7 +4,7 @@
 import { PROGRAM_DETAILS } from '@/config/program-details'
 import { CURRICULUM } from '@/config/curriculum'
 import { TRACK_PROJECTS } from '@/config/stories'
-import type { Answers } from './questions'
+import { aiVersionOf, type Answers } from './questions'
 import { programForLearner, segmentOf } from './segments'
 
 type Level = 'junior' | 'mid' | 'senior'
@@ -41,13 +41,16 @@ function levelOf(a: Answers): Level {
 /** Roles this learner can aim for after their recommended program. */
 export function rolesFor(a: Answers): string[] {
   const id = programForLearner(a)?.id ?? 'genai-agentic-ai-master'
-  return (ROLE_PATHS[id] ?? ROLE_PATHS['genai-agentic-ai-master'])[levelOf(a)]
+  const roles = (ROLE_PATHS[id] ?? ROLE_PATHS['genai-agentic-ai-master'])[levelOf(a)]
+  // People who don't code grow their own career with AI first ("AI-powered Marketer"), then the program's roles.
+  if (id === 'applied-ai-practitioner' || id === 'genai-agentic-ai-managers-leaders' || a.programmer === 'no') return [...new Set([aiVersionOf(a), ...roles])].slice(0, 3)
+  return roles
 }
 
 /** How the counsellor frames pay (never a promise): a step of at least 20% below ₹50 LPA; career value above it. */
 export function payNote(a: Answers): string | null {
   if (!a.ctc || a.ctc === 'na') return 'Your Salary Benchmark shows how these roles compare with your pay today.'
-  if (a.ctc === 'gt50') return 'At your level the gain is scope and leadership more than a fixed hike; your mentor will map where pay can realistically move.'
+  if (a.ctc === 'gt50') return 'At your level the gain is scope and leadership more than a fixed hike; your Senior Counsellor will map where pay can realistically move.'
   return 'We aim for roles paying at least 20% more than your current band. Your Salary Benchmark shows the indicative ranges.'
 }
 

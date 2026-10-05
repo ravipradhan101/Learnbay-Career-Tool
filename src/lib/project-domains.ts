@@ -38,9 +38,10 @@ export const DOMAIN_TAG: Record<string, string> = {
   'cloud-devops': 'Cloud & DevOps', 'qa-testing': 'QA & testing', 'software-development': 'Software development',
   'genai-software-development': 'GenAI software', 'ai-cloud-devops-llm-infra': 'LLM infrastructure', 'ai-backend-engineering': 'AI backend',
   'distributed-systems-ai': 'Distributed systems', 'multi-agent-workflow-automation': 'Multi-agent automation', 'genai-product-management': 'GenAI product',
+  design: 'Design', 'data-analytics': 'Data & MIS', education: 'Education',
 }
 
-/** The learner's industry (Richa's question) → industry specialisation. */
+/** The learner's industry (Lumi's question) → industry specialisation. */
 const FOR_INDUSTRY: Record<string, string> = { bfsi: 'bfsi', healthcare: 'healthcare', manufacturing: 'manufacturing', retail: 'retail-ecommerce', telecom: 'telecom' }
 /** The learner's role → role specialisations. */
 const FOR_ROLE: Record<string, string[]> = {

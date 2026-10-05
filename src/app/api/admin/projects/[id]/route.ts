@@ -1,6 +1,7 @@
 import { query } from '@/lib/db'
 import { adminGuard, body, isUuid } from '@/lib/email/admin'
 import { parseProject } from '@/lib/project-admin'
+import { domainLabels } from '@/lib/project-roles'
 import { jsonError, jsonOk } from '@/lib/security'
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -16,7 +17,7 @@ export async function PATCH(request: Request, { params }: Ctx) {
     const r = await query(`UPDATE projects SET status = $2, updated_at = now() WHERE id = $1 RETURNING id`, [id, b.status])
     return r.length ? jsonOk() : jsonError(404, 'Project not found.')
   }
-  const { value: p, error } = parseProject(b)
+  const { value: p, error } = parseProject(b, await domainLabels())
   if (!p) return jsonError(400, error ?? 'Invalid project.')
   try {
     const r = await query(

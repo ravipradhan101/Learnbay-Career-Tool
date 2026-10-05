@@ -17,7 +17,8 @@ export function getPool(): Pool {
       connectionString: normalizeDatabaseUrl(env.databaseUrl),
       max: Math.max(2, Number(process.env.DB_POOL_MAX ?? '20') || 20),
       idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 10_000,
+      // Neon can take a few seconds to wake from idle; a short timeout turns that into a failed page load.
+      connectionTimeoutMillis: 20_000,
       ssl: env.databaseSsl ? { rejectUnauthorized: env.databaseSslRejectUnauthorized } : undefined,
     })
     pool.on('error', (err) => console.error('[db] idle client error', err.message))

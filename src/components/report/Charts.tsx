@@ -109,17 +109,33 @@ export function PhaseTimeline({ phases, months }: { phases: { title: string; wee
   const monthMarks = Array.from({ length: months + 1 }, (_, m) => m)
   return (
     <div className="phase-timeline">
-      <div className="pt-axis" aria-hidden="true">{monthMarks.filter((m) => m % Math.ceil(months / 6 || 1) === 0).map((m) => <span key={m} style={{ left: `${(m / months) * 100}%` }}>M{m}</span>)}</div>
-      {bars.map((p, i) => (
-        <div className="pt-row" key={p.title + i}>
-          <span className="pt-label"><b>{i + 1}</b>{p.title}</span>
-          <div className="pt-track">
-            <i className={`c${i % 4}`} style={{ left: `${((p.a - 1) / totalWeeks) * 100}%`, width: `${Math.max(4, ((p.b - p.a + 1) / totalWeeks) * 100)}%` }} title={p.milestone}>
-              <span>{p.weeks}</span>
-            </i>
+      <div className="pt-axis" aria-hidden="true">
+        {monthMarks.filter((m) => m % Math.ceil(months / 6 || 1) === 0).map((m) => (
+          // The first and last marks align to the edge instead of hanging half outside it.
+          <span key={m} className={m === 0 ? 'first' : m === months ? 'last' : ''} style={{ left: `${(m / months) * 100}%` }}>M{m}</span>
+        ))}
+      </div>
+      {bars.map((p, i) => {
+        const left = ((p.a - 1) / totalWeeks) * 100
+        const width = Math.max(4, ((p.b - p.a + 1) / totalWeeks) * 100)
+        const label = p.weeks.replace(/^weeks?\s*/i, 'Wk ')
+        // Short bars can't hold their label: it sits just after the bar (or before it, near the end of the track).
+        const inside = width >= 26
+        const after = !inside && left + width <= 74
+        return (
+          <div className="pt-row" key={p.title + i}>
+            <span className="pt-label"><b>{i + 1}</b>{p.title}</span>
+            <div className="pt-track">
+              <i className={`c${i % 4}`} style={{ left: `${left}%`, width: `${width}%` }} title={`${p.weeks}: ${p.milestone}`}>
+                {inside && <span>{label}</span>}
+              </i>
+              {!inside && (
+                <span className={`pt-out ${after ? 'after' : 'before'}`} style={after ? { left: `calc(${left + width}% + 6px)` } : { right: `calc(${100 - left}% + 6px)` }}>{label}</span>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

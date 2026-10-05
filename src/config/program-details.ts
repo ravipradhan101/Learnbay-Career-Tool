@@ -1,5 +1,5 @@
 // Details of every Learnbay AI, Data and Cloud program, from each program page on learnbay.co (checked 2026-09-29).
-// Durations and fees are left out on purpose (a mentor covers them). The Data Science pages' "industry projects" were
+// Durations and fees are left out on purpose (a Senior Counsellor covers them). The Data Science pages' "industry projects" were
 // system-design exercises reused from another page, so they are not listed. Regenerate when the site changes.
 
 export type ProgramDetail = {

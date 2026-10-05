@@ -111,7 +111,7 @@ export async function acquisitionFunnel(since: Date): Promise<FunnelStep[]> {
     { label: 'Visited any page', count: n(r?.visitors) },
     { label: 'Saw the landing page', count: n(r?.landing), note: 'Some visitors arrive on /start or /login directly' },
     { label: 'Saw the track picker', count: n(r?.tracks) },
-    { label: 'Started chatting with Richa', count: n(r?.started) },
+    { label: 'Started chatting with Lumi', count: n(r?.started) },
     { label: 'Answered: career goal', count: n(r?.goal) },
     { label: 'Answered: industry / background', count: n(r?.domain) },
     { label: 'Answered: experience', count: n(r?.experience) },
@@ -151,7 +151,7 @@ export async function conversationFunnel(since: Date): Promise<FunnelStep[]> {
     { label: 'Said yes to the test', count: n(r?.accepted) },
     { label: 'Finished the test', count: n(r?.tested) },
     { label: 'Were asked to decide', count: n(r?.asked) },
-    { label: 'Booked a mentor call or asked for a call', count: n(r?.decided), note: `${fmtN(r?.emailed)} more asked for the plan by email` },
+    { label: 'Booked a counselling call or asked for a call', count: n(r?.decided), note: `${fmtN(r?.emailed)} more asked for the plan by email` },
   ]
 }
 const fmtN = (v: string | undefined) => n(v).toLocaleString('en-IN')

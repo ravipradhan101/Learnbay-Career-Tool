@@ -3,7 +3,7 @@ import { Empty, PageHead, Stat, fmtDate, fmtInt } from '@/components/admin/parts
 import { requireAdmin } from '@/lib/admin-auth'
 import { parseRange } from '@/lib/admin-reports'
 import { getCounsellor } from '@/lib/counsellors'
-import { reviewReport } from '@/lib/reviews'
+import { DEMO_RATINGS, demoRatingsOn, reviewReport } from '@/lib/reviews'
 
 export const metadata = { title: 'Reviews & suggestions' }
 
@@ -19,7 +19,12 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHead title="Reviews & suggestions" sub={`${range.label}. What learners said in Richa's feedback pop-up (asked after a few steps, or when they leave).`} range={range.key} base="/admin/reviews" />
+      <PageHead title="Reviews & suggestions" sub={`${range.label}. What learners said in Lumi's feedback pop-up (asked after a few steps, or when they leave).`} range={range.key} base="/admin/reviews" />
+      {demoRatingsOn() && (
+        <div className="card demo-banner" role="note">
+          <b>Demo ratings are ON (prototype data).</b> Learners see starting ratings for each counsellor ({Object.entries(DEMO_RATINGS).map(([id, r]) => `${getCounsellor(id).name} ${r.avg} from ${fmtInt(r.count)}`).join(' · ')}), blended with real reviews. Set <code>DEMO_RATINGS=false</code> in the environment before real learners use the app; the figures below are real reviews only.
+        </div>
+      )}
       <div className="stat-grid">
         <Stat label="Reviews" value={fmtInt(total)} note={total >= 200 ? 'showing the latest 200' : undefined} />
         <Stat label="Avg counsellor rating" value={avg ? `${avg.toFixed(2)} / 5` : '—'} />

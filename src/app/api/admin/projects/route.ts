@@ -1,13 +1,14 @@
 import { queryOne } from '@/lib/db'
 import { adminGuard, body } from '@/lib/email/admin'
 import { parseProject } from '@/lib/project-admin'
+import { domainLabels } from '@/lib/project-roles'
 import { jsonError, jsonOk } from '@/lib/security'
 
 /** Add a project to the library (Admin → Projects). */
 export async function POST(request: Request) {
   const admin = await adminGuard(request)
   if (admin instanceof Response) return admin
-  const { value: p, error } = parseProject(await body(request))
+  const { value: p, error } = parseProject(await body(request), await domainLabels())
   if (!p) return jsonError(400, error ?? 'Invalid project.')
   const row = await queryOne<{ id: string }>(
     `INSERT INTO projects (title, description, tools, kind, module, domain, programs, source, status)

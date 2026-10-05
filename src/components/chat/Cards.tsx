@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Icon, type IconName } from '../Icon'
 import { openWhyLearnbay } from '../why/WhyLearnbayButton'
@@ -22,10 +22,10 @@ import { Avatar } from './Avatar'
 import { PartnerLogos } from '../PartnerLogos'
 import { USPS } from '@/config/usps'
 import { track } from '@/lib/analytics'
-import { postJson } from '@/lib/client'
+import { getJson, postJson } from '@/lib/client'
 import { COUNTRY_CODES, isValidPhone } from '@/lib/questions'
 import type { ReportCard } from '@/lib/report-card'
-import { SESSION_TIMES } from '@/lib/sessions'
+import type { Booking, DaySlots } from '@/lib/sessions'
 import { getTool } from '@/lib/tools-meta'
 import type { TestState } from '@/lib/eligibility'
 
@@ -53,7 +53,7 @@ export function CardView({ card, live, onDone }: { card: Card; live: boolean; on
     case 'counsellor': return <CounsellorCard id={card.id} track={card.track} />
     case 'skill-levels': return <SkillLevelsCard skills={card.skills} live={live} onDone={onDone} />
     case 'skill-matrix': return <SkillMatrixCard skills={card.skills} live={live} onDone={onDone} />
-    case 'program': return <ProgramCard interest={card.interest} programId={card.programId} />
+    case 'program': return <ProgramCard interest={card.interest} programId={card.programId} asked={card.asked} />
     case 'proof': return <ProofCard />
     case 'projects': return <ProjectsCard interest={card.interest} programId={card.programId} items={card.items} />
     case 'roles': return <RolesCard roles={card.roles} note={card.note} />
@@ -61,6 +61,7 @@ export function CardView({ card, live, onDone }: { card: Card; live: boolean; on
     case 'why': return <WhyCard interest={card.interest} programId={card.programId} />
     case 'curriculum': return <CurriculumCard interest={card.interest} programId={card.programId} />
     case 'refund': return <RefundCard />
+    case 'companies': return <CompaniesCard />
     case 'elig-push': return <EligPushCard />
     case 'decision': return <DecisionCard eligible={card.eligible} programId={card.programId} />
     case 'fit': return <FitCard rows={card.rows} />
@@ -419,77 +420,123 @@ function UspCard({ ids, lead }: { ids: (keyof typeof USPS)[]; lead?: string }) {
   )
 }
 
-// ---------- Mentor call ----------
+// ---------- Counselling call with a Senior Counsellor ----------
 
-function nextDays(count: number) {
-  const now = new Date()
-  return Array.from({ length: count }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
-    return {
-      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
-      day: i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-IN', { weekday: 'short' }),
-      date: d.getDate(),
-      isToday: i === 0,
-    }
-  })
-}
-function timeAvailable(time: string, isToday: boolean) {
-  if (!isToday) return true
-  const [hm, ap] = time.split(' ')
-  let h = Number(hm.split(':')[0])
-  if (ap === 'PM' && h !== 12) h += 12
-  return h > new Date().getHours() + 1
-}
+type SlotsData = { booking: Booking | null; days: DaySlots[] }
 
+/**
+ * Booking a free call: today or tomorrow, 10 AM to 8 PM IST, greyed out when a slot is full or has passed.
+ * Once booked, the card shows the booking with a Reschedule option (no cancelling).
+ */
 function BookingCard({ live, onDone }: { live: boolean; onDone: Done }) {
-  const days = useMemo(() => nextDays(10), [])
-  const [date, setDate] = useState('')
+  const [data, setData] = useState<SlotsData | null>(null)
+  const [error, setError] = useState('')
+  const [picking, setPicking] = useState(false)
+  const load = useCallback(async () => {
+    const r = await getJson('/api/sessions')
+    if (r.ok) setData({ booking: (r.data.booking as Booking | null) ?? null, days: (r.data.days as DaySlots[]) ?? [] })
+    else setError(r.error)
+  }, [])
+  useEffect(() => { void load() }, [load])
+
+  if (error && !data) return <div className="tc-card"><p className="tc-error" role="alert">{error}</p></div>
+  if (!data) return <div className="tc-card tc-booking"><span className="spinner" /> Loading open slots…</div>
+
+  const b = data.booking
+  if (b && !picking) {
+    return (
+      <div className="tc-card tc-booked">
+        <div className="tc-booked-head">
+          <span className="tc-booked-icon"><Icon name="calendar" size="1.2rem" /></span>
+          <span><small>Your call is booked</small><b>{b.when} <em>IST</em></b></span>
+          <span className="tc-booked-tag"><Icon name="checkCircle" size="0.85rem" /> Confirmed</span>
+        </div>
+        <ul className="tc-booked-list">
+          <li><Icon name="phone" size="0.9rem" /> A Senior Career Counsellor will call you on your registered number.</li>
+          <li><Icon name="file" size="0.9rem" /> Keep your reports handy: they go straight to your plan, program and fees.</li>
+          <li><Icon name="mail" size="0.9rem" /> The confirmation is in your email.</li>
+        </ul>
+        <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => setPicking(true)}><Icon name="refresh" size="0.9rem" /> Reschedule</button>
+      </div>
+    )
+  }
+  return (
+    <SlotPicker
+      days={data.days}
+      current={b}
+      onCancel={b ? () => setPicking(false) : undefined}
+      onBooked={(booking) => {
+        setData({ ...data, booking })
+        setPicking(false)
+        if (live && !b) onDone({ when: booking.when })
+        void load()
+      }}
+    />
+  )
+}
+
+function SlotPicker({ days, current, onBooked, onCancel }: { days: DaySlots[]; current: Booking | null; onBooked: (b: Booking) => void; onCancel?: () => void }) {
+  const firstOpen = days.find((d) => d.slots.some((s) => s.open))?.date ?? days[0]?.date ?? ''
+  const [date, setDate] = useState(firstOpen)
   const [time, setTime] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [when, setWhen] = useState('')
-  const day = days.find((d) => d.value === date)
+  const day = days.find((d) => d.date === date)
+  const dateLabel = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
 
-  async function book() {
+  async function save() {
     setBusy(true)
     setError('')
-    const res = await postJson('/api/sessions', { date, time, note })
+    const res = current ? await postJson('/api/sessions', { date, time }, 'PATCH') : await postJson('/api/sessions', { date, time, note })
     setBusy(false)
-    if (!res.ok) { track('error', 'session_booking', { status: res.status }); return setError(res.error) }
-    track('action', 'session_booked', { time, from: 'chat' })
-    setWhen(String(res.data.when))
-    onDone({ when: String(res.data.when) })
+    if (!res.ok) { track('error', current ? 'session_reschedule' : 'session_booking', { status: res.status }); return setError(res.error) }
+    track('action', current ? 'session_rescheduled' : 'session_booked', { time, from: 'chat' })
+    onBooked(res.data.booking as Booking)
   }
 
-  if (!live || when) return <div className="tc-card tc-done"><Icon name="calendar" size="1.1rem" /> Requested{when ? ` for ${when}` : ''}</div>
   return (
     <div className="tc-card tc-booking">
-      <span className="tc-eyebrow">Pick a day</span>
+      <span className="tc-eyebrow">{current ? `Move your call (now ${current.when})` : 'Pick a day'}</span>
       <div className="tc-days" role="radiogroup" aria-label="Day">
-        {days.map((d) => (
-          <button key={d.value} type="button" role="radio" aria-checked={date === d.value} className="tc-day" onClick={() => { setDate(d.value); setTime('') }}>
-            <small>{d.day}</small><b>{d.date}</b>
-          </button>
-        ))}
+        {days.map((d) => {
+          const any = d.slots.some((s) => s.open)
+          return (
+            <button key={d.date} type="button" role="radio" aria-checked={date === d.date} className="tc-day" disabled={!any} onClick={() => { setDate(d.date); setTime('') }}>
+              <small>{d.label}</small><b>{dateLabel(d.date)}</b>{!any && <em>No slots left</em>}
+            </button>
+          )
+        })}
       </div>
-      {date && (
+      {day && (
         <>
-          <span className="tc-eyebrow">Pick a time (IST)</span>
-          <div className="tc-chips" role="radiogroup" aria-label="Time">
-            {SESSION_TIMES.filter((t) => timeAvailable(t, Boolean(day?.isToday))).map((t) => (
-              <button key={t} type="button" role="radio" aria-checked={time === t} className="tc-chip" onClick={() => setTime(t)}>{t}</button>
-            ))}
+          <span className="tc-eyebrow">Pick a time (IST) · Senior Counsellors call between 10 AM and 8 PM</span>
+          <div className="tc-slots" role="radiogroup" aria-label="Time">
+            {day.slots.map((s) => {
+              const mine = current && current.date === day.date && current.time === s.time
+              const disabled = !s.open || Boolean(mine)
+              return (
+                <button key={s.time} type="button" role="radio" aria-checked={time === s.time} disabled={disabled}
+                  className={`tc-slot${time === s.time ? ' on' : ''}`} onClick={() => setTime(s.time)}
+                  title={mine ? 'Your current time' : s.left <= 0 ? 'This slot is full' : !s.open ? 'This time has passed' : `${s.left} of 10 places left`}>
+                  <b>{s.time}</b>
+                  <small>{mine ? 'Current' : s.left <= 0 ? 'Full' : !s.open ? 'Passed' : s.left <= 3 ? `${s.left} left` : 'Open'}</small>
+                </button>
+              )
+            })}
           </div>
         </>
       )}
-      {time && (
+      {time && !current && (
         <input className="tc-note" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anything to discuss? e.g. fees, EMI, weekend batches (optional)" aria-label="Anything to discuss" />
       )}
       {error && <p className="tc-error" role="alert">{error}</p>}
-      <button type="button" className="tc-btn tc-btn-accent" disabled={busy || !date || !time} onClick={book}>
-        {busy ? <span className="spinner" /> : <><Icon name="calendar" size="1rem" /> Book my free call</>}
-      </button>
+      <div className="tc-actions">
+        <button type="button" className="tc-btn tc-btn-accent" disabled={busy || !date || !time} onClick={save}>
+          {busy ? <span className="spinner" /> : <><Icon name="calendar" size="1rem" /> {current ? 'Move my call' : 'Book my free call'}</>}
+        </button>
+        {onCancel && <button type="button" className="tc-btn tc-btn-ghost" onClick={onCancel} disabled={busy}>Keep my current time</button>}
+      </div>
     </div>
   )
 }
@@ -636,7 +683,7 @@ function LoginCard({ live, onDone }: { live: boolean; onDone: Done }) {
   )
 }
 
-// ---------- Richa finds a counsellor ----------
+// ---------- Lumi finds a counsellor ----------
 
 type Slide =
   | { kind: 'story'; name: string; photo?: string; from: string; to: string; company?: string; hike?: string }
@@ -746,6 +793,10 @@ function MatchingCard({ area, onDone }: { area: string; onDone: Done }) {
 function CounsellorCard({ id, track }: { id: string; track: string }) {
   const c = getCounsellor(id)
   const t = trackOf(track)
+  const [rating, setRating] = useState<{ avg: number; count: number } | null>(null)
+  useEffect(() => {
+    void getJson('/api/counsellor').then((r) => { if (r.ok) setRating(((r.data.ratings as Record<string, { avg: number; count: number }>) ?? {})[id] ?? null) })
+  }, [id])
   return (
     <div className="tc-card tc-counsellor">
       <Avatar who={c.id} size={52} online />
@@ -753,6 +804,7 @@ function CounsellorCard({ id, track }: { id: string; track: string }) {
         <span className="tc-eyebrow">Your counsellor</span>
         <b>{c.name}</b>
         <small>{COUNSELLOR_TITLE}{t ? ` · ${t.label}` : ''}</small>
+        {rating && rating.count >= 10 && <small className="tc-rating"><b>★ {rating.avg.toFixed(2)}</b> · {rating.count.toLocaleString('en-IN')} learner ratings</small>}
       </div>
     </div>
   )
@@ -792,16 +844,17 @@ function SkillLevelsCard({ skills, live, onDone }: { skills: { id: string; label
 
 // ---------- The pitch: program, proof, projects ----------
 
-function ProgramCard({ interest, programId }: { interest: string; programId?: string }) {
+/** `asked`: a program the learner asked about (not necessarily the one recommended for them). */
+function ProgramCard({ interest, programId, asked }: { interest: string; programId?: string; asked?: boolean }) {
   const p = programId ? getProgram(programId) : programFor(interest)
   if (!p) return null
   return (
     <div className="tc-card tc-program">
-      <span className="tc-eyebrow">Recommended for you</span>
+      <span className="tc-eyebrow">{asked ? 'The program you asked about' : 'Recommended for you'}</span>
       <b className="tc-program-name">{p.name}</b>
       <ul>{p.features.map((f) => <li key={f}><Icon name="checkCircle" size="0.9rem" />{f}</li>)}</ul>
       <div className="tc-actions">
-        <Link href="/dashboard/sessions" scroll={false} className="tc-btn tc-btn-primary tc-btn-sm">Talk to a mentor, free</Link>
+        <Link href="/dashboard/sessions" scroll={false} className="tc-btn tc-btn-primary tc-btn-sm">Talk to a Senior Counsellor, free</Link>
         <a href={p.url} target="_blank" rel="noopener noreferrer" className="tc-btn tc-btn-ghost tc-btn-sm">Program details <Icon name="external" size="0.8rem" /></a>
       </div>
     </div>
@@ -838,7 +891,7 @@ function ProjectsCard({ interest, programId, items }: { interest: string; progra
               {p.description && <small className="tc-project-desc">{p.description}</small>}
               <span className="tc-project-meta">
                 {p.kind === 'capstone' && <span className="tc-project-tag">Capstone</span>}
-                {p.domain && <span className="tc-project-tag domain">{DOMAIN_TAG[p.domain] ?? p.domain}</span>}
+                {p.domain && <span className="tc-project-tag domain">{DOMAIN_TAG[p.domain] ?? p.domainLabel ?? p.domain}</span>}
                 {p.tools.length > 0 && <small>{p.tools.join(' · ')}</small>}
               </span>
             </div>
@@ -972,6 +1025,58 @@ function CurriculumCard({ interest, programId }: { interest: string; programId?:
 }
 
 /** Learnbay's published refund policy, in plain words, with the link to the full policy. */
+type Co = { name: string; category: string; alumni: boolean }
+
+/**
+ * Companies: 15 well-known names first (where Learnbay alumni work), then the full list to browse and search.
+ * "Alumni" marks only the companies Learnbay publishes as alumni employers; the rest hire for these roles in India.
+ */
+function CompaniesCard() {
+  const [data, setData] = useState<{ claim: string; featured: Co[]; companies: Co[] } | null>(null)
+  const [all, setAll] = useState(false)
+  const [q, setQ] = useState('')
+  useEffect(() => {
+    void getJson('/api/companies').then((r) => { if (r.ok) setData(r.data as { claim: string; featured: Co[]; companies: Co[] }) })
+  }, [])
+  if (!data) return <div className="tc-card tc-companies"><span className="spinner" /> Loading companies…</div>
+  const groups = (list: Co[]) => [...new Set(list.map((c) => c.category))]
+  const term = q.trim().toLowerCase()
+  const shown = term ? data.companies.filter((c) => c.name.toLowerCase().includes(term) || c.category.toLowerCase().includes(term)) : data.companies
+  return (
+    <div className="tc-card tc-companies">
+      <span className="tc-eyebrow">{data.claim}</span>
+      <b className="tc-card-title">{all ? `${data.companies.length} companies hiring for these roles` : 'A few of the companies our alumni work at'}</b>
+      {!all && groups(data.featured).map((g) => (
+        <div key={g} className="tc-co-group">
+          <small>{g}</small>
+          <div className="tc-co-list">{data.featured.filter((c) => c.category === g).map((c) => <span key={c.name} className="tc-co">{c.name}</span>)}</div>
+        </div>
+      ))}
+      {all && (
+        <>
+          <input className="tc-note" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search a company or sector, e.g. Microsoft, bank, GCC" aria-label="Search companies" />
+          <div className="tc-co-all">
+            {groups(shown).map((g) => (
+              <div key={g} className="tc-co-group">
+                <small>{g} · {shown.filter((c) => c.category === g).length}</small>
+                <div className="tc-co-list">
+                  {shown.filter((c) => c.category === g).map((c) => <span key={c.name} className={`tc-co${c.alumni ? ' alumni' : ''}`}>{c.name}{c.alumni && <em>Alumni</em>}</span>)}
+                </div>
+              </div>
+            ))}
+            {!shown.length && <p className="tc-co-note">No company matches “{q}”.</p>}
+          </div>
+          <p className="tc-co-note"><em className="tc-co-key">Alumni</em> Learnbay alumni work here (as published by Learnbay). Others are well-known companies hiring for tech, data, AI and cloud roles in India.</p>
+        </>
+      )}
+      <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => { setAll(!all); setQ('') }}>
+        {all ? 'Show fewer' : <>See all {data.companies.length} companies <Icon name="arrowRight" size="0.85rem" /></>}
+      </button>
+      <p className="tc-co-note">Placement support: mock interviews, resume build-up and interview calls once you’re job-ready. Where you land depends on your skills and interviews; no one can promise a specific company.</p>
+    </div>
+  )
+}
+
 function RefundCard() {
   const icons: IconName[] = ['calendar', 'checkCircle', 'rupee', 'refresh', 'mail']
   return (
@@ -1000,14 +1105,14 @@ function EligPushCard() {
         <ul>
           <li><Icon name="checkCircle" size="0.85rem" />10 quick questions, no maths</li>
           <li><Icon name="checkCircle" size="0.85rem" />See where you’d start in the program</li>
-          <li><Icon name="checkCircle" size="0.85rem" />Then a mentor can check scholarships for you on the call</li>
+          <li><Icon name="checkCircle" size="0.85rem" />Then a Senior Counsellor can check scholarships for you on the call</li>
         </ul>
       </div>
     </div>
   )
 }
 
-/** Where the learner stands and what the mentor call settles: the decision, in one glance. */
+/** Where the learner stands and what the counselling call settles: the decision, in one glance. */
 function DecisionCard({ eligible, programId }: { eligible: boolean | null; programId?: string }) {
   const p = programId ? getProgram(programId) : null
   const rows: { icon: IconName; label: string; value: string; tone: 'ok' | 'todo' | 'info' }[] = [
@@ -1015,7 +1120,7 @@ function DecisionCard({ eligible, programId }: { eligible: boolean | null; progr
       : eligible === false ? { icon: 'route', label: 'Eligibility', value: 'Foundation first, then the program', tone: 'info' }
         : { icon: 'award', label: 'Eligibility', value: 'Not checked yet · 2 min', tone: 'todo' },
     ...(p ? [{ icon: 'book' as IconName, label: 'Program', value: p.name, tone: 'info' as const }] : []),
-    { icon: 'calendar', label: 'Mentor call confirms', value: 'Batch and seats · fee and EMI · scholarship (only a mentor can activate one)', tone: 'info' },
+    { icon: 'calendar', label: 'Counselling call confirms', value: 'Batch and seats · fee and EMI · scholarship (only a Senior Counsellor can activate one)', tone: 'info' },
   ]
   return (
     <div className="tc-card tc-decision">

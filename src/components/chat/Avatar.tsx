@@ -4,7 +4,7 @@ import { useId, useState } from 'react'
 import { BOT_NAME, GUIDE_PHOTO, getCounsellor, photoOf, type Look } from '@/lib/counsellors'
 
 /**
- * Avatars: LB-AIbot (before sign-up) and the AI counsellors (after). Each counsellor shows a stock photo from
+ * Avatars: Lumi, the guide (before sign-up, and floating in the studio) and the AI counsellors (after). Each counsellor shows a stock photo from
  * /public/counsellors when one is there, otherwise an illustration. The "AI Career Counsellor" badge always
  * sits next to the name, so no one mistakes the AI for a real member of staff.
  */
@@ -28,28 +28,54 @@ export function Avatar({ who, size = 44, online = false }: { who: string; size?:
   )
 }
 
-/** LB-AIbot: a Learnbay-gradient disc with a chat bubble and an AI spark. */
+/** Lumi, the guide: a smiling young Indian woman on a bright sunrise-gradient disc, with a small spark (her name means light). */
 function BotMark({ size }: { size: number }) {
   const id = useId().replace(/:/g, '')
+  const skin = '#c68a63'
+  const hair = '#1b1210'
   return (
-    <svg viewBox="0 0 64 64" width={size} height={size} role="img" aria-label={`${BOT_NAME}, Learnbay's AI assistant`}>
+    <svg viewBox="0 0 64 64" width={size} height={size} role="img" aria-label={`${BOT_NAME}, Learnbay's virtual career guide`}>
       <defs>
         <linearGradient id={`b${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#4f46e5" />
-          <stop offset="0.6" stopColor="#7c3aed" />
-          <stop offset="1" stopColor="#c026d3" />
+          <stop offset="0" stopColor="#fb923c" />
+          <stop offset="0.5" stopColor="#ec4899" />
+          <stop offset="1" stopColor="#8b5cf6" />
         </linearGradient>
-        <radialGradient id={`s${id}`} cx="0.8" cy="0.15" r="0.6">
-          <stop offset="0" stopColor="#fdba74" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#fdba74" stopOpacity="0" />
-        </radialGradient>
+        <clipPath id={`c${id}`}><circle cx="32" cy="32" r="32" /></clipPath>
       </defs>
-      <circle cx="32" cy="32" r="32" fill={`url(#b${id})`} />
-      <circle cx="32" cy="32" r="32" fill={`url(#s${id})`} />
-      <path d="M17 22.5c0-3.6 2.9-6.5 6.5-6.5h17c3.6 0 6.5 2.9 6.5 6.5v12c0 3.6-2.9 6.5-6.5 6.5H30l-7.5 6.5V41h1c-3.6 0-6.5-2.9-6.5-6.5z" fill="#fff" />
-      <path d="M32 20.5l1.9 5.1 5.1 1.9-5.1 1.9-1.9 5.1-1.9-5.1-5.1-1.9 5.1-1.9z" fill="#f97316" />
-      <circle cx="40.5" cy="21.5" r="1.8" fill="#a78bfa" />
-      <circle cx="23.5" cy="33.5" r="1.3" fill="#a78bfa" />
+      <g clipPath={`url(#c${id})`}>
+        <rect width="64" height="64" fill={`url(#b${id})`} />
+        {/* long hair behind the shoulders */}
+        <path d="M13 33c0-13 8.5-22 19-22s19 9 19 22v20c0 3-2 5-5 5H18c-3 0-5-2-5-5z" fill={hair} />
+        {/* kurta with a gold neckline */}
+        <path d="M9 64c1.5-10 10-15.5 23-15.5S53.5 54 55 64z" fill="#0d9488" />
+        <path d="M26 49.3c1.6 3.6 3.7 5.2 6 5.2s4.4-1.6 6-5.2" stroke="#fbbf24" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        <path d="M27.5 41h9v8.3c-2.5 2.1-6.5 2.1-9 0z" fill={skin} />
+        <path d="M27.5 44h9v3c-3 1.5-6 1.5-9 0z" fill="rgba(0,0,0,0.12)" />
+        {/* ears and jhumka earrings */}
+        <circle cx="20.6" cy="32" r="2.3" fill={skin} />
+        <circle cx="43.4" cy="32" r="2.3" fill={skin} />
+        <circle cx="20.4" cy="35.4" r="1.1" fill="#fbbf24" /><path d="M18.6 37.2h3.6l-1.8 2.6z" fill="#fbbf24" />
+        <circle cx="43.6" cy="35.4" r="1.1" fill="#fbbf24" /><path d="M41.8 37.2h3.6l-1.8 2.6z" fill="#fbbf24" />
+        <ellipse cx="32" cy="31" rx="11.4" ry="13" fill={skin} />
+        {/* side-parted hair framing the face */}
+        <path d="M20.4 30.5c-.8-9.5 4.8-16.2 12-16.2 7.6 0 12.3 5.8 11.6 14.6-4-1.2-7.6-3.8-9.8-7.4-2.8 4.4-8 7.6-13.8 9z" fill={hair} />
+        <path d="M20.2 27.5c-2.3 5.3-2.2 11.6.4 16.6l2.2-1.1c-1.8-5-1.7-10.4.3-14.8z" fill={hair} />
+        <path d="M43.8 27.5c2 5 2 10.8-.2 15.6l-2-1c1.5-4.6 1.4-9.6-.1-13.8z" fill={hair} />
+        {/* eyebrows, smiling eyes, bindi */}
+        <path d="M25 26.6c1.3-1 3.2-1.2 4.6-.5M34.4 26.1c1.4-.7 3.3-.5 4.6.5" stroke={hair} strokeWidth="1.1" fill="none" strokeLinecap="round" />
+        <path d="M25.6 31.2c1-1.4 2.9-1.4 3.9 0M34.5 31.2c1-1.4 2.9-1.4 3.9 0" stroke="#2b1d1a" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+        <circle cx="32" cy="27.4" r="0.9" fill="#e11d48" />
+        <path d="M31.3 34.6c.4.3 1 .3 1.4 0" stroke="rgba(0,0,0,0.25)" strokeWidth="0.9" fill="none" strokeLinecap="round" />
+        {/* big open smile */}
+        <path d="M27 37.2c1.3 3.8 8.7 3.8 10 0z" fill="#7f1d1d" />
+        <path d="M27.8 37.5c1.6.6 6.8.6 8.4 0l-.3 1c-2.2.5-5.6.5-7.8 0z" fill="#fff" />
+        <circle cx="24.6" cy="35.4" r="2.2" fill="#fb7185" opacity="0.4" />
+        <circle cx="39.4" cy="35.4" r="2.2" fill="#fb7185" opacity="0.4" />
+        {/* her spark */}
+        <path d="M51 9.5l1.3 3.4 3.4 1.3-3.4 1.3-1.3 3.4-1.3-3.4-3.4-1.3 3.4-1.3z" fill="#fde047" />
+        <circle cx="12.5" cy="15" r="1.3" fill="#fef3c7" opacity="0.9" />
+      </g>
     </svg>
   )
 }

@@ -4,7 +4,8 @@
 // 1-2 projects they've seen with 2-3 new ones.
 
 import { query } from './db'
-import { domainsFor } from './project-domains'
+import { domainKeysFor } from './project-roles'
+import type { Answers } from './questions'
 
 export type Project = {
   id: string; title: string; description: string; tools: string[]
@@ -34,8 +35,9 @@ const ROLE_PROGRAM_FOR: Record<string, string> = {
   'network-admin': 'cloud-devops-network', sysadmin: 'cloud-devops-sysadmin', 'it-support': 'cloud-devops-it-support-ops', dba: 'cloud-devops-dba', 'qa-engineer': 'cloud-devops-qa-testers',
 }
 
-export async function pickProjects(userId: string | null, programId: string, industry?: string, count = 4, role?: string): Promise<Project[]> {
-  const domains = domainsFor(programId, industry, role)
+export async function pickProjects(userId: string | null, programId: string, who: Answers, count = 4): Promise<Project[]> {
+  const domains = await domainKeysFor(programId, who)
+  const role = who.role
   const domain = domains[0] ?? null
   const myRoleProgram = role ? ROLE_PROGRAM_FOR[role] : undefined
   const pool = await query<Project & { shown_at: Date | null }>(
@@ -58,7 +60,7 @@ export async function pickProjects(userId: string | null, programId: string, ind
   const unseen = shuffle(pool.filter((p) => !p.shown_at)).map((p) => ({ p, w: weight(p) })).sort((x, y) => y.w - x.w).map((x) => x.p)
   const picked: typeof pool = []
   const take = (p: (typeof pool)[number] | undefined) => { if (p && !picked.some((x) => x.id === p.id) && picked.length < count) picked.push(p) }
-  // Keep 1-2 from before (when they've seen some), then new ones: their industry first, a capstone, then the rest.
+  // Keep 1-2 from before (when they've seen some), then new ones: their role or industry first, a capstone, then the rest.
   for (const p of shuffle(seen.slice(0, 4)).slice(0, seen.length ? (Math.random() < 0.5 ? 1 : 2) : 0)) take(p)
   if (domain) take(unseen.find((p) => p.domain === domain))
   take(unseen.find((p) => p.kind === 'capstone'))
@@ -77,11 +79,11 @@ export async function pickProjects(userId: string | null, programId: string, ind
 }
 
 /** Project titles for a program (for the counsellor's knowledge), capstones and the learner's domain first. */
-export async function projectTitles(programId: string, industry?: string, limit = 12, role?: string): Promise<string[]> {
+export async function projectTitles(programId: string, who: Answers, limit = 12): Promise<string[]> {
   const rows = await query<{ title: string }>(
     `SELECT title FROM projects WHERE status = 'active' AND $1 = ANY(programs) AND (domain IS NULL OR domain = ANY($2::text[]))
       ORDER BY (kind = 'capstone') DESC, (domain IS NOT NULL) DESC, title LIMIT $3`,
-    [programId, domainsFor(programId, industry, role), limit],
+    [programId, await domainKeysFor(programId, who), limit],
   )
   return rows.map((r) => r.title)
 }

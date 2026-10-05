@@ -13,33 +13,63 @@ const time = (at: number) => new Date(at).toLocaleTimeString('en-IN', { hour: 'n
 export const nameOf = (who: string) => (who === 'bot' ? BOT_NAME : getCounsellor(who).name)
 
 /** The chat: who you are talking to, the conversation, quick replies, and the message box. The call button is always in the header. */
-export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }: {
+export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, profile, rating }: {
   chat: ChatApi
   onSend: (text: string) => void
-  /** Omitted before login (with Richa): no call button. */
+  /** Omitted before login (with Lumi): no call button. */
   onCall?: () => void
   headerRight?: React.ReactNode
   footer?: React.ReactNode
   onLink?: (href: string) => void
+  /** The counsellor's profile box, opened from their photo or name (signed-in chat only). */
+  profile?: (who: string, close: () => void) => React.ReactNode
+  /** The counsellor's rating, shown next to their name. */
+  rating?: { avg: number; count: number } | null
 }) {
+  const [profileOf, setProfileOf] = useState<string | null>(null)
+  const openProfile = profile ? (who: string) => setProfileOf((cur) => (cur === who ? null : who)) : undefined
+  useEffect(() => {
+    if (!profileOf) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setProfileOf(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [profileOf])
   const bodyRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [text, setText] = useState('')
-  const { items, prompt, asking, suggestions, thinking, who, callOffer } = chat
+  const { items, prompt, asking, suggestions, thinking, who, callOffer, more } = chat
   const isBot = who === 'bot'
 
-  // Keep the newest message in view.
+  // Keep the newest message in view, but only while the learner is at the bottom: scrolling up to read earlier
+  // messages is never pulled back down. A button brings them back (with a dot when something new arrived).
+  const [atBottom, setAtBottom] = useState(true)
+  const [unread, setUnread] = useState(false)
+  const atBottomRef = useRef(true)
+  const onScroll = () => {
+    const el = bodyRef.current
+    if (!el) return
+    const near = el.scrollHeight - el.scrollTop - el.clientHeight < 90
+    atBottomRef.current = near
+    setAtBottom(near)
+    if (near) setUnread(false)
+  }
+  const toBottom = (smooth = true) => {
+    const el = bodyRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' })
+    atBottomRef.current = true
+    setAtBottom(true)
+    setUnread(false)
+  }
   const last = items[items.length - 1]
-  const lastLen = last && last.kind === 'bot' ? last.text.length : 0
+  const lastIsMine = last?.kind === 'user'
+  const lastKey = last ? `${last.id}:${last.kind}` : ''
   useEffect(() => {
-    const el = bodyRef.current
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  }, [items.length, prompt, suggestions.length, asking, callOffer])
-  // While a message is being typed out, follow it without animation.
-  useEffect(() => {
-    const el = bodyRef.current
-    if (el && lastLen) el.scrollTop = el.scrollHeight
-  }, [lastLen])
+    // Their own message always scrolls down (they just sent it); anything else only if they are following along.
+    if (atBottomRef.current || lastIsMine) toBottom()
+    else if (lastKey) setUnread(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length, lastKey, prompt, suggestions.length, more.length, asking, callOffer])
 
   useEffect(() => {
     if (asking) inputRef.current?.focus()
@@ -82,23 +112,55 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
   return (
     <section className="tc" aria-label={`Chat with ${nameOf(who)}, ${isBot ? 'your career guide' : 'your career counsellor'}`}>
       <header className="tc-header">
-        <Avatar who={who} size={38} online />
-        <div className="tc-who">
-          <div className="tc-name"><b>{nameOf(who)}</b><span className="tc-badge">{isBot ? GUIDE_TITLE : COUNSELLOR_TITLE}</span></div>
-          <span className="tc-status">Online · {isBot ? 'virtual career guide' : 'virtual counsellor'}</span>
-        </div>
+        {openProfile && !isBot ? (
+          <button type="button" className="tc-who-btn" onClick={() => openProfile(who)} aria-label={`View ${nameOf(who)}'s profile`} aria-expanded={profileOf === who}>
+            <Avatar who={who} size={38} online />
+            <span className="tc-who">
+              <span className="tc-name"><b>{nameOf(who)}</b><span className="tc-badge">{COUNSELLOR_TITLE}</span></span>
+              <span className="tc-status">
+                {rating && rating.count >= 10 && <span className="tc-rating"><b>★ {rating.avg.toFixed(2)}</b> ({rating.count.toLocaleString('en-IN')} ratings) · </span>}
+                Online · <u>View profile</u>
+              </span>
+            </span>
+          </button>
+        ) : (
+          <>
+            <Avatar who={who} size={38} online />
+            <div className="tc-who">
+              <div className="tc-name"><b>{nameOf(who)}</b><span className="tc-badge">{isBot ? GUIDE_TITLE : COUNSELLOR_TITLE}</span></div>
+              <span className="tc-status">Online · {isBot ? 'virtual career guide' : 'virtual counsellor'}</span>
+            </div>
+          </>
+        )}
         <div className="tc-header-right">
           {headerRight}
           {onCall && (
-            <button type="button" className="tc-call" aria-label={`Get a call from ${isBot ? 'a Learnbay counsellor' : nameOf(who)}`} title="Get a call" onClick={onCall}>
+            <button type="button" className="tc-call" data-tour="call" aria-label={`Get a call from ${isBot ? 'a Learnbay counsellor' : nameOf(who)}`} title="Get a call" onClick={onCall}>
               <Icon name="phone" size="1.1rem" /><span className="tc-call-label">Call me</span>
             </button>
           )}
         </div>
       </header>
 
-      <div className="tc-body" ref={bodyRef} aria-live="polite">
-        {items.map((item, i) => <Row key={item.id} item={item} prev={items[i - 1]} next={items[i + 1]} chat={chat} onLink={onLink} />)}
+      {profile && profileOf && (
+        <>
+          <div className="cp-backdrop" onClick={() => setProfileOf(null)} />
+          {profile(profileOf, () => setProfileOf(null))}
+        </>
+      )}
+      <div className="tc-body-wrap">
+      <div className="tc-body" ref={bodyRef} aria-live="polite" onScroll={onScroll}>
+        {items.map((item, i) => <Row key={item.id} item={item} prev={items[i - 1]} next={items[i + 1]} chat={chat} onLink={onLink} onWho={openProfile} />)}
+
+        {more.length > 0 && !asking && (
+          <div className="tc-more" aria-label="Read more of this answer">
+            <span className="tc-more-label"><Icon name="book" size="0.85rem" /> What would you like to see next?</span>
+            <div className="tc-suggest">
+              {more.map((m, i) => <button key={m.title} type="button" className="tc-chip tc-chip-more" onClick={() => void chat.readMore(i)}><Icon name="arrowRight" size="0.8rem" />{m.title}</button>)}
+              {more.length > 1 && <button type="button" className="tc-chip tc-chip-soft" onClick={() => void chat.readMore('all')}>Show all</button>}
+            </div>
+          </div>
+        )}
 
         {callOffer && !asking && onCall && (
           <div className="tc-suggest">
@@ -114,6 +176,12 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
         )}
 
         {prompt && <PromptView key={`${prompt.question ?? ''}|${prompt.choices.map((c) => c.id).join(',')}`} prompt={prompt} onPick={chat.pick} onPickMany={chat.pickMany} />}
+      </div>
+      {!atBottom && (
+        <button type="button" className={`tc-jump${unread ? ' has-new' : ''}`} aria-label={unread ? 'New message: jump to the latest' : 'Jump to the latest message'} onClick={() => toBottom()}>
+          <Icon name="chevronDown" size="1.2rem" />{unread && <i aria-hidden="true" />}
+        </button>
+      )}
       </div>
 
       {asking?.label && (
@@ -141,7 +209,7 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink }
 const fromBot = (i?: Item) => Boolean(i && (i.kind === 'bot' || i.kind === 'card' || i.kind === 'typing'))
 const speaker = (i?: Item) => (i && (i.kind === 'bot' || i.kind === 'card' || i.kind === 'typing') ? i.by ?? '' : '')
 
-function Row({ item, prev, next, chat, onLink }: { item: Item; prev?: Item; next?: Item; chat: ChatApi; onLink?: (href: string) => void }) {
+function Row({ item, prev, next, chat, onLink, onWho }: { item: Item; prev?: Item; next?: Item; chat: ChatApi; onLink?: (href: string) => void; onWho?: (who: string) => void }) {
   if (item.kind === 'divider') return <div className="tc-divider"><span>{item.text}</span></div>
   if (item.kind === 'event') {
     return (
@@ -157,12 +225,12 @@ function Row({ item, prev, next, chat, onLink }: { item: Item; prev?: Item; next
   const last = !fromBot(next) || speaker(next) !== by
   return (
     <div className={`tc-row tc-row-bot ${first ? 'first' : ''}`}>
-      <span className="tc-row-avatar">{first ? <Avatar who={by} size={28} /> : null}</span>
+      <span className="tc-row-avatar">{first ? (onWho && by !== 'bot' ? <button type="button" className="tc-avatar-btn" onClick={() => onWho(by)} aria-label={`View ${nameOf(by)}'s profile`}><Avatar who={by} size={28} /></button> : <Avatar who={by} size={28} />) : null}</span>
       <div className="tc-row-main">
         {first && <span className="tc-speaker">{nameOf(by)}</span>}
         {item.kind === 'typing' && <div className="tc-bubble tc-typing" aria-label={`${nameOf(by)} is typing`}><i /><i /><i /></div>}
         {item.kind === 'bot' && (
-          <div className={`tc-bubble ${/\n\s*[-*•] /.test(item.text) ? 'tc-bubble-rich' : ''}`}>
+          <div className={`tc-bubble tc-pop ${/\n\s*[-*•] /.test(item.text) ? 'tc-bubble-rich' : ''}`}>
             <RichText text={item.text} rich />
             {item.action && (
               <Link href={item.action.href} className="tc-btn tc-btn-primary tc-btn-sm tc-bubble-action" scroll={false} onClick={() => onLink?.(item.action!.href)}>

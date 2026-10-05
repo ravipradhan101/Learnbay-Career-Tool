@@ -4,7 +4,7 @@ import { Sheet } from '@/components/chat/Sheet'
 import { getStudio } from '@/lib/data'
 import {
   CITIES, COUNTRY_CODES, CTC_BANDS, PROGRAMMER, SKILLS, SKILL_NONE, TIMELINES, WEEKLY_HOURS,
-  experienceLabel, interestLabel, labelOf, roleLabel, targetRoleLabel,
+  domainLabel, experienceLabel, interestLabel, labelOf, roleLabel, targetRoleLabel,
 } from '@/lib/questions'
 
 export const metadata = { title: 'My Profile' }
@@ -18,6 +18,7 @@ export default async function ProfilePage() {
     ['Email', user.email],
     ['Phone', user.phone ? `${flag} ${user.phone_country} ${user.phone}` : '—'],
     ['Current role', roleLabel(answers)],
+    ['Industry', domainLabel(answers) ?? '—'],
     ['Experience', experienceLabel(answers)],
     ['Codes at work', labelOf(PROGRAMMER, answers.programmer) ?? '—'],
     ['Program area', interestLabel(answers)],
@@ -46,7 +47,7 @@ export default async function ProfilePage() {
           <Icon name="lock" className="text-primary" />
           <div>
             <b>Your answers are locked</b>
-            <p className="small muted">Each analysis is personalised to these answers. Need a correction? A mentor can update it with you in a 1:1 session.</p>
+            <p className="small muted">Each analysis is personalised to these answers. Need a correction? A Senior Counsellor can update it with you in a 1:1 session.</p>
           </div>
         </div>
         <Link href="/dashboard/sessions" scroll={false} className="btn btn-outline btn-sm">Book a 1:1 session</Link>

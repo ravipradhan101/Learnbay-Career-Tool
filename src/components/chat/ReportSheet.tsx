@@ -7,15 +7,18 @@ import { Sheet } from './Sheet'
 import { queryOne } from '@/lib/db'
 import { activeSetFor } from '@/lib/eligibility-sets'
 import { getResumeAnalysis, getStudio } from '@/lib/data'
-import { interestLabel, roleLabel } from '@/lib/questions'
+import { domainLabel, interestLabel, roleLabel } from '@/lib/questions'
 import { currentCtcRange } from '@/lib/tools'
 import { getTool, type ToolId } from '@/lib/tools-meta'
 import type { RoadmapResult, SalaryResult, SkillGapResult } from '@/lib/tool-types'
 
+/** Industries worth naming in the report ("including your healthcare domain"); not student, business or IT services. */
+const INDUSTRY_DOMAINS = new Set(['bfsi', 'telecom', 'manufacturing', 'healthcare', 'retail', 'education', 'government', 'other'])
+
 /** The full report, opened from the chat's report card. Closing it returns to the same place in the chat. */
 export async function ReportSheet({ id }: { id: ToolId }) {
   const meta = getTool(id)!
-  const { user, answers, tools } = await getStudio()
+  const { user, answers, tools, hasSession } = await getStudio()
   const row = tools.find((t) => t.tool === id)
   const back = meta.route
   if (row?.status !== 'ready' || !row.data) {
@@ -33,7 +36,7 @@ export async function ReportSheet({ id }: { id: ToolId }) {
     queryOne<{ status: string }>(`SELECT status FROM eligibility_tests WHERE user_id = $1 AND status = 'completed' LIMIT 1`, [user.id]),
     activeSetFor(answers.interest),
   ])
-  const extras: ReportExtras = { area: interestLabel(answers), role: roleLabel(answers), eligibilityDone: elig?.status === 'completed' || !set }
+  const extras: ReportExtras = { area: interestLabel(answers), role: roleLabel(answers), eligibilityDone: elig?.status === 'completed' || !set, hasSession, industry: INDUSTRY_DOMAINS.has(answers.domain ?? '') ? domainLabel(answers) ?? null : null }
   return (
     <Sheet title={meta.name} closeHref={back}>
       <div className="row between no-print">

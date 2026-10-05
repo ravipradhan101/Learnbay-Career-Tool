@@ -8250,6 +8250,745 @@
    ],
    "source": "generated",
    "sourceRef": null
+  },
+  {
+   "title": "AI Brand Kit Generator",
+   "description": "Generate logo concepts, colour palettes and social templates from a one-page brief, then publish the brand style guide as a live site on Vercel.",
+   "tools": [
+    "Midjourney",
+    "Adobe Firefly",
+    "Canva Magic Studio",
+    "ChatGPT",
+    "Vercel"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Product Mockup Studio",
+   "description": "Create product photos and lifestyle mockups with generative image tools, then present them in a portfolio page deployed on Cloudflare Pages.",
+   "tools": [
+    "Adobe Firefly",
+    "Photoroom",
+    "Canva",
+    "Cloudflare Pages"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "UI Screens from a Written Brief",
+   "description": "Turn a product brief into app screens with AI design tools, refine them in Figma and share a clickable prototype with a landing page on Vercel.",
+   "tools": [
+    "Uizard",
+    "Figma AI",
+    "v0",
+    "Vercel"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Automated Social Creative Engine",
+   "description": "A no-code pipeline that takes campaign briefs from a sheet, writes the copy, generates matching images and files every creative for review.",
+   "tools": [
+    "Make",
+    "ChatGPT",
+    "DALL·E",
+    "Google Sheets",
+    "Google Drive"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Design Feedback Copilot",
+   "description": "A custom GPT that reviews layouts against brand rules and accessibility (contrast, hierarchy, spacing) and explains every suggestion.",
+   "tools": [
+    "Custom GPTs",
+    "Figma",
+    "WCAG checks"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Motion Explainer with AI Video",
+   "description": "Produce a short explainer with AI video and voice tools, add captions and publish it on a microsite on Cloudflare Pages.",
+   "tools": [
+    "Runway",
+    "ElevenLabs",
+    "CapCut",
+    "Cloudflare Pages"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI-built Design Portfolio Website",
+   "description": "Build a portfolio site with AI site builders, write case studies with AI and deploy it on Vercel with your own domain.",
+   "tools": [
+    "Framer AI",
+    "v0",
+    "ChatGPT",
+    "Vercel"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "design",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Project Status Reporter",
+   "description": "Pull weekly updates from Jira or Trello, let AI draft the status report with a red-amber-green summary, and post it to Slack or Teams automatically.",
+   "tools": [
+    "Make",
+    "Jira",
+    "ChatGPT",
+    "Slack"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Risk Register Copilot",
+   "description": "A custom GPT that reads project documents and proposes risks, owners and mitigations straight into a shared risk register.",
+   "tools": [
+    "Custom GPTs",
+    "Google Sheets",
+    "Zapier"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Meeting-to-Action Automation",
+   "description": "Turn meeting transcripts into action items with owners and due dates, created as tasks in Asana without anyone typing them.",
+   "tools": [
+    "Otter.ai",
+    "Make",
+    "ChatGPT",
+    "Asana"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Resource Planner",
+   "description": "Forecast team load with Copilot in Excel, flag over-allocation early and share a live dashboard with stakeholders.",
+   "tools": [
+    "Microsoft Copilot",
+    "Excel",
+    "Looker Studio"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Stakeholder Update Generator",
+   "description": "Write one update and let AI tailor it for executives, clients and the team, then send each version on schedule.",
+   "tools": [
+    "ChatGPT",
+    "Zapier",
+    "Gmail"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Project Knowledge Assistant",
+   "description": "A no-code chatbot that answers questions from the project documents, embedded on an internal page deployed on Vercel.",
+   "tools": [
+    "Chatbase",
+    "Notion",
+    "Vercel"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Sprint Retrospective Analyser",
+   "description": "Collect retro notes with a form, let AI cluster the themes and suggest actions, and publish the summary page on Cloudflare Pages.",
+   "tools": [
+    "Google Forms",
+    "ChatGPT",
+    "Make",
+    "Cloudflare Pages"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "project-management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Content Calendar Engine",
+   "description": "Plan a month of posts from a single brief, draft them with AI in your brand voice and schedule them across channels.",
+   "tools": [
+    "Notion AI",
+    "ChatGPT",
+    "Buffer"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "One Article, Every Channel",
+   "description": "Repurpose one long article into LinkedIn posts, a newsletter, short-video scripts and threads with an automated workflow.",
+   "tools": [
+    "Make",
+    "ChatGPT",
+    "Google Docs"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Newsletter Studio",
+   "description": "Curate a weekly newsletter from trusted sources with AI summaries, edit it and send it on autopilot.",
+   "tools": [
+    "RSS",
+    "ChatGPT",
+    "Beehiiv",
+    "Zapier"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Podcast and Video Production with AI",
+   "description": "Script, voice, edit and caption a short podcast or video series with AI tools, ready to publish.",
+   "tools": [
+    "ChatGPT",
+    "ElevenLabs",
+    "Descript"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "SEO Content Brief Generator",
+   "description": "A custom GPT that turns a topic into a brief with search intent, keywords and an outline, saved to a shared sheet.",
+   "tools": [
+    "Custom GPTs",
+    "Google Sheets",
+    "Perplexity"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Brand Voice Guardian",
+   "description": "A custom GPT that rewrites drafts in the brand tone and flags claims that need a fact check before publishing.",
+   "tools": [
+    "Custom GPTs",
+    "ChatGPT"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI-built Content Microsite",
+   "description": "Build a campaign microsite with AI copy and images and deploy it on Vercel, with a sign-up form connected to a sheet.",
+   "tools": [
+    "Framer AI",
+    "v0",
+    "Vercel",
+    "Google Sheets"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "media",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Lesson Planner",
+   "description": "A custom GPT that builds lesson plans, classroom activities and rubrics mapped to learning outcomes.",
+   "tools": [
+    "Custom GPTs",
+    "Google Docs"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Quiz and Assessment Generator",
+   "description": "Generate multiple-choice questions with answer keys from chapter PDFs and publish them as Google Forms automatically.",
+   "tools": [
+    "ChatGPT",
+    "Make",
+    "Google Forms"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Study Buddy Chatbot",
+   "description": "A no-code chatbot that answers student questions from your course notes, embedded on a class site on Cloudflare Pages.",
+   "tools": [
+    "Chatbase",
+    "Cloudflare Pages"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Assignment Feedback Assistant",
+   "description": "Draft personalised feedback for every student from rubric scores, ready for the teacher to review and send.",
+   "tools": [
+    "ChatGPT",
+    "Google Sheets",
+    "Make"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Explainer Lesson Videos with AI",
+   "description": "Turn a topic into slides with AI, add an AI voice-over and export a short lesson video.",
+   "tools": [
+    "Gamma",
+    "ElevenLabs",
+    "Canva"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Student Progress Dashboard",
+   "description": "A live dashboard of marks and attendance with AI-written weekly insights for each student.",
+   "tools": [
+    "Google Sheets",
+    "Looker Studio",
+    "ChatGPT"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Course Website Built with AI",
+   "description": "Build a course landing site with AI tools and deploy it on Vercel, with enquiries flowing into a sheet.",
+   "tools": [
+    "v0",
+    "Framer AI",
+    "Vercel"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "education",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Market Research Brief",
+   "description": "A research workflow that produces a cited market brief and a competitor comparison table in hours, not days.",
+   "tools": [
+    "Perplexity",
+    "ChatGPT",
+    "Google Sheets"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Proposal and SOW Generator",
+   "description": "A custom GPT that drafts proposals and statements of work from discovery notes, in your firm’s template.",
+   "tools": [
+    "Custom GPTs",
+    "Google Docs"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Board Pack Summariser",
+   "description": "Summarise financials and KPIs into a one-page brief with charts, using Copilot in Excel and PowerPoint.",
+   "tools": [
+    "Microsoft Copilot",
+    "Excel",
+    "PowerPoint"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Process Automation Audit",
+   "description": "Map a business process, find what AI can automate, build one working automation and estimate the time saved.",
+   "tools": [
+    "Make",
+    "Zapier",
+    "ChatGPT",
+    "Miro"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Customer Insight Synthesiser",
+   "description": "Cluster survey and NPS comments into themes with AI and present them in a live dashboard.",
+   "tools": [
+    "ChatGPT",
+    "Google Sheets",
+    "Looker Studio"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Scenario Planning Copilot",
+   "description": "A custom GPT for what-if planning, with every assumption kept in a shared sheet so decisions are traceable.",
+   "tools": [
+    "Custom GPTs",
+    "Google Sheets"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Client-facing AI Assistant Demo",
+   "description": "Design a no-code AI assistant for a client use case and launch it with a landing page on Vercel.",
+   "tools": [
+    "Voiceflow",
+    "ChatGPT",
+    "Vercel"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "management",
+   "programs": [
+    "applied-ai-practitioner"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "From Excel MIS to a Python Pipeline",
+   "description": "Rebuild a monthly Excel MIS report in Python with Pandas, automate the refresh and charts, and schedule it on AWS Lambda.",
+   "tools": [
+    "Python",
+    "Pandas",
+    "Matplotlib",
+    "AWS Lambda"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Sales Forecasting with Machine Learning",
+   "description": "Forecast sales with classical ML and time-series models, compare them honestly, and serve the best one as an API on AWS.",
+   "tools": [
+    "Python",
+    "scikit-learn",
+    "Prophet",
+    "FastAPI",
+    "AWS"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Customer Churn Prediction",
+   "description": "Build a churn model with feature engineering and SHAP explanations, then deploy it as an API on AWS.",
+   "tools": [
+    "Python",
+    "XGBoost",
+    "SHAP",
+    "AWS SageMaker"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "NLP Feedback and Ticket Classifier",
+   "description": "Classify customer feedback and support tickets with NLP, from TF-IDF to a fine-tuned transformer, with a themes dashboard.",
+   "tools": [
+    "Python",
+    "NLTK",
+    "Hugging Face Transformers",
+    "Streamlit"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Deep Learning Demand Model",
+   "description": "Train an LSTM demand model, compare it with classical ML, and deploy it on AWS with basic monitoring.",
+   "tools": [
+    "Python",
+    "PyTorch",
+    "AWS",
+    "CloudWatch"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "Talk-to-Your-Data SQL Agent",
+   "description": "An LLM agent that answers business questions over a SQL database, with guardrails (read-only, allowed tables, checked answers), deployed on AWS.",
+   "tools": [
+    "LangChain",
+    "LangGraph",
+    "SQL",
+    "Guardrails AI",
+    "AWS"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
+  },
+  {
+   "title": "AI Narrator for MIS Reports",
+   "description": "Generate monthly management commentary from KPI tables with RAG, with hallucination checks and guardrails, on Amazon Bedrock.",
+   "tools": [
+    "Amazon Bedrock",
+    "LangChain",
+    "Guardrails",
+    "Python"
+   ],
+   "kind": "domain",
+   "module": null,
+   "domain": "data-analytics",
+   "programs": [
+    "genai-agentic-ai-master",
+    "genai-agentic-ai-program"
+   ],
+   "source": "generated",
+   "sourceRef": "Role projects added for the Applied AI Practitioner and GenAI & Agentic AI role paths (Oct 2026)"
   }
  ]
 }

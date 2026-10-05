@@ -1,0 +1,40 @@
+{
+ "note": "Roles and specialisations for the project library (Admin → Courses & roles). learner_roles: learner role ids (and industry:<id>) that see these projects. keywords: words in a typed role or industry that match. Insert-only seeding: edits made in Admin are kept.",
+ "domains": [
+  { "key": "bfsi", "label": "BFSI (Banking, Financial Services & Insurance)", "kind": "industry", "learner_roles": ["banking-finance", "industry:bfsi"], "keywords": ["bank", "banking", "finance", "fintech", "insurance", "accounts", "accountant", "audit", "credit", "loan"] },
+  { "key": "healthcare", "label": "Healthcare", "kind": "industry", "learner_roles": ["industry:healthcare"], "keywords": ["health", "hospital", "pharma", "clinical", "medical", "doctor", "nurse"] },
+  { "key": "manufacturing", "label": "Manufacturing", "kind": "industry", "learner_roles": ["industry:manufacturing"], "keywords": ["manufacturing", "plant", "factory", "production", "automotive"] },
+  { "key": "supply-chain", "label": "Supply Chain & Operations", "kind": "role", "learner_roles": ["operations"], "keywords": ["supply chain", "logistics", "operations", "warehouse", "procurement", "inventory"] },
+  { "key": "retail-ecommerce", "label": "Retail & E-commerce", "kind": "industry", "learner_roles": ["industry:retail"], "keywords": ["retail", "ecommerce", "e-commerce", "store", "fmcg"] },
+  { "key": "media", "label": "Media, Content & Communication", "kind": "role", "learner_roles": ["content"], "keywords": ["content", "writer", "copywriter", "journalist", "editor", "video", "social media", "media", "communication", "pr"] },
+  { "key": "hr", "label": "HR", "kind": "role", "learner_roles": ["hr"], "keywords": ["hr", "human resources", "recruiter", "recruitment", "talent", "payroll"] },
+  { "key": "sales-marketing", "label": "Sales & Marketing", "kind": "role", "learner_roles": ["marketing", "sales"], "keywords": ["marketing", "marketer", "seo", "brand", "sales", "business development", "growth", "advertising"] },
+  { "key": "telecom", "label": "Telecom", "kind": "industry", "learner_roles": ["industry:telecom"], "keywords": ["telecom", "telco"] },
+  { "key": "project-management", "label": "Project Management", "kind": "role", "learner_roles": ["project-manager", "business-non-tech"], "keywords": ["project manager", "program manager", "scrum", "delivery manager", "pmo"] },
+  { "key": "management", "label": "Management & Consulting", "kind": "role", "learner_roles": ["consultant", "business-non-tech"], "keywords": ["consultant", "consulting", "strategy", "manager", "management", "founder", "entrepreneur"] },
+  { "key": "product-management", "label": "Product Management", "kind": "role", "learner_roles": ["product-manager"], "keywords": ["product manager", "product owner"] },
+  { "key": "design", "label": "Graphic & UI/UX Design", "kind": "role", "learner_roles": ["designer"], "keywords": ["designer", "graphic", "ui", "ux", "illustrator", "visual", "creative", "animator"] },
+  { "key": "data-analytics", "label": "Data Analytics & MIS", "kind": "role", "learner_roles": ["data-excel", "data-analyst"], "keywords": ["mis", "excel", "reporting", "analyst", "analytics", "power bi", "tableau"] },
+  { "key": "education", "label": "Education & Training", "kind": "role", "learner_roles": ["teacher"], "keywords": ["teacher", "trainer", "professor", "lecturer", "tutor", "faculty", "education"] },
+  { "key": "cloud-devops", "label": "Cloud & DevOps", "kind": "role", "learner_roles": ["devops-cloud"], "keywords": ["devops", "cloud", "sre"] },
+  { "key": "qa-testing", "label": "QA & Testing", "kind": "role", "learner_roles": ["qa-engineer"], "keywords": ["qa", "tester", "testing", "automation test"] },
+  { "key": "software-development", "label": "Software Development", "kind": "role", "learner_roles": ["software-engineer"], "keywords": ["developer", "software engineer", "programmer", "backend", "frontend", "full stack"] },
+  { "key": "genai-software-development", "label": "GenAI Software Development", "kind": "role", "learner_roles": [], "keywords": [] },
+  { "key": "ai-cloud-devops-llm-infra", "label": "AI Cloud, DevOps & LLM Infrastructure", "kind": "role", "learner_roles": ["devops-cloud"], "keywords": [] },
+  { "key": "ai-backend-engineering", "label": "AI Backend Engineering", "kind": "role", "learner_roles": ["software-engineer"], "keywords": [] },
+  { "key": "distributed-systems-ai", "label": "Distributed Systems for AI", "kind": "role", "learner_roles": [], "keywords": [] },
+  { "key": "multi-agent-workflow-automation", "label": "Multi-agent Workflow Automation", "kind": "role", "learner_roles": [], "keywords": [] },
+  { "key": "genai-product-management", "label": "GenAI Product Management", "kind": "role", "learner_roles": ["product-manager"], "keywords": [] }
+ ],
+ "core": [
+  ["genai-software-developers", "software-development"],
+  ["genai-agentic-ai-managers-leaders", "project-management"],
+  ["sde-genai-agentic-ai", "genai-software-development"], ["sde-genai-agentic-ai", "ai-cloud-devops-llm-infra"], ["sde-genai-agentic-ai", "ai-backend-engineering"],
+  ["sde-genai-agentic-ai", "distributed-systems-ai"], ["sde-genai-agentic-ai", "multi-agent-workflow-automation"], ["sde-genai-agentic-ai", "genai-product-management"]
+ ],
+ "extra": [
+  ["applied-ai-practitioner", "design"], ["applied-ai-practitioner", "project-management"], ["applied-ai-practitioner", "media"],
+  ["applied-ai-practitioner", "education"], ["applied-ai-practitioner", "management"],
+  ["genai-agentic-ai-master", "data-analytics"], ["genai-agentic-ai-program", "data-analytics"]
+ ]
+}

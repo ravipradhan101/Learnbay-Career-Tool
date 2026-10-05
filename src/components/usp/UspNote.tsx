@@ -49,7 +49,7 @@ export function PublishedStory() {
   )
 }
 
-/** A compact "why Learnbay" band for public share links: four strengths and a mentorship call. */
+/** A compact "why Learnbay" band for public share links: four strengths and a Senior Counsellorship call. */
 export function LearnbayPitch({ ids, toolId }: { ids: UspId[]; toolId: string }) {
   return (
     <section className="learnbay-pitch">
@@ -69,7 +69,7 @@ export function LearnbayPitch({ ids, toolId }: { ids: UspId[]; toolId: string })
       <blockquote className="why-story">“{PUBLISHED_STORY.quote}”<cite>{PUBLISHED_STORY.name}, {PUBLISHED_STORY.role} · as published on {PUBLISHED_STORY.source}</cite></blockquote>
       <div className="row">
         <Link href={`/start?tool=${toolId}`} className="btn btn-primary">Get my own free analysis</Link>
-        <Link href="/start?tool=sessions" className="btn btn-outline">Book a free 1:1 mentorship call</Link>
+        <Link href="/start?tool=sessions" className="btn btn-outline">Book a free counselling call</Link>
       </div>
     </section>
   )

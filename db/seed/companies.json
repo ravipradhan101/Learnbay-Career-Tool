@@ -1,0 +1,2105 @@
+{
+ "note": "Alumni = named on Learnbay's own website, brochures or placement report (checked 30 Sep 2026). Others = well-known companies hiring for tech, data, AI and cloud roles in India.",
+ "companies": [
+  {
+   "name": "Microsoft",
+   "category": "Big Tech",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Amazon",
+   "category": "Big Tech",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Meta",
+   "category": "Big Tech",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Samsung",
+   "category": "Big Tech",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Oracle",
+   "category": "Big Tech",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "IBM",
+   "category": "Big Tech",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Deloitte",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "KPMG",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "EY",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "PwC",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Accenture",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "TCS",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Capgemini",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "HCLTech",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Tech Mahindra",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "LTIMindtree",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Genpact",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Mphasis",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Brillio",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Fractal",
+   "category": "Analytics & AI",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Mu Sigma",
+   "category": "Analytics & AI",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Teleperformance",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Canarys",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Infrasoft Technologies",
+   "category": "Consulting & IT services",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Bosch",
+   "category": "Global capability centre",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "General Electric",
+   "category": "Global capability centre",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Target",
+   "category": "Global capability centre",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Ford",
+   "category": "Global capability centre",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "MediaMarktSaturn",
+   "category": "Global capability centre",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "PayPal",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Razorpay",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Myntra",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Ola",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Unacademy",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "TheMathCompany",
+   "category": "Analytics & AI",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Bridgei2i",
+   "category": "Analytics & AI",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Affine Analytics",
+   "category": "Analytics & AI",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Cendrol",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Act21 Software",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "HAP Technologies",
+   "category": "Product & startups",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "JPMorgan",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": true
+  },
+  {
+   "name": "Wells Fargo",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Capital One",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Citibank",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "HSBC",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "NatWest",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Ocwen Financial",
+   "category": "Banking & finance",
+   "alumni": true,
+   "featured": false
+  },
+  {
+   "name": "Google",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Apple",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Netflix",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Adobe",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Salesforce",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Intel",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "NVIDIA",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Qualcomm",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cisco",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "SAP",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Dell Technologies",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "HP",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Hewlett Packard Enterprise",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ServiceNow",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Workday",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Atlassian",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Uber",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "LinkedIn",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Intuit",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "VMware",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Broadcom",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "AMD",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Texas Instruments",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Micron",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Autodesk",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Synopsys",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cadence",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Nutanix",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Juniper Networks",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Arista Networks",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Palo Alto Networks",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zscaler",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Akamai",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Red Hat",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Databricks",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Snowflake",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "MongoDB",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Visa",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Mastercard",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "eBay",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Expedia",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Siemens",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Honeywell",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ABB",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Schneider Electric",
+   "category": "Big Tech",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Walmart Global Tech",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Lowe's",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tesco",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Philips",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Caterpillar",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "John Deere",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Mercedes-Benz R&D India",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Volvo Group",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Continental",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ZF",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Valeo",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Airbus",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Boeing",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Rolls-Royce",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Shell",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "BP",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ExxonMobil",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Maersk",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "DHL",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "FedEx",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "AB InBev",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Diageo",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Mondelez",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "PepsiCo",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Unilever",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Procter & Gamble",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Nestle",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "L'Oreal",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "The Home Depot",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "McKinsey & Company",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Boston Consulting Group",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Bain & Company",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Gartner",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Moody's",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "S&P Global",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "LSEG",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Fidelity Investments",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "General Motors",
+   "category": "Global capability centre",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Goldman Sachs",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Morgan Stanley",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Barclays",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Deutsche Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "UBS",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "BNY",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "State Street",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Northern Trust",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Standard Chartered",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Lloyds Banking Group",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "BNP Paribas",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Societe Generale",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Bank of America",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "American Express",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Fiserv",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "FIS",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "MetLife",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Experian",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "TransUnion",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "HDFC Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ICICI Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Axis Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Kotak Mahindra Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "State Bank of India",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Bajaj Finserv",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "IDFC First Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "IndusInd Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Yes Bank",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Aditya Birla Capital",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "HDFC Life",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ICICI Prudential Life",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ICICI Lombard",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "SBI Life",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "PolicyBazaar",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Paytm",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "PhonePe",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "CRED",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zerodha",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Groww",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Pine Labs",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Juspay",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Upstox",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Angel One",
+   "category": "Banking & finance",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Infosys",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Wipro",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Persistent Systems",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Coforge",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Hexaware",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zensar",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cognizant",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "NTT DATA",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "DXC Technology",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Virtusa",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Birlasoft",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sonata Software",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "KPIT Technologies",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Elxsi",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cyient",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "L&T Technology Services",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Happiest Minds",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Mastek",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sasken",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Quest Global",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "UST",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "EXL",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "WNS",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Concentrix",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Infogain",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Nagarro",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "GlobalLogic",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "EPAM",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Publicis Sapient",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Thoughtworks",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Altimetrik",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Hitachi Vantara",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Fujitsu",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Atos",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Kyndryl",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Unisys",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "CGI",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Technologies",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Intellect Design Arena",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Newgen Software",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Firstsource",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sutherland",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ValueLabs",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Synechron",
+   "category": "Consulting & IT services",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tiger Analytics",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "LatentView Analytics",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tredence",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sigmoid",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Quantiphi",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Course5 Intelligence",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "NielsenIQ",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ZS Associates",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Axtria",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "IQVIA",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Merkle",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Dunnhumby",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Saama",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Innovaccer",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Uniphore",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Haptik",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Yellow.ai",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Observe.AI",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sarvam AI",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Netradyne",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Wadhwani AI",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Gupshup",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "InMobi",
+   "category": "Analytics & AI",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Flipkart",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Swiggy",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zomato",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Meesho",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Nykaa",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Dream11",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ShareChat",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Urban Company",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Lenskart",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Delhivery",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "BigBasket",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Udaan",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Ather Energy",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Rapido",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cars24",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "OYO",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "MakeMyTrip",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Info Edge",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Postman",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "BrowserStack",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Chargebee",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Druva",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Icertis",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "MiQ",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sprinklr",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zeta",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Darwinbox",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Freshworks",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zoho",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "CleverTap",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "MoEngage",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "LeadSquared",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Whatfix",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Mindtickle",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Atlan",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Rippling",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Ola Electric",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Zepto",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Blinkit",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "PharmEasy",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata 1mg",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Practo",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cult.fit",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Spinny",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "CarDekho",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "boAt",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Honasa Consumer",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "NoBroker",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cleartrip",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ixigo",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "redBus",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Digital",
+   "category": "Product & startups",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Reliance Jio",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Bharti Airtel",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Vodafone Idea",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Ericsson",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Nokia",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "MediaTek",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tejas Networks",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sterlite Technologies",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Communications",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Infineon",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "NXP Semiconductors",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "STMicroelectronics",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Analog Devices",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Marvell",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Applied Materials",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Lam Research",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "KLA",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Motors",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Mahindra & Mahindra",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Maruti Suzuki",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "TVS Motor",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Bajaj Auto",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Hero MotoCorp",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Ashok Leyland",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Larsen & Toubro",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Steel",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "JSW Steel",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Reliance Industries",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Power",
+   "category": "Telecom & engineering",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Optum",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Novartis",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "AstraZeneca",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "GSK",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sanofi",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Pfizer",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Roche",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "GE HealthCare",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Siemens Healthineers",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Medtronic",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Abbott",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Sun Pharma",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Dr. Reddy's",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Cipla",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Lupin",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Biocon",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Apollo Hospitals",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Narayana Health",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Carelon Global Solutions",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Evernorth",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "McKesson",
+   "category": "Healthcare & pharma",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Hindustan Unilever",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "ITC",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Asian Paints",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Marico",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Dabur",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Titan Company",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Tata Consumer Products",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  },
+  {
+   "name": "Reliance Retail",
+   "category": "Retail & consumer",
+   "alumni": false,
+   "featured": false
+  }
+ ]
+}

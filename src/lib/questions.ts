@@ -1,10 +1,10 @@
 // Question and option definitions shared by the browser (onboarding, tool questions) and the server (validation).
 
-export type Option = { id: string; label: string; hint?: string }
+export type Option = { id: string; label: string; hint?: string; keywords?: string[] }
 
 // ---------- Onboarding (asked in the chat before contact details) ----------
 
-/** Career goal (asked by Richa). Shapes how the counsellor talks to them and what they pitch. */
+/** Career goal (asked by Lumi). Shapes how the counsellor talks to them and what they pitch. */
 export const GOALS: Option[] = [
   { id: 'switch', label: 'Switch to a better tech role' },
   { id: 'upskill', label: 'Grow faster in my current role' },
@@ -30,23 +30,29 @@ export const TRACKS: (Option & { interest: string; programId: string; roles: str
 ]
 
 /** The role a track aims at, so the learner is not asked again after picking the track. */
-export const TRACK_TARGET: Record<string, string> = { ai: 'ai-engineer', fde: 'fde', 'cloud-devops': 'cloud-engineer' }
+/**
+ * The role a track aims at when the track alone decides it. The AI track has no single target: it depends on the
+ * learner (see defaultTargetRole in lib/segments), e.g. "AI-powered Marketer" for a marketer who doesn't code.
+ */
+export const TRACK_TARGET: Record<string, string> = { fde: 'fde', 'cloud-devops': 'cloud-engineer' }
 
-/** Industry or domain the learner comes from (asked by Richa). */
+/** Industry or domain the learner comes from (asked by Lumi). */
+/** `keywords`: what people type for that industry (typed answers only; never shown). Anything else becomes "Other" with their words. */
 export const DOMAINS: Option[] = [
-  { id: 'it-services', label: 'IT services / consulting' },
-  { id: 'product', label: 'Product / SaaS company' },
-  { id: 'bfsi', label: 'Banking, finance & insurance' },
-  { id: 'telecom', label: 'Telecom & networking' },
-  { id: 'manufacturing', label: 'Manufacturing & automotive' },
-  { id: 'healthcare', label: 'Healthcare & pharma' },
-  { id: 'retail', label: 'Retail & e-commerce' },
-  { id: 'education', label: 'Education' },
-  { id: 'government', label: 'Government / PSU' },
+  { id: 'it-services', label: 'IT services / consulting', keywords: ['it services', 'it company', 'consulting', 'consultancy', 'outsourcing', 'service based', 'service company', 'infosys', 'tcs', 'wipro', 'accenture', 'cognizant', 'capgemini', 'hcl', 'tech mahindra'] },
+  { id: 'product', label: 'Product / SaaS company', keywords: ['saas', 'product based', 'product company', 'software product', 'startup', 'big tech'] },
+  { id: 'bfsi', label: 'Banking, finance & insurance', keywords: ['bank', 'banking', 'finance', 'financial', 'fintech', 'insurance', 'nbfc', 'payments', 'investment', 'stock', 'trading', 'accounting', 'audit', 'bfsi'] },
+  { id: 'telecom', label: 'Telecom & networking', keywords: ['telecom', 'telco', 'networking', 'network'] },
+  { id: 'manufacturing', label: 'Manufacturing & automotive', keywords: ['manufacturing', 'automotive', 'automobile', 'factory', 'industrial', 'mechanical', 'electronics', 'semiconductor', 'steel', 'chemical'] },
+  { id: 'healthcare', label: 'Healthcare & pharma', keywords: ['healthcare', 'health', 'hospital', 'pharma', 'pharmaceutical', 'medical', 'clinical', 'life sciences', 'biotech'] },
+  { id: 'retail', label: 'Retail & e-commerce', keywords: ['retail', 'ecommerce', 'e commerce', 'fmcg', 'consumer goods', 'd2c'] },
+  { id: 'education', label: 'Education', keywords: ['education', 'edtech', 'teaching', 'teacher', 'school', 'college', 'university', 'training'] },
+  { id: 'government', label: 'Government / PSU', keywords: ['government', 'govt', 'psu', 'public sector', 'defence', 'defense', 'railway'] },
   { id: 'non-tech', label: 'Non-tech / business role' },
-  { id: 'student', label: 'Student / fresher' },
+  { id: 'student', label: 'Student / fresher', keywords: ['student', 'fresher', 'graduate', 'studying'] },
   { id: 'other', label: 'Other' },
 ]
+export const DOMAIN_OTHER = 'other'
 
 /** Probing questions the counsellor asks in the first conversation. */
 export const LEARNING_SOURCES: Option[] = [
@@ -76,6 +82,18 @@ export const ROLES: Option[] = [
   { id: 'devops-cloud', label: 'DevOps / Cloud Engineer' },
   { id: 'product-manager', label: 'Product Manager' },
   { id: 'business-non-tech', label: 'Business / Non-Technical' },
+  // Non-tech roles, asked after "Non-tech / business role" (each has its own AI Practitioner projects)
+  { id: 'data-excel', label: 'MIS / Excel / Reporting analyst' },
+  { id: 'marketing', label: 'Marketing / Digital marketing' },
+  { id: 'designer', label: 'Graphic / UI-UX designer' },
+  { id: 'project-manager', label: 'Project / Program manager' },
+  { id: 'banking-finance', label: 'Banking / Finance / Accounts' },
+  { id: 'sales', label: 'Sales / Business development' },
+  { id: 'hr', label: 'HR / Recruitment' },
+  { id: 'operations', label: 'Operations / Supply chain' },
+  { id: 'content', label: 'Content / Writing / Media' },
+  { id: 'teacher', label: 'Teacher / Trainer' },
+  { id: 'consultant', label: 'Business / Management consultant' },
   { id: 'student', label: 'Student / Fresher' },
   // Asked for the Cloud & DevOps track, where each has its own specialisation program
   { id: 'network-admin', label: 'Network Engineer / Admin' },
@@ -85,6 +103,25 @@ export const ROLES: Option[] = [
 ]
 /** Roles shown only to Cloud & DevOps learners. */
 export const CLOUD_ROLES = ['network-admin', 'sysadmin', 'it-support', 'dba']
+/** Non-tech roles (shown after "Non-tech / business role"). data-excel works with data: they learn Python and ML too. */
+export const NONTECH_ROLES = ['data-excel', 'marketing', 'designer', 'project-manager', 'banking-finance', 'sales', 'hr', 'operations', 'content', 'teacher', 'consultant']
+export const DATA_SIDE_ROLES = ['data-analyst', 'data-excel']
+
+/** "Their role + AI": what a non-coder becomes with the AI Practitioner program (and leaders with theirs). */
+export const AI_ROLE_TITLE: Record<string, string> = {
+  marketing: 'AI-powered Marketer', designer: 'AI-first Designer', 'project-manager': 'AI Project Manager',
+  'banking-finance': 'AI-enabled Banking & Finance Professional', sales: 'AI-powered Sales Professional', hr: 'AI-enabled HR Professional',
+  operations: 'AI-driven Operations Manager', content: 'AI Content Strategist', teacher: 'AI-enabled Educator', consultant: 'AI Business Consultant',
+  'business-non-tech': 'AI-enabled Business Professional', 'product-manager': 'AI Product Manager', 'data-excel': 'AI & Data Analyst',
+  'data-analyst': 'AI & Data Analyst', 'qa-engineer': 'AI QA Engineer', 'software-engineer': 'AI-enabled Software Engineer',
+  'devops-cloud': 'AI-powered DevOps Engineer', student: 'AI Practitioner',
+}
+/** The AI version of their current role ("AI-powered Marketer"), or a sensible default. */
+export function aiVersionOf(a: Answers): string {
+  if (a.role && AI_ROLE_TITLE[a.role]) return AI_ROLE_TITLE[a.role]
+  if (a.role === ROLE_OTHER && a.roleOther) return `AI-powered ${a.roleOther}`
+  return 'AI-enabled Professional'
+}
 export const ROLE_OTHER = 'other'
 
 export const EXPERIENCE: Option[] = [
@@ -118,9 +155,15 @@ export const TARGET_ROLES: Record<string, Option[]> = {
     { id: 'genai-developer', label: 'GenAI / LLM Developer' },
     { id: 'ml-engineer', label: 'Machine Learning Engineer' },
     { id: 'ai-enabled-current', label: 'AI-skilled version of my current role' },
+    { id: 'sde-product', label: 'Software engineer (SDE) at a product company' },
   ],
   'cloud-devops': [
     { id: 'cloud-engineer', label: 'Cloud Engineer' },
+    { id: 'cloud-network-engineer', label: 'Cloud Network Engineer' },
+    { id: 'sre', label: 'Cloud / Site Reliability Engineer' },
+    { id: 'cloud-db-engineer', label: 'Cloud Database Engineer' },
+    { id: 'cloud-ops-engineer', label: 'Cloud Operations Engineer' },
+    { id: 'devops-qa', label: 'DevOps & Test Automation Engineer' },
     { id: 'devops-engineer', label: 'DevOps / SRE Engineer' },
     { id: 'mlops-engineer', label: 'MLOps / Platform Engineer' },
     { id: 'ai-enabled-current', label: 'AI-skilled version of my current role' },
@@ -256,10 +299,12 @@ export const COUNTRY_CODES: { code: string; label: string; flag: string; digits:
 ]
 
 export type Answers = {
-  // onboarding (Richa)
+  // onboarding (Lumi)
   goal?: string
   domain?: string
-  /** Freshers: final year, job hunting, or working outside tech (asked by Richa). */
+  /** Their own industry, typed when it isn't in the list (domain = 'other'). */
+  domainOther?: string
+  /** Freshers: final year, job hunting, or working outside tech (asked by Lumi). */
   studyStage?: string
   // first conversation with the counsellor
   /** "What made you start looking at this now?" (their own reason: the only source of urgency). */
@@ -304,14 +349,20 @@ export function roleLabel(a: Answers): string {
 export const experienceLabel = (a: Answers) => labelOf(EXPERIENCE, a.experience) ?? 'Not specified'
 export const interestLabel = (a: Answers) => labelOf(INTERESTS, a.interest) ?? 'Not specified'
 export const goalLabel = (a: Answers) => labelOf(GOALS, a.goal)
-export const domainLabel = (a: Answers) => labelOf(DOMAINS, a.domain)
+export const domainLabel = (a: Answers) => (a.domain === DOMAIN_OTHER ? a.domainOther || undefined : labelOf(DOMAINS, a.domain))
 export const trackOf = (interest: string | undefined) => TRACKS.find((t) => t.interest === interest) ?? null
 export function targetRoleOptions(a: Answers): Option[] {
-  return TARGET_ROLES[a.interest ?? 'ai'] ?? TARGET_ROLES.ai
+  const list = TARGET_ROLES[a.interest ?? 'ai'] ?? TARGET_ROLES.ai
+  // "AI-skilled version of my current role" says exactly which role ("AI-powered Marketer").
+  const named = list.map((o) => (o.id === 'ai-enabled-current' ? { ...o, label: aiVersionOf(a) } : o))
+  // Non-coders see their AI-version first; developer-only targets are not offered.
+  if (a.programmer === 'no') return [named.find((o) => o.id === 'ai-enabled-current') ?? { id: 'ai-enabled-current', label: aiVersionOf(a) }, ...named.filter((o) => o.id !== 'ai-enabled-current' && o.id !== 'sde-product')]
+  return named
 }
 export function targetRoleLabel(a: Answers): string {
   if (!a.targetRole) return 'Not specified'
   if (a.targetRole === TARGET_NOT_SURE) return 'Not sure yet'
+  if (a.targetRole === 'ai-enabled-current') return aiVersionOf(a)
   return targetRoleOptions(a).find((o) => o.id === a.targetRole)?.label
     ?? Object.values(TARGET_ROLES).flat().find((o) => o.id === a.targetRole)?.label
     ?? 'Not specified'

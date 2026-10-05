@@ -13,7 +13,7 @@ async function parse(res: Response): Promise<ApiResult> {
   return { ok: false, status: res.status, data, error: typeof data.error === 'string' ? data.error : 'Something went wrong. Please try again.' }
 }
 
-export async function postJson(url: string, body: unknown, method: 'POST' | 'DELETE' = 'POST'): Promise<ApiResult> {
+export async function postJson(url: string, body: unknown, method: 'POST' | 'DELETE' | 'PATCH' = 'POST'): Promise<ApiResult> {
   try {
     const res = await fetch(url, {
       method,
@@ -98,7 +98,7 @@ export function sessionRemove(key: string) {
 }
 
 /**
- * Forgets the conversation with Richa kept in this tab (it only survives a refresh mid-way). Called when a new
+ * Forgets the conversation with Lumi kept in this tab (it only survives a refresh mid-way). Called when a new
  * journey starts, after sign-in hands the chat over to the counsellor, and on logout.
  * `keepHandover` keeps the copy the dashboard is about to pick up.
  */

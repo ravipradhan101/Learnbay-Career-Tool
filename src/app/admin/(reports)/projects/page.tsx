@@ -3,7 +3,7 @@ import { ProjectLibrary, type AdminProject } from '@/components/admin/ProjectLib
 import { PROGRAMS } from '@/config/programs'
 import { requireAdmin } from '@/lib/admin-auth'
 import { query } from '@/lib/db'
-import { PROJECT_DOMAINS } from '@/lib/project-domains'
+import { domainLabels } from '@/lib/project-roles'
 
 export const metadata = { title: 'Projects' }
 
@@ -22,7 +22,7 @@ export default async function ProjectsPage() {
   return (
     <>
       <PageHead title="Projects" sub="The projects learners see in the chat. Each showing picks 4 for the learner's program and industry, keeping 1–2 they've seen and adding new ones." />
-      <ProjectLibrary projects={projects} programs={programs} domains={PROJECT_DOMAINS} />
+      <ProjectLibrary projects={projects} programs={programs} domains={await domainLabels()} />
     </>
   )
 }

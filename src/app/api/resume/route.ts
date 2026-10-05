@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   const existing = await queryOne(`SELECT id FROM resume_analyses WHERE user_id = $1`, [user.id])
-  if (existing) return jsonError(409, 'Your resume has already been reviewed. Book a mentor session for a fresh review.')
+  if (existing) return jsonError(409, 'Your resume has already been reviewed. Book a counselling call for a fresh review.')
 
   const ctx = await queryOne<{ answers: Answers; data: SkillGapResult | null }>(
     `SELECT a.answers, t.data FROM assessments a JOIN tool_results t ON t.user_id = a.user_id

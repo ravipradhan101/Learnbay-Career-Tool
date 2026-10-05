@@ -2,13 +2,40 @@ import { query, queryOne } from './db'
 
 export type Rating = { avg: number; count: number }
 
-/** A counsellor's average rating from real learner reviews (null until someone has rated them). */
+/**
+ * DEMO DATA for the stakeholder prototype: starting ratings per counsellor, blended with real learner reviews.
+ * Switch off with DEMO_RATINGS=false before real learners use the app (Admin → Reviews shows a banner while it's on).
+ */
+export const DEMO_RATINGS: Record<string, Rating> = {
+  tanya: { avg: 4.82, count: 3126 }, siya: { avg: 4.76, count: 2481 }, mangesh: { avg: 4.68, count: 1893 }, elanor: { avg: 4.91, count: 4637 },
+  kshitij: { avg: 4.57, count: 958 }, riya: { avg: 4.87, count: 3712 }, imran: { avg: 4.73, count: 2214 },
+}
+export const demoRatingsOn = () => process.env.DEMO_RATINGS !== 'false'
+
+/** Stars are shown once a counsellor has this many ratings (one early rating never decides what everyone sees). */
+export const MIN_RATINGS_SHOWN = 10
+
+/** A counsellor's rating: real reviews, blended with the demo starting ratings while demo data is on. */
 export async function ratingOf(counsellor: string): Promise<Rating | null> {
-  const row = await queryOne<{ avg: string | null; count: number }>(
-    `SELECT avg(rating)::numeric(3,2)::text AS avg, count(*)::int AS count FROM counsellor_reviews WHERE counsellor = $1`,
-    [counsellor],
+  return (await ratingsOf([counsellor]))[counsellor] ?? null
+}
+
+/** Ratings for several counsellors at once (an average over every rating, so each new rating moves it a little). */
+export async function ratingsOf(ids: string[]): Promise<Record<string, Rating>> {
+  const rows = await query<{ counsellor: string; total: number; count: number }>(
+    `SELECT counsellor, sum(rating)::float AS total, count(*)::int AS count FROM counsellor_reviews WHERE counsellor = ANY($1) GROUP BY counsellor`,
+    [ids],
   )
-  return row && row.count > 0 && row.avg ? { avg: Number(row.avg), count: row.count } : null
+  const out: Record<string, Rating> = {}
+  for (const id of ids) {
+    const real = rows.find((r) => r.counsellor === id)
+    const demo = demoRatingsOn() ? DEMO_RATINGS[id] : undefined
+    const count = (real?.count ?? 0) + (demo?.count ?? 0)
+    if (!count) continue
+    const total = (real?.total ?? 0) + (demo ? demo.avg * demo.count : 0)
+    out[id] = { avg: Math.round((total / count) * 100) / 100, count }
+  }
+  return out
 }
 
 export type ReviewInput = {

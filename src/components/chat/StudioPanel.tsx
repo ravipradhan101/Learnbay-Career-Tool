@@ -1,110 +1,105 @@
 'use client'
 
 import Link from 'next/link'
-import { Icon } from '../Icon'
+import { Icon, type IconName } from '../Icon'
 import { openWhyLearnbay } from '../why/WhyLearnbayButton'
-import { Avatar } from './Avatar'
-import { PartnerLogos } from '../PartnerLogos'
 import { programForLearner } from '@/lib/segments'
-import { PUBLISHED_STORY, USPS } from '@/config/usps'
-import { COUNSELLOR_TITLE, getCounsellor } from '@/lib/counsellors'
+import { USPS } from '@/config/usps'
+import { getCounsellor } from '@/lib/counsellors'
 import { trackOf, type Answers } from '@/lib/questions'
 import type { ToolState } from '@/lib/report-card'
 import { TOOLS, type ToolId } from '@/lib/tools-meta'
 
+type Step = { id: string; label: string; icon: IconName; href: string; done: boolean; note: string }
+const WHY = { projects: 'Real projects', mentors: 'Live mentors', placement: 'Placement support', domain: 'Domain focus' } as const
+
 /**
- * Right pane: who is guiding you, your saved reports (always here when you log in), the program your
- * counsellor recommends once they know you, and why Learnbay.
+ * Right pane, readable at a glance and without scrolling: the program recommended for you first, then your progress
+ * (a ring, your readiness score and five step tiles) and why Learnbay in four icons. The counsellor's own profile
+ * opens from their photo in the chat.
  */
-export function StudioPanel({ counsellor, rating, answers, tools, eligibilityDone, eligibilityVisible, onCall, onNavigate }: {
+export function StudioPanel({ counsellor, answers, tools, eligibilityDone, eligibilityVisible, sessionsDone, onNavigate }: {
   counsellor: string
-  /** From real learner reviews; null until someone has rated this counsellor. */
-  rating: { avg: number; count: number } | null
   answers: Answers
   tools: Record<ToolId, ToolState>
   eligibilityDone: boolean
   eligibilityVisible: boolean
-  onCall: () => void
+  sessionsDone: boolean
   onNavigate?: () => void
 }) {
   const c = getCounsellor(counsellor)
   const t = trackOf(answers.interest)
   const program = programForLearner(answers)
   const probed = Boolean(answers.difficulty)
+  const readiness = tools['skill-gap']?.card?.gauge
+  const short: Record<ToolId, string> = { 'skill-gap': 'Skill gaps', salary: 'Salary', roadmap: 'Roadmap' }
+  const steps: Step[] = [
+    ...TOOLS.map((tool) => {
+      const ready = tools[tool.id]?.status === 'ready'
+      return {
+        id: tool.id, label: short[tool.id], icon: tool.icon, href: ready ? `/dashboard/${tool.id}/report` : tool.route, done: ready,
+        note: ready ? (tool.id === 'skill-gap' && readiness !== undefined ? `${readiness}/100` : 'Open') : '1 min',
+      }
+    }),
+    ...(eligibilityVisible ? [{ id: 'eligibility', label: 'Eligibility', icon: 'award' as IconName, href: '/dashboard/eligibility', done: eligibilityDone, note: eligibilityDone ? 'Saved' : '2 min' }] : []),
+    { id: 'sessions', label: sessionsDone ? 'Call booked' : 'Counselling call', icon: 'calendar', href: '/dashboard/sessions', done: sessionsDone, note: sessionsDone ? 'See details' : 'Free' },
+  ]
+  const doneCount = steps.filter((s) => s.done).length
+  const next = steps.find((s) => !s.done)
+  const pct = Math.round((doneCount / steps.length) * 100)
+
   return (
-    <div className="sp">
-      <section className="sp-card sp-me">
-        <Avatar who={c.id} size={44} online />
-        <div className="sp-me-text">
-          <b>{c.name}</b>
-          <small>{COUNSELLOR_TITLE}{t ? ` · ${t.label}` : ''}</small>
-          {rating ? (
-            <span className="sp-rating" aria-label={`Rated ${rating.avg.toFixed(1)} out of 5 by ${rating.count} learner${rating.count === 1 ? '' : 's'}`}>
-              <span className="sp-stars" aria-hidden="true"><span style={{ width: `${(rating.avg / 5) * 100}%` }}>★★★★★</span>★★★★★</span>
-              <b>{rating.avg.toFixed(1)}</b><small>({rating.count})</small>
-            </span>
-          ) : <span className="sp-rating sp-rating-new">★ New · no ratings yet</span>}
-          <small className="sp-online">Online · virtual counsellor</small>
-        </div>
-        <button type="button" className="sp-call" onClick={onCall} aria-label={`Get a call from ${c.name}`}><Icon name="phone" size="1rem" /></button>
-      </section>
-
-      <section className="sp-section">
-        <h3>Your reports</h3>
-        <ul className="sp-reports">
-          {TOOLS.map((tool) => {
-            const ready = tools[tool.id]?.status === 'ready'
-            return (
-              <li key={tool.id}>
-                <Link href={ready ? `/dashboard/${tool.id}/report` : tool.route} scroll={false} onClick={onNavigate}>
-                  <span className={`sp-r-icon ${ready ? 'ok' : ''}`}><Icon name={ready ? 'checkCircle' : tool.icon} size="0.95rem" /></span>
-                  <span className="sp-r-text"><b>{tool.name}</b><small>{ready ? 'Saved · open anytime' : 'Not built yet'}</small></span>
-                  <Icon name="chevronRight" size="0.9rem" className="sp-chev" />
-                </Link>
-              </li>
-            )
-          })}
-          {eligibilityVisible && (
-            <li>
-              <Link href="/dashboard/eligibility" scroll={false} onClick={onNavigate}>
-                <span className={`sp-r-icon ${eligibilityDone ? 'ok' : ''}`}><Icon name={eligibilityDone ? 'checkCircle' : 'award'} size="0.95rem" /></span>
-                <span className="sp-r-text"><b>Eligibility test</b><small>{eligibilityDone ? 'Result saved' : '10 quick questions'}</small></span>
-                <Icon name="chevronRight" size="0.9rem" className="sp-chev" />
-              </Link>
-            </li>
-          )}
-        </ul>
-      </section>
-
-      <section className="sp-section">
-        <h3>Recommended for you</h3>
+    <div className="sp sp2">
+      <section className="sp2-card sp2-program" aria-label="Recommended for you">
+        <span className="sp2-eyebrow"><Icon name="sparkles" size="0.8rem" /> Recommended for you</span>
         {probed && program ? (
-          <div className="sp-card sp-program">
-            <b>{program.name}</b>
-            <ul>{program.features.slice(0, 3).map((f) => <li key={f}><Icon name="check" size="0.8rem" />{f}</li>)}</ul>
-            <div className="sp-actions">
-              <Link href="/dashboard/sessions" scroll={false} className="tc-btn tc-btn-primary tc-btn-sm" onClick={onNavigate}>Talk to a mentor</Link>
-              <a href={program.url} target="_blank" rel="noopener noreferrer" className="tc-btn tc-btn-ghost tc-btn-sm">Details <Icon name="external" size="0.75rem" /></a>
+          <>
+            <b className="sp2-program-name">{program.name}</b>
+            <div className="sp2-program-actions">
+              <Link href="/dashboard/sessions" scroll={false} className="tc-btn tc-btn-primary tc-btn-sm" onClick={onNavigate}><Icon name="calendar" size="0.9rem" /> {sessionsDone ? 'See my booked call' : 'Talk to a counsellor'}</Link>
+              <a href={program.url} target="_blank" rel="noopener noreferrer" className="sp2-link">Details <Icon name="external" size="0.75rem" /></a>
             </div>
-          </div>
+          </>
         ) : (
-          <p className="sp-empty">{c.name} will recommend the right program after a few quick questions in the chat.</p>
+          <>
+            {t && <b className="sp2-program-name">{t.label} <small>({t.hint})</small></b>}
+            <p className="sp2-empty">{c.name} will confirm the exact program for you after a few quick questions in the chat.</p>
+          </>
         )}
       </section>
 
-      <section className="sp-section">
-        <h3>Why Learnbay</h3>
-        <ul className="sp-usps">
-          {(['projects', 'mentors', 'placement', 'domain'] as const).map((id) => (
-            <li key={id}><span className="tc-soft-icon"><Icon name={USPS[id].icon} size="0.9rem" /></span><span><b>{USPS[id].title}</b><small>{USPS[id].short}</small></span></li>
+      <section className="sp2-card sp2-progress" aria-label="Your progress">
+        <div className="sp2-progress-top">
+          <span className="sp2-ring" style={{ ['--p' as string]: `${pct}%` }} aria-label={`${doneCount} of ${steps.length} steps done`}>
+            <b>{doneCount}<small>/{steps.length}</small></b>
+          </span>
+          <div className="sp2-progress-text">
+            <b>Your progress</b>
+            {readiness !== undefined
+              ? <small>Readiness score <span className="sp2-score">{readiness}/100</span></small>
+              : <small>{next ? `Next: ${next.label.toLowerCase()}` : 'All steps done'}</small>}
+          </div>
+        </div>
+        <ul className="sp2-steps">
+          {steps.map((s) => (
+            <li key={s.id}>
+              <Link href={s.href} scroll={false} onClick={onNavigate} className={`sp2-step${s.done ? ' done' : ''}${s.id === next?.id ? ' next' : ''}`} title={s.done ? `${s.label}: done` : `${s.label}: start`}>
+                <span className="sp2-step-icon"><Icon name={s.done ? 'check' : s.icon} size="1rem" /></span>
+                <b>{s.label}</b>
+                <small>{s.note}</small>
+              </Link>
+            </li>
           ))}
         </ul>
-        <PartnerLogos size={16} className="sp-logos" />
-        <figure className="sp-quote">
-          <blockquote>“{PUBLISHED_STORY.quote}”</blockquote>
-          <figcaption>{PUBLISHED_STORY.name} · {PUBLISHED_STORY.role}</figcaption>
-        </figure>
-        <button type="button" className="tc-link" onClick={() => { onNavigate?.(); openWhyLearnbay('right-pane') }}>How Learnbay is different <Icon name="arrowRight" size="0.8rem" /></button>
+      </section>
+
+      <section className="sp2-why" aria-label="Why Learnbay">
+        <div className="sp2-why-grid">
+          {(Object.keys(WHY) as (keyof typeof WHY)[]).map((id) => (
+            <span key={id} className="sp2-why-item" title={`${USPS[id].title}: ${USPS[id].short}`}><Icon name={USPS[id].icon} size="1rem" />{WHY[id]}</span>
+          ))}
+        </div>
+        <button type="button" className="sp2-link" onClick={() => { onNavigate?.(); openWhyLearnbay('right-pane') }}>How Learnbay is different <Icon name="arrowRight" size="0.8rem" /></button>
       </section>
     </div>
   )

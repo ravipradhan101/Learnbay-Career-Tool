@@ -47,7 +47,7 @@ export function skillGapSummary(r: SkillGapResult): ReportSummary {
       topGap
         ? { title: `Start with ${topGap.skill}`, detail: shorten(topGap.howToClose), href: '/dashboard/roadmap', cta: 'See it in your roadmap' }
         : { title: `Start with ${r.topGaps[0] ?? 'your first gap'}`, href: '/dashboard/roadmap', cta: 'Plan it' },
-      { title: 'Get your gaps reviewed by a mentor', detail: 'A free 1:1 to confirm what to learn first, and what to skip.', href: '/dashboard/sessions', cta: 'Book free 1:1' },
+      { title: 'Get your gaps reviewed by a Senior Counsellor', detail: 'A free call to confirm what to learn first, and what to skip.', href: '/dashboard/sessions', cta: 'Book free call' },
     ],
   }
 }
@@ -69,7 +69,7 @@ export function salarySummary(r: SalaryResult, current: { minLpa: number; maxLpa
         ? { title: `Add ${premium.skill}`, detail: shorten(premium.note), href: '/dashboard/roadmap', cta: 'Plan it' }
         : { title: 'Close your top skill gap', href: '/dashboard/skill-gap', cta: 'See my gaps' },
       ...(r.negotiationTips?.[0] ? [{ title: 'Before your next offer', detail: shorten(r.negotiationTips[0]) }] : []),
-      { title: 'Plan your switch with a mentor', detail: 'A free 1:1 on which role, which companies, and a realistic number for you.', href: '/dashboard/sessions', cta: 'Book free 1:1' },
+      { title: 'Plan your switch with a Senior Counsellor', detail: 'A free call on which role, which companies, and a realistic number for you.', href: '/dashboard/sessions', cta: 'Book free call' },
     ],
   }
 }
@@ -85,7 +85,7 @@ export function roadmapSummary(r: RoadmapResult): ReportSummary {
     ],
     actions: [
       ...r.nextSteps.slice(0, 2).map((s, i) => ({ title: i === 0 ? 'Today' : 'This week', detail: shorten(s) })),
-      { title: 'Stay on track with a mentor', detail: 'A free 1:1 to pressure-test this plan against your job and schedule.', href: '/dashboard/sessions', cta: 'Book free 1:1' },
+      { title: 'Stay on track with a Senior Counsellor', detail: 'A free call to pressure-test this plan against your job and schedule.', href: '/dashboard/sessions', cta: 'Book free call' },
     ],
   }
 }
@@ -97,3 +97,14 @@ export function summaryFor(tool: ToolId, data: ToolResultMap[ToolId], current: {
 }
 
 export const programOf = (programId: string) => getProgram(programId)
+
+/** With a counselling call already booked, the "book a call" step becomes "bring this to your call" (never a second booking). */
+export function withBooking<T extends { actions: Action[] }>(summary: T, booked: boolean): T {
+  if (!booked) return summary
+  return {
+    ...summary,
+    actions: summary.actions.map((a) => (a.href === '/dashboard/sessions'
+      ? { ...a, title: 'Bring this to your booked call', detail: 'Your Senior Counsellor will go through it with you and turn it into a plan.', cta: 'See my booking' }
+      : a)),
+  }
+}

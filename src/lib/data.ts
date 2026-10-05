@@ -91,7 +91,9 @@ export const getStudio = cache(async (): Promise<StudioData> => {
                     'share_token', t.share_token, 'updated_at', t.updated_at)) FROM tool_results t WHERE t.user_id = u.id) AS tools,
             (SELECT json_build_object('session_type', c.session_type, 'preferred_date', to_char(c.preferred_date, 'YYYY-MM-DD'),
                     'preferred_time', c.preferred_time, 'status', c.status)
-               FROM counsellor_requests c WHERE c.user_id = u.id ORDER BY c.created_at DESC LIMIT 1) AS latest_session
+               FROM counsellor_requests c
+              WHERE c.user_id = u.id AND c.status <> 'closed' AND c.preferred_date >= (now() AT TIME ZONE 'Asia/Kolkata')::date
+              ORDER BY c.created_at DESC LIMIT 1) AS latest_session
        FROM sessions s JOIN users u ON u.id = s.user_id LEFT JOIN assessments a ON a.user_id = u.id
       WHERE s.token_hash = $1 AND s.expires_at > now()`,
     [sha256(token)],
@@ -101,5 +103,6 @@ export const getStudio = cache(async (): Promise<StudioData> => {
   // An emailed link meant for a different learner: never show or build this account's reports under it.
   if (!linkMatches(user.id, linkFor)) redirect(`/account/switch?next=${encodeURIComponent(safePath)}`)
   if (!answers || !answers.interest || !user.phone) redirect('/start')
+  // hasSession: an upcoming counselling call is booked (after that day passes, they can book another).
   return { user, answers, tools: tools ?? [], hasSession: Boolean(latest_session), latestSession: latest_session }
 })

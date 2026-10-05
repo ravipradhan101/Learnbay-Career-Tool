@@ -1,11 +1,11 @@
 import { Icon } from '../Icon'
 import { ActionPlan } from '../report/ActionPlan'
 import { LadderChart, PhaseTimeline, RangeChart, Ring, SkillBars } from '../report/Charts'
-import { ChartCard, EligibilityStrip, LearnbayEdge, More, ReportHero } from '../report/ReportParts'
+import { ChartCard, EligibilityStrip, LearnbayEdge, More, OutcomePath, ReportHero } from '../report/ReportParts'
 import { PublishedStory } from '../usp/UspNote'
 import { getProgram } from '@/config/programs'
 import { getResources } from '@/config/resources'
-import { roadmapSummary, salarySummary, skillGapSummary } from '@/lib/report-summary'
+import { roadmapSummary, salarySummary, skillGapSummary, withBooking } from '@/lib/report-summary'
 import type { ProgramFit, RoadmapResult, SalaryResult, SkillGapResult } from '@/lib/tool-types'
 
 // Report layout, built for skimming: one headline number, key numbers, 3 actions, charts,
@@ -14,7 +14,7 @@ import type { ProgramFit, RoadmapResult, SalaryResult, SkillGapResult } from '@/
 export const formatLpa = (n: number) => `₹${Number.isInteger(n) ? n : n.toFixed(1)} LPA`
 
 /** Learner context for the personal parts of a report (not shown on public share links). */
-export type ReportExtras = { area: string; role: string; eligibilityDone: boolean }
+export type ReportExtras = { area: string; role: string; eligibilityDone: boolean; hasSession: boolean; industry: string | null }
 
 export function ProgramFitCard({ fit, showLink = true }: { fit: ProgramFit; showLink?: boolean }) {
   const program = getProgram(fit.programId)
@@ -48,7 +48,14 @@ export function SkillGapView({ r, shared = false, extras }: { r: SkillGapResult;
   return (
     <>
       <ReportHero summary={s} gauge={r.readiness.score} />
-      {!shared && <ActionPlan tool="skill-gap" actions={s.actions} />}
+      {!shared && extras && (
+        <OutcomePath
+          goal={`Job-ready ${r.targetRole}`} targetRole={r.targetRole} programId={r.programId} industry={extras.industry}
+          goalNote={`From ${r.readiness.score}/100 today to job-ready: close ${totalGaps} skill gap${totalGaps === 1 ? '' : 's'} with a structured plan${totalGaps && programCovers / totalGaps >= 0.5 ? `, ${programCovers} of them covered by your recommended program` : ''}.`}
+          eligibilityDone={extras.eligibilityDone} hasSession={extras.hasSession}
+        />
+      )}
+      {!shared && <ActionPlan tool="skill-gap" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
 
       <div className="grid-2 report-grid">
         <ChartCard title="Where you stand" sub="Your level vs what the role needs. Biggest gaps first.">
@@ -118,7 +125,7 @@ export function SkillGapView({ r, shared = false, extras }: { r: SkillGapResult;
             <Ring value={programCovers} total={totalGaps} label="gaps covered by your recommended program" />
             <Ring value={genericCovers} total={totalGaps} label="covered by a typical generic course" />
           </div>
-          <LearnbayEdge ids={['customisation', 'projects', 'mentors']} programId={r.programId} coverage={{ covers: programCovers, total: totalGaps }} />
+          <LearnbayEdge booked={extras.hasSession} ids={['customisation', 'projects', 'mentors']} programId={r.programId} coverage={{ covers: programCovers, total: totalGaps }} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
           <PublishedStory />
         </>
@@ -132,6 +139,7 @@ export function SkillGapView({ r, shared = false, extras }: { r: SkillGapResult;
 export function SalaryView({ r, current, shared = false, extras }: { r: SalaryResult; current: { minLpa: number; maxLpa: number | null } | null; shared?: boolean; extras?: ReportExtras }) {
   const cur = shared ? null : current
   const s = salarySummary(r, cur)
+  const top = r.targetRoles.find((t) => t.role === r.targetRole) ?? r.targetRoles[0]
   const rows = [
     ...(cur ? [{ label: 'You today', min: cur.minLpa, max: cur.maxLpa ?? cur.minLpa * 1.2, tone: 'current' as const }] : []),
     { label: 'Your role, market', min: r.currentRoleMarket.minLpa, max: r.currentRoleMarket.maxLpa, tone: 'muted' as const },
@@ -140,7 +148,14 @@ export function SalaryView({ r, current, shared = false, extras }: { r: SalaryRe
   return (
     <>
       <ReportHero summary={s} />
-      {!shared && <ActionPlan tool="salary" actions={s.actions} />}
+      {!shared && extras && top && (
+        <OutcomePath
+          goal={`${top.role} at ${formatLpa(top.minLpa)} – ${formatLpa(top.maxLpa)}`} targetRole={top.role} programId={r.programId} industry={extras.industry}
+          goalNote={cur ? `Up from ${formatLpa(cur.minLpa)}${cur.maxLpa ? ` – ${formatLpa(cur.maxLpa)}` : '+'} today. Indicative market range for your experience and city, not a promise.` : 'Indicative market range for your experience and city, not a promise.'}
+          eligibilityDone={extras.eligibilityDone} hasSession={extras.hasSession}
+        />
+      )}
+      {!shared && <ActionPlan tool="salary" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
 
       <ChartCard title="What you could earn" sub="Indicative market ranges in ₹ lakh per year for your experience and city">
         <RangeChart rows={rows} />
@@ -179,7 +194,7 @@ export function SalaryView({ r, current, shared = false, extras }: { r: SalaryRe
 
       {!shared && extras && (
         <>
-          <LearnbayEdge ids={['placement', 'domain', 'projects']} programId={r.programId} />
+          <LearnbayEdge booked={extras.hasSession} ids={['placement', 'domain', 'projects']} programId={r.programId} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
         </>
       )}
@@ -195,7 +210,14 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
   return (
     <>
       <ReportHero summary={s} />
-      {!shared && <ActionPlan tool="roadmap" actions={s.actions} />}
+      {!shared && extras && (
+        <OutcomePath
+          goal={`${r.targetRole}, with a portfolio to prove it`} targetRole={r.targetRole} programId={r.programId} industry={extras.industry}
+          goalNote={`Your ${r.durationMonths}-month plan at ${r.weeklyHours}, phase by phase, each ending with a milestone you can show.`}
+          eligibilityDone={extras.eligibilityDone} hasSession={extras.hasSession}
+        />
+      )}
+      {!shared && <ActionPlan tool="roadmap" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
 
       <ChartCard title={`Your ${r.durationMonths}-month plan at a glance`} sub={`${r.weeklyHours} · each phase ends with a milestone you can show`}>
         <PhaseTimeline phases={r.phases} months={r.durationMonths} />
@@ -252,7 +274,7 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
 
       {!shared && extras && (
         <>
-          <LearnbayEdge ids={['mentors', 'hybrid', 'placement']} programId={r.programId} />
+          <LearnbayEdge booked={extras.hasSession} ids={['mentors', 'hybrid', 'placement']} programId={r.programId} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
           <PublishedStory />
         </>

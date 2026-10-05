@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Icon } from './Icon'
 import { clearCachedChats, clearGuestChat } from '@/lib/client'
 
-export function LogoutButton({ className = 'btn btn-ghost', showIcon = false, before }: { className?: string; showIcon?: boolean; before?: () => Promise<void> }) {
+/** `confirm`: asked first (e.g. Lumi's goodbye with a Log out button); logging out only happens when it resolves true. */
+export function LogoutButton({ className = 'btn btn-ghost', showIcon = false, before, confirm }: { className?: string; showIcon?: boolean; before?: () => Promise<void>; confirm?: () => Promise<boolean> }) {
   const [busy, setBusy] = useState(false)
   async function logout() {
+    if (confirm && !(await confirm().catch(() => true))) return
     setBusy(true)
     if (before) await before().catch(() => {})
     clearGuestChat()

@@ -1,6 +1,7 @@
 import { env } from './env'
 import { queryOne, query } from './db'
 import { sendMail } from './mailer'
+import { CALL_HOURS } from './sessions'
 
 export type CallRequest = {
   userId: string | null
@@ -64,6 +65,6 @@ export async function requestCall(r: CallRequest): Promise<{ calling: boolean; m
     calling,
     message: calling
       ? `Calling you now on ${masked}. Pick up when it rings.`
-      : `Got it. You’ll get a call on ${masked} shortly (usually within 30 minutes, 10 AM to 7 PM IST).`,
+      : `Got it. A Senior Counsellor will call you on ${masked} at the earliest available time, within 1 working day (${CALL_HOURS}).`,
   }
 }

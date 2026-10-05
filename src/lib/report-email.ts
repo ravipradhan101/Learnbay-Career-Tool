@@ -97,7 +97,7 @@ export function toolReportPdf(opts: Opts): Buffer {
     {
       type: 'callout',
       title: 'Turn this report into a plan, free',
-      text: `Book a 1:1 with a Learnbay mentor. Bring this report: you will leave knowing which role to target, what to learn first, and whether the ${p.name} fits you.`,
+      text: `Book a free call with a Learnbay Senior Career Counsellor. Bring this report: you will leave knowing which role to target, what to learn first, and whether the ${p.name} fits you.`,
       button: { label: 'Book my free 1:1', url: learnerUrl(opts.userId, '/dashboard/sessions') },
     },
     ...detailBlocks(opts.meta.id, opts.data),
@@ -114,7 +114,7 @@ export function toolReportPdf(opts: Opts): Buffer {
 
 // ---------- Email body ----------
 
-const TONE: Record<string, string> = { primary: '#2563eb', success: '#16a34a', accent: '#f97316', warning: '#d97706' }
+const TONE: Record<string, string> = { primary: '#4338ca', success: '#16a34a', accent: '#f97316', warning: '#d97706' }
 
 function miniChartHtml(tool: ToolMeta['id'], data: ToolResultMap[ToolMeta['id']]): string {
   const row = (label: string, pct: number, value: string, color: string, marker?: number) => `
@@ -129,20 +129,20 @@ ${marker !== undefined ? `<div style="position:absolute;left:${Math.min(99, mark
     const r = data as SkillGapResult
     title = 'Biggest gaps (bar = you, orange line = needed)'
     rows = [...r.skills].sort((a, b) => (b.requiredLevel - b.currentLevel) - (a.requiredLevel - a.currentLevel)).slice(0, 4)
-      .map((s) => row(s.name, s.currentLevel, s.requiredLevel > s.currentLevel ? `+${s.requiredLevel - s.currentLevel}` : 'Ready', '#2563eb', s.requiredLevel)).join('')
+      .map((s) => row(s.name, s.currentLevel, s.requiredLevel > s.currentLevel ? `+${s.requiredLevel - s.currentLevel}` : 'Ready', '#4338ca', s.requiredLevel)).join('')
   } else if (tool === 'salary') {
     const r = data as SalaryResult
     const top = Math.max(10, ...r.targetRoles.map((t) => t.maxLpa), r.currentRoleMarket.maxLpa)
     title = 'What you could earn (₹ lakh per year, top of range)'
     rows = [row('Your role today', (r.currentRoleMarket.maxLpa / top) * 100, `₹${r.currentRoleMarket.minLpa}–${r.currentRoleMarket.maxLpa}L`, '#94a3b8'),
-      ...r.targetRoles.map((t) => row(t.role, (t.maxLpa / top) * 100, `₹${t.minLpa}–${t.maxLpa}L`, '#2563eb'))].join('')
+      ...r.targetRoles.map((t) => row(t.role, (t.maxLpa / top) * 100, `₹${t.minLpa}–${t.maxLpa}L`, '#4338ca'))].join('')
   } else {
     const r = data as RoadmapResult
     const totalWeeks = Math.max(4, Math.round(r.durationMonths * 4.3))
     title = `Your ${r.durationMonths}-month plan`
     rows = r.phases.map((p, i) => {
       const [, b] = weekRange(p.weeks, [1, totalWeeks])
-      return row(`${i + 1}. ${p.title}`, (Math.min(b, totalWeeks) / totalWeeks) * 100, p.weeks, ['#2563eb', '#f97316', '#16a34a', '#7c3aed'][i % 4])
+      return row(`${i + 1}. ${p.title}`, (Math.min(b, totalWeeks) / totalWeeks) * 100, p.weeks, ['#4338ca', '#f97316', '#16a34a', '#7c3aed'][i % 4])
     }).join('')
   }
   return `<p style="margin:18px 0 6px;font-size:13px;font-weight:700;color:#0f172a">${escapeHtml(title)}</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>`
@@ -163,16 +163,16 @@ export function buildReportEmail(opts: Opts): Mail {
 <div style="font-size:17px;font-weight:800;color:#0f172a;margin-top:4px">${escapeHtml(k.value)}</div>
 ${k.sub ? `<div style="font-size:11px;color:#64748b">${escapeHtml(k.sub)}</div>` : ''}</div></td>`).join('')}</tr></table>`
   const actionsHtml = `<p style="margin:20px 0 8px;font-size:15px;font-weight:800;color:#0f172a">Your next ${s.actions.length} moves</p>${s.actions.map((a, i) => `
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;background:${i === s.actions.length - 1 ? '#fff7ed' : '#eff6ff'};border-radius:10px"><tr>
-<td width="34" valign="top" style="padding:12px 0 12px 12px"><div style="width:22px;height:22px;border-radius:50%;background:${i === s.actions.length - 1 ? '#f97316' : '#2563eb'};color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:22px">${i + 1}</div></td>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;background:${i === s.actions.length - 1 ? '#fff7ed' : '#eef2ff'};border-radius:10px"><tr>
+<td width="34" valign="top" style="padding:12px 0 12px 12px"><div style="width:22px;height:22px;border-radius:50%;background:${i === s.actions.length - 1 ? '#f97316' : '#4338ca'};color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:22px">${i + 1}</div></td>
 <td style="padding:12px 12px 12px 8px"><div style="font-size:14px;font-weight:700;color:#0f172a">${escapeHtml(a.title)}</div>${a.detail ? `<div style="font-size:13px;color:#475569;line-height:1.5;margin-top:2px">${escapeHtml(a.detail)}</div>` : ''}</td></tr></table>`).join('')}`
   const buttons = `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0 6px"><tr>
-<td style="padding:0 8px 8px 0"><a href="${escapeHtml(reportUrl)}" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Open my full report</a></td>
-<td style="padding:0 0 8px"><a href="${escapeHtml(sessionUrl)}" style="display:inline-block;background:#f97316;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Book a free 1:1 mentor call</a></td>
+<td style="padding:0 8px 8px 0"><a href="${escapeHtml(reportUrl)}" style="display:inline-block;background:#4338ca;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Open my full report</a></td>
+<td style="padding:0 0 8px"><a href="${escapeHtml(sessionUrl)}" style="display:inline-block;background:#f97316;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Book a free counselling call</a></td>
 </tr></table>`
   const bodyHtml = `
-<div style="background:#eff6ff;border-radius:12px;padding:16px 18px;margin:4px 0">
-<span style="font-size:34px;font-weight:800;color:#2563eb;line-height:1">${escapeHtml(s.headline.value)}</span>
+<div style="background:#eef2ff;border-radius:12px;padding:16px 18px;margin:4px 0">
+<span style="font-size:34px;font-weight:800;color:#4338ca;line-height:1">${escapeHtml(s.headline.value)}</span>
 <span style="font-size:14px;font-weight:700;color:#475569;margin-left:6px">${escapeHtml(s.headline.label.replace(/^\/100 /, 'out of 100 · '))}</span>
 <p style="margin:8px 0 0;font-size:14px;color:#334155;line-height:1.55">${escapeHtml(s.headline.note)}</p></div>
 ${kpiHtml}${miniChartHtml(opts.meta.id, opts.data)}${actionsHtml}${buttons}
@@ -182,7 +182,7 @@ ${kpiHtml}${miniChartHtml(opts.meta.id, opts.data)}${actionsHtml}${buttons}
     `${s.headline.value} ${s.headline.label.replace(/^\/100 /, 'out of 100, ')}. ${s.headline.note}`,
     '', ...s.kpis.map((k) => `${k.label}: ${k.value}${k.sub ? ` (${k.sub})` : ''}`),
     '', `Your next ${s.actions.length} moves:`, ...s.actions.map((a, i) => `${i + 1}. ${a.title}${a.detail ? ` - ${a.detail}` : ''}`),
-    '', `Open my full report: ${reportUrl}`, `Book a free 1:1 mentor call: ${sessionUrl}`, '', 'Your full report is attached as a PDF.',
+    '', `Open my full report: ${reportUrl}`, `Book a free counselling call: ${sessionUrl}`, '', 'Your full report is attached as a PDF.',
   ].join('\n')
 
   return {

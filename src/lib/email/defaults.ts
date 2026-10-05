@@ -24,7 +24,7 @@ export const DEFAULT_FLOWS: DefaultFlow[] = [
   {
     key: 'welcome',
     name: 'Welcome & activation',
-    description: 'Sent after a learner confirms their email for the first time. Gets them to finish their tools, take the eligibility test and talk to a mentor.',
+    description: 'Sent after a learner confirms their email for the first time. Gets them to finish their tools, take the eligibility test and talk to a Senior Counsellor.',
     trigger: 'signup',
     reentryDays: 0,
     exitOn: [],
@@ -81,11 +81,11 @@ After you finish, a counsellor reviews your result and calls you to talk it thro
         delayMinutes: 2 * DAY,
         conditions: ['onboarded', 'no_session'],
         subject: '{{first_name}}, want a second opinion on your plan?',
-        preheader: 'A free 1:1 with a mentor who knows the {{program_area}} market.',
+        preheader: 'A free call with a Senior Career Counsellor who knows the {{program_area}} market.',
         heading: "Talk it through with someone who's done it",
         body: `AI tools are great for a first draft. A conversation is better for the decisions that matter: which role, which program, and how to fit learning around your job.
 
-Book a free 1:1 with a Learnbay mentor and bring your reports. You'll leave with:
+Book a free call with a Learnbay Senior Career Counsellor and bring your reports. You'll leave with:
 - A clear view of the role that suits your background
 - An honest estimate of the time it will take
 - Answers about program fit, domain options and projects`,
@@ -172,7 +172,7 @@ The last piece is readiness. The eligibility test takes about 4 minutes, and a c
   {
     key: 'session-booked',
     name: 'After booking a 1:1',
-    description: 'Helps the learner get the most from their mentor session, then follows up.',
+    description: 'Helps the learner get the most from their counselling call, then follows up.',
     trigger: 'session_booked',
     reentryDays: 14,
     exitOn: [],
@@ -183,7 +183,7 @@ The last piece is readiness. The eligibility test takes about 4 minutes, and a c
         subject: 'How to get the most from your 1:1',
         preheader: 'Three things to keep handy. It takes five minutes.',
         heading: 'Make your session count',
-        body: `Your 1:1 request is in. Mentors can help most when you come with a little context. Before the call:
+        body: `Your counselling call is booked. Senior Counsellors can help most when you come with a little context. Before the call:
 - Open your reports once, and note what surprised you
 - Write down your real constraints: weekly time, budget, notice period
 - Pick your top two questions (for example, "which role first?" or "how long, honestly?")

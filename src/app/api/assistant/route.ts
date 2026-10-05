@@ -8,15 +8,17 @@ import { getAnswers, getReadyResults } from '@/lib/data'
 import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
 import { firstName } from '@/lib/validation'
 import type { ToolResultMap } from '@/lib/tool-types'
-import { TRACK_TARGET, type Answers } from '@/lib/questions'
+import type { Answers } from '@/lib/questions'
 import { skillFamily } from '@/lib/skills'
 import { projectTitles } from '@/lib/projects'
-import { programForLearner } from '@/lib/segments'
+import { defaultTargetRole, programForLearner } from '@/lib/segments'
+import { whenLabel } from '@/lib/sessions'
+import { hiringCompanies } from '@/lib/hiring'
 
 export const maxDuration = 60
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-type Body = { context?: unknown; message?: unknown; conversationId?: unknown; history?: unknown; intent?: unknown; pending?: unknown; counsel?: unknown }
+type Body = { context?: unknown; message?: unknown; conversationId?: unknown; history?: unknown; intent?: unknown; pending?: unknown; counsel?: unknown; recent?: unknown }
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError(403, 'Invalid request origin.')
@@ -39,6 +41,8 @@ export async function POST(request: Request) {
     ? { was: cleanText(c.was, 120) || 'the chat', round: Math.max(0, Math.min(5, Math.floor(Number(c.round) || 0))) }
     : undefined
   if (!message && !intent) return jsonError(400, 'Type a question first.')
+  // What the learner sees in the chat right now (plain text lines, size-limited): context for the counsellor, never instructions.
+  const recent = Array.isArray(body?.recent) ? body.recent.slice(-16).map((l) => cleanText(l, 280)).filter((l): l is string => Boolean(l)) : []
 
   const user = await getCurrentUser()
   // Career AI is available only inside the Studio, after sign-up.
@@ -50,12 +54,19 @@ export async function POST(request: Request) {
     [user.id],
   )
   if ((usage?.total ?? 0) >= LIMITS.userTotal || (usage?.today ?? 0) >= LIMITS.userPerDay) {
-    return jsonError(429, 'You have reached your question limit for now. A mentor can take it from here — book a free session.', { limit: true })
+    return jsonError(429, 'You have reached your question limit for now. A Senior Counsellor can take it from here — book a free session.', { limit: true })
   }
   if (!(await rateLimit(`assist:user:${user.id}`, 8, 60))) return jsonError(429, 'Please slow down a little and try again in a minute.')
   if (intent && !(await rateLimit(`assist:intent:${user.id}`, 12, 24 * 3600))) return jsonOk({ reply: '', suggestions: [], action: null, allowed: true, skipped: true })
 
-  const [answers, results, counsellor] = await Promise.all([getAnswers(user.id), getReadyResults(user.id), counsellorOf(user.id)])
+  const [answers, results, counsellor, booking, companies] = await Promise.all([
+    getAnswers(user.id), getReadyResults(user.id), counsellorOf(user.id),
+    queryOne<{ d: string; t: string }>(
+      `SELECT to_char(preferred_date, 'YYYY-MM-DD') AS d, preferred_time AS t FROM counsellor_requests
+        WHERE user_id = $1 AND status <> 'closed' AND preferred_date >= (now() AT TIME ZONE 'Asia/Kolkata')::date AND preferred_time IS NOT NULL
+        ORDER BY created_at DESC LIMIT 1`, [user.id]),
+    hiringCompanies().catch(() => []),
+  ])
   // Tool chats only see that tool's result; the advisor sees everything.
   const isTool = context === 'skill-gap' || context === 'salary' || context === 'roadmap'
   const scoped: Partial<ToolResultMap> = isTool ? { [context]: results[context as keyof ToolResultMap] } : results
@@ -63,17 +74,17 @@ export async function POST(request: Request) {
   const history = await query<{ role: 'user' | 'model'; content: string }>(
     `SELECT role, content FROM (
        SELECT role, content, created_at, id FROM chat_messages WHERE user_id = $1 AND (conversation_id = $2 OR created_at > now() - interval '30 days')
-        ORDER BY created_at DESC, id DESC LIMIT 10
+        ORDER BY created_at DESC, id DESC LIMIT 16
      ) h ORDER BY created_at, id`,
     [user.id, conversationId],
   )
 
   // The projects the program's library holds for this learner (so the counsellor names real ones).
   const recommended = answers ? programForLearner(answers) : undefined
-  const projectTitlesList = recommended ? await projectTitles(recommended.id, answers?.domain, 12, answers?.role).catch(() => []) : []
+  const projectTitlesList = recommended ? await projectTitles(recommended.id, answers ?? {}, 12).catch(() => []) : []
   let out
   try {
-    out = await askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel, projectTitles: projectTitlesList })
+    out = await askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel, projectTitles: projectTitlesList, booked: booking ? whenLabel(booking.d, booking.t) : null, companies, recent })
   } catch (err) {
     console.error('[assistant] failed', (err as Error).message)
     return jsonError(502, 'I am busy right now. Please try again in a moment.')
@@ -84,8 +95,9 @@ export async function POST(request: Request) {
   if (out.profileUpdate && answers) {
     const prev = answers
     const next: Answers = { ...prev, ...out.profileUpdate }
-    if (out.profileUpdate.interest) next.targetRole = TRACK_TARGET[out.profileUpdate.interest] ?? prev.targetRole
     delete next.program
+    // What they told us changes who they are (role, coding, track): the target follows, unless they picked one themselves.
+    if (out.profileUpdate.interest || out.profileUpdate.role || out.profileUpdate.programmer) next.targetRole = defaultTargetRole({ ...next, targetRole: undefined }) ?? prev.targetRole
     const reportsReset = next.interest !== prev.interest || skillFamily(next) !== skillFamily(prev)
     await query(`UPDATE assessments SET answers = $2, updated_at = now() WHERE user_id = $1`, [user.id, JSON.stringify(next)])
     if (reportsReset) await query(`UPDATE tool_results SET status = 'pending', attempts = 0, error = NULL, updated_at = now() WHERE user_id = $1 AND status IN ('ready', 'failed')`, [user.id])

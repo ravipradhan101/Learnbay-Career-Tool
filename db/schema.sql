@@ -458,3 +458,44 @@ CREATE TABLE IF NOT EXISTS project_views (
   shown_at    timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (user_id, project_id)
 );
+
+-- v15: each section of the studio (skill gap, salary, roadmap, eligibility, mentor call, masterclasses) keeps its own
+-- chat, so going back to a section reopens that conversation. NULL = the main counselling chat.
+ALTER TABLE chat_threads ADD COLUMN IF NOT EXISTS topic text;
+CREATE INDEX IF NOT EXISTS chat_threads_topic_idx ON chat_threads(user_id, topic, updated_at DESC);
+
+-- v16: counselling calls can be rescheduled (not cancelled); count how often, for the counsellor team.
+ALTER TABLE counsellor_requests ADD COLUMN IF NOT EXISTS rescheduled integer NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS counsellor_slot_idx ON counsellor_requests(preferred_date, preferred_time);
+
+-- v17: companies shown to learners (Admin → Companies). alumni = Learnbay publishes that its alumni work there;
+-- the rest are well-known companies hiring for tech, data, AI and cloud roles in India. featured = on the chat card.
+CREATE TABLE IF NOT EXISTS hiring_companies (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        text NOT NULL,
+  category    text NOT NULL,
+  alumni      boolean NOT NULL DEFAULT false,
+  featured    boolean NOT NULL DEFAULT false,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS hiring_companies_name_idx ON hiring_companies(lower(name));
+
+-- v18: roles and specialisations for projects (Admin → Courses & roles). learner_roles: the learner role ids (and
+-- "industry:<id>" for industries) that see these projects; keywords: words in a typed role or industry that match.
+CREATE TABLE IF NOT EXISTS project_domains (
+  key            text PRIMARY KEY,
+  label          text NOT NULL,
+  kind           text NOT NULL DEFAULT 'role' CHECK (kind IN ('industry', 'role')),
+  learner_roles  text[] NOT NULL DEFAULT '{}',
+  keywords       text[] NOT NULL DEFAULT '{}',
+  created_at     timestamptz NOT NULL DEFAULT now()
+);
+-- Which roles each course offers projects for; core = every learner of the course sees them (e.g. SDE specialisations).
+CREATE TABLE IF NOT EXISTS course_roles (
+  program_id  text NOT NULL,
+  domain_key  text NOT NULL REFERENCES project_domains(key) ON DELETE CASCADE,
+  core        boolean NOT NULL DEFAULT false,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (program_id, domain_key)
+);

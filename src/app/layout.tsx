@@ -24,15 +24,17 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#2563eb',
+  themeColor: '#4338ca',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Reading request headers renders every page per request, which the CSP nonce needs.
   await headers()
   return (
-    <html lang="en" className={`${inter.className} ${jakarta.variable}`}>
-      <body>{children}<AnalyticsTracker /></body>
+    // Browser extensions (Grammarly, password managers…) add attributes to <html> and <body> before React loads;
+    // suppressHydrationWarning ignores those (it applies to these two tags only, not the app inside them).
+    <html lang="en" className={`${inter.className} ${jakarta.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}<AnalyticsTracker /></body>
     </html>
   )
 }

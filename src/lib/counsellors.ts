@@ -1,4 +1,4 @@
-// The virtual guide and counsellors (client-safe). Before sign-up everyone talks to Richa, the career guide;
+// The virtual guide and counsellors (client-safe). Before sign-up everyone talks to Lumi, the career guide;
 // after sign-up one of these counsellors is allocated round robin. They are virtual (AI-driven): the chat says
 // "virtual" in the status line, and they answer truthfully if asked whether they are a person.
 
@@ -24,7 +24,7 @@ export const photoOf = (id: CounsellorId): string | null => PHOTOS[id] ?? null
 export const COUNSELLORS: Counsellor[] = [
   { id: 'tanya', name: 'Tanya', gender: 'female', look: { skin: '#e0a482', hair: '#2b1d1a', top: '#5b3fe0', style: 'long' } },
   { id: 'siya', name: 'Siya', gender: 'female', look: { skin: '#c98a66', hair: '#1f1512', top: '#0e9f8e', style: 'bun' } },
-  { id: 'mangesh', name: 'Mangesh', gender: 'male', look: { skin: '#b97a56', hair: '#1c1412', top: '#2563eb', style: 'short', beard: true } },
+  { id: 'mangesh', name: 'Mangesh', gender: 'male', look: { skin: '#b97a56', hair: '#1c1412', top: '#4338ca', style: 'short', beard: true } },
   { id: 'elanor', name: 'Elanor', gender: 'female', look: { skin: '#f1c7a8', hair: '#8a5a2b', top: '#db2777', style: 'wavy' } },
   { id: 'kshitij', name: 'Kshitij', gender: 'male', look: { skin: '#d59a74', hair: '#231815', top: '#ea580c', style: 'short' } },
   { id: 'riya', name: 'Riya', gender: 'female', look: { skin: '#d8a07c', hair: '#3a2419', top: '#7c3aed', style: 'curly' } },
@@ -32,8 +32,9 @@ export const COUNSELLORS: Counsellor[] = [
 ]
 
 /** The guide before sign-up. Internally still called 'bot'. */
-export const BOT_NAME = 'Richa'
-export const GUIDE_PHOTO = '/counsellors/richa.jpg'
+export const BOT_NAME = 'Lumi'
+/** Lumi is drawn (a smiling illustration in Avatar.tsx), not a photo. */
+export const GUIDE_PHOTO: string | null = null
 export const GUIDE_TITLE = 'Career Guide'
 export const COUNSELLOR_TITLE = 'Senior Career Counsellor'
 

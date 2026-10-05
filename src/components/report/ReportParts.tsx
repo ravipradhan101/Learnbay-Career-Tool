@@ -1,9 +1,10 @@
 import Link from 'next/link'
-import { Icon } from '../Icon'
+import { Icon, type IconName } from '../Icon'
 import { WhyLearnbayButton } from '../why/WhyLearnbayButton'
 import { Gauge, KpiTiles } from './Charts'
 import { getProgram } from '@/config/programs'
 import { USPS, type UspId } from '@/config/usps'
+import { curriculumOf } from '@/lib/roles'
 import type { ReportSummary } from '@/lib/report-summary'
 
 /** Top of every report: the one number that matters, what it means, and 3-4 key numbers. */
@@ -48,7 +49,7 @@ export function More({ title, count, children, open = false }: { title: string; 
 }
 
 /** Compact, visual "how Learnbay helps with this" strip, instead of paragraphs. */
-export function LearnbayEdge({ ids, programId, coverage }: { ids: UspId[]; programId: string; coverage?: { covers: number; total: number } }) {
+export function LearnbayEdge({ ids, programId, coverage, booked = false }: { ids: UspId[]; programId: string; coverage?: { covers: number; total: number }; booked?: boolean }) {
   const p = getProgram(programId)
   return (
     <section className="lb-edge">
@@ -66,10 +67,62 @@ export function LearnbayEdge({ ids, programId, coverage }: { ids: UspId[]; progr
         ))}
       </div>
       <div className="row">
-        <Link href="/dashboard/sessions" className="btn btn-primary btn-sm">Talk to a mentor, free</Link>
+        <Link href="/dashboard/sessions" className="btn btn-primary btn-sm">{booked ? 'See my booked call' : 'Talk to a Senior Counsellor, free'}</Link>
         <a href={p.url} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">Program details <Icon name="external" size="0.85rem" /></a>
         <WhyLearnbayButton source="report-edge" className="btn btn-ghost btn-sm" label="How we're different" />
       </div>
+    </section>
+  )
+}
+
+/**
+ * The bottom of the funnel, near the top of every report: the achievement this report points to, and the steps
+ * with Learnbay that lead there (the ones already done are ticked, the next one is highlighted).
+ */
+export function OutcomePath({ goal, goalNote, programId, industry, eligibilityDone, hasSession, targetRole }: {
+  /** The achievement, e.g. "AI Engineer at ₹18–28 LPA". */
+  goal: string
+  /** One line on where that number comes from (always honest: indicative, not a promise). */
+  goalNote: string
+  programId: string
+  industry: string | null
+  eligibilityDone: boolean
+  hasSession: boolean
+  targetRole: string
+}) {
+  const p = getProgram(programId)
+  const course = curriculumOf(programId)
+  const steps: { icon: IconName; title: string; text: string; done: boolean; href?: string; cta?: string }[] = [
+    { icon: 'award', title: 'Check your eligibility', text: '10 quick questions, about 2 minutes, no maths.', done: eligibilityDone, href: '/dashboard/eligibility', cta: 'Take the test' },
+    { icon: 'calendar', title: hasSession ? 'Your call with a Senior Counsellor is booked' : 'Free call with a Senior Counsellor', text: 'Your plan, fees and a scholarship check, on one call.', done: hasSession, href: '/dashboard/sessions', cta: 'Book my call' },
+    { icon: 'play', title: `Learn live: ${p.name}`, text: `${course.liveHours ? course.liveHours.replace(/^./, (c) => c.toUpperCase()) : 'Live classes'} with industry mentors, around your job.`, done: false },
+    { icon: 'folder', title: 'Build real proof', text: `${course.projectsCount ? course.projectsCount.replace(/^./, (c) => c.toUpperCase()) : 'Real industry projects'}${industry ? `, including your ${industry.charAt(0).toLowerCase()}${industry.slice(1)} domain` : ''}, for your portfolio.`, done: false },
+    { icon: 'briefcase', title: `Get hired as ${/^[aeiou]/i.test(targetRole) ? 'an' : 'a'} ${targetRole}`, text: USPS.placement.short, done: false },
+  ]
+  const next = steps.findIndex((s) => !s.done)
+  return (
+    <section className="outcome" aria-label="Your outcome with Learnbay">
+      <div className="outcome-goal">
+        <span className="outcome-flag"><Icon name="target" size="1.1rem" /></span>
+        <div>
+          <span className="eyebrow">Where this can take you</span>
+          <b>{goal}</b>
+          <small>{goalNote}</small>
+        </div>
+      </div>
+      <ol className="outcome-steps">
+        {steps.map((s, i) => (
+          <li key={s.title} className={s.done ? 'done' : i === next ? 'next' : ''}>
+            <span className="outcome-dot">{s.done ? <Icon name="check" size="0.9rem" /> : <Icon name={s.icon} size="0.9rem" />}</span>
+            <div>
+              <b>{s.title}{i === next && <span className="outcome-here">You’re here</span>}</b>
+              <small>{s.text}</small>
+              {i === next && s.href && <Link href={s.href} className="btn btn-primary btn-sm outcome-cta">{s.cta} <Icon name="arrowRight" size="0.85rem" /></Link>}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="xsmall muted">Learnbay supports every step; outcomes depend on your effort, and salary figures are indicative market ranges, not promises.</p>
     </section>
   )
 }

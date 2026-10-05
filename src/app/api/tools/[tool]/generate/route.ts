@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ too
     const row = await queryOne<{ status: string }>(`SELECT status FROM tool_results WHERE user_id = $1 AND tool = $2`, [user.id, meta.id])
     if (row?.status === 'ready') return jsonOk({ status: 'ready' })
     if (row?.status === 'generating') return jsonOk({ status: 'generating' })
-    return jsonError(429, 'We could not build this after several tries. Please book a mentor session and we will help you right away.', { exhausted: true })
+    return jsonError(429, 'We could not build this after several tries. Please book a counselling call and we will help you right away.', { exhausted: true })
   }
 
   try {

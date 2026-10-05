@@ -7,9 +7,9 @@ import { getCurrentUser } from '@/lib/auth'
 import { getAnswers } from '@/lib/data'
 import { TRACKS } from '@/lib/questions'
 
-export const metadata: Metadata = { title: 'Talk to Richa, your career guide' }
+export const metadata: Metadata = { title: 'Talk to Lumi, your career guide' }
 
-/** Step 3: Richa, the career guide. ?track=ai|fde|cloud-devops, or ?login=1 for returning learners. */
+/** Step 3: Lumi, the career guide. ?track=ai|fde|cloud-devops, or ?login=1 for returning learners. */
 export default async function StartChatPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams
   const login = params.login === '1'

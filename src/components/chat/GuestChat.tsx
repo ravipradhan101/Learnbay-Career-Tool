@@ -3,14 +3,14 @@
 import { useEffect, useRef } from 'react'
 import { Icon } from '../Icon'
 import { ChatWindow } from './ChatWindow'
-import { matchTyped, useChat } from './engine'
+import { looksLikeGibberish, looksLikeQuestion, matchTyped, otherAnswer, useChat } from './engine'
 import { GUEST_ITEMS_KEY, PENDING_Q_KEY, guestFlow, loginFlow, type GuestCtx } from './flows'
 import { sessionSet as storageSet } from '@/lib/client'
 import type { Answers } from '@/lib/questions'
 
 export const LOGIN_EVENT = 'lcn:chat-login'
 
-/** Richa, the career guide: a few questions, sign-up with an email code, then she finds the right counsellor. */
+/** Lumi, the career guide: a few questions, sign-up with an email code, then she finds the right counsellor. */
 export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestCtx['signedIn']; initial: Answers; track: string | null; mode: 'start' | 'login' }) {
   const chat = useChat({ storageKey: GUEST_ITEMS_KEY, signedIn: false, speaker: 'bot' })
   const started = useRef(false)
@@ -31,14 +31,29 @@ export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestC
 
   function onSend(text: string) {
     if (chat.answer(text)) return
-    if (chat.prompt) {
-      const local = matchTyped(text, chat.prompt)
+    const prompt = chat.prompt
+    // A typed answer: one of the options ("5" → 3–5 years, "fintech" → Banking), or their own words where the
+    // question takes them ("Logistics" → Other: Logistics).
+    if (prompt) {
+      const local = matchTyped(text, prompt) ?? (looksLikeGibberish(text) ? null : otherAnswer(text, prompt))
       if (local) { chat.userSays(text); chat.pickTyped(local); return }
     }
-    // Questions typed before sign-up are answered by the counsellor right after.
     chat.userSays(text)
-    storageSet(PENDING_Q_KEY, text)
-    chat.note(chat.prompt ? 'Good question. Your counsellor will answer that in detail in a moment. For now, just tap the option that fits best below.' : 'Good question. Your counsellor will answer that in detail in a moment; let me just finish a couple of quick steps.')
+    if (looksLikeGibberish(text)) {
+      chat.note(prompt ? 'Sorry, I didn’t quite catch that. Tap the option that fits you best below, or type your answer in a few words.' : 'Sorry, I didn’t quite catch that. Could you type it again?')
+      return
+    }
+    if (looksLikeQuestion(text)) {
+      // Questions typed before sign-up are answered by the counsellor right after.
+      storageSet(PENDING_Q_KEY, text)
+      chat.note(prompt ? 'Good question! Your counsellor will answer it right after this step. For now, pick the option below that fits you best.' : 'Good question! Your counsellor will answer it in detail in a moment; let me just finish a couple of quick steps.')
+      return
+    }
+    // An answer that isn't one of the options: say so plainly, and keep the same options on screen.
+    const said = text.length > 40 ? `${text.slice(0, 40)}…` : text
+    chat.note(prompt
+      ? `I couldn’t match “${said}” to one of these options. Please tap the one closest to you below${prompt.other ? ', or “Other”' : ''}.`
+      : 'Thanks! Let me just finish a couple of quick steps.')
   }
 
   return (
