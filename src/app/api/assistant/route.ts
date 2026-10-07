@@ -8,7 +8,7 @@ import { getAnswers, getReadyResults } from '@/lib/data'
 import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
 import { firstName } from '@/lib/validation'
 import type { ToolResultMap } from '@/lib/tool-types'
-import type { Answers } from '@/lib/questions'
+import { trackOf, type Answers } from '@/lib/questions'
 import { skillFamily } from '@/lib/skills'
 import { projectTitles } from '@/lib/projects'
 import { defaultTargetRole, programForLearner } from '@/lib/segments'
@@ -105,9 +105,19 @@ export async function POST(request: Request) {
     const prev = answers
     const next: Answers = { ...prev, ...out.profileUpdate }
     delete next.program
+    // A map answer that moves them into another track's program (QA → "DevOps, not AI testing"): the track follows.
+    if (out.profileUpdate.mapAnswers && !out.profileUpdate.interest) {
+      const program = programForLearner(next)
+      const track = trackOf(next.interest)
+      if (program && track && !program.interests.some((i) => trackOf(i)?.interest === track.interest)) {
+        const moved = trackOf(program.interests[0])
+        if (moved) next.interest = moved.interest
+      }
+    }
     // What they told us changes who they are (role, coding, track): the target follows, unless they picked one themselves.
-    if (out.profileUpdate.interest || out.profileUpdate.role || out.profileUpdate.programmer) next.targetRole = defaultTargetRole({ ...next, targetRole: undefined }) ?? prev.targetRole
-    const reportsReset = next.interest !== prev.interest || skillFamily(next) !== skillFamily(prev)
+    if (out.profileUpdate.interest || out.profileUpdate.role || out.profileUpdate.programmer || (out.profileUpdate.mapAnswers && programForLearner(next)?.id !== programForLearner(prev)?.id)) next.targetRole = defaultTargetRole({ ...next, targetRole: undefined }) ?? prev.targetRole
+    // Reports follow the program: a new track, kind of program, or program (e.g. a map answer that moves them) rebuilds them.
+    const reportsReset = next.interest !== prev.interest || skillFamily(next) !== skillFamily(prev) || programForLearner(next)?.id !== programForLearner(prev)?.id
     await query(`UPDATE assessments SET answers = $2, updated_at = now() WHERE user_id = $1`, [user.id, JSON.stringify(next)])
     if (reportsReset) await query(`UPDATE tool_results SET status = 'pending', attempts = 0, error = NULL, updated_at = now() WHERE user_id = $1 AND status IN ('ready', 'failed')`, [user.id])
     updated = { answers: next, reportsReset }

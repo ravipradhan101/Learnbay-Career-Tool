@@ -8,6 +8,7 @@ import { PROGRAMS, cloudTrackFor, getProgram } from '@/config/programs'
 import { trackOf, type Answers } from './questions'
 import { eligibility, programForLearner } from './segments'
 import { pathFor } from './lead-match'
+import { MAP_QUESTIONS } from '@/config/map-questions'
 
 const CODING_TEXT = { no: 'no coding', some: 'coding taught from scratch (no prior coding needed)', yes: 'for people who already write code' } as const
 const nameOf = (code: string | null | undefined) => (code ? getProgram(PROGRAMS.find((p) => p.code === code)?.id).name : '')
@@ -71,13 +72,21 @@ export function learnerRoute(a: Answers): string {
   const near = new Set([...path.options.map((o) => o.code), ...PROGRAMS.filter((p) => a.interest && p.interests.includes(a.interest)).map((p) => p.code)])
   const closed = PROGRAMS.filter((p) => p.code !== program.code && near.has(p.code) && !path.options.some((o) => o.code === p.code)).map((p) => ({ p, e: eligibility(p.id, a) })).filter((x) => !x.e.ok)
   const unanswered = persona ? persona.probes : []
+  // The map question that decides between their programs: already answered (never ask again), or still open.
+  const mq = MAP_QUESTIONS[path.persona.id]
+  const mqAnswer = mq ? mq.options.find((o) => o.id === a.mapAnswers?.[mq.id]) : undefined
+  const mapLine = !mq ? '' : mqAnswer
+    ? `
+- Map question already answered: "${mq.question}" → "${mqAnswer.label}". Never ask it again, in any words; use the answer.`
+    : `
+- Their open map question (the answer can change their program): "${mq.question}" (${mq.options.map((o) => o.label).join(' / ')}). Ask it in your own words when it fits the conversation, once; when they answer, even in their own words, set profileUpdate.mapAnswer.`
   return `THIS LEARNER'S PATH (calculated from their profile with Learnbay's Lead–Course Map and entry rules; binding, never re-decide it):
 - Lead type: "${path.persona.name}" (${path.match}% match: ${path.persona.reasons.join('; ') || 'from their profile'}).
 - ${options.join('\n- ')}
 - The program you recommend is ${program.name}. Why: ${path.why}${track}${e.confirm ? ` Not yet confirmed by their profile: ${program.name} ${e.confirm}. When eligibility comes up, state that rule and ask or say it gets confirmed (eligibility test or Senior Counsellor); never say they "definitely" qualify.` : ''}
 - When they ask which program fits, what they'll learn, what they'll build, how long it is or whether they're eligible, answer about ${program.name}: its syllabus, projects and entry rule are the ones below. Never present another program as their fit, and never describe one program's syllabus or projects under another's name. Mention the Next best or One more option only as that (with its reason), and a "not open yet" one only with when it opens.${closed.length ? `
 - They cannot join these yet (never recommend them; if asked, explain kindly): ${closed.map((x) => `${x.p.name}: ${x.e.reason}`).join('; ')}.` : ''}
-- Their target role is where they are heading; it does not change the program you recommend now.${(() => {
+- Their target role is where they are heading; it does not change the program you recommend now.${mapLine}${(() => {
     const picked = trackOf(a.interest)
     if (!picked || program.interests.some((i) => trackOf(i)?.interest === picked.interest)) return ''
     return `\n- They picked the ${picked.label} at the start, but the map puts them on ${program.name}. If they ask about ${picked.label.replace(/ track$/, '')} programs, explain kindly and honestly why (their role, coding and experience against its entry rule), what would open it later, and why ${program.name} serves their goal now.`

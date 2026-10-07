@@ -5,6 +5,7 @@ import { catalogueIndex, learnerRoute, retiredNames, routingRules, syllabusOf } 
 import { groundingFor } from './knowledge'
 import { checkAnswer, rewriteNote, stripViolations, type Violation } from './guardrails'
 import { pathFor } from './lead-match'
+import { MAP_QUESTIONS, type MapQuestion } from '@/config/map-questions'
 import { REFUND_POLICY } from '@/config/policies'
 import { COMPARISON, USPS } from '@/config/usps'
 import type { HiringCompany } from './hiring'
@@ -227,7 +228,7 @@ TOPICS OUTSIDE THE LISTED MODULES: if the learner asks whether their program cov
 - Their interest points to a different Learnbay program that teaches it: first understand what they want it for, then suggest that program if it fits. verdict "other-program".
 Otherwise leave topicCheck.topic empty and verdict "none".
 
-PROFILE UPDATES: the learner profile above is what they told us earlier. If in THIS message they clearly state something new or different (they don't write code / they do; they work in a different industry; they now want a different area than their current one, including AI vs data science vs analytics within the AI & Data Science track; their current pay, e.g. "I earn 12 LPA"; their years of experience; their current role), set the matching profileUpdate field; otherwise "unchanged". Only say you have noted something if you set it here. Never guess or infer from vague hints. When you update, say in one line that you've updated their plan, and set show to "program" so they see the program that now fits (it is chosen automatically from the updated profile: for example people who don't code get the Applied AI Practitioner Program). If you name a specific Learnbay program as the better fit, it must be the one the updated profile leads to, or set suggestProgram to it.
+PROFILE UPDATES: the learner profile above is what they told us earlier. If in THIS message they clearly state something new or different (they don't write code / they do; they work in a different industry; they now want a different area than their current one, including AI vs data science vs analytics within the AI & Data Science track; their current pay, e.g. "I earn 12 LPA"; their years of experience; their current role; or an answer to their open map question in THIS LEARNER'S PATH), set the matching profileUpdate field; otherwise "unchanged". Only say you have noted something if you set it here. Never guess or infer from vague hints. When you update, say in one line that you've updated their plan, and set show to "program" so they see the program that now fits (it is chosen automatically from the updated profile: for example people who don't code get the Applied AI Practitioner Program). If you name a specific Learnbay program as the better fit, it must be the one the updated profile leads to, or set suggestProgram to it.
 
 SALARY TALK: for learners below ₹50 LPA, anchor on roles that typically pay at least 20% more than their current band (indicative market ranges, never a promise). For ₹50 LPA and above, be honest that a jump is not automatic: ask what kind of company they are in, explain how an AI role or AI leadership adds career value (scope, leadership, staying relevant) and pay where it realistically can, and if an AI role would not help them, suggest the Learnbay program that fits better.
 
@@ -268,7 +269,7 @@ export function intentPrompt(intent: AssistantIntent, context: AssistantContext,
   return `[Instruction, not from the learner] ${name}'s ${tool?.name ?? 'report'} is ready and shown above your message as a visual card (they can see the numbers). In under 40 words: point out the ONE insight that matters most for them (use a real number from their result), and connect it to the difficulty they told you about. Do not list programs; the next cards cover that. End without a question.`
 }
 
-export function responseSchema(signedIn: boolean, pending?: PendingQuestion, counsel?: { tracks: string[]; programs: string[] }) {
+export function responseSchema(signedIn: boolean, pending?: PendingQuestion, counsel?: { tracks: string[]; programs: string[] }, mapQ?: MapQuestion) {
   return {
     type: 'object',
     properties: {
@@ -314,8 +315,9 @@ export function responseSchema(signedIn: boolean, pending?: PendingQuestion, cou
             ctc: { type: 'string', enum: ['unchanged', ...CTC_BANDS.filter((b) => b.id !== 'na').map((b) => b.id)], description: 'Their current yearly pay band when they state it (e.g. "12 LPA" = 12-18, "I earn 9 lakhs" = 8-12).' },
             experience: { type: 'string', enum: ['unchanged', ...EXPERIENCE.map((e) => e.id)], description: 'Their years of work experience when they state it (e.g. "5 years" = 3-5).' },
             role: { type: 'string', enum: ['unchanged', ...ROLES.map((r) => r.id)], description: 'Their current role when they state it (closest match).' },
+            ...(mapQ ? { mapAnswer: { type: 'string', enum: ['unchanged', ...mapQ.options.map((o) => o.id)], description: `Their answer to the map question "${mapQ.question}" (${mapQ.options.map((o) => `${o.id} = ${o.label}`).join('; ')}), only when this message clearly answers it; otherwise "unchanged".` } } : {}),
           },
-          required: ['programmer', 'domain', 'interest', 'ctc', 'experience', 'role'],
+          required: ['programmer', 'domain', 'interest', 'ctc', 'experience', 'role', ...(mapQ ? ['mapAnswer'] : [])],
         },
       } : {}),
       topicCheck: {
@@ -519,6 +521,8 @@ ASK FIRST (this message): they want to know which program fits them, but their p
   // Grounding (RAG): the exact facts for this question and the knowledge-base passages that match it, about the
   // program the question is about (the one they named, else their recommended one).
   const focusId = asked ?? recommended?.id ?? null
+  // The Lead–Course Map question for their lead type: an answer typed in chat is saved like a tapped one.
+  const mapQ = opts.answers ? MAP_QUESTIONS[pathFor(opts.answers).persona.id] : undefined
   const grounded = !opts.intent && opts.message ? groundingFor(opts.message, opts.answers, focusId, alternatives) : null
   const groundNote = grounded?.block ?? ''
   type Raw = { allowed?: unknown; reply?: unknown; points?: unknown; next?: unknown; route?: unknown; suggestions?: unknown; offerCall?: unknown; choice?: unknown; goNow?: unknown; show?: unknown; aboutProgram?: unknown; followUp?: unknown; suggestTrack?: unknown; suggestProgram?: unknown; topicCheck?: unknown; profileUpdate?: unknown }
@@ -531,7 +535,7 @@ ASK FIRST (this message): they want to know which program fits them, but their p
       ...opts.history.map((m) => ({ role: m.role, parts: [{ text: m.role === 'model' ? JSON.stringify((({ reply, points, next }) => ({ reply, points, next }))(proseParts(m.content))) : m.content }] })),
       { role: 'user' as const, parts: [{ text }] },
     ],
-    jsonSchema: responseSchema(opts.signedIn, opts.pending, opts.counsel ? { tracks: otherTracks.map((t) => t.interest), programs: otherPrograms } : undefined),
+    jsonSchema: responseSchema(opts.signedIn, opts.pending, opts.counsel ? { tracks: otherTracks.map((t) => t.interest), programs: otherPrograms } : undefined, mapQ),
     // Low temperature: the same question gets the same answer; facts come from the grounding, not creativity.
     temperature: 0.3,
     maxOutputTokens: 1200,
@@ -656,13 +660,13 @@ YOU JUST SAID: "${lastSaid.slice(0, 400)}". Do not repeat it or reword it: move 
   }
   return { programId: about, reply, allowed, action: route ? { href: route, label: route === '/dashboard/sessions' && opts.booked ? 'See my booked call' : routes[route] } : null, suggestions, offerCall: allowed && !opts.intent && !choice && raw.offerCall === true, choice, goNow: Boolean(route) && raw.goNow === true,
     // While it still needs to ask about them, no program cards (they would be a guess).
-    show: allowed && !opts.intent && typeof raw.show === 'string' && ['projects', 'program', 'proof', 'strengths', 'compare', 'curriculum', 'refund', 'companies'].includes(raw.show) && !(missing.length && ['projects', 'program', 'compare', 'curriculum'].includes(raw.show)) ? raw.show : undefined, followUp, suggestTrack, suggestProgram, profileUpdate: allowed && !opts.intent ? profileChanges(raw.profileUpdate, opts.answers) : undefined }
+    show: allowed && !opts.intent && typeof raw.show === 'string' && ['projects', 'program', 'proof', 'strengths', 'compare', 'curriculum', 'refund', 'companies'].includes(raw.show) && !(missing.length && ['projects', 'program', 'compare', 'curriculum'].includes(raw.show)) ? raw.show : undefined, followUp, suggestTrack, suggestProgram, profileUpdate: allowed && !opts.intent ? profileChanges(raw.profileUpdate, opts.answers, mapQ) : undefined }
 }
 
 export { programsForInterest }
 
 /** The profile facts the learner stated that differ from what we have (validated; empty means nothing changed). */
-function profileChanges(raw: unknown, current: Answers | undefined): Answers | undefined {
+function profileChanges(raw: unknown, current: Answers | undefined, mapQ?: MapQuestion): Answers | undefined {
   const u = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
   const out: Answers = {}
   if (typeof u.programmer === 'string' && ['yes', 'some', 'no'].includes(u.programmer) && u.programmer !== current?.programmer) out.programmer = u.programmer
@@ -677,5 +681,9 @@ function profileChanges(raw: unknown, current: Answers | undefined): Answers | u
   if (typeof u.ctc === 'string' && CTC_BANDS.some((b) => b.id === u.ctc && b.id !== 'na') && u.ctc !== current?.ctc) out.ctc = u.ctc
   if (typeof u.experience === 'string' && EXPERIENCE.some((e) => e.id === u.experience) && u.experience !== current?.experience) out.experience = u.experience
   if (typeof u.role === 'string' && ROLES.some((r) => r.id === u.role) && u.role !== current?.role) out.role = u.role
+  // A map question answered in their own words: only one of the question's fixed answers is ever saved.
+  if (mapQ && typeof u.mapAnswer === 'string' && mapQ.options.some((o) => o.id === u.mapAnswer) && current?.mapAnswers?.[mapQ.id] !== u.mapAnswer) {
+    out.mapAnswers = { ...(current?.mapAnswers ?? {}), [mapQ.id]: u.mapAnswer }
+  }
   return Object.keys(out).length ? out : undefined
 }
