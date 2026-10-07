@@ -1,4 +1,4 @@
-// The virtual guide and counsellors (client-safe). Before sign-up everyone talks to Lumi, the career guide;
+// The virtual guide and counsellors (client-safe). Before sign-up everyone talks to Woody, the guide;
 // after sign-up one of these counsellors is allocated round robin. They are virtual (AI-driven): the chat says
 // "virtual" in the status line, and they answer truthfully if asked whether they are a person.
 
@@ -32,10 +32,10 @@ export const COUNSELLORS: Counsellor[] = [
 ]
 
 /** The guide before sign-up. Internally still called 'bot'. */
-export const BOT_NAME = 'Lumi'
-/** Lumi is drawn (a smiling illustration in Avatar.tsx), not a photo. */
+export const BOT_NAME = 'Woody'
+/** Woody is drawn (a smiling illustration in Avatar.tsx), not a photo. */
 export const GUIDE_PHOTO: string | null = null
-export const GUIDE_TITLE = 'Career Guide'
+export const GUIDE_TITLE = 'Guide'
 export const COUNSELLOR_TITLE = 'Senior Career Counsellor'
 
 export function getCounsellor(id: string | null | undefined): Counsellor {

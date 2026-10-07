@@ -13,6 +13,7 @@ import { reportCard, type ToolState } from '@/lib/report-card'
 import { currentCtcRange } from '@/lib/tools'
 import { TOOLS, type ToolId } from '@/lib/tools-meta'
 import { firstName } from '@/lib/validation'
+import { industriesFor } from '@/lib/projects'
 
 export const metadata: Metadata = { title: 'Career Studio', robots: { index: false, follow: false } }
 
@@ -59,7 +60,7 @@ export default async function StudioLayout({ children }: { children: React.React
   return (
     <StudioChat data={data}>
       {children}
-      <WhyLearnbay profile={{ role: roleLabel(answers), interest: interestLabel(answers), city: answers.city ?? null, program: { name: program.name, url: program.url, features: program.features } }} />
+      <WhyLearnbay profile={{ role: roleLabel(answers), interest: interestLabel(answers), city: answers.city ?? null, industry: industriesFor(answers)[0] ?? null, program: { id: program.id, name: program.name, url: program.url, features: program.features } }} />
     </StudioChat>
   )
 }

@@ -51,16 +51,22 @@ export function passwordProblem(password: string, email: string): string | null 
 }
 
 export type AdminUser = { id: string; email: string }
-type AdminRow = { id: string; email: string; password_hash: string | null; failed_attempts: number; locked_until: Date | null }
+export type StaffRole = 'admin' | 'manager' | 'associate' | 'ism'
+/** Anyone signed in to the staff side. Only role 'admin' may open the admin reports; everyone uses /admin/crm. */
+export type StaffUser = { id: string; email: string; name: string | null; role: StaffRole; manager_id: string | null; associate_id: string | null }
+type AdminRow = { id: string; email: string; password_hash: string | null; failed_attempts: number; locked_until: Date | null; active: boolean }
 type Result = { ok: true } | { ok: false; status: number; error: string }
 
-/** Admin accounts live in admin_users; any address in ADMIN_EMAILS (.env) is added on first use. */
+/**
+ * Staff accounts live in admin_users; any address in ADMIN_EMAILS (.env) is added on first use as a manager
+ * (there is only ever one admin, set in the database, so an env change can never create a second one).
+ */
 async function findAdmin(email: string): Promise<AdminRow | null> {
-  const row = await queryOne<AdminRow>(`SELECT id, email, password_hash, failed_attempts, locked_until FROM admin_users WHERE email = $1`, [email])
+  const row = await queryOne<AdminRow>(`SELECT id, email, password_hash, failed_attempts, locked_until, active FROM admin_users WHERE email = $1`, [email])
   if (row || !env.adminEmails.includes(email)) return row
   return queryOne<AdminRow>(
-    `INSERT INTO admin_users (email) VALUES ($1) ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
-     RETURNING id, email, password_hash, failed_attempts, locked_until`,
+    `INSERT INTO admin_users (email, role) VALUES ($1, 'manager') ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+     RETURNING id, email, password_hash, failed_attempts, locked_until, active`,
     [email],
   )
 }
@@ -96,6 +102,7 @@ export async function adminLogin(email: string, password: string, ip: string): P
     )
     return { ok: false, status: 401, error: WRONG_PASSWORD }
   }
+  if (!admin.active) return { ok: false, status: 403, error: 'This account has been deactivated. Please ask your manager or the admin.' }
   await query(`UPDATE admin_users SET failed_attempts = 0, locked_until = NULL, last_login_at = now() WHERE id = $1`, [admin.id])
   await startAdminSession(admin.id)
   return { ok: true }
@@ -107,7 +114,7 @@ export async function requestAdminCode(email: string, ip: string): Promise<Resul
     return { ok: false, status: 429, error: 'Too many code requests. Please wait a few minutes.' }
   }
   const admin = await findAdmin(email)
-  if (!admin) return { ok: true }
+  if (!admin || !admin.active) return { ok: true }
   const code = String(randomInt(0, 1_000_000)).padStart(6, '0')
   await query(
     `WITH old AS (UPDATE admin_codes SET consumed_at = now() WHERE admin_id = $1 AND consumed_at IS NULL)
@@ -125,7 +132,7 @@ export async function resetAdminPassword(email: string, code: string, password: 
   const invalid: Result = { ok: false, status: 400, error: 'That code is incorrect or has expired. Request a new one.' }
   if (!/^\d{6}$/.test(code)) return invalid
   const admin = await findAdmin(email)
-  if (!admin) return invalid
+  if (!admin || !admin.active) return invalid
   const hash = await hashPassword(password)
   const done = await transaction(async (db) => {
     const row = (await db.query<{ id: string; code_hash: string; attempts: number }>(
@@ -148,14 +155,24 @@ export async function resetAdminPassword(email: string, code: string, password: 
   return { ok: true }
 }
 
-export const getCurrentAdmin = cache(async (): Promise<AdminUser | null> => {
+/** The signed-in staff member (any role), or null. Deactivated accounts are signed out everywhere at once. */
+export const getCurrentStaff = cache(async (): Promise<StaffUser | null> => {
   const token = (await cookies()).get(ADMIN_COOKIE)?.value
   if (!token || token.length > 100) return null
-  return queryOne<AdminUser>(
-    `SELECT a.id, a.email FROM admin_sessions s JOIN admin_users a ON a.id = s.admin_id
-      WHERE s.token_hash = $1 AND s.expires_at > now()`,
+  return queryOne<StaffUser>(
+    `SELECT a.id, a.email, a.name, a.role, a.manager_id, a.associate_id FROM admin_sessions s JOIN admin_users a ON a.id = s.admin_id
+      WHERE s.token_hash = $1 AND s.expires_at > now() AND a.active`,
     [sha256(token)],
   )
+})
+
+/**
+ * The signed-in admin, or null. Only the single 'admin' role counts, so managers, associates and ISMs can never
+ * reach the admin reports or admin APIs (every one of them checks this, directly or through requireAdmin/adminGuard).
+ */
+export const getCurrentAdmin = cache(async (): Promise<AdminUser | null> => {
+  const staff = await getCurrentStaff()
+  return staff?.role === 'admin' ? { id: staff.id, email: staff.email } : null
 })
 
 /** Only /admin pages (no protocol-relative or odd paths) are accepted as a post-login destination. */
@@ -170,10 +187,28 @@ export function safeAdminNext(value: unknown): string {
 export async function requireAdmin(): Promise<AdminUser> {
   const admin = await getCurrentAdmin()
   if (!admin) {
+    // Signed-in sales staff belong in the CRM, not on the login page.
+    if (await getCurrentStaff()) redirect('/admin/crm')
     const path = (await headers()).get('x-pathname') ?? '/admin'
     redirect(`/admin/login?next=${encodeURIComponent(safeAdminNext(path))}`)
   }
   return admin
+}
+
+/** Every staff (CRM) page calls this itself, for the same reason as requireAdmin. */
+export async function requireStaff(): Promise<StaffUser> {
+  const staff = await getCurrentStaff()
+  if (!staff) {
+    const path = (await headers()).get('x-pathname') ?? '/admin/crm'
+    redirect(`/admin/login?next=${encodeURIComponent(safeAdminNext(path))}`)
+  }
+  return staff
+}
+
+/** Where a staff member lands after signing in: the admin goes where they asked; everyone else only into the CRM. */
+export function landingFor(role: StaffRole, next: string): string {
+  if (role === 'admin') return next
+  return next.startsWith('/admin/crm') ? next : '/admin/crm'
 }
 
 export async function adminLogout(): Promise<void> {

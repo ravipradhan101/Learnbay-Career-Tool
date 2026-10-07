@@ -6,6 +6,7 @@ import { env } from './env'
 import { query, queryOne } from './db'
 import { clientIp, hmac, randomToken, rateLimits, safeEqualHex, sha256 } from './security'
 import { sendOtpEmail } from './mailer'
+import { crmNewLead } from './crm/hooks'
 
 export const SESSION_COOKIE = 'lcn_session'
 const SESSION_DAYS = 30
@@ -80,13 +81,15 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function findOrCreateUser(email: string): Promise<User> {
-  const user = await queryOne<User>(
+  const row = await queryOne<User & { inserted: boolean }>(
     `INSERT INTO users (email) VALUES ($1)
      ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
-     RETURNING id, email, name, phone_country, phone, created_at`,
+     RETURNING id, email, name, phone_country, phone, created_at, (xmax = 0) AS inserted`,
     [email],
   )
-  return user!
+  const { inserted, ...user } = row!
+  if (inserted) crmNewLead(user.id)
+  return user
 }
 
 // ---------- One-time codes ----------

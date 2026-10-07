@@ -4,7 +4,22 @@
     {
       "name": "navigator-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "crm-mailtest",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "env": {
+        "MAIL_LOG_ONLY": "true"
+      },
       "port": 3000
     }
   ]

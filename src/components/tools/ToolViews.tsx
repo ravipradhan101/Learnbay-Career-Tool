@@ -1,7 +1,7 @@
 import { Icon } from '../Icon'
 import { ActionPlan } from '../report/ActionPlan'
 import { LadderChart, PhaseTimeline, RangeChart, Ring, SkillBars } from '../report/Charts'
-import { ChartCard, EligibilityStrip, LearnbayEdge, More, OutcomePath, ReportHero } from '../report/ReportParts'
+import { ChartCard, EligibilityStrip, LearnbayEdge, More, OutcomePath, PlanWithLearnbay, ReportHero } from '../report/ReportParts'
 import { PublishedStory } from '../usp/UspNote'
 import { getProgram } from '@/config/programs'
 import { getResources } from '@/config/resources'
@@ -14,7 +14,7 @@ import type { ProgramFit, RoadmapResult, SalaryResult, SkillGapResult } from '@/
 export const formatLpa = (n: number) => `₹${Number.isInteger(n) ? n : n.toFixed(1)} LPA`
 
 /** Learner context for the personal parts of a report (not shown on public share links). */
-export type ReportExtras = { area: string; role: string; eligibilityDone: boolean; hasSession: boolean; industry: string | null }
+export type ReportExtras = { area: string; role: string; eligibilityDone: boolean; hasSession: boolean; industry: string | null; profile?: { label: string; value: string }[]; industries?: string[] }
 
 export function ProgramFitCard({ fit, showLink = true }: { fit: ProgramFit; showLink?: boolean }) {
   const program = getProgram(fit.programId)
@@ -125,6 +125,8 @@ export function SkillGapView({ r, shared = false, extras }: { r: SkillGapResult;
             <Ring value={programCovers} total={totalGaps} label="gaps covered by your recommended program" />
             <Ring value={genericCovers} total={totalGaps} label="covered by a typical generic course" />
           </div>
+          <PlanWithLearnbay profile={extras.profile ?? []} industries={extras.industries ?? []} programId={r.programId}
+            focus={r.gapDetails?.length ? r.gapDetails.map((g) => g.skill) : [...r.skills].sort((a, b) => (b.requiredLevel - b.currentLevel) - (a.requiredLevel - a.currentLevel)).map((x) => x.name)} />
           <LearnbayEdge booked={extras.hasSession} ids={['customisation', 'projects', 'mentors']} programId={r.programId} coverage={{ covers: programCovers, total: totalGaps }} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
           <PublishedStory />
@@ -142,7 +144,7 @@ export function SalaryView({ r, current, shared = false, extras }: { r: SalaryRe
   const top = r.targetRoles.find((t) => t.role === r.targetRole) ?? r.targetRoles[0]
   const rows = [
     ...(cur ? [{ label: 'You today', min: cur.minLpa, max: cur.maxLpa ?? cur.minLpa * 1.2, tone: 'current' as const }] : []),
-    { label: 'Your role, market', min: r.currentRoleMarket.minLpa, max: r.currentRoleMarket.maxLpa, tone: 'muted' as const },
+    { label: r.fresher ? 'Fresher starting range' : 'Your role, market', min: r.currentRoleMarket.minLpa, max: r.currentRoleMarket.maxLpa, tone: 'muted' as const },
     ...r.targetRoles.map((t) => ({ label: t.role, min: t.minLpa, max: t.maxLpa, tone: 'target' as const })),
   ]
   return (
@@ -194,6 +196,8 @@ export function SalaryView({ r, current, shared = false, extras }: { r: SalaryRe
 
       {!shared && extras && (
         <>
+          <PlanWithLearnbay profile={extras.profile ?? []} industries={extras.industries ?? []} programId={r.programId}
+            focus={r.skillPremiums?.length ? [...r.skillPremiums].sort((a, b) => (a.impact === b.impact ? 0 : a.impact === 'High' ? -1 : 1)).map((x) => x.skill) : r.drivers} />
           <LearnbayEdge booked={extras.hasSession} ids={['placement', 'domain', 'projects']} programId={r.programId} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
         </>
@@ -274,6 +278,7 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
 
       {!shared && extras && (
         <>
+          <PlanWithLearnbay profile={extras.profile ?? []} industries={extras.industries ?? []} programId={r.programId} focus={r.phases.map((x) => x.title)} />
           <LearnbayEdge booked={extras.hasSession} ids={['mentors', 'hybrid', 'placement']} programId={r.programId} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
           <PublishedStory />

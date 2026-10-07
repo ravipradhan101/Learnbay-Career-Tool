@@ -811,7 +811,7 @@
 .sp-logos { justify-content: flex-start; gap: 10px 16px; margin: 12px 0; opacity: 0.9; }
 .tc-proof-logos { justify-content: flex-start; gap: 10px 20px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
 
-/* ---------- Landing, tracks, Lumi: same style ---------- */
+/* ---------- Landing, tracks, Woody: same style ---------- */
 .lp { background: #fff; }
 .lp-top { border-bottom: 1px solid #eef0f3; max-width: none; padding: 16px 32px; }
 .lp-login, .tg-login { height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid #e5e7eb; font-weight: 500; font-size: 0.92rem; box-shadow: none; }
@@ -956,7 +956,7 @@
 .tc-call svg { color: #fff !important; }
 @media (max-width: 480px) { .tc-call-label { display: none; } .tc-call { padding: 0 11px !important; } }
 
-/* ---------- Lumi, the floating guide ---------- */
+/* ---------- Woody, the floating guide ---------- */
 .rg { position: fixed; right: 22px; bottom: 96px; z-index: 60; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: none; }
 .rg > * { pointer-events: auto; }
 .rg-face { position: relative; border: none; background: none; padding: 0; cursor: pointer; border-radius: 50%; animation: rg-float 3.2s ease-in-out infinite; }
@@ -1007,10 +1007,10 @@
 .sp-call { background: #16a34a !important; color: #fff !important; border: none !important; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25); }
 .sp-call:hover { background: #15803d !important; }
 .sp-call svg { color: #fff !important; }
-/* Where Lumi floats over the chat (narrower screens), the newest message scrolls clear of her. */
+/* Where Woody floats over the chat (narrower screens), the newest message scrolls clear of her. */
 @media (max-width: 1280px) { .ts-main .tc-body { padding-bottom: 70px !important; } }
 
-/* ---------- Lumi's feedback pop-up ---------- */
+/* ---------- Woody's feedback pop-up ---------- */
 .rg-form { display: grid; gap: 10px; margin-top: 10px; }
 .rg-stars-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.84rem; color: #334155; }
 .rg-stars { display: flex; gap: 2px; flex: none; }
@@ -1024,7 +1024,7 @@
 .rg-form-actions { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
 .rg-act:disabled { opacity: 0.55; cursor: not-allowed; }
 .rg-error { margin: 0; color: #b91c1c; font-size: 0.8rem; }
-/* ---------- v10: Lumi easy to spot; "more options" as a clear button ---------- */
+/* ---------- v10: Woody easy to spot; "more options" as a clear button ---------- */
 .rg-tag { opacity: 1 !important; right: 70px; background: #fff; color: #3730a3; border: 1px solid #c7d2fe; box-shadow: 0 6px 16px rgba(67, 56, 202, 0.18); font-size: 0.8rem; padding: 6px 12px; }
 .rg-open .rg-tag { opacity: 0 !important; }
 .rg-ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(67, 56, 202, 0.45); animation: rg-pulse 2.4s ease-out infinite; pointer-events: none; }
@@ -1087,7 +1087,7 @@
 .tc-roles-note { margin: 0; display: flex; gap: 6px; align-items: flex-start; font-size: 0.84rem; color: #166534; background: #ecfdf3; padding: 8px 10px; border-radius: 10px; }
 .tc-roles-note svg { flex: none; margin-top: 2px; }
 
-/* ---------- v13: Lumi's pop-ups in the centre; Lumi in the sidebar ---------- */
+/* ---------- v13: Woody's pop-ups in the centre; Woody in the sidebar ---------- */
 .rg-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(15, 23, 42, 0.42); display: grid; place-items: center; padding: 16px; animation: rg-fade 0.18s ease-out; pointer-events: auto; }
 @keyframes rg-fade { from { opacity: 0; } to { opacity: 1; } }
 .rg-overlay .rg-bubble { position: relative; width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; border-radius: 22px !important; padding: 20px 20px 18px !important; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28) !important; }
@@ -1173,13 +1173,13 @@
 .lp-get:hover .lp-get-icon { transform: scale(1.08); background: #4338ca; color: #fff; }
 @media (prefers-reduced-motion: reduce) { .lp-get, .lp-get:hover, .lp-get:hover .lp-get-icon { transition: none; transform: none; } }
 
-/* ---------- Lumi: typing dots in her pop-up ---------- */
+/* ---------- Woody: typing dots in her pop-up ---------- */
 .rg-dots { display: inline-flex; gap: 4px; padding: 6px 2px; }
 .rg-dots i { width: 7px; height: 7px; border-radius: 50%; background: #a5b4fc; animation: tc-dot 1.1s infinite ease-in-out; }
 .rg-dots i:nth-child(2) { animation-delay: 0.15s; }
 .rg-dots i:nth-child(3) { animation-delay: 0.3s; }
 
-/* ---------- Lumi's guided tour ---------- */
+/* ---------- Woody's guided tour ---------- */
 .lt { position: fixed; inset: 0; z-index: 120; }
 .lt-block { position: absolute; inset: 0; }
 .lt-dim { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.55); }
@@ -1199,7 +1199,7 @@
 .lt-actions .rg-act { justify-content: center; }
 @media (prefers-reduced-motion: reduce) { .lt-spot, .lt-card { transition: none; animation: none; } }
 
-/* ---------- Right pane: at-a-glance plan (no scrolling; room left for Lumi at the bottom) ---------- */
+/* ---------- Right pane: at-a-glance plan (no scrolling; room left for Woody at the bottom) ---------- */
 .ts-right .sp2 { padding-bottom: 118px; }
 .sp2 { gap: 14px !important; }
 .sp2-me { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #eef0f3; border-radius: 18px; background: #fff; }
@@ -1377,9 +1377,10 @@
 .lp-card h1 span { background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
 .lp-badge { color: var(--brand-violet) !important; background: #f5f3ff !important; border-color: #e4dcfd !important; }
 .lp-get-icon { color: var(--brand) !important; }
-.lp-get:hover .lp-get-icon { background: var(--brand-grad) !important; }
+.lp-get:hover .lp-get-icon { background: var(--brand-grad) !important; color: #fff !important; }
+.lp-get-icon svg { stroke: currentColor; }
 
-/* Lumi and the tour pick up the brand */
+/* Woody and the tour pick up the brand */
 .rg-face .tanya-avatar { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #c4b5fd, 0 12px 28px rgba(109, 40, 217, 0.35) !important; }
 .rg-ring { border-color: rgba(109, 40, 217, 0.45) !important; }
 .rg-tag { color: var(--brand) !important; border-color: #ddd6fe !important; }
@@ -1399,10 +1400,10 @@
 .sp2-program-actions { flex-direction: column; align-items: stretch; gap: 6px; }
 .sp2-program-actions .tc-btn { justify-content: center; white-space: nowrap; width: 100%; }
 .sp2-program-actions .sp2-link { align-self: center; }
-/* Lumi: the label shows on hover only (it used to sit on top of the plan tiles) */
+/* Woody: the label shows on hover only (it used to sit on top of the plan tiles) */
 .rg-tag { opacity: 0 !important; }
 .rg-face:hover .rg-tag, .rg-face:focus-visible .rg-tag { opacity: 1 !important; }
-/* With the right pane on screen, Lumi sits in the bottom-right corner, below the pane's content */
+/* With the right pane on screen, Woody sits in the bottom-right corner, below the pane's content */
 @media (min-width: 1281px) {
   .rg { bottom: 18px; right: 18px; }
   .ts-right .sp2 { padding-bottom: 92px; }
@@ -1426,3 +1427,365 @@
   .ts-hi-short { display: inline; }
   .tc-newchat { min-width: 38px; min-height: 38px; justify-content: center; }
 }
+
+/* =====================================================================================================================
+   Design v5 (Oct 2026): a lighter, modern studio. One layer over everything above: soft aurora backdrop, floating glass
+   sidebar, rounder surfaces with depth instead of borders, gradient accents, airy chat bubbles, lift-on-hover option
+   cards, a compact pill input and a calmer type scale. Learner pages only; admin and CRM keep their own look.
+   ===================================================================================================================== */
+:root {
+  --v5-bg: #f6f5ff;
+  --v5-surface: rgba(255, 255, 255, 0.86);
+  --v5-line: rgba(99, 102, 241, 0.12);
+  --v5-ink: #12122a;
+  --v5-muted: #6b6b85;
+  --v5-radius: 22px;
+  --v5-shadow: 0 1px 2px rgba(24, 22, 64, 0.04), 0 18px 48px -24px rgba(55, 48, 163, 0.28);
+  --v5-shadow-hover: 0 2px 4px rgba(24, 22, 64, 0.05), 0 22px 44px -22px rgba(55, 48, 163, 0.42);
+  --v5-accent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #db2777 100%);
+}
+
+/* Backdrop: a soft aurora behind everything, so cards float instead of sitting in boxes. */
+.ts-shell.ts-3 {
+  background:
+    radial-gradient(900px 500px at 8% -10%, rgba(124, 58, 237, 0.10), transparent 60%),
+    radial-gradient(800px 480px at 105% 10%, rgba(219, 39, 119, 0.08), transparent 60%),
+    radial-gradient(900px 600px at 50% 120%, rgba(79, 70, 229, 0.10), transparent 60%),
+    var(--v5-bg) !important;
+}
+.ts-content, .ts-body, .ts-head { background: transparent !important; }
+.ts-shell, .tc { font-family: var(--tc-font); letter-spacing: -0.005em; }
+
+/* Sidebar: a floating glass panel. */
+.ts-side {
+  margin: 14px 0 14px 14px; border-radius: 26px !important; border: 1px solid var(--v5-line) !important;
+  background: var(--v5-surface) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--v5-shadow); height: calc(100dvh - 28px);
+}
+.ts-side > .logo { border-bottom: none !important; }
+.ts-label { font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; color: #9a98b8 !important; margin: 14px 0 6px 14px !important; }
+.ts-item { border-radius: 14px !important; min-height: 42px !important; font-size: 0.92rem !important; transition: background 0.15s, transform 0.15s, box-shadow 0.15s; }
+.ts-item:hover:not([aria-current='page']) { background: rgba(99, 102, 241, 0.07) !important; transform: translateX(2px); }
+.ts-item-icon { width: 30px !important; height: 30px !important; border-radius: 10px !important; background: rgba(99, 102, 241, 0.08) !important; color: #4f46e5 !important; }
+.ts-item-icon svg { width: 17px !important; height: 17px !important; }
+.ts-item[aria-current='page'] { background: var(--v5-accent) !important; box-shadow: 0 12px 26px -14px rgba(124, 58, 237, 0.85) !important; }
+.ts-item[aria-current='page'] .ts-item-icon { background: rgba(255, 255, 255, 0.2) !important; color: #fff !important; }
+.ts-lumi { border-radius: 18px !important; border: 1px solid rgba(124, 58, 237, 0.18) !important; background: linear-gradient(135deg, #fff7ed 0%, #fdf2f8 50%, #f5f3ff 100%) !important; box-shadow: 0 10px 24px -18px rgba(219, 39, 119, 0.6); }
+
+/* Header: lighter, with a gradient greeting. */
+.ts-head { border-bottom: none !important; padding: 18px 28px 6px !important; }
+.ts-head h1 { font-weight: 800 !important; letter-spacing: -0.03em !important; background: linear-gradient(90deg, #1e1b4b, #5b21b6); -webkit-background-clip: text; background-clip: text; color: transparent !important; }
+.ts-pill { border: 1px solid var(--v5-line) !important; background: var(--v5-surface) !important; backdrop-filter: blur(10px); box-shadow: 0 6px 18px -14px rgba(55, 48, 163, 0.5); font-weight: 600 !important; }
+.ts-pill:hover { border-color: rgba(124, 58, 237, 0.35) !important; transform: translateY(-1px); }
+.ts-avatar { background: var(--v5-accent) !important; }
+
+/* The chat: one soft floating surface. */
+.ts-body { padding: 12px 24px 20px !important; gap: 20px !important; }
+.ts-main .tc { border: 1px solid var(--v5-line) !important; border-radius: 28px !important; background: rgba(255, 255, 255, 0.92) !important; box-shadow: var(--v5-shadow) !important; overflow: hidden; }
+.ts-main .tc::before { display: none !important; }
+.tc-header { background: transparent !important; border-bottom: 1px solid rgba(99, 102, 241, 0.08) !important; padding: 14px 22px !important; }
+.tc-body { background: transparent !important; }
+
+/* Bubbles: airy, rounded, with a little depth. */
+.tc-bubble { background: #f4f3fb !important; border-radius: 20px 20px 20px 6px !important; padding: 11px 16px !important; color: var(--v5-ink) !important; line-height: 1.55 !important; }
+.tc-bubble-rich { background: #fff !important; border: 1px solid rgba(99, 102, 241, 0.12) !important; box-shadow: 0 10px 28px -22px rgba(55, 48, 163, 0.5) !important; }
+.tc-bubble-user { background: var(--v5-accent) !important; color: #fff !important; border-radius: 20px 20px 6px 20px !important; box-shadow: 0 10px 22px -14px rgba(124, 58, 237, 0.8) !important; }
+.tc-bubble .rt-n { background: var(--v5-accent) !important; color: #fff !important; }
+.tc-bubble .rt-next { background: linear-gradient(135deg, #eef2ff, #fdf2f8) !important; border: 1px solid rgba(124, 58, 237, 0.12); }
+.tc-speaker { font-weight: 700 !important; color: #8b88a8 !important; letter-spacing: 0.01em; }
+
+/* Options: cards that lift. */
+.tc-choice { border-radius: 16px !important; border: 1px solid rgba(99, 102, 241, 0.16) !important; background: #fff !important; padding: 9px 14px 9px 9px !important; box-shadow: 0 1px 2px rgba(24, 22, 64, 0.04); }
+.tc-choice:hover { border-color: rgba(124, 58, 237, 0.45) !important; box-shadow: var(--v5-shadow-hover) !important; transform: translateY(-2px) !important; }
+.tc-choice-icon { width: 32px !important; height: 32px !important; border-radius: 11px !important; background: linear-gradient(135deg, #eef2ff, #fae8ff) !important; color: #6d28d9 !important; }
+.tc-choice-main { border-color: rgba(124, 58, 237, 0.35) !important; background: linear-gradient(135deg, #f5f3ff, #fdf2f8) !important; }
+.tc-choice-main .tc-choice-icon { background: var(--v5-accent) !important; color: #fff !important; }
+.tc-choice-arrow { color: #a78bfa !important; }
+
+/* Input: a compact floating pill with a soft glow on focus. */
+.tc-composer { border-top: none !important; background: transparent !important; padding: 8px 18px 16px !important; align-items: center !important; }
+.tc-composer textarea {
+  min-height: 52px !important; max-height: 140px; border-radius: 26px !important; border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  background: #fff !important; padding: 14px 20px !important; box-shadow: 0 10px 30px -22px rgba(55, 48, 163, 0.55);
+}
+.tc-composer textarea:focus { border-color: rgba(124, 58, 237, 0.55) !important; box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12), 0 12px 32px -22px rgba(124, 58, 237, 0.6) !important; }
+.tc-send { width: 48px !important; height: 48px !important; background: var(--v5-accent) !important; box-shadow: 0 12px 24px -12px rgba(124, 58, 237, 0.9) !important; transition: transform 0.15s; }
+.tc-send:not(:disabled):hover { transform: scale(1.06); }
+
+/* Right pane cards. */
+.sp2-card { border: 1px solid var(--v5-line) !important; border-radius: var(--v5-radius) !important; background: var(--v5-surface) !important; backdrop-filter: blur(10px); box-shadow: var(--v5-shadow) !important; }
+
+/* Cards in the chat. */
+.tc-card { border-radius: 20px !important; border-color: rgba(99, 102, 241, 0.14) !important; box-shadow: 0 14px 34px -26px rgba(55, 48, 163, 0.55) !important; }
+.tc-eyebrow { color: #7c3aed !important; letter-spacing: 0.08em !important; }
+
+/* Woody as a mascot: a gentle bob where she floats. */
+@keyframes lumi-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
+.rg-face .lumi-mascot, .ts-lumi .lumi-mascot { animation: lumi-bob 3.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .rg-face .lumi-mascot, .ts-lumi .lumi-mascot { animation: none; } }
+
+@media (max-width: 900px) {
+  .ts-side { margin: 0; border-radius: 0 !important; height: 100dvh; }
+  .ts-body { padding: 8px 10px 12px !important; }
+  .ts-main .tc { border-radius: 22px !important; }
+  .ts-head { padding: 12px 14px 4px !important; }
+}
+
+/* Syllabus card: modules open to show weeks, topics and projects. */
+.tc-syl-list { list-style: none; margin: 8px 0 4px; padding: 0; display: grid; gap: 6px; }
+.tc-syl-list details { border: 1px solid rgba(99, 102, 241, 0.14); border-radius: 14px; background: #fff; transition: box-shadow 0.15s, border-color 0.15s; }
+.tc-syl-list details[open] { border-color: rgba(124, 58, 237, 0.35); box-shadow: 0 12px 26px -20px rgba(55, 48, 163, 0.6); }
+.tc-syl-list summary { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 12px; cursor: pointer; list-style: none; }
+.tc-syl-list summary::-webkit-details-marker { display: none; }
+.tc-syl-list summary > svg { color: #a78bfa; transition: transform 0.2s; }
+.tc-syl-list details[open] summary > svg { transform: rotate(180deg); }
+.tc-syl-name b { display: block; font-size: 0.9rem; font-weight: 650; color: #12122a; line-height: 1.3; }
+.tc-syl-name small { display: block; font-size: 0.74rem; color: #8b88a8; margin-top: 1px; }
+.tc-syl-body { padding: 0 14px 12px 48px; }
+.tc-syl-body ul { margin: 0; padding-left: 1.05em; display: grid; gap: 3px; font-size: 0.86rem; color: #3f3f5a; line-height: 1.45; }
+.tc-syl-note { margin: 0; font-size: 0.86rem; color: #3f3f5a; }
+.tc-syl-projects { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+.tc-syl-projects .tc-eyebrow { width: 100%; margin-bottom: 0; }
+@media (max-width: 520px) { .tc-syl-body { padding-left: 14px; } }
+/* The pill input grows with its text; no scroll arrows inside the pill. */
+.tc-composer textarea { box-sizing: border-box; scrollbar-width: none; }
+.tc-composer textarea::-webkit-scrollbar { display: none; }
+
+/* Best-fit path (Lead–Course Map): the lead type they match, then Recommended / Next best / One more option */
+.tc-path { display: grid; gap: 12px; }
+.tc-path-who { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, #eef2ff, #fdf2f8); }
+.tc-path-who small { display: block; font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.tc-path-who b { font-size: 0.98rem; color: #1e1b4b; line-height: 1.3; }
+.tc-path-match { display: grid; place-items: center; min-width: 64px; padding: 6px 8px; border-radius: 12px; background: #fff; color: #4338ca; font-weight: 800; font-size: 1.15rem; line-height: 1; box-shadow: 0 4px 14px -8px rgba(67, 56, 202, 0.5); }
+.tc-path-match small { font-size: 0.62rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+.tc-path-reasons { display: flex; flex-wrap: wrap; gap: 6px; }
+.tc-path-reasons span { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 999px; background: #f0fdf4; color: #166534; font-size: 0.76rem; font-weight: 600; }
+.tc-path-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tc-path-row { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid #eef2f7; background: #f8fafc; }
+.tc-path-row.recommend { background: #f5f7ff; border-color: #c7d2fe; }
+.tc-path-row.later { opacity: 0.82; }
+.tc-path-step { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 0.8rem; color: #64748b; background: #fff; border: 1px solid #e2e8f0; }
+.tc-path-row.recommend .tc-path-step { color: #fff; background: linear-gradient(135deg, #4338ca, #c026d3); border-color: transparent; }
+.tc-path-body { display: grid; gap: 4px; min-width: 0; }
+.tc-path-kind { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+.tc-path-row.recommend .tc-path-kind { color: #4338ca; }
+.tc-path-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.tc-path-top b { font-size: 0.92rem; color: #0f172a; line-height: 1.3; }
+.tc-path-fit { font-size: 0.82rem; font-weight: 700; color: #64748b; white-space: nowrap; }
+.tc-path-row.recommend .tc-path-fit { color: #3730a3; }
+.tc-path-row.recommend .tc-fit-bar i { background: linear-gradient(90deg, #4338ca, #22c55e); }
+.tc-path-body small { font-size: 0.8rem; color: #475569; line-height: 1.4; }
+.tc-path-note { display: inline-flex; align-items: center; gap: 5px; color: #92400e !important; }
+
+/* Options (Woody and counsellors): hovering any option gives it the highlighted look (tinted background, filled icon);
+   while the pointer is over the list, the default highlighted first option steps back to the plain look. */
+.tc-choice:hover, .tc-choice:focus-visible {
+  border-color: rgba(124, 58, 237, 0.35) !important;
+  background: linear-gradient(135deg, #f5f3ff, #fdf2f8) !important;
+}
+.tc-choice:hover .tc-choice-icon, .tc-choice:focus-visible .tc-choice-icon { background: var(--v5-accent) !important; color: #fff !important; }
+.tc-choice:hover .tc-choice-arrow { color: #7c3aed !important; transform: translateX(2px); transition: transform 0.15s ease; }
+.tc-choices:hover .tc-choice-main:not(:hover) {
+  border-color: rgba(99, 102, 241, 0.16) !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(24, 22, 64, 0.04) !important;
+}
+.tc-choices:hover .tc-choice-main:not(:hover) .tc-choice-icon { background: linear-gradient(135deg, #eef2ff, #fae8ff) !important; color: #6d28d9 !important; }
+.tc-choice-icon { transition: background 0.15s ease, color 0.15s ease; }
+.tc-chip:hover { border-color: rgba(124, 58, 237, 0.4) !important; background: linear-gradient(135deg, #f5f3ff, #fdf2f8) !important; }
+
+/* Woody v2: a sleek little robot with gestures. Parts animate in their own box. */
+.lumi-v2 .lumi-bot, .lumi-v2 .lumi-hand, .lumi-v2 .lumi-eye, .lumi-v2 .lumi-look, .lumi-v2 .lumi-light { transform-box: fill-box; transform-origin: center; }
+.lumi-v2 .lumi-bot { animation: lumi2-float 3.6s ease-in-out infinite; }
+.lumi-v2 .lumi-eye { animation: lumi2-blink 4.6s infinite; }
+.lumi-v2 .lumi-look { animation: lumi2-look 7s ease-in-out infinite; }
+.lumi-v2 .lumi-hand { transform-origin: 50% 90%; animation: lumi2-wave 3.2s ease-in-out infinite; }
+.lumi-v2 .lumi-light { animation: lumi2-light 2.4s ease-in-out infinite; }
+.lumi-v2 .lumi-happy { opacity: 0; transition: opacity 0.15s ease; }
+.lumi-v2 .lumi-eyes { transition: opacity 0.15s ease; }
+/* Hover (or the parent card hovered): happy eyes and a little head tilt */
+.lumi-v2:hover .lumi-happy, :hover > .tanya-avatar > .lumi-v2 .lumi-happy, .ts-lumi:hover .lumi-v2 .lumi-happy { opacity: 1; }
+.lumi-v2:hover .lumi-eyes, :hover > .tanya-avatar > .lumi-v2 .lumi-eyes, .ts-lumi:hover .lumi-v2 .lumi-eyes { opacity: 0; }
+.lumi-v2:hover .lumi-bot, .ts-lumi:hover .lumi-v2 .lumi-bot { animation: lumi2-tilt 0.9s ease-in-out; }
+@keyframes lumi2-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.6px) } }
+@keyframes lumi2-blink { 0%, 44%, 50%, 100% { transform: scaleY(1) } 47% { transform: scaleY(0.12) } }
+@keyframes lumi2-look { 0%, 30%, 100% { transform: translateX(0) } 38%, 46% { transform: translateX(-1.6px) } 56%, 64% { transform: translateX(1.6px) } }
+@keyframes lumi2-wave { 0%, 55%, 100% { transform: rotate(0deg) } 62% { transform: rotate(-22deg) } 70% { transform: rotate(14deg) } 78% { transform: rotate(-18deg) } 86% { transform: rotate(8deg) } }
+@keyframes lumi2-light { 0%, 100% { opacity: 1 } 50% { opacity: 0.45 } }
+@keyframes lumi2-tilt { 0%, 100% { transform: rotate(0deg) } 30% { transform: rotate(-8deg) } 65% { transform: rotate(6deg) } }
+@media (prefers-reduced-motion: reduce) {
+  .lumi-v2 .lumi-bot, .lumi-v2 .lumi-eye, .lumi-v2 .lumi-look, .lumi-v2 .lumi-hand, .lumi-v2 .lumi-light { animation: none !important; }
+}
+/* The old bob on the wrapper would double the float. */
+.rg-face .lumi-v2, .ts-lumi .lumi-v2 { animation: none !important; }
+
+/* Woody the firefly: hovers, flutters, glows, blinks, glances, sways her antennae and waves a leg.
+   Hover (her or the card she sits in): happy eyes, a little twirl and a brighter glow. */
+.lumi-fly .lumi-bot, .lumi-fly .lumi-wing, .lumi-fly .lumi-eye, .lumi-fly .lumi-look, .lumi-fly .lumi-light, .lumi-fly .lumi-tail,
+.lumi-fly .lumi-hand, .lumi-fly .lumi-antennae, .lumi-fly .lumi-tip, .lumi-fly .lumi-spark { transform-box: fill-box; transform-origin: center; }
+.lumi-fly .lumi-bot { animation: fly-hover 3.2s ease-in-out infinite; }
+.lumi-fly .lumi-wing-l { transform-origin: 100% 50%; animation: fly-wing 0.3s ease-in-out infinite alternate; }
+.lumi-fly .lumi-wing-r { transform-origin: 0% 50%; animation: fly-wing 0.3s ease-in-out infinite alternate; }
+.lumi-fly .lumi-light { animation: fly-glow 2.6s ease-in-out infinite; }
+.lumi-fly .lumi-tail { animation: fly-tail 2.6s ease-in-out infinite; }
+.lumi-fly .lumi-eye { animation: lumi2-blink 4.4s infinite; }
+.lumi-fly .lumi-look { animation: lumi2-look 7.5s ease-in-out infinite; }
+.lumi-fly .lumi-antennae { transform-origin: 50% 100%; animation: fly-antennae 3.6s ease-in-out infinite; }
+.lumi-fly .lumi-tip { animation: fly-tip 2.6s ease-in-out infinite; }
+.lumi-fly.lumi-wave .lumi-hand { transform-origin: 0% 100%; animation: fly-wave 3.4s ease-in-out infinite; }
+.lumi-fly .lumi-spark { opacity: 0; animation: fly-spark 3s ease-in-out infinite; }
+.lumi-fly .lumi-spark.s2 { animation-delay: 1s; }
+.lumi-fly .lumi-spark.s3 { animation-delay: 2s; }
+.lumi-fly .lumi-happy { opacity: 0; transition: opacity 0.15s ease; }
+.lumi-fly .lumi-eyes { transition: opacity 0.15s ease; }
+.lumi-fly:hover .lumi-happy, :hover > .tanya-avatar > .lumi-fly .lumi-happy, .ts-lumi:hover .lumi-fly .lumi-happy { opacity: 1; }
+.lumi-fly:hover .lumi-eyes, :hover > .tanya-avatar > .lumi-fly .lumi-eyes, .ts-lumi:hover .lumi-fly .lumi-eyes { opacity: 0; }
+.lumi-fly:hover .lumi-bot, .ts-lumi:hover .lumi-fly .lumi-bot { animation: fly-twirl 0.9s ease-in-out; }
+.lumi-fly:hover .lumi-light, .ts-lumi:hover .lumi-fly .lumi-light { animation-duration: 0.8s; }
+@keyframes fly-hover { 0%, 100% { transform: translate(0, 0) rotate(0deg) } 30% { transform: translate(0.6px, -1.8px) rotate(-2deg) } 65% { transform: translate(-0.6px, -0.8px) rotate(2deg) } }
+@keyframes fly-wing { from { transform: scaleY(1) } to { transform: scaleY(0.6) } }
+@keyframes fly-glow { 0%, 100% { opacity: 0.55; transform: scale(0.92) } 50% { opacity: 1; transform: scale(1.08) } }
+@keyframes fly-tail { 0%, 100% { filter: brightness(0.96) } 50% { filter: brightness(1.12) } }
+@keyframes fly-antennae { 0%, 100% { transform: rotate(0deg) } 40% { transform: rotate(-4deg) } 70% { transform: rotate(3deg) } }
+@keyframes fly-tip { 0%, 100% { opacity: 0.75 } 50% { opacity: 1 } }
+@keyframes fly-wave { 0%, 55%, 100% { transform: rotate(0deg) } 62% { transform: rotate(-26deg) } 70% { transform: rotate(10deg) } 78% { transform: rotate(-20deg) } 86% { transform: rotate(4deg) } }
+@keyframes fly-spark { 0%, 100% { opacity: 0; transform: translateY(0) scale(0.6) } 40% { opacity: 1; transform: translateY(-2px) scale(1) } 80% { opacity: 0; transform: translateY(-4px) scale(0.6) } }
+@keyframes fly-twirl { 0%, 100% { transform: rotate(0deg) scale(1) } 35% { transform: rotate(-12deg) scale(1.05) } 70% { transform: rotate(8deg) scale(1.03) } }
+@media (prefers-reduced-motion: reduce) {
+  .lumi-fly .lumi-bot, .lumi-fly .lumi-wing, .lumi-fly .lumi-eye, .lumi-fly .lumi-look, .lumi-fly .lumi-light, .lumi-fly .lumi-tail,
+  .lumi-fly .lumi-hand, .lumi-fly .lumi-antennae, .lumi-fly .lumi-tip, .lumi-fly .lumi-spark { animation: none !important; }
+  .lumi-fly .lumi-spark { opacity: 0.8; }
+}
+.rg-face .lumi-fly, .ts-lumi .lumi-fly { animation: none !important; }
+
+/* Woody the octopus: bobs as if in water, wiggles her tentacles, waves, blinks, glances, swings her tassel, blows bubbles.
+   Hover (her or the card she sits in): happy eyes and a little twirl. */
+.lumi-octo .lumi-bot, .lumi-octo .lumi-arm, .lumi-octo .lumi-hand, .lumi-octo .lumi-eye, .lumi-octo .lumi-look,
+.lumi-octo .lumi-tassel, .lumi-octo .lumi-cap, .lumi-octo .lumi-bubble { transform-box: fill-box; transform-origin: center; }
+.lumi-octo .lumi-bot { animation: octo-bob 3.4s ease-in-out infinite; }
+.lumi-octo .lumi-arm { transform-origin: 50% 0%; animation: octo-wiggle 2.4s ease-in-out infinite; }
+.lumi-octo .lumi-arm.a2 { animation-delay: -0.6s; }
+.lumi-octo .lumi-arm.a3 { animation-delay: -1.2s; }
+.lumi-octo .lumi-arm.a4 { animation-delay: -1.8s; }
+.lumi-octo.lumi-wave .lumi-hand { transform-origin: 0% 100%; animation: octo-wave 3s ease-in-out infinite; }
+.lumi-octo .lumi-eye { animation: lumi2-blink 4.6s infinite; }
+.lumi-octo .lumi-look { animation: lumi2-look 7.5s ease-in-out infinite; }
+.lumi-octo .lumi-tassel { transform-origin: 0% 0%; animation: octo-tassel 2.8s ease-in-out infinite; }
+.lumi-octo .lumi-bubble { opacity: 0; animation: octo-bubble 3.6s ease-in infinite; }
+.lumi-octo .lumi-bubble.b2 { animation-delay: 1.2s; }
+.lumi-octo .lumi-bubble.b3 { animation-delay: 2.4s; }
+.lumi-octo .lumi-happy { opacity: 0; transition: opacity 0.15s ease; }
+.lumi-octo .lumi-eyes { transition: opacity 0.15s ease; }
+.lumi-octo:hover .lumi-happy, :hover > .tanya-avatar > .lumi-octo .lumi-happy, .ts-lumi:hover .lumi-octo .lumi-happy { opacity: 1; }
+.lumi-octo:hover .lumi-eyes, :hover > .tanya-avatar > .lumi-octo .lumi-eyes, .ts-lumi:hover .lumi-octo .lumi-eyes { opacity: 0; }
+.lumi-octo:hover .lumi-bot, .ts-lumi:hover .lumi-octo .lumi-bot { animation: octo-twirl 0.9s ease-in-out; }
+.lumi-octo:hover .lumi-arm, .ts-lumi:hover .lumi-octo .lumi-arm { animation-duration: 0.8s; }
+@keyframes octo-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+@keyframes octo-wiggle { 0%, 100% { transform: rotate(0deg) } 30% { transform: rotate(6deg) } 70% { transform: rotate(-6deg) } }
+@keyframes octo-wave { 0%, 50%, 100% { transform: rotate(0deg) } 58% { transform: rotate(-18deg) } 66% { transform: rotate(10deg) } 74% { transform: rotate(-14deg) } 82% { transform: rotate(4deg) } }
+@keyframes octo-tassel { 0%, 100% { transform: rotate(0deg) } 40% { transform: rotate(-9deg) } 75% { transform: rotate(6deg) } }
+@keyframes octo-bubble { 0% { opacity: 0; transform: translateY(0) scale(0.7) } 20% { opacity: 0.9 } 100% { opacity: 0; transform: translateY(-14px) scale(1.1) } }
+@keyframes octo-twirl { 0%, 100% { transform: rotate(0deg) scale(1) } 35% { transform: rotate(-10deg) scale(1.05) } 70% { transform: rotate(7deg) scale(1.03) } }
+@media (prefers-reduced-motion: reduce) {
+  .lumi-octo .lumi-bot, .lumi-octo .lumi-arm, .lumi-octo .lumi-hand, .lumi-octo .lumi-eye, .lumi-octo .lumi-look,
+  .lumi-octo .lumi-tassel, .lumi-octo .lumi-bubble { animation: none !important; }
+  .lumi-octo .lumi-bubble { opacity: 0.7; }
+}
+.rg-face .lumi-octo, .ts-lumi .lumi-octo { animation: none !important; }
+
+/* Woody the hamster: squishy bounce, flapping arms, blinks, glances, twitching ears and whiskers.
+   Hover (her or the card she sits in): a happy hop with squinty eyes and arms up. */
+.lumi-ham .lumi-bot, .lumi-ham .lumi-hand, .lumi-ham .lumi-arm-l, .lumi-ham .lumi-arm-r, .lumi-ham .lumi-eye, .lumi-ham .lumi-look,
+.lumi-ham .lumi-ear, .lumi-ham .lumi-whiskers { transform-box: fill-box; transform-origin: center; }
+.lumi-ham .lumi-bot { transform-origin: 50% 100%; animation: ham-bounce 2.6s ease-in-out infinite; }
+.lumi-ham .lumi-arm-l { transform-origin: 100% 100%; animation: ham-flap-l 2.6s ease-in-out infinite; }
+.lumi-ham .lumi-arm-r, .lumi-ham .lumi-hand { transform-origin: 0% 100%; animation: ham-flap-r 2.6s ease-in-out infinite; }
+.lumi-ham.lumi-wave .lumi-hand { animation: ham-wave 3s ease-in-out infinite; }
+.lumi-ham .lumi-eye { animation: lumi2-blink 4.2s infinite; }
+.lumi-ham .lumi-look { animation: lumi2-look 7s ease-in-out infinite; }
+.lumi-ham .lumi-ear.l { transform-origin: 80% 90%; animation: ham-ear 5s ease-in-out infinite; }
+.lumi-ham .lumi-ear.r { transform-origin: 20% 90%; animation: ham-ear 5s ease-in-out infinite 0.4s; }
+.lumi-ham .lumi-whiskers { animation: ham-whisker 1.8s ease-in-out infinite; }
+.lumi-ham .lumi-happy { opacity: 0; transition: opacity 0.15s ease; }
+.lumi-ham .lumi-eyes { transition: opacity 0.15s ease; }
+.lumi-ham:hover .lumi-happy, :hover > .tanya-avatar > .lumi-ham .lumi-happy, .ts-lumi:hover .lumi-ham .lumi-happy { opacity: 1; }
+.lumi-ham:hover .lumi-eyes, :hover > .tanya-avatar > .lumi-ham .lumi-eyes, .ts-lumi:hover .lumi-ham .lumi-eyes { opacity: 0; }
+.lumi-ham:hover .lumi-bot, .ts-lumi:hover .lumi-ham .lumi-bot { animation: ham-hop 0.7s ease-in-out infinite; }
+.lumi-ham:hover .lumi-arm-l, .ts-lumi:hover .lumi-ham .lumi-arm-l { animation: ham-up-l 0.7s ease-in-out infinite; }
+.lumi-ham:hover .lumi-hand, .lumi-ham:hover .lumi-arm-r, .ts-lumi:hover .lumi-ham .lumi-hand, .ts-lumi:hover .lumi-ham .lumi-arm-r { animation: ham-up-r 0.7s ease-in-out infinite; }
+@keyframes ham-bounce { 0%, 100% { transform: scale(1, 1) } 45% { transform: scale(1.03, 0.97) } 60% { transform: translateY(-1.5px) scale(0.98, 1.02) } 75% { transform: scale(1, 1) } }
+@keyframes ham-flap-l { 0%, 100% { transform: rotate(0deg) } 45% { transform: rotate(10deg) } 60% { transform: rotate(-8deg) } }
+@keyframes ham-flap-r { 0%, 100% { transform: rotate(0deg) } 45% { transform: rotate(-10deg) } 60% { transform: rotate(8deg) } }
+@keyframes ham-wave { 0%, 50%, 100% { transform: rotate(0deg) } 58% { transform: rotate(-24deg) } 66% { transform: rotate(8deg) } 74% { transform: rotate(-20deg) } 82% { transform: rotate(4deg) } }
+@keyframes ham-ear { 0%, 88%, 100% { transform: rotate(0deg) } 92% { transform: rotate(-10deg) } 96% { transform: rotate(6deg) } }
+@keyframes ham-whisker { 0%, 100% { transform: scaleX(1) } 50% { transform: scaleX(1.06) } }
+@keyframes ham-hop { 0%, 100% { transform: translateY(0) scale(1.03, 0.97) } 50% { transform: translateY(-3.5px) scale(0.97, 1.03) } }
+@keyframes ham-up-l { 0%, 100% { transform: rotate(20deg) } 50% { transform: rotate(38deg) } }
+@keyframes ham-up-r { 0%, 100% { transform: rotate(-20deg) } 50% { transform: rotate(-38deg) } }
+@media (prefers-reduced-motion: reduce) {
+  .lumi-ham .lumi-bot, .lumi-ham .lumi-hand, .lumi-ham .lumi-arm-l, .lumi-ham .lumi-arm-r, .lumi-ham .lumi-eye, .lumi-ham .lumi-look,
+  .lumi-ham .lumi-ear, .lumi-ham .lumi-whiskers { animation: none !important; }
+}
+.rg-face .lumi-ham, .ts-lumi .lumi-ham { animation: none !important; }
+
+/* The sapling: its sprout sways, and perks up (a little grow) on hover. Uses the bounce, arms, eyes of .lumi-ham. */
+.lumi-tree .lumi-sprout { transform-box: fill-box; transform-origin: 50% 100%; animation: tree-sway 3.2s ease-in-out infinite; }
+.lumi-tree:hover .lumi-sprout, :hover > .tanya-avatar > .lumi-tree .lumi-sprout, .ts-lumi:hover .lumi-tree .lumi-sprout { animation: tree-perk 0.7s ease-in-out infinite; }
+@keyframes tree-sway { 0%, 100% { transform: rotate(-6deg) } 50% { transform: rotate(6deg) } }
+@keyframes tree-perk { 0%, 100% { transform: scale(1) rotate(0deg) } 50% { transform: scale(1.18) rotate(-4deg) } }
+@media (prefers-reduced-motion: reduce) { .lumi-tree .lumi-sprout { animation: none !important; } }
+
+/* Woody, the guide: each mood moves in its own way. Parts animate in their own box. */
+.woody .woody-bot, .woody .woody-eye, .woody .woody-sprouts, .woody .woody-wave, .woody .woody-arms-up, .woody .woody-arms-out,
+.woody .woody-present, .woody .woody-glint, .woody .woody-zzz, .woody .woody-stars, .woody .woody-head { transform-box: fill-box; transform-origin: center; }
+.woody .woody-bot { transform-origin: 50% 100%; animation: woody-bob 3.2s ease-in-out infinite; }
+.woody .woody-eye { animation: lumi2-blink 4.6s infinite; }
+.woody .woody-sprouts { transform-origin: 50% 100%; animation: woody-sway 3.4s ease-in-out infinite; }
+.woody .woody-wave { transform-origin: 0% 100%; animation: woody-wave 2.6s ease-in-out infinite; }
+.woody-excited .woody-bot { animation: woody-jump 0.8s ease-in-out infinite; }
+.woody-excited .woody-arms-up { animation: woody-cheer 0.4s ease-in-out infinite alternate; }
+.woody-thinking .woody-head { transform-origin: 50% 100%; animation: woody-tilt 3s ease-in-out infinite; }
+.woody-playful .woody-bot { animation: woody-wiggle 0.5s ease-in-out infinite; }
+.woody-present .woody-present { transform-origin: 0% 50%; animation: woody-offer 1.8s ease-in-out infinite; }
+.woody-present .woody-glint { animation: woody-glint 1.2s ease-in-out infinite; }
+.woody-sleep .woody-bot { animation: woody-breathe 3.6s ease-in-out infinite; }
+.woody-sleep .woody-zzz { animation: woody-zzz 2.4s ease-in-out infinite; }
+.woody-ouch .woody-bot { animation: woody-shake 0.35s ease-in-out 3; }
+.woody-ouch .woody-stars { animation: woody-spin 1.2s linear infinite; }
+.woody-innocent .woody-bot { animation: woody-sway-slow 4s ease-in-out infinite; }
+@keyframes woody-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.2px) } }
+@keyframes woody-sway { 0%, 100% { transform: rotate(-5deg) } 50% { transform: rotate(5deg) } }
+@keyframes woody-sway-slow { 0%, 100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
+@keyframes woody-wave { 0%, 45%, 100% { transform: rotate(0deg) } 55% { transform: rotate(-22deg) } 65% { transform: rotate(10deg) } 75% { transform: rotate(-18deg) } 85% { transform: rotate(4deg) } }
+@keyframes woody-jump { 0%, 100% { transform: translateY(0) scale(1.02, 0.98) } 50% { transform: translateY(-3px) scale(0.98, 1.02) } }
+@keyframes woody-cheer { from { transform: translateY(0) } to { transform: translateY(-1.4px) } }
+@keyframes woody-tilt { 0%, 100% { transform: rotate(0deg) } 50% { transform: rotate(-5deg) } }
+@keyframes woody-wiggle { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
+@keyframes woody-offer { 0%, 100% { transform: translateX(0) } 50% { transform: translateX(1.2px) } }
+@keyframes woody-glint { 0%, 100% { opacity: 0.5; transform: scale(0.8) rotate(0deg) } 50% { opacity: 1; transform: scale(1.15) rotate(45deg) } }
+@keyframes woody-breathe { 0%, 100% { transform: scale(1, 1) } 50% { transform: scale(1.015, 0.985) } }
+@keyframes woody-zzz { 0% { opacity: 0; transform: translate(0, 2px) } 40% { opacity: 1 } 100% { opacity: 0; transform: translate(2px, -3px) } }
+@keyframes woody-shake { 0%, 100% { transform: translateX(0) } 25% { transform: translateX(-1.5px) rotate(-3deg) } 75% { transform: translateX(1.5px) rotate(3deg) } }
+@keyframes woody-spin { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) {
+  .woody .woody-bot, .woody .woody-eye, .woody .woody-sprouts, .woody .woody-wave, .woody .woody-arms-up, .woody .woody-arms-out,
+  .woody .woody-present, .woody .woody-glint, .woody .woody-zzz, .woody .woody-stars, .woody .woody-head { animation: none !important; }
+}
+.rg-face .woody, .ts-lumi .woody { animation: none !important; }
+
+/* Woody in his corner: a draggable, throwable guide with a small speech bubble. */
+.rg-woody { position: relative; display: flex; align-items: flex-end; justify-content: flex-end; will-change: transform; }
+.rg-woody .rg-face { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.rg-woody .rg-face:active { cursor: grabbing; }
+.rg-woody.free .rg-face { animation: none; }
+.rg-say { position: absolute; right: calc(100% + 10px); bottom: 34px; width: max-content; max-width: min(240px, calc(100vw - 110px)); background: #fff; color: #1e1b4b;
+  border: 1px solid #e0e7ff; border-radius: 16px 16px 4px 16px; box-shadow: 0 12px 28px -10px rgba(30, 27, 75, 0.35); padding: 9px 12px; font-size: 0.86rem; line-height: 1.4;
+  display: grid; gap: 8px; animation: rg-say-in 0.22s ease-out; }
+.rg-say-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.rg-say-acts button { border: 1px solid #c7d2fe; background: #f5f3ff; color: #3730a3; border-radius: 999px; padding: 5px 10px; font: 600 0.78rem/1 inherit; cursor: pointer; }
+.rg-say-acts button:first-child { background: var(--v5-accent, #4338ca); color: #fff; border-color: transparent; }
+.rg-say-acts button:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+@keyframes rg-say-in { from { opacity: 0; transform: translateY(4px) scale(0.96) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) { .rg-say { animation: none; } }
+@media (max-width: 760px) { .rg-say { bottom: 28px; } }
+.rg-say.right { right: auto; left: calc(100% + 10px); border-radius: 16px 16px 16px 4px; }

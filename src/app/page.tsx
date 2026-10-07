@@ -31,10 +31,10 @@ export default async function HomePage() {
         <section className="lp-card">
           <span className="lp-badge"><Icon name="sparkles" size="0.8rem" /> Career readiness · 2026</span>
           <h1>Your next tech role,<br /><span>planned with a counsellor.</span></h1>
-          <p className="lp-sub">Pick your track, talk to a Learnbay career counsellor and get a clear, personal plan for AI, FDE or Cloud &amp; DevOps roles.</p>
+          <p className="lp-sub">Pick your track, talk to a Learnbay career counsellor and get a clear, personal plan for AI, Data, FDE or Cloud &amp; DevOps roles.</p>
 
           <dl className="lp-facts">
-            <div><dt>Best for</dt><dd>Working professionals &amp; graduates</dd></div>
+            <div><dt>Best for</dt><dd>Professionals, graduates &amp; students</dd></div>
             <div><dt>Time needed</dt><dd>About 5 minutes</dd></div>
             <div><dt>You receive</dt><dd>Readiness report + 1:1 guidance</dd></div>
           </dl>

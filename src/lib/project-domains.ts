@@ -41,7 +41,7 @@ export const DOMAIN_TAG: Record<string, string> = {
   design: 'Design', 'data-analytics': 'Data & MIS', education: 'Education',
 }
 
-/** The learner's industry (Lumi's question) → industry specialisation. */
+/** The learner's industry (Woody's question) → industry specialisation. */
 const FOR_INDUSTRY: Record<string, string> = { bfsi: 'bfsi', healthcare: 'healthcare', manufacturing: 'manufacturing', retail: 'retail-ecommerce', telecom: 'telecom' }
 /** The learner's role → role specialisations. */
 const FOR_ROLE: Record<string, string[]> = {

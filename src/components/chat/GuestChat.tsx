@@ -10,7 +10,7 @@ import type { Answers } from '@/lib/questions'
 
 export const LOGIN_EVENT = 'lcn:chat-login'
 
-/** Lumi, the career guide: a few questions, sign-up with an email code, then she finds the right counsellor. */
+/** Woody, the guide: a few questions, sign-up with an email code, then he finds the right counsellor. */
 export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestCtx['signedIn']; initial: Answers; track: string | null; mode: 'start' | 'login' }) {
   const chat = useChat({ storageKey: GUEST_ITEMS_KEY, signedIn: false, speaker: 'bot' })
   const started = useRef(false)

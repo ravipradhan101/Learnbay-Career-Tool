@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { Icon } from '@/components/Icon'
 import { Logo } from '@/components/Logo'
 import { ResetGuestChat } from '@/components/ResetGuestChat'
-import { programFor } from '@/config/programs'
 import { getCurrentUser } from '@/lib/auth'
 import { getAnswers } from '@/lib/data'
 import { TRACKS } from '@/lib/questions'
@@ -31,7 +30,6 @@ export default async function StartPage() {
         </div>
         <div className="lp-tracks">
           {TRACKS.map((t) => {
-            const program = programFor(t.interest)
             return (
               <Link key={t.id} href={signedIn ? `/dashboard?track=${t.id}` : `/start/chat?track=${t.id}`} className="lp-track">
                 <span className="lp-track-icon"><Icon name={t.icon} size="1.25rem" /></span>
@@ -42,14 +40,14 @@ export default async function StartPage() {
                 <dl>
                   <div><dt>Best for</dt><dd>{t.bestFor}</dd></div>
                   <div><dt>Roles you can target</dt><dd>{t.roles.join(' · ')}</dd></div>
-                  {program && <div><dt>Program</dt><dd>{program.name}</dd></div>}
+                  <div><dt>Program</dt><dd>{t.path}</dd></div>
                 </dl>
                 <span className="lp-track-go">Choose this track <Icon name="arrowRight" size="0.95rem" /></span>
               </Link>
             )
           })}
         </div>
-        <p className="lp-fine">Not sure? Pick the closest one; your counsellor will help you decide.</p>
+        <p className="lp-fine">Not sure? Pick the closest one: your counsellor matches you to the right program by your background, experience and whether you code.</p>
       </main>
     </div>
   )

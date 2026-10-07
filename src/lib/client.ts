@@ -2,7 +2,11 @@
 
 export type ApiResult = { ok: true; data: Record<string, unknown> } | { ok: false; error: string; status: number; data: Record<string, unknown> }
 
-async function parse(res: Response): Promise<ApiResult> {
+/** Fired once when a learner API says the sign-in on this device has ended (the studio shows a sign-in notice). */
+export const SESSION_ENDED = 'lcn:session-ended'
+const isLearnerApi = (url: string) => url.startsWith('/api/') && !/^\/api\/(admin|crm|auth)\b/.test(url)
+
+async function parse(res: Response, url = ''): Promise<ApiResult> {
   let data: Record<string, unknown> = {}
   try {
     data = (await res.json()) as Record<string, unknown>
@@ -10,6 +14,11 @@ async function parse(res: Response): Promise<ApiResult> {
     // Non-JSON error page (for example a proxy timeout).
   }
   if (res.ok && data.ok !== false) return { ok: true, data }
+  if (res.status === 401 && isLearnerApi(url) && typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(SESSION_ENDED))
+    // The notice explains it; nobody (least of all the counsellor) repeats "please sign in again".
+    return { ok: false, status: 401, data, error: '' }
+  }
   return { ok: false, status: res.status, data, error: typeof data.error === 'string' ? data.error : 'Something went wrong. Please try again.' }
 }
 
@@ -21,7 +30,7 @@ export async function postJson(url: string, body: unknown, method: 'POST' | 'DEL
       body: JSON.stringify(body ?? {}),
       credentials: 'same-origin',
     })
-    return parse(res)
+    return parse(res, url)
   } catch {
     return { ok: false, status: 0, data: {}, error: 'Network error. Check your connection and try again.' }
   }
@@ -29,7 +38,7 @@ export async function postJson(url: string, body: unknown, method: 'POST' | 'DEL
 
 export async function getJson(url: string): Promise<ApiResult> {
   try {
-    return parse(await fetch(url, { credentials: 'same-origin', cache: 'no-store' }))
+    return parse(await fetch(url, { credentials: 'same-origin', cache: 'no-store' }), url)
   } catch {
     return { ok: false, status: 0, data: {}, error: 'Network error. Check your connection and try again.' }
   }
@@ -37,7 +46,7 @@ export async function getJson(url: string): Promise<ApiResult> {
 
 export async function postForm(url: string, form: FormData): Promise<ApiResult> {
   try {
-    return parse(await fetch(url, { method: 'POST', body: form, credentials: 'same-origin' }))
+    return parse(await fetch(url, { method: 'POST', body: form, credentials: 'same-origin' }), url)
   } catch {
     return { ok: false, status: 0, data: {}, error: 'Network error. Check your connection and try again.' }
   }
@@ -98,7 +107,7 @@ export function sessionRemove(key: string) {
 }
 
 /**
- * Forgets the conversation with Lumi kept in this tab (it only survives a refresh mid-way). Called when a new
+ * Forgets the conversation with Woody kept in this tab (it only survives a refresh mid-way). Called when a new
  * journey starts, after sign-in hands the chat over to the counsellor, and on logout.
  * `keepHandover` keeps the copy the dashboard is about to pick up.
  */

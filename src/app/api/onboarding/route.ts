@@ -4,6 +4,7 @@ import { cleanText, clientIp, isSameOrigin, jsonError, jsonOk, rateLimits, readJ
 import { mergeAnswers, sanitizeAnswers, validateContact } from '@/lib/validation'
 import { getTool } from '@/lib/tools-meta'
 import type { Answers } from '@/lib/questions'
+import { crmNewLead } from '@/lib/crm/hooks'
 
 const SOURCE_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'referrer', 'landing'] as const
 
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
       [contact.email, contact.name, contact.phoneCountry, contact.phone, JSON.stringify(sanitizeSource(body.source)), JSON.stringify(answers)],
     )
     // saved = null means a verified account already owns this email.
+    if (saved) crmNewLead(saved.id)
     return jsonOk({ needsOtp: true, email: contact.email, existing: !saved })
   }
 

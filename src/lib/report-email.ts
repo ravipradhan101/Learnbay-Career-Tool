@@ -9,6 +9,10 @@ import { currentCtcRange } from './tools'
 import type { Answers } from './questions'
 import type { ToolMeta } from './tools-meta'
 import type { RoadmapResult, SalaryResult, SkillGapResult, ToolResultMap } from './tool-types'
+import { focusFor, moduleFor, weeksLabel } from './plan'
+import { industriesFor } from './projects'
+import { curriculumOf } from './roles'
+import { domainLabel, experienceLabel, roleLabel, targetRoleLabel } from './questions'
 
 // Emailed reports. People skim email: the body shows the headline number, key numbers, one mini chart,
 // the next 3 moves and two buttons. The attached PDF opens with the same visual summary page, then details.
@@ -84,6 +88,31 @@ function detailBlocks(tool: ToolMeta['id'], data: ToolResultMap[ToolMeta['id']])
   return out
 }
 
+/** "Your plan with Learnbay" in the PDF: who they are, what to focus on and the module that teaches it, certificates, projects. */
+function planBlocks(opts: Opts, programId: string, programName: string): PdfBlock[] {
+  const a = opts.answers
+  const course = curriculumOf(programId)
+  const about = [roleLabel(a), experienceLabel(a), domainLabel(a), targetRoleLabel(a) !== 'Not specified' ? `aiming for ${targetRoleLabel(a)}` : ''].filter((x) => x && x !== 'Not specified')
+  const focus = focusFor(opts.meta.id, opts.data).slice(0, 4)
+  const used = new Set<string>()
+  const industries = industriesFor(a)
+  const rank = (d: string | undefined) => { const i = d ? industries.indexOf(d) : -1; return i < 0 ? 99 : i }
+  const sorted = [...course.projects].sort((x, y) => rank(x.domain) - rank(y.domain))
+  const projects = rank(sorted[0]?.domain) < 99 ? sorted.slice(0, 2) : sorted.filter((x, i) => sorted.findIndex((y) => y.domain === x.domain) === i).slice(0, 2)
+  return [
+    { type: 'h', text: `Your plan with Learnbay: ${programName}` },
+    ...(about.length ? [{ type: 'small', text: `About you: ${about.join(' · ')}` } as PdfBlock] : []),
+    ...focus.map((f, i): PdfBlock => {
+      const m = moduleFor(f, course.moduleDetails, used)
+      if (m) used.add(m.name)
+      return { type: 'bullet', text: `${i + 1}. ${f}${m ? `: learnt in "${m.name}"${/\d/.test(m.weeks) ? ` (${weeksLabel(m.weeks)})` : ''}` : ': covered in your plan with your Senior Counsellor'}` }
+    }),
+    ...(course.durationMonths ? [{ type: 'bullet', text: `Program length: ${course.durationMonths} months (${course.totalWeeks} weeks), ${course.moduleDetails.length} modules.` } as PdfBlock] : []),
+    ...(course.certifications[0] ? [{ type: 'bullet', text: `Certificates: ${course.certifications[0]}` } as PdfBlock] : []),
+    ...projects.map((x): PdfBlock => ({ type: 'bullet', text: `Capstone (${x.domain}): ${x.title}. ${x.objective} You'll achieve: ${x.outcome}` })),
+  ]
+}
+
 /** The same report as a branded, visual PDF: summary page first, details after. */
 export function toolReportPdf(opts: Opts): Buffer {
   const s: ReportSummary = summaryFor(opts.meta.id, opts.data, currentCtcRange(opts.answers))
@@ -101,8 +130,9 @@ export function toolReportPdf(opts: Opts): Buffer {
       button: { label: 'Book my free 1:1', url: learnerUrl(opts.userId, '/dashboard/sessions') },
     },
     ...detailBlocks(opts.meta.id, opts.data),
-    { type: 'h', text: `Recommended for you: ${p.name}` },
-    ...USPS_FOR[opts.meta.id].map((id): PdfBlock => ({ type: 'bullet', text: `${USPS[id].title}: ${USPS[id].short}` })),
+    ...planBlocks(opts, p.id, p.name),
+    { type: 'h', text: `How Learnbay helps you get there` },
+    ...(['customisation', 'projects', 'mentors', 'placement'] as const).map((id): PdfBlock => ({ type: 'bullet', text: `${USPS[id].title}: ${USPS[id].short}` })),
     { type: 'bullet', text: `Program details: ${p.url}` },
     { type: 'small', text: `"${PUBLISHED_STORY.quote}" (${PUBLISHED_STORY.name}, ${PUBLISHED_STORY.role}, as published on ${PUBLISHED_STORY.source})` },
     { type: 'gap' },

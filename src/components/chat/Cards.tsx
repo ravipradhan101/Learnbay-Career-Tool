@@ -19,6 +19,7 @@ import { PUBLISHED_STORY } from '@/config/usps'
 import { COUNSELLOR_TITLE, getCounsellor } from '@/lib/counsellors'
 import { SKILL_LEVELS, trackOf } from '@/lib/questions'
 import { Avatar } from './Avatar'
+import { MeetCard } from './MeetCard'
 import { PartnerLogos } from '../PartnerLogos'
 import { USPS } from '@/config/usps'
 import { track } from '@/lib/analytics'
@@ -28,6 +29,7 @@ import type { ReportCard } from '@/lib/report-card'
 import type { Booking, DaySlots } from '@/lib/sessions'
 import { getTool } from '@/lib/tools-meta'
 import type { TestState } from '@/lib/eligibility'
+import { pathKindLabel, type PathCardData } from '@/lib/lead-match'
 
 type Done = (value: unknown) => void
 
@@ -45,6 +47,8 @@ export function CardView({ card, live, onDone }: { card: Card; live: boolean; on
     case 'elig-result': return <EligResultCard result={card.result} />
     case 'usp': return <UspCard ids={card.ids} lead={card.lead} />
     case 'booking': return <BookingCard live={live} onDone={onDone} />
+    case 'session-ended': return <SessionEndedCard />
+    case 'meet': return <MeetCard mode={card.mode} source={card.source} live={live} onDone={onDone} />
     case 'masterclass': return <MasterclassCard interest={card.interest} label={card.label} />
     case 'call': return <CallCard source={card.source} phone={card.phone} by={card.by} />
     case 'call-guest': return <GuestCallCard />
@@ -65,6 +69,7 @@ export function CardView({ card, live, onDone }: { card: Card; live: boolean; on
     case 'elig-push': return <EligPushCard />
     case 'decision': return <DecisionCard eligible={card.eligible} programId={card.programId} />
     case 'fit': return <FitCard rows={card.rows} />
+    case 'path': return <PathCard data={card} />
     case 'bridge': return <BridgeCard have={card.have} add={card.add} role={card.role} readiness={card.readiness} program={card.program} />
   }
 }
@@ -683,7 +688,19 @@ function LoginCard({ live, onDone }: { live: boolean; onDone: Done }) {
   )
 }
 
-// ---------- Lumi finds a counsellor ----------
+/** The sign-in on this device ended (expired, or signed out elsewhere): a system notice, never the counsellor's words. */
+function SessionEndedCard() {
+  const next = typeof window !== 'undefined' ? window.location.pathname : '/dashboard'
+  return (
+    <div className="tc-card tc-session-ended" role="status">
+      <span className="tc-eyebrow"><Icon name="lock" size="0.85rem" /> Your sign-in on this device has ended</span>
+      <p className="small">Your chat, reports and bookings are saved. Sign in with the same email (we send a 6-digit code) to carry on right here.</p>
+      <a className="tc-btn tc-btn-primary tc-btn-sm" href={`/login?next=${encodeURIComponent(next)}`}>Sign in to continue <Icon name="arrowRight" size="0.9rem" /></a>
+    </div>
+  )
+}
+
+// ---------- Woody finds a counsellor ----------
 
 type Slide =
   | { kind: 'story'; name: string; photo?: string; from: string; to: string; company?: string; hike?: string }
@@ -888,10 +905,16 @@ function ProjectsCard({ interest, programId, items }: { interest: string; progra
             <span className="tc-project-n">{n + 1}</span>
             <div>
               <b>{p.title}</b>
-              {p.description && <small className="tc-project-desc">{p.description}</small>}
+              {p.objective
+                ? <>
+                    <small className="tc-project-desc"><em>Goal:</em> {p.objective}</small>
+                    {p.outcome && <small className="tc-project-desc"><em>You’ll achieve:</em> {p.outcome}</small>}
+                  </>
+                : p.description && <small className="tc-project-desc">{p.description}</small>}
               <span className="tc-project-meta">
                 {p.kind === 'capstone' && <span className="tc-project-tag">Capstone</span>}
-                {p.domain && <span className="tc-project-tag domain">{DOMAIN_TAG[p.domain] ?? p.domainLabel ?? p.domain}</span>}
+                {p.industry && <span className="tc-project-tag domain">{p.industry}</span>}
+                {!p.industry && p.domain && <span className="tc-project-tag domain">{DOMAIN_TAG[p.domain] ?? p.domainLabel ?? p.domain}</span>}
                 {p.tools.length > 0 && <small>{p.tools.join(' · ')}</small>}
               </span>
             </div>
@@ -984,42 +1007,59 @@ function WhyCard({ interest, programId }: { interest: string; programId?: string
   )
 }
 
-/** The program's curriculum as published: headline numbers, every module in order, electives, and the syllabus link. */
+/**
+ * The program's syllabus (2026 catalogue): length, modules and projects at a glance, then every module opens to show
+ * its weeks, topics and the projects built in it. Short by default, detailed on tap.
+ */
 function CurriculumCard({ interest, programId }: { interest: string; programId?: string }) {
   const p = programId ? getProgram(programId) : programFor(interest)
-  const cur = p ? curriculumOf(p.id) : undefined
-  const c = cur && cur.modules.length ? {
-    liveHours: cur.liveHours ?? '', projects: cur.projectsCount ?? '', modules: cur.modules,
-    electives: cur.electives.length ? cur.electives : undefined, certs: cur.certifications, tools: cur.tools.slice(0, 14),
-  } : undefined
   if (!p) return null
+  const cur = curriculumOf(p.id)
+  const modules = cur.moduleDetails
+  const projectCount = modules.reduce((n, m) => n + m.projects.length, 0)
+  const spec = cur.electives
   return (
-    <div className="tc-card tc-curriculum">
-      <span className="tc-eyebrow">Your roadmap · {p.name}</span>
-      {c && (c.liveHours || c.projects) && (
-        <div className="tc-cur-stats">
-          {c.liveHours && <span><Icon name="users" size="0.95rem" /><b>{c.liveHours.split(/ of | live/)[0]}</b><small>live mentor-led classes</small></span>}
-          {c.projects && <span><Icon name="folder" size="0.95rem" /><b>{c.projects.split(' ')[0]}</b><small>guided hands-on projects</small></span>}
-          <span><Icon name="clock" size="0.95rem" /><b>3-year</b><small>flexible access</small></span>
-        </div>
-      )}
-      <ol className="tc-cur-list">
-        {(c?.modules ?? p.focusAreas).map((m, n) => <li key={m}><span className="tc-path-n">{n + 1}</span><span>{m}</span></li>)}
+    <div className="tc-card tc-curriculum tc-syllabus">
+      <span className="tc-eyebrow">Syllabus · {p.name}</span>
+      <div className="tc-cur-stats">
+        {cur.durationMonths && <span><Icon name="clock" size="0.95rem" /><b>{cur.durationMonths} months</b><small>{cur.totalWeeks} weeks</small></span>}
+        <span><Icon name="book" size="0.95rem" /><b>{modules.length}</b><small>modules</small></span>
+        {projectCount > 0 && <span><Icon name="folder" size="0.95rem" /><b>{projectCount}+</b><small>module projects</small></span>}
+        {cur.projects.length > 0 && <span><Icon name="target" size="0.95rem" /><b>{cur.projects.length}</b><small>capstone options</small></span>}
+      </div>
+      <ol className="tc-syl-list">
+        {modules.map((m, n) => (
+          <li key={m.name}>
+            <details>
+              <summary>
+                <span className="tc-path-n">{n + 1}</span>
+                <span className="tc-syl-name"><b>{m.name}</b>{m.weeks && /\d/.test(m.weeks) && <small>Weeks {m.weeks}</small>}</span>
+                <Icon name="chevronDown" size="0.9rem" />
+              </summary>
+              <div className="tc-syl-body">
+                {m.topics.length > 0 && !(m.topics.length === 1 && /^see specialisations/i.test(m.topics[0])) && (
+                  <ul>{m.topics.map((t) => <li key={t}>{t}</li>)}</ul>
+                )}
+                {/^see specialisations/i.test(m.topics[0] ?? '') && spec.length > 0 && <p className="tc-syl-note">Pick from: {spec.join(' · ')}</p>}
+                {m.projects.length > 0 && (
+                  <div className="tc-syl-projects">
+                    <span className="tc-eyebrow">You build</span>
+                    {m.projects.map((x) => <span key={x} className="tc-chip-static"><Icon name="folder" size="0.8rem" />{x}</span>)}
+                  </div>
+                )}
+              </div>
+            </details>
+          </li>
+        ))}
       </ol>
-      {c?.tools && c.tools.length > 0 && (
+      {spec.length > 0 && (
         <div className="tc-why-projects">
-          <span className="tc-eyebrow">Tools you’ll use</span>
-          {c.tools.map((t) => <span key={t} className="tc-chip-static"><Icon name="code" size="0.8rem" />{t}</span>)}
+          <span className="tc-eyebrow">Specialisations / tracks</span>
+          {spec.map((e) => <span key={e} className="tc-chip-static"><Icon name="target" size="0.8rem" />{e}</span>)}
         </div>
       )}
-      {c?.electives && (
-        <div className="tc-why-projects">
-          <span className="tc-eyebrow">Electives matched to your background</span>
-          {c.electives.map((e) => <span key={e} className="tc-chip-static"><Icon name="target" size="0.8rem" />{e}</span>)}
-        </div>
-      )}
-      <div className="tc-cur-certs"><Icon name="award" size="0.9rem" /> {c?.certs?.length ? c.certs.slice(0, 2).map((x) => x.split(/[(:—–-]/)[0].trim()).join(' · ') : 'Industry certification'} · live mentors · real projects</div>
-      <CourseLink interest={interest} programId={p.id} label="See the full syllabus" />
+      {cur.certifications[0] && <div className="tc-cur-certs"><Icon name="award" size="0.9rem" /> {cur.certifications[0]}</div>}
+      <CourseLink interest={interest} programId={p.id} label="Program page" />
     </div>
   )
 }
@@ -1210,6 +1250,37 @@ function FitCard({ rows }: { rows: { programId: string; name: string; score: num
           {r.reasons.length > 0 && <small>{r.reasons.join(' · ')}</small>}
         </div>
       ))}
+    </div>
+  )
+}
+
+/** Their best-fit path from Learnbay's Lead–Course Map: the lead type they match, then Recommended, Next best and One more option. */
+function PathCard({ data }: { data: PathCardData }) {
+  return (
+    <div className="tc-card tc-path">
+      <span className="tc-eyebrow">Your best-fit path · Learnbay’s course map</span>
+      <div className="tc-path-who">
+        <div>
+          <small>Your profile matches</small>
+          <b>{data.persona}</b>
+        </div>
+        <span className="tc-path-match" aria-label={`${data.match}% match`}>{data.match}%<small>match</small></span>
+      </div>
+      {data.reasons.length > 0 && <div className="tc-path-reasons">{data.reasons.map((r) => <span key={r}><Icon name="check" size="0.75rem" />{r}</span>)}</div>}
+      <ol className="tc-path-list">
+        {data.options.map((o, n) => (
+          <li key={o.programId} className={`tc-path-row ${o.kind}${o.later ? ' later' : ''}`}>
+            <span className="tc-path-step" aria-hidden="true">{n + 1}</span>
+            <div className="tc-path-body">
+              <span className="tc-path-kind">{pathKindLabel(o.kind)}</span>
+              <div className="tc-path-top"><b>{o.name}</b><span className="tc-path-fit">{o.fit}/10</span></div>
+              <div className="tc-fit-bar" aria-hidden="true"><i style={{ width: `${o.fit * 10}%` }} /></div>
+              {n === 0 && <small>{o.why}</small>}
+              {o.note && <small className="tc-path-note"><Icon name={o.later ? 'clock' : 'alert'} size="0.75rem" />{o.note}</small>}
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   )
 }

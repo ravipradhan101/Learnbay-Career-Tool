@@ -1,0 +1,4444 @@
+{
+ "version": "2.1",
+ "generated": "2026-10-06",
+ "programs": [
+  {
+   "code": "AAP",
+   "name": "Applied AI Practitioner Program",
+   "family": "AI for Business (no code)",
+   "tier": "Program",
+   "durationMonths": 4,
+   "totalWeeks": 17,
+   "whoFor": [
+    "Working non-tech professionals who want to use AI in their current job: marketing, design, content, sales, HR, finance, operations",
+    "Freelancers and small-business owners",
+    "College students (any stream) who want AI skills before placements"
+   ],
+   "notFor": [
+    "Anyone who wants to switch into an analyst job (→ DABA)",
+    "Developers who want to build AI systems in code (→ GenAI for Software Developers)",
+    "Managers who need AI strategy and governance (→ AI Leadership Program)"
+   ],
+   "entry": "No work experience required. No coding. Comfortable with a laptop, email and spreadsheets. Graduation not required for the course itself; confirm IIT Patna certificate eligibility.",
+   "targetRoles": [
+    "AI-enabled marketer / designer / recruiter / analyst in current role",
+    "AI workflow specialist",
+    "Freelance AI content creator"
+   ],
+   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation) + AI CoLab startup certificate",
+   "modules": [
+    {
+     "name": "Induction: AI at work",
+     "weeks": "1",
+     "topics": [
+      "What GenAI and agents can and can't do",
+      "Choosing the right tool for a task",
+      "Setting up Claude, ChatGPT, Gemini and Copilot workspaces"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI foundations, prompting & context engineering",
+     "weeks": "2–3",
+     "topics": [
+      "How LLMs work: tokens, context windows, reasoning models",
+      "Prompt frameworks: role, context, task, format",
+      "Claude Projects, custom GPTs and Gems",
+      "Grounding answers in your own documents",
+      "Checking AI output: hallucination, citations, verification"
+     ],
+     "projects": [
+      "My AI Knowledge Assistant: answers questions from your team's policies and SOPs"
+     ]
+    },
+    {
+     "name": "Multimodal content creation",
+     "weeks": "4–5",
+     "topics": [
+      "Image generation and editing (Nano Banana, Midjourney/Ideogram, Adobe Firefly)",
+      "Video (Runway, Veo) and voice (ElevenLabs)",
+      "Microsoft 365 Copilot and Gemini for Workspace in everyday work",
+      "Decks and documents (Gamma, Canva AI)",
+      "Brand consistency, copyright and disclosure"
+     ],
+     "projects": [
+      "AI Content Studio: on-brand visuals, a voice-over, a short video and a deck from one brief"
+     ]
+    },
+    {
+     "name": "Connectors & MCP: plugging AI into your tools",
+     "weeks": "6–7",
+     "topics": [
+      "What connectors are: Claude reading and acting in Gmail, Google Drive, Calendar, Slack, Notion, Canva",
+      "The connectors directory vs custom connectors",
+      "What MCP (Model Context Protocol) is, in plain language",
+      "Adding MCP servers to Claude Desktop",
+      "Permissions, data access and security hygiene",
+      "Skills: packaging a repeatable task so Claude does it the same way every time"
+     ],
+     "projects": [
+      "Inbox-to-Action Assistant: Gmail + Calendar connectors turn emails into tasks and meetings",
+      "Drive Research Brief: Claude searches your Drive and writes a sourced brief",
+      "Team Skill: a reusable skill for your weekly report format"
+     ]
+    },
+    {
+     "name": "Claude Code for non-developers",
+     "weeks": "8–10",
+     "topics": [
+      "Installing Claude Code (desktop app and terminal) and a 30-minute terminal primer",
+      "Describing what you want and reviewing what Claude builds; plan mode",
+      "CLAUDE.md: giving Claude standing instructions for a project",
+      "Automating file work: renaming, merging spreadsheets, cleaning CSVs, converting documents",
+      "Building small web apps and dashboards and putting them online",
+      "Connecting Claude Code to tools with MCP; slash commands, skills and plugins",
+      "Safety: approvals, version control with Git, undoing changes"
+     ],
+     "projects": [
+      "Folder Automator: Claude Code merges and cleans a month of sales CSVs into one report",
+      "Personal Dashboard Web App: built and deployed without writing code by hand",
+      "Build Your Own MCP Server: connect Claude to a Google Sheet or CRM your team uses"
+     ]
+    },
+    {
+     "name": "Agents & workflow automation",
+     "weeks": "11–12",
+     "topics": [
+      "What an agent is: goals, tools, memory, human approval",
+      "Zapier, Make and n8n automations",
+      "Agents that use connectors and MCP tools",
+      "Scheduled and recurring AI tasks",
+      "Human-in-the-loop design"
+     ],
+     "projects": [
+      "AI Workflow Co-Pilot: reads a sheet or inbox, drafts actions, sends a daily summary"
+     ]
+    },
+    {
+     "name": "Measuring AI at work & responsible AI",
+     "weeks": "13",
+     "topics": [
+      "Quality scorecards and LLM-as-judge checks",
+      "Tracking cost and time saved",
+      "Responsible AI, data privacy and India's DPDP Act"
+     ],
+     "projects": [
+      "AI quality scorecard for one of your workflows"
+     ]
+    },
+    {
+     "name": "Function track (choose 1)",
+     "weeks": "14–15",
+     "topics": [
+      "See specialisations"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI CoLab capstone with a startup",
+     "weeks": "16–17",
+     "topics": [
+      "Build an AI solution for a real startup brief",
+      "Product thinking, demo and pitch"
+     ],
+     "projects": [
+      "Startup capstone + Startup Experience Certificate"
+     ]
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "Marketing & Creative",
+     "content": "Campaign ideation, ad and creative variants at scale, SEO and AI-search (GEO) content, social calendars, brand-safe image/video, AI performance reports",
+     "projects": [
+      "Campaign-in-a-day: brief to multi-channel creative set",
+      "AI social content calendar with brand guardrails"
+     ]
+    },
+    {
+     "name": "Sales & Customer Experience",
+     "content": "Prospect research, personalised outreach, CRM copilots, call summaries, support bots, CSAT analysis",
+     "projects": [
+      "AI SDR research-and-outreach workflow",
+      "Support FAQ bot with escalation"
+     ]
+    },
+    {
+     "name": "HR & People",
+     "content": "JD writing, screening assistants, onboarding bots, policy Q&A, bias checks, people-analytics basics",
+     "projects": [
+      "Hiring pipeline assistant",
+      "HR policy bot"
+     ]
+    },
+    {
+     "name": "Finance & Operations",
+     "content": "Invoice and document extraction, reconciliation, Copilot in Excel, SOP assistants, management reporting",
+     "projects": [
+      "Invoice-to-sheet extraction workflow",
+      "Monthly MIS narrative generator"
+     ]
+    }
+   ],
+   "capstones": [
+    "P01",
+    "P06",
+    "P12",
+    "P16",
+    "P19",
+    "P24",
+    "P28",
+    "P37",
+    "P42",
+    "P45",
+    "P48",
+    "P49",
+    "P52",
+    "P55",
+    "P58",
+    "P61",
+    "P64",
+    "P68"
+   ]
+  },
+  {
+   "code": "DABA",
+   "name": "Data & Business Analytics with GenAI",
+   "family": "Analytics & Data Science",
+   "tier": "Program",
+   "durationMonths": 6,
+   "totalWeeks": 27,
+   "whoFor": [
+    "Graduates of any stream (B.Com, BBA, BA, B.Sc) starting a career",
+    "Non-tech professionals switching into data or business analyst roles",
+    "Career-gap returnees",
+    "Marketers, HR and finance people who want analytics roles in their own function"
+   ],
+   "notFor": [
+    "People who only want AI productivity in their current job (→ Applied AI Practitioner)",
+    "People who want ML or data scientist roles (→ Data Science & GenAI Program)"
+   ],
+   "entry": "No work experience required. Any graduate. No coding needed. Basic Excel helps.",
+   "targetRoles": [
+    "Data Analyst",
+    "Business Analyst",
+    "MIS / Reporting Analyst",
+    "Marketing / HR / Finance Analyst",
+    "BI Developer (junior)"
+   ],
+   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation) + AI CoLab startup certificate",
+   "modules": [
+    {
+     "name": "Induction + Excel for analytics with Copilot",
+     "weeks": "1–3",
+     "topics": [
+      "Functions, lookups, cleaning, Power Query",
+      "PivotTables, what-if, goal seek",
+      "Power Pivot and DAX basics",
+      "Copilot in Excel"
+     ],
+     "projects": [
+      "Employee Performance & Attrition Dashboard",
+      "Business Performance Insights Dashboard"
+     ]
+    },
+    {
+     "name": "AI copilots for analysts: Claude, Microsoft Copilot & connectors",
+     "weeks": "4",
+     "topics": [
+      "Copilot in Excel and Power BI",
+      "Claude with Google Drive and Sheets connectors",
+      "Claude Code to clean and merge folders of spreadsheets (no hand-written code)",
+      "MCP: letting Claude query a database safely",
+      "Verifying AI-generated numbers"
+     ],
+     "projects": [
+      "Folder Automator: merge a month of CSVs into one clean report",
+      "Ask-the-database assistant over MCP"
+     ]
+    },
+    {
+     "name": "Statistics & business metrics",
+     "weeks": "5–7",
+     "topics": [
+      "Descriptive statistics and distributions",
+      "Sampling, confidence intervals, hypothesis tests",
+      "A/B testing and experiment readouts",
+      "Correlation vs causation",
+      "KPI trees, cohorts and funnels"
+     ],
+     "projects": [
+      "A/B Test Readout for a pricing experiment",
+      "KPI tree for an e-commerce business"
+     ]
+    },
+    {
+     "name": "SQL",
+     "weeks": "8–10",
+     "topics": [
+      "Joins, subqueries, GROUP BY/HAVING",
+      "CTEs and window functions",
+      "Views, indexes and query plans",
+      "AI-assisted SQL, and checking it"
+     ],
+     "projects": [
+      "SQL Sales Aggregator",
+      "Customer cohort & retention queries"
+     ]
+    },
+    {
+     "name": "Python for analysts",
+     "weeks": "11–13",
+     "topics": [
+      "pandas for cleaning and EDA",
+      "Charts with Matplotlib/Seaborn",
+      "Using AI coding assistants in notebooks"
+     ],
+     "projects": [
+      "Retail Sales EDA in pandas"
+     ]
+    },
+    {
+     "name": "Power BI, Tableau & data storytelling",
+     "weeks": "14–17",
+     "topics": [
+      "Data modelling and DAX, time intelligence",
+      "Tableau LOD expressions and dashboards",
+      "Copilot in Power BI",
+      "Storytelling and executive summaries"
+     ],
+     "projects": [
+      "Campaign Report (Power BI)",
+      "Interactive Sales Dashboard (Tableau)"
+     ]
+    },
+    {
+     "name": "GenAI for analysts",
+     "weeks": "18–20",
+     "topics": [
+      "How LLMs work, prompting for analysis",
+      "Asking questions of reports and documents (RAG, no code)",
+      "AI-generated visuals and decks for presentations"
+     ],
+     "projects": [
+      "Ask-your-reports assistant"
+     ]
+    },
+    {
+     "name": "Agents & automation for analytics",
+     "weeks": "21–22",
+     "topics": [
+      "Text-to-SQL agents and how to verify them",
+      "MCP connectors to databases and sheets",
+      "Automated weekly reporting with n8n/Zapier"
+     ],
+     "projects": [
+      "Weekly KPI report agent"
+     ]
+    },
+    {
+     "name": "Domain analytics track (choose 1)",
+     "weeks": "23–24",
+     "topics": [
+      "See specialisations"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Capstone + AI CoLab",
+     "weeks": "25–27",
+     "topics": [
+      "End-to-end analysis: question → data → dashboard → AI summary → recommendation"
+     ],
+     "projects": [
+      "Startup analytics capstone"
+     ]
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "Marketing analytics",
+     "content": "Attribution, CAC/LTV, campaign ROI, web and social analytics",
+     "projects": [
+      "Campaign ROI & attribution dashboard"
+     ]
+    },
+    {
+     "name": "HR analytics",
+     "content": "Attrition drivers, hiring funnel, workforce planning",
+     "projects": [
+      "Attrition risk dashboard"
+     ]
+    },
+    {
+     "name": "Finance & BFSI analytics",
+     "content": "Credit, collections, fraud and portfolio KPIs",
+     "projects": [
+      "Collections performance dashboard"
+     ]
+    },
+    {
+     "name": "Supply chain & operations analytics",
+     "content": "OTIF, inventory turns, demand trends",
+     "projects": [
+      "Inventory & OTIF control tower"
+     ]
+    },
+    {
+     "name": "Product analytics",
+     "content": "Funnels, retention, feature adoption, experiments",
+     "projects": [
+      "Product funnel & retention analysis"
+     ]
+    }
+   ],
+   "capstones": [
+    "P02",
+    "P07",
+    "P18",
+    "P20",
+    "P27",
+    "P29",
+    "P43",
+    "P50",
+    "P53",
+    "P60",
+    "P67"
+   ]
+  },
+  {
+   "code": "DSG-C",
+   "name": "Data Science & GenAI Program",
+   "family": "Analytics & Data Science",
+   "tier": "Program",
+   "durationMonths": 9,
+   "totalWeeks": 39,
+   "whoFor": [
+    "CS, IT, engineering, maths or statistics graduates starting in data science",
+    "Analysts (Excel/SQL/BI) moving into data science and ML",
+    "Working professionals comfortable with maths and willing to code"
+   ],
+   "notFor": [
+    "Non-tech people with no interest in coding (→ DABA or Applied AI Practitioner)",
+    "Working developers who only want GenAI (→ GenAI for Software Developers)"
+   ],
+   "entry": "No work experience required. Graduate with 12th-level maths. Prior coding helps but isn't required; self-paced Python pre-work is provided.",
+   "targetRoles": [
+    "Data Scientist (junior)",
+    "ML Engineer (junior)",
+    "Data Analyst → Data Scientist",
+    "AI Analyst"
+   ],
+   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Induction + Python for data science",
+     "weeks": "1–5",
+     "topics": [
+      "Core and advanced Python, OOP",
+      "NumPy, pandas, Matplotlib, Seaborn",
+      "Git basics and notebooks"
+     ],
+     "projects": [
+      "Banking System Simulation",
+      "Retail Sales Data EDA"
+     ]
+    },
+    {
+     "name": "AI-assisted data work: Claude Code, Copilot & MCP",
+     "weeks": "6–7",
+     "topics": [
+      "Claude Code for data pipelines, notebooks and refactoring analysis code",
+      "GitHub Copilot in VS Code and Jupyter",
+      "MCP servers for databases and warehouses (Postgres, BigQuery, Snowflake)",
+      "Claude connectors to Drive and Sheets for data briefs",
+      "Checking AI-generated analysis: numbers, joins and leakage"
+     ],
+     "projects": [
+      "Automate an EDA-to-report pipeline with Claude Code",
+      "Query a database in plain English through an MCP server"
+     ]
+    },
+    {
+     "name": "Statistics & EDA",
+     "weeks": "8–11",
+     "topics": [
+      "Probability, distributions, sampling",
+      "Hypothesis testing (z, t, chi-square), A/B tests",
+      "EDA, outliers, five-point summary"
+     ],
+     "projects": [
+      "Survey Correlation Study",
+      "KPI Statistical Analysis",
+      "Patient Data Insights"
+     ]
+    },
+    {
+     "name": "Machine learning",
+     "weeks": "12–15",
+     "topics": [
+      "Regression, classification, trees",
+      "Ensembles: Random Forest, XGBoost, LightGBM, CatBoost",
+      "SVM, clustering (K-means, DBSCAN), PCA",
+      "Tuning, cross-validation, SHAP",
+      "Time series: ARIMA/SARIMA, Prophet, walk-forward validation"
+     ],
+     "projects": [
+      "Housing Price Predictor",
+      "Loan Default Predictor",
+      "Customer Segmentation",
+      "Predictive Maintenance Classifier",
+      "Energy Consumption Forecasting"
+     ]
+    },
+    {
+     "name": "SQL, MongoDB & BI tools",
+     "weeks": "16–21",
+     "topics": [
+      "SQL: joins, CTEs, window functions, optimisation",
+      "MongoDB basics",
+      "Excel, Power BI, Tableau"
+     ],
+     "projects": [
+      "SQL Sales Aggregator",
+      "Campaign Report (Power BI)",
+      "Interactive Sales Dashboard (Tableau)"
+     ]
+    },
+    {
+     "name": "Deep learning & NLP essentials",
+     "weeks": "22–25",
+     "topics": [
+      "Neural networks, backpropagation",
+      "CNN basics",
+      "RNN/LSTM (now taught, since projects use it)",
+      "Embeddings, transformers, fine-tuning BERT"
+     ],
+     "projects": [
+      "Transformer Sentiment Pipeline",
+      "Energy Anomaly Detection (LSTM autoencoder)"
+     ]
+    },
+    {
+     "name": "Generative AI & RAG",
+     "weeks": "26–30",
+     "topics": [
+      "Current model families (GPT, Claude, Gemini, Llama, Mistral) and choosing one",
+      "Prompting and structured outputs",
+      "Hugging Face, embeddings, vector databases",
+      "RAG and RAG evaluation (Ragas)",
+      "When to fine-tune (LoRA); Azure OpenAI and AWS Bedrock"
+     ],
+     "projects": [
+      "HR Policy RAG Query Bot",
+      "AI-Powered Sales Email Writer"
+     ]
+    },
+    {
+     "name": "Agentic AI",
+     "weeks": "31–34",
+     "topics": [
+      "Agent components: tools, memory, planning",
+      "LangGraph and CrewAI",
+      "MCP and A2A",
+      "Guardrails and human approval"
+     ],
+     "projects": [
+      "AI Data Analyst Agent (text-to-SQL)",
+      "LLM Toxicity & Guardrail Engine"
+     ]
+    },
+    {
+     "name": "Big data with PySpark",
+     "weeks": "35–36",
+     "topics": [
+      "Spark DataFrames and Spark SQL",
+      "Structured Streaming intro",
+      "Running Spark on Databricks"
+     ],
+     "projects": [
+      "Spark Data Pipeline"
+     ]
+    },
+    {
+     "name": "Capstones",
+     "weeks": "37–39",
+     "topics": [
+      "Two capstones: one classic ML, one GenAI"
+     ],
+     "projects": [
+      "Credit risk scoring with explainability",
+      "Enterprise document Q&A with evaluation"
+     ]
+    }
+   ],
+   "specialisations": [],
+   "capstones": [
+    "P02",
+    "P03",
+    "P07",
+    "P10",
+    "P13",
+    "P18",
+    "P20",
+    "P21",
+    "P25",
+    "P27",
+    "P29",
+    "P31",
+    "P32",
+    "P36",
+    "P40",
+    "P43",
+    "P46",
+    "P47",
+    "P50",
+    "P51",
+    "P53",
+    "P59",
+    "P60",
+    "P62",
+    "P65",
+    "P67"
+   ]
+  },
+  {
+   "code": "DSG-M",
+   "name": "Data Science & GenAI Master Program",
+   "family": "Analytics & Data Science",
+   "tier": "Master",
+   "durationMonths": 13,
+   "totalWeeks": 56,
+   "whoFor": [
+    "Working professionals with 1+ year in tech, analytics or engineering targeting data scientist, ML engineer or AI roles",
+    "Domain specialists (BFSI, healthcare, manufacturing, retail) who want DS + GenAI in their industry"
+   ],
+   "notFor": [
+    "Freshers (→ Data Science & GenAI Program)",
+    "Developers who want SDE/product-company roles (→ SDE Master)"
+   ],
+   "entry": "1+ year of work experience. Comfortable with maths; coding experience preferred.",
+   "targetRoles": [
+    "Data Scientist",
+    "ML Engineer",
+    "Applied AI / GenAI Engineer",
+    "Domain AI Specialist"
+   ],
+   "certificates": "IBM + Microsoft + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Induction + Python for data science",
+     "weeks": "1–5",
+     "topics": [
+      "Core and advanced Python, OOP",
+      "NumPy, pandas, Matplotlib, Seaborn",
+      "Git basics and notebooks"
+     ],
+     "projects": [
+      "Banking System Simulation",
+      "Retail Sales Data EDA"
+     ]
+    },
+    {
+     "name": "AI-assisted data work: Claude Code, Copilot & MCP",
+     "weeks": "6–7",
+     "topics": [
+      "Claude Code for data pipelines, notebooks and refactoring analysis code",
+      "GitHub Copilot in VS Code and Jupyter",
+      "MCP servers for databases and warehouses (Postgres, BigQuery, Snowflake)",
+      "Claude connectors to Drive and Sheets for data briefs",
+      "Checking AI-generated analysis: numbers, joins and leakage"
+     ],
+     "projects": [
+      "Automate an EDA-to-report pipeline with Claude Code",
+      "Query a database in plain English through an MCP server"
+     ]
+    },
+    {
+     "name": "Statistics & EDA",
+     "weeks": "8–11",
+     "topics": [
+      "Probability, distributions, sampling",
+      "Hypothesis testing (z, t, chi-square), A/B tests",
+      "EDA, outliers, five-point summary"
+     ],
+     "projects": [
+      "Survey Correlation Study",
+      "KPI Statistical Analysis",
+      "Patient Data Insights"
+     ]
+    },
+    {
+     "name": "Machine learning",
+     "weeks": "12–15",
+     "topics": [
+      "Regression, classification, trees",
+      "Ensembles: Random Forest, XGBoost, LightGBM, CatBoost",
+      "SVM, clustering (K-means, DBSCAN), PCA",
+      "Tuning, cross-validation, SHAP",
+      "Time series: ARIMA/SARIMA, Prophet, walk-forward validation"
+     ],
+     "projects": [
+      "Housing Price Predictor",
+      "Loan Default Predictor",
+      "Customer Segmentation",
+      "Predictive Maintenance Classifier",
+      "Energy Consumption Forecasting"
+     ]
+    },
+    {
+     "name": "SQL, MongoDB & BI tools",
+     "weeks": "16–21",
+     "topics": [
+      "SQL: joins, CTEs, window functions, optimisation",
+      "MongoDB basics",
+      "Excel, Power BI, Tableau"
+     ],
+     "projects": [
+      "SQL Sales Aggregator",
+      "Campaign Report (Power BI)",
+      "Interactive Sales Dashboard (Tableau)"
+     ]
+    },
+    {
+     "name": "Deep learning & NLP essentials",
+     "weeks": "22–25",
+     "topics": [
+      "Neural networks, backpropagation",
+      "CNN basics",
+      "RNN/LSTM (now taught, since projects use it)",
+      "Embeddings, transformers, fine-tuning BERT"
+     ],
+     "projects": [
+      "Transformer Sentiment Pipeline",
+      "Energy Anomaly Detection (LSTM autoencoder)"
+     ]
+    },
+    {
+     "name": "Generative AI & RAG",
+     "weeks": "26–30",
+     "topics": [
+      "Current model families (GPT, Claude, Gemini, Llama, Mistral) and choosing one",
+      "Prompting and structured outputs",
+      "Hugging Face, embeddings, vector databases",
+      "RAG and RAG evaluation (Ragas)",
+      "When to fine-tune (LoRA); Azure OpenAI and AWS Bedrock"
+     ],
+     "projects": [
+      "HR Policy RAG Query Bot",
+      "AI-Powered Sales Email Writer"
+     ]
+    },
+    {
+     "name": "Agentic AI",
+     "weeks": "31–34",
+     "topics": [
+      "Agent components: tools, memory, planning",
+      "LangGraph and CrewAI",
+      "MCP and A2A",
+      "Guardrails and human approval"
+     ],
+     "projects": [
+      "AI Data Analyst Agent (text-to-SQL)",
+      "LLM Toxicity & Guardrail Engine"
+     ]
+    },
+    {
+     "name": "Big data with PySpark",
+     "weeks": "35–36",
+     "topics": [
+      "Spark DataFrames and Spark SQL",
+      "Structured Streaming intro",
+      "Running Spark on Databricks"
+     ],
+     "projects": [
+      "Spark Data Pipeline"
+     ]
+    },
+    {
+     "name": "Computer vision",
+     "weeks": "37–40",
+     "topics": [
+      "CNNs and transfer learning",
+      "Object detection (current YOLO versions)",
+      "Segmentation (U-Net)",
+      "Vision transformers"
+     ],
+     "projects": [
+      "Defect Detection Classifier",
+      "Medical Image Segmentation"
+     ]
+    },
+    {
+     "name": "MLOps & LLMOps",
+     "weeks": "41–45",
+     "topics": [
+      "FastAPI and Docker",
+      "MLflow, DVC, CI/CD for models",
+      "SageMaker / Azure ML",
+      "Drift monitoring (Evidently)",
+      "LLM tracing and eval gates (LangSmith, Langfuse)"
+     ],
+     "projects": [
+      "Cloud Model Deployment",
+      "Model Monitoring with MLflow",
+      "Chatbot Deployment"
+     ]
+    },
+    {
+     "name": "Domain electives (choose 2)",
+     "weeks": "46–51",
+     "topics": [
+      "See specialisations"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI CoLab",
+     "weeks": "52–53",
+     "topics": [
+      "Startup project with code review"
+     ],
+     "projects": [
+      "2 AI CoLab project certificates"
+     ]
+    },
+    {
+     "name": "Capstones",
+     "weeks": "54–56",
+     "topics": [
+      "4 capstones across chosen domains"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "BFSI",
+     "content": "KYC, credit, collections, fraud, insurance claims; RBI guidance",
+     "projects": [
+      "GenAI Credit Underwriting Assistant",
+      "Agentic Fraud Detection & Explanation Engine",
+      "Agentic Compliance Review Agent"
+     ]
+    },
+    {
+     "name": "Retail & E-commerce",
+     "content": "Catalog, pricing, returns, demand; conversion and AOV",
+     "projects": [
+      "Agentic Catalog Enrichment",
+      "Pricing Recommendation Agent",
+      "Returns Insights Assistant"
+     ]
+    },
+    {
+     "name": "Manufacturing & Supply Chain",
+     "content": "Quality, maintenance, inventory, logistics; OEE and OTIF",
+     "projects": [
+      "Agentic QA Inspection Workflow",
+      "Predictive Maintenance Report Assistant",
+      "Logistics RCA Assistant"
+     ]
+    },
+    {
+     "name": "Healthcare & Pharma",
+     "content": "Clinical coding, pharmacovigilance, trials; HIPAA/FHIR",
+     "projects": [
+      "ICD/CPT Coding Assistant",
+      "Drug Safety Signal Investigator",
+      "Trial Protocol Summary Assistant"
+     ]
+    }
+   ],
+   "capstones": [
+    "P02",
+    "P03",
+    "P07",
+    "P10",
+    "P13",
+    "P17",
+    "P18",
+    "P20",
+    "P21",
+    "P25",
+    "P27",
+    "P29",
+    "P31",
+    "P32",
+    "P34",
+    "P36",
+    "P40",
+    "P43",
+    "P46",
+    "P47",
+    "P50",
+    "P51",
+    "P53",
+    "P59",
+    "P60",
+    "P62",
+    "P65",
+    "P67",
+    "P76"
+   ]
+  },
+  {
+   "code": "GAI-SD",
+   "name": "GenAI & Agentic AI for Software Developers",
+   "family": "Software & AI Engineering",
+   "tier": "Program",
+   "durationMonths": 5,
+   "totalWeeks": 22,
+   "whoFor": [
+    "Software developers with 1–5 years who code daily (Java, .NET, Python, JS)",
+    "QA automation engineers who write code"
+   ],
+   "notFor": [
+    "Non-coders (→ Applied AI Practitioner)",
+    "Developers whose main gap is DSA and system design (→ SDE Master)"
+   ],
+   "entry": "1+ year as a developer (or in a coding role). No ML background needed.",
+   "targetRoles": [
+    "GenAI Engineer",
+    "AI Application Developer",
+    "LLM / RAG Engineer"
+   ],
+   "certificates": "IBM + Microsoft Azure AI Fundamentals",
+   "modules": [
+    {
+     "name": "Python for AI engineers",
+     "weeks": "1–2",
+     "topics": [
+      "Async Python, httpx, retries and rate limits",
+      "Pydantic and structured outputs",
+      "LLM SDKs and streaming",
+      "pytest, type hints"
+     ],
+     "projects": [
+      "Bulk LLM Enrichment Engine"
+     ]
+    },
+    {
+     "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
+     "weeks": "3",
+     "topics": [
+      "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
+      "GitHub Copilot in VS Code: completions, chat and agent mode",
+      "MCP servers in your IDE and in Claude: GitHub, Postgres, filesystem, Jira",
+      "Claude connectors for team context: Google Drive, Slack, Notion",
+      "Reviewing, testing and securing AI-written code; when not to trust it"
+     ],
+     "projects": [
+      "Ship a feature with Claude Code + Copilot as a reviewed pull request",
+      "Build an MCP server for a tool your team uses"
+     ]
+    },
+    {
+     "name": "ML & transformer essentials",
+     "weeks": "4–5",
+     "topics": [
+      "ML workflow and evaluation",
+      "Embeddings and attention",
+      "Transformers and tokenisation"
+     ],
+     "projects": [
+      "Sentiment Analysis Using BERT"
+     ]
+    },
+    {
+     "name": "LLM engineering & RAG",
+     "weeks": "6–9",
+     "topics": [
+      "Choosing among current model families",
+      "Prompt and context engineering",
+      "Vector DBs, chunking, hybrid search, reranking",
+      "RAG evaluation",
+      "When to fine-tune (LoRA/QLoRA)",
+      "Azure OpenAI and AWS Bedrock"
+     ],
+     "projects": [
+      "AI-Powered Sales Email Writer",
+      "HR Policy RAG Query Bot",
+      "Enterprise Document Assistant (Azure)"
+     ]
+    },
+    {
+     "name": "Agentic AI",
+     "weeks": "10–13",
+     "topics": [
+      "Tool calling, memory, planning",
+      "LangGraph, CrewAI, AutoGen/AG2",
+      "Building MCP servers and clients",
+      "A2A for agent-to-agent communication",
+      "Human-in-the-loop approvals"
+     ],
+     "projects": [
+      "AI Data Analyst Agent",
+      "MCP Coding Assistant & Debugger",
+      "LangGraph Human-in-the-Loop Approval Workflow"
+     ]
+    },
+    {
+     "name": "LLMOps, evals & guardrails",
+     "weeks": "14–16",
+     "topics": [
+      "Tracing and eval sets (LangSmith, Langfuse)",
+      "Regression evals and eval gates",
+      "Guardrails (NeMo Guardrails, Llama Guard), prompt-injection defence",
+      "Serving with vLLM; Docker and Kubernetes basics",
+      "Cost and latency tuning"
+     ],
+     "projects": [
+      "Production-Grade LLM App Deployment",
+      "LLM Toxicity & Guardrail Engine",
+      "Agentic AI Monitoring & Cost Optimisation"
+     ]
+    },
+    {
+     "name": "Developer track: AI system design & backend for LLM apps",
+     "weeks": "17–19",
+     "topics": [
+      "Model gateways and routing",
+      "Semantic and prompt caching",
+      "Streaming and async APIs",
+      "Distributed RAG microservices"
+     ],
+     "projects": [
+      "Multi-LLM API Gateway with Fallback",
+      "Intelligent Prompt Caching Microservice"
+     ]
+    },
+    {
+     "name": "Capstone",
+     "weeks": "20–22",
+     "topics": [
+      "Pick 1 developer capstone"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [],
+   "capstones": [
+    "P04",
+    "P09",
+    "P22",
+    "P39",
+    "P41",
+    "P44",
+    "P54",
+    "P63",
+    "P68",
+    "P69",
+    "P70",
+    "P77"
+   ]
+  },
+  {
+   "code": "SDE-M",
+   "name": "SDE Master Program: DSA, System Design & GenAI",
+   "family": "Software & AI Engineering",
+   "tier": "Master",
+   "durationMonths": 11,
+   "totalWeeks": 48,
+   "whoFor": [
+    "Developers with 1–6 years in service companies who want product-company roles",
+    "Developers who keep failing DSA or system-design rounds"
+   ],
+   "notFor": [
+    "Developers who only want AI skills (→ GenAI for Software Developers)",
+    "Experienced engineers moving into client-facing AI roles (→ Forward Deployed AI Engineer)"
+   ],
+   "entry": "1+ year as a working developer.",
+   "targetRoles": [
+    "SDE-1 / SDE-2 at product companies",
+    "Backend Engineer",
+    "AI-enabled Software Engineer"
+   ],
+   "certificates": "IBM + Microsoft Azure AI Fundamentals + AI CoLab project certificate + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Induction + engineering foundations",
+     "weeks": "1–2",
+     "topics": [
+      "Git workflow, SQL refresher, unit testing"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
+     "weeks": "3–4",
+     "topics": [
+      "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
+      "GitHub Copilot in VS Code: completions, chat and agent mode",
+      "MCP servers in your IDE and in Claude: GitHub, Postgres, filesystem, Jira",
+      "Claude connectors for team context: Google Drive, Slack, Notion",
+      "Reviewing, testing and securing AI-written code; when not to trust it"
+     ],
+     "projects": [
+      "Ship a feature with Claude Code + Copilot as a reviewed pull request",
+      "Build an MCP server for a tool your team uses"
+     ]
+    },
+    {
+     "name": "Data Structures & Algorithms (Java, C++ or Python)",
+     "weeks": "5–16",
+     "topics": [
+      "Complexity, arrays, strings, hashing, two pointers, sliding window",
+      "Linked lists, stacks, queues",
+      "Trees, BST, heaps, tries",
+      "Graphs: BFS/DFS, shortest paths, MST, union-find",
+      "Recursion, backtracking, greedy, DP",
+      "Weekly timed contests and mock DSA screens"
+     ],
+     "projects": [
+      "Text Autocomplete System (Trie)",
+      "Shortest Path Route Finder",
+      "Server Load Balancer Simulation"
+     ]
+    },
+    {
+     "name": "System design: LLD + HLD",
+     "weeks": "17–24",
+     "topics": [
+      "OOP, SOLID, design patterns, UML",
+      "LLD case studies: parking lot, Splitwise, BookMyShow",
+      "HLD: scaling, caching, queues (Kafka), CAP, sharding",
+      "Database selection and schema design (now has its own content)",
+      "HLD case studies: URL shortener, Instagram feed, ride sharing, chat, payments"
+     ],
+     "projects": [
+      "Instagram Feed System design",
+      "AI-Powered Ride Sharing System design"
+     ]
+    },
+    {
+     "name": "GenAI core for developers",
+     "weeks": "25–38",
+     "topics": [
+      "Same five modules as GenAI for Software Developers (Python for AI engineers → LLMOps), compressed"
+     ],
+     "projects": [
+      "8 projects from the GenAI developer core"
+     ]
+    },
+    {
+     "name": "Electives (choose 2)",
+     "weeks": "39–44",
+     "topics": [
+      "See specialisations"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Capstone + interview sprint",
+     "weeks": "45–48",
+     "topics": [
+      "Capstone",
+      "DSA, LLD, HLD and AI system-design mock interviews"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "Developer copilots & AI for software engineering",
+     "content": "Repo indexing, PR review, test generation, migration agents",
+     "projects": [
+      "AI-Driven Pull Request Reviewer",
+      "Semantic Repository Search"
+     ]
+    },
+    {
+     "name": "LLM infrastructure on cloud & Kubernetes",
+     "content": "GPU serving, autoscaling, inference pipelines",
+     "projects": [
+      "Scalable LLM Inference Deployment Pipeline"
+     ]
+    },
+    {
+     "name": "Backend for LLM apps & RAG microservices",
+     "content": "Async APIs, streaming, caching, distributed retrieval",
+     "projects": [
+      "High-Performance LLM API Service"
+     ]
+    },
+    {
+     "name": "Distributed systems & microservices for AI",
+     "content": "Service mesh, circuit breakers, load balancing",
+     "projects": [
+      "Resilient AI Microservice Network"
+     ]
+    },
+    {
+     "name": "Multi-agent systems & workflow automation",
+     "content": "Orchestration graphs, context routing, enterprise workflows",
+     "projects": [
+      "Multi-Agent Document Intelligence Pipeline"
+     ]
+    }
+   ],
+   "capstones": [
+    "P09",
+    "P22",
+    "P39",
+    "P41",
+    "P44",
+    "P54",
+    "P63",
+    "P68",
+    "P69",
+    "P70",
+    "P77"
+   ]
+  },
+  {
+   "code": "FDE-M",
+   "name": "Forward Deployed AI Engineer Master Program",
+   "family": "Software & AI Engineering",
+   "tier": "Master",
+   "durationMonths": 12,
+   "totalWeeks": 52,
+   "whoFor": [
+    "Engineers with 1+ year: backend, full-stack, Java/Python/Node developers, data engineers, ML engineers",
+    "Solutions, pre-sales and platform engineers",
+    "Cloud/DevOps engineers who code and want AI delivery roles"
+   ],
+   "notFor": [
+    "Freshers and non-coders"
+   ],
+   "entry": "1+ year in a tech role, and writes code. Newer coders get Python and backend pre-work.",
+   "targetRoles": [
+    "Forward Deployed Engineer",
+    "AI Solutions Engineer",
+    "Applied AI Engineer",
+    "AI Platform Engineer"
+   ],
+   "certificates": "IBM + Microsoft Azure AI Fundamentals + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Term 1 · GenAI foundation, no code",
+     "weeks": "1–2",
+     "topics": [
+      "How GenAI works, model families, limits",
+      "Prompting without code",
+      "No-code agents and when to move to code",
+      "AI use-case scoping and business case"
+     ],
+     "projects": [
+      "Support Ticket Triage Assistant",
+      "AI Opportunity Assessment Brief"
+     ]
+    },
+    {
+     "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
+     "weeks": "3–4",
+     "topics": [
+      "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
+      "GitHub Copilot in VS Code: completions, chat and agent mode",
+      "MCP servers in your IDE and in Claude: GitHub, Postgres, filesystem, Jira",
+      "Claude connectors for team context: Google Drive, Slack, Notion",
+      "Reviewing, testing and securing AI-written code; when not to trust it"
+     ],
+     "projects": [
+      "Ship a feature with Claude Code + Copilot as a reviewed pull request",
+      "Build an MCP server for a tool your team uses"
+     ]
+    },
+    {
+     "name": "Term 1 · Python for AI",
+     "weeks": "5–9",
+     "topics": [
+      "Core and advanced Python",
+      "Async, httpx, retries, rate limits",
+      "LLM SDKs, Pydantic structured outputs",
+      "mypy, pytest, ruff"
+     ],
+     "projects": [
+      "Contract Document Extraction Pipeline",
+      "Bulk LLM Enrichment Engine"
+     ]
+    },
+    {
+     "name": "Term 1 · Software engineering for FDE",
+     "weeks": "10–13",
+     "topics": [
+      "Git in client repos",
+      "PostgreSQL, SQLAlchemy, pgvector",
+      "MongoDB, Redis, Neo4j, Elasticsearch",
+      "FastAPI, REST, WebSockets, gRPC",
+      "OAuth/SSO, RBAC, multi-tenancy, queues, Docker"
+     ],
+     "projects": [
+      "Customer 360 Query Layer",
+      "Streaming Chat Backend",
+      "Enterprise Integration Bridge",
+      "Multi-Tenant Knowledge API"
+     ]
+    },
+    {
+     "name": "Term 2 · ML & transformer essentials",
+     "weeks": "14–15",
+     "topics": [
+      "ML workflow, embeddings, attention, transformers"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Term 2 · LLM engineering",
+     "weeks": "16–20",
+     "topics": [
+      "Model families, serving with vLLM/Ollama, quantisation, GPU sizing",
+      "Prompt and context engineering",
+      "Fine-tuning (LoRA/QLoRA) and when not to"
+     ],
+     "projects": [
+      "Enterprise Document Assistant"
+     ]
+    },
+    {
+     "name": "Term 2 · Advanced RAG & enterprise retrieval",
+     "weeks": "21–25",
+     "topics": [
+      "Layout-aware ingestion and chunking",
+      "Hybrid retrieval, reranking, query rewriting",
+      "GraphRAG, agentic and corrective RAG, text-to-SQL",
+      "Permissions, PII, data residency",
+      "RAG evaluation"
+     ],
+     "projects": [
+      "Multi-Format Ingestion Pipeline",
+      "Hybrid Retrieval Search Engine",
+      "GraphRAG Knowledge System",
+      "Permission-Aware Policy Assistant",
+      "RAG Quality Audit Report"
+     ]
+    },
+    {
+     "name": "Term 2 · Agentic AI engineering",
+     "weeks": "26–30",
+     "topics": [
+      "LangGraph, CrewAI, AutoGen/AG2",
+      "MCP servers and A2A",
+      "Guardrails and evals for agents"
+     ],
+     "projects": [
+      "AI Data Analyst Agent",
+      "MCP Coding Assistant & Debugger"
+     ]
+    },
+    {
+     "name": "Term 2 · Interview readiness sprint",
+     "weeks": "31",
+     "topics": [
+      "GenAI and agentic interview questions, take-home practice (fills the empty divider page)"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Term 3 · Cloud, LLMOps & AIOps",
+     "weeks": "32–36",
+     "topics": [
+      "Cloud foundations and IAM",
+      "Kubernetes, Helm, Terraform, GPU autoscaling",
+      "vLLM, Ray Serve, Triton",
+      "Eval-gated CI/CD and canary rollouts",
+      "AI platform patterns: inference gateway, model router, event-driven inference (absorbed from AI Engineering Master)"
+     ],
+     "projects": [
+      "Production AI Service Deployment",
+      "Eval-Gated Deployment Pipeline",
+      "Incident Triage & RCA Agent",
+      "AI Cost & Observability Dashboard"
+     ]
+    },
+    {
+     "name": "Term 3 · AI system design & enterprise architecture",
+     "weeks": "37–39",
+     "topics": [
+      "NFRs and capacity estimation",
+      "Reference architectures",
+      "ERP/CRM/ITSM integration, zero trust",
+      "DPDP Act, EU AI Act, build vs buy",
+      "C4, ADRs, TCO"
+     ],
+     "projects": [
+      "Enterprise AI Solution Design Document",
+      "AI Architecture Review & Remediation"
+     ]
+    },
+    {
+     "name": "Term 3 · Client solution engineering",
+     "weeks": "40–43",
+     "topics": [
+      "Discovery workshops and stakeholder mapping",
+      "Proposals and SOWs",
+      "Prototyping and demos in days",
+      "Delivery in client environments; adoption and handover"
+     ],
+     "projects": [
+      "Client Discovery & Solution Brief",
+      "48-Hour Prototype Sprint",
+      "Pilot Impact & Handover Package"
+     ]
+    },
+    {
+     "name": "Term 4 · FDE elective (choose 1)",
+     "weeks": "44–47",
+     "topics": [
+      "See specialisations"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Term 4 · Capstone",
+     "weeks": "48–52",
+     "topics": [
+      "One domain capstone, deployed and handed over"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Optional · DSA & problem solving",
+     "weeks": "Self-paced, parallel",
+     "topics": [
+      "For learners targeting big-tech interview loops"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "FDE · Software & SaaS",
+     "content": "In-product copilots, developer agents, support automation, multi-tenant AI ops",
+     "projects": [
+      "Multi-Tenant SaaS Copilot",
+      "Developer Agent for Code Migration"
+     ]
+    },
+    {
+     "name": "FDE · Data & Analytics",
+     "content": "Modern data stack, text-to-SQL, conversational BI, data agents",
+     "projects": [
+      "Natural Language Analytics Platform",
+      "Metric Anomaly Investigation Agent"
+     ]
+    },
+    {
+     "name": "FDE · Cloud & Enterprise",
+     "content": "Landing zones, legacy modernisation, private/air-gapped AI, platform engineering",
+     "projects": [
+      "Self-Service Enterprise AI Platform",
+      "Private RAG for Air-Gapped Environment"
+     ]
+    }
+   ],
+   "capstones": [
+    "P04",
+    "P05",
+    "P08",
+    "P09",
+    "P14",
+    "P17",
+    "P22",
+    "P26",
+    "P30",
+    "P33",
+    "P39",
+    "P44",
+    "P54",
+    "P56",
+    "P57",
+    "P66",
+    "P68",
+    "P69",
+    "P70",
+    "P72",
+    "P74",
+    "P77"
+   ]
+  },
+  {
+   "code": "GAI-M",
+   "name": "GenAI & Agentic AI Master Program",
+   "family": "GenAI & Agentic AI",
+   "tier": "Master",
+   "durationMonths": 9,
+   "totalWeeks": 39,
+   "whoFor": [
+    "Tech professionals with 1+ year who code (developers, QA, data, cloud) and want GenAI plus a domain or role specialisation",
+    "Domain professionals in BFSI, healthcare, manufacturing or retail who are comfortable coding",
+    "Tech professionals who want AI but haven't picked a role yet"
+   ],
+   "notFor": [
+    "Non-coders (→ Applied AI Practitioner or AI Leadership Program)",
+    "Developers who only need one developer track in 5 months (→ GenAI for Software Developers)"
+   ],
+   "entry": "1+ year in a tech role. Self-paced Python pre-work for weak coders.",
+   "targetRoles": [
+    "GenAI Engineer",
+    "Agentic AI Engineer",
+    "Domain AI Specialist (BFSI, healthcare, retail, manufacturing)",
+    "AI QA Engineer"
+   ],
+   "certificates": "IBM + Microsoft Azure AI Fundamentals + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Induction + Python for GenAI",
+     "weeks": "1–4",
+     "topics": [
+      "Python, pandas and APIs for GenAI work"
+     ],
+     "projects": [
+      "Retail Sales Data EDA"
+     ]
+    },
+    {
+     "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
+     "weeks": "5–6",
+     "topics": [
+      "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
+      "GitHub Copilot in VS Code: completions, chat and agent mode",
+      "MCP servers in your IDE and in Claude: GitHub, Postgres, filesystem, Jira",
+      "Claude connectors for team context: Google Drive, Slack, Notion",
+      "Reviewing, testing and securing AI-written code; when not to trust it"
+     ],
+     "projects": [
+      "Ship a feature with Claude Code + Copilot as a reviewed pull request",
+      "Build an MCP server for a tool your team uses"
+     ]
+    },
+    {
+     "name": "ML & transformer foundations",
+     "weeks": "7–9",
+     "topics": [
+      "ML workflow, embeddings, attention, BERT"
+     ],
+     "projects": [
+      "Loan Approval Prediction",
+      "Sentiment Analysis Using BERT"
+     ]
+    },
+    {
+     "name": "LLM engineering & RAG",
+     "weeks": "10–16",
+     "topics": [
+      "Model families and selection",
+      "Prompt and context engineering",
+      "Hugging Face, vector DBs, RAG, RAG evaluation",
+      "Fine-tuning, Azure OpenAI, AWS Bedrock",
+      "Image generation (one optional lab)"
+     ],
+     "projects": [
+      "AI-Powered Sales Email Writer",
+      "HR Policy RAG Query Bot",
+      "Enterprise Document Assistant"
+     ]
+    },
+    {
+     "name": "Agentic AI & automation",
+     "weeks": "17–22",
+     "topics": [
+      "LangGraph, CrewAI, AutoGen/AG2",
+      "MCP servers and A2A",
+      "No-code agents (n8n) for prototyping",
+      "Human-in-the-loop"
+     ],
+     "projects": [
+      "AI Data Analyst Agent",
+      "Interoperable Multi-Agent System (MCP + A2A)",
+      "LangGraph HITL Approval Workflow"
+     ]
+    },
+    {
+     "name": "LLMOps & production",
+     "weeks": "23–26",
+     "topics": [
+      "Tracing, evals, deployment, monitoring, cost"
+     ],
+     "projects": [
+      "Production-Grade LLM App Deployment",
+      "Agentic AI Monitoring & Cost Optimisation"
+     ]
+    },
+    {
+     "name": "Responsible AI, guardrails & governance",
+     "weeks": "27–28",
+     "topics": [
+      "NeMo Guardrails, Llama Guard, prompt-injection defence",
+      "DPDP Act and EU AI Act, named separately",
+      "Audit logs, model cards"
+     ],
+     "projects": [
+      "LLM Toxicity & Guardrail Engine"
+     ]
+    },
+    {
+     "name": "Two specialisations",
+     "weeks": "29–34",
+     "topics": [
+      "See specialisations (choose 2)"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI CoLab",
+     "weeks": "35–36",
+     "topics": [
+      "Startup project"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Capstones",
+     "weeks": "37–39",
+     "topics": [
+      "2 capstones matched to the chosen specialisations"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "Software Developers",
+     "content": "AI system design, gateways, caching, backend for LLM apps",
+     "projects": [
+      "Multi-LLM API Gateway with Fallback",
+      "High-Performance LLM API Service"
+     ]
+    },
+    {
+     "name": "Cloud & DevOps",
+     "content": "AI for IaC and CI/CD, incident bots, K8s autoscaling agents, FinOps",
+     "projects": [
+      "Agentic Incident Response Bot",
+      "AI-Driven Kubernetes Auto-Scaling Agent"
+     ]
+    },
+    {
+     "name": "QA & Test",
+     "content": "Test generation, bug triage, regression selection, self-healing tests",
+     "projects": [
+      "GenAI Test Case Generator",
+      "Agentic Regression Test Suite Selector"
+     ]
+    },
+    {
+     "name": "BFSI",
+     "content": "Underwriting, claims, KYC, fraud, RBI guidance",
+     "projects": [
+      "Agentic KYC Verification Pipeline",
+      "Agentic Fraud Detection & Explanation"
+     ]
+    },
+    {
+     "name": "Retail & E-commerce",
+     "content": "Catalog, pricing, returns, customer query agents",
+     "projects": [
+      "Visual Product Search & Description Generator",
+      "Agentic Customer Query Resolution"
+     ]
+    },
+    {
+     "name": "Manufacturing & Supply Chain",
+     "content": "Quality, maintenance, inventory, logistics",
+     "projects": [
+      "Assembly Troubleshooting RAG Agent",
+      "Agentic Warehouse Task Planner"
+     ]
+    },
+    {
+     "name": "Healthcare & Pharma",
+     "content": "Clinical coding, drug safety, trials, compliance",
+     "projects": [
+      "Agentic ICD/CPT Coding Assistant",
+      "FDA/EMA Compliance Checker"
+     ]
+    }
+   ],
+   "capstones": [
+    "P04",
+    "P05",
+    "P08",
+    "P10",
+    "P14",
+    "P17",
+    "P22",
+    "P26",
+    "P30",
+    "P33",
+    "P39",
+    "P44",
+    "P47",
+    "P54",
+    "P56",
+    "P57",
+    "P66",
+    "P68",
+    "P75"
+   ]
+  },
+  {
+   "code": "GAI-CD",
+   "name": "GenAI & Agentic AI for Cloud & DevOps",
+   "family": "Cloud & DevOps",
+   "tier": "Program",
+   "durationMonths": 5,
+   "totalWeeks": 22,
+   "whoFor": [
+    "Cloud, DevOps, SRE and platform engineers with 1+ year who already work on AWS/Azure, CI/CD and Kubernetes"
+   ],
+   "notFor": [
+    "Infra people still moving into cloud (→ Cloud & DevOps Engineering role track)"
+   ],
+   "entry": "1+ year in cloud/DevOps. Basic Python scripting.",
+   "targetRoles": [
+    "AI Platform / LLMOps Engineer",
+    "AIOps Engineer",
+    "DevOps Engineer with GenAI"
+   ],
+   "certificates": "IBM GenAI certificate",
+   "modules": [
+    {
+     "name": "Python for AI in operations",
+     "weeks": "1–2",
+     "topics": [
+      "Python scripting, APIs, LLM SDKs"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
+     "weeks": "3",
+     "topics": [
+      "Generating and reviewing Terraform, Ansible and Kubernetes manifests with Claude Code and Copilot",
+      "MCP servers for AWS, Azure and Kubernetes",
+      "Claude connectors for runbooks and tickets (Confluence, Jira, Slack)",
+      "Guardrails: approvals, dry runs and policy checks before AI changes infrastructure"
+     ],
+     "projects": [
+      "AI-generated Terraform module, reviewed and deployed through CI",
+      "Kubernetes troubleshooting assistant over MCP"
+     ]
+    },
+    {
+     "name": "GenAI & LLM foundations for engineers",
+     "weeks": "4–5",
+     "topics": [
+      "How LLMs work, prompting, structured outputs"
+     ],
+     "projects": []
+    },
+    {
+     "name": "RAG over runbooks, logs and docs",
+     "weeks": "6–8",
+     "topics": [
+      "Vector DBs, chunking logs and runbooks"
+     ],
+     "projects": [
+      "Runbook RAG Assistant"
+     ]
+    },
+    {
+     "name": "Agentic AI for operations",
+     "weeks": "9–11",
+     "topics": [
+      "LangGraph, CrewAI",
+      "MCP servers for Kubernetes and cloud APIs",
+      "Human approval for infra changes"
+     ],
+     "projects": [
+      "Agentic Incident Response & Runbook Bot",
+      "GenAI Kubernetes Operations Assistant"
+     ]
+    },
+    {
+     "name": "LLMOps & AI infrastructure",
+     "weeks": "12–15",
+     "topics": [
+      "vLLM and KServe on Kubernetes, GPU autoscaling",
+      "LLM observability (OpenTelemetry, Langfuse)",
+      "Cost and FinOps for AI"
+     ],
+     "projects": [
+      "Scalable LLM Inference on Kubernetes",
+      "AI Cost & Observability Dashboard"
+     ]
+    },
+    {
+     "name": "GenAI for DevOps specialisation",
+     "weeks": "16–19",
+     "topics": [
+      "AI for IaC and CI/CD",
+      "Log analytics and anomaly detection",
+      "Security drift and DR automation"
+     ],
+     "projects": [
+      "CI/CD Pipeline Optimisation Assistant",
+      "AI Log Pattern Summarizer",
+      "Security Drift & Compliance Checker",
+      "AI-Driven Kubernetes Auto-Scaling Agent",
+      "GenAI Cloud Cost Optimizer"
+     ]
+    },
+    {
+     "name": "Capstone",
+     "weeks": "20–22",
+     "topics": [
+      "One ops capstone"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [],
+   "capstones": [
+    "P11",
+    "P15",
+    "P23",
+    "P33",
+    "P35",
+    "P38",
+    "P71",
+    "P72",
+    "P74"
+   ]
+  },
+  {
+   "code": "CD",
+   "name": "Cloud & DevOps Engineering (role tracks)",
+   "family": "Cloud & DevOps",
+   "tier": "Program",
+   "durationMonths": 5,
+   "totalWeeks": 22,
+   "whoFor": [
+    "IT professionals with 1+ year moving into cloud and DevOps. Pick the role track at enrolment: IT Support & ITOps · System Admin · Network · DBA · QA & Test · General IT & Developers"
+   ],
+   "notFor": [
+    "Freshers and students",
+    "Non-IT professionals",
+    "Engineers already working in cloud/DevOps (→ GenAI for Cloud & DevOps or the Master)"
+   ],
+   "entry": "1+ year in an IT role. QA track: Selenium, Playwright, Cypress or Pytest experience.",
+   "targetRoles": [
+    "Cloud Engineer",
+    "DevOps Engineer",
+    "Cloud Ops / SRE (junior)",
+    "Cloud Network Engineer",
+    "Cloud DBA / DBRE",
+    "QA DevOps Engineer"
+   ],
+   "certificates": "Microsoft Azure certification track + course completion certificate",
+   "modules": [
+    {
+     "name": "Linux, networking & shell",
+     "weeks": "1–2",
+     "topics": [
+      "Linux administration, permissions, processes",
+      "Networking basics, SSH",
+      "Bash scripting"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
+     "weeks": "3",
+     "topics": [
+      "Generating and reviewing Terraform, Ansible and Kubernetes manifests with Claude Code and Copilot",
+      "MCP servers for AWS, Azure and Kubernetes",
+      "Claude connectors for runbooks and tickets (Confluence, Jira, Slack)",
+      "Guardrails: approvals, dry runs and policy checks before AI changes infrastructure"
+     ],
+     "projects": [
+      "AI-generated Terraform module, reviewed and deployed through CI",
+      "Kubernetes troubleshooting assistant over MCP"
+     ]
+    },
+    {
+     "name": "Python & Bash automation",
+     "weeks": "4",
+     "topics": [
+      "Python for scripting",
+      "boto3 and Azure SDK"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AWS: Cloud Practitioner → Solutions Architect Associate",
+     "weeks": "5–9",
+     "topics": [
+      "EC2, S3, IAM, VPC, RDS, Lambda, CloudWatch",
+      "HA, DR and migration",
+      "SAA exam prep"
+     ],
+     "projects": [
+      "Static Website Hosting with CDN",
+      "EC2 Deployment & Monitoring Pipeline",
+      "Scalable Multi-Tier Application",
+      "Serverless Order Processing"
+     ]
+    },
+    {
+     "name": "Azure Administrator essentials",
+     "weeks": "10–11",
+     "topics": [
+      "Subscriptions, RBAC, Entra ID",
+      "VNets, VMs, storage",
+      "AZ-900 / AZ-104 prep (now mandatory)"
+     ],
+     "projects": [
+      "Azure landing setup with RBAC and networking"
+     ]
+    },
+    {
+     "name": "DevOps toolchain",
+     "weeks": "12–16",
+     "topics": [
+      "Git, Jenkins, GitHub Actions",
+      "Docker, Kubernetes, Helm",
+      "Terraform and Ansible",
+      "Prometheus, Grafana, ELK"
+     ],
+     "projects": [
+      "Git-Centric CI Pipeline",
+      "Dockerized Microservice Deployment",
+      "Terraform-provisioned Kubernetes app with Helm",
+      "Prometheus & Grafana monitoring stack"
+     ]
+    },
+    {
+     "name": "AIOps & GenAI for operations",
+     "weeks": "17",
+     "topics": [
+      "AI log analysis, anomaly detection, AI-assisted runbooks (replaces MLOps)"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Role specialisation + 4 role capstones",
+     "weeks": "18–22",
+     "topics": [
+      "See specialisations (choose 1)"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "IT Support & ITOps",
+     "content": "Cloud ops, incident lifecycle, AIOps, ITIL change, SRE basics",
+     "projects": [
+      "Cloud Monitoring & Alerting System",
+      "Automated Incident Response Workflow",
+      "On-Call Simulation & RCA",
+      "SRE Observability Dashboard"
+     ]
+    },
+    {
+     "name": "System Admin",
+     "content": "OS hardening, immutable infra, backup/DR, container security",
+     "projects": [
+      "Cloud Server Hardening & Automation",
+      "Enterprise Infra Migration",
+      "Terraform Provisioning",
+      "Monitoring & Auto-Remediation"
+     ]
+    },
+    {
+     "name": "Network",
+     "content": "VPC design, hybrid connectivity, firewalls/WAF, service mesh, network IaC",
+     "projects": [
+      "Cloud Network Foundation",
+      "Cloud Network Architecture",
+      "Network IaC Deployment",
+      "Service Mesh & Zero-Trust"
+     ]
+    },
+    {
+     "name": "DBA",
+     "content": "Managed DBs, HA, DMS migration, performance, DB CI/CD",
+     "projects": [
+      "DB Deployment & Backup Automation",
+      "HA Database Architecture",
+      "Cloud Database Migration",
+      "Schema CI/CD with Liquibase/Flyway"
+     ]
+    },
+    {
+     "name": "QA & Test",
+     "content": "CI quality gates, test infra as code, K8s test grids, observability",
+     "projects": [
+      "CI/CD Quality Gate Pipeline",
+      "Test Infra with Terraform",
+      "Containerised Parallel Test Platform",
+      "Chaos & Synthetic Monitoring (FIS, Synthetics)"
+     ]
+    },
+    {
+     "name": "General IT & Developers",
+     "content": "Multicloud strategy, Terraform/Pulumi, platform basics, FinOps",
+     "projects": [
+      "Multicloud App Deployment (AWS + Azure)",
+      "Cost-optimised multi-env platform"
+     ]
+    }
+   ],
+   "capstones": [
+    "P11",
+    "P15",
+    "P23",
+    "P35",
+    "P38",
+    "P71",
+    "P72",
+    "P73",
+    "P75"
+   ]
+  },
+  {
+   "code": "CD-M",
+   "name": "AI-Powered Cloud & DevOps Master Program",
+   "family": "Cloud & DevOps",
+   "tier": "Master",
+   "durationMonths": 9,
+   "totalWeeks": 39,
+   "whoFor": [
+    "Infra, DevOps and developer professionals with 1+ year aiming for cloud architect, platform, DevSecOps or SRE roles"
+   ],
+   "notFor": [
+    "Freshers and non-IT professionals",
+    "People who only need one role move in 5 months (→ Cloud & DevOps Engineering role track)"
+   ],
+   "entry": "1+ year in IT, with Linux comfort.",
+   "targetRoles": [
+    "Cloud Architect",
+    "Platform Engineer",
+    "DevSecOps Engineer",
+    "SRE",
+    "AI Infrastructure Engineer"
+   ],
+   "certificates": "IBM + Microsoft Azure + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Linux, Python & Bash automation",
+     "weeks": "1–3",
+     "topics": [
+      "Admin, scripting, boto3, Azure SDK"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
+     "weeks": "4–5",
+     "topics": [
+      "Generating and reviewing Terraform, Ansible and Kubernetes manifests with Claude Code and Copilot",
+      "MCP servers for AWS, Azure and Kubernetes",
+      "Claude connectors for runbooks and tickets (Confluence, Jira, Slack)",
+      "Guardrails: approvals, dry runs and policy checks before AI changes infrastructure"
+     ],
+     "projects": [
+      "AI-generated Terraform module, reviewed and deployed through CI",
+      "Kubernetes troubleshooting assistant over MCP"
+     ]
+    },
+    {
+     "name": "AWS Solutions Architect Associate",
+     "weeks": "6–10",
+     "topics": [
+      "Compute, networking, storage, serverless, HA/DR"
+     ],
+     "projects": [
+      "Scalable Multi-Tier Application",
+      "Serverless Order Processing"
+     ]
+    },
+    {
+     "name": "Azure Administrator + Solutions Architect",
+     "weeks": "11–13",
+     "topics": [
+      "AZ-104 and AZ-305 prep (mandatory)"
+     ],
+     "projects": [
+      "Azure hub-and-spoke landing zone"
+     ]
+    },
+    {
+     "name": "DevOps toolchain & GitOps",
+     "weeks": "14–17",
+     "topics": [
+      "CI/CD, Docker, Terraform, Ansible, ArgoCD",
+      "Prometheus, Grafana, ELK"
+     ],
+     "projects": [
+      "Git-Centric CI Pipeline",
+      "Complete GitOps Platform"
+     ]
+    },
+    {
+     "name": "Kubernetes & platform engineering",
+     "weeks": "18–20",
+     "topics": [
+      "CKA-aligned Kubernetes",
+      "Helm, operators, Backstage"
+     ],
+     "projects": [
+      "Enterprise Kubernetes Platform"
+     ]
+    },
+    {
+     "name": "Cloud system design & distributed architecture",
+     "weeks": "21–23",
+     "topics": [
+      "Capacity, caching, queues, multi-region"
+     ],
+     "projects": [
+      "Ride-Sharing Platform Design",
+      "Real-Time Logging Pipeline"
+     ]
+    },
+    {
+     "name": "DevSecOps & cloud security",
+     "weeks": "24–26",
+     "topics": [
+      "SAST/SCA/SBOM, Vault, OPA, image signing",
+      "GuardDuty, Defender, zero trust, compliance"
+     ],
+     "projects": [
+      "Secure CI/CD with Scanning",
+      "Kubernetes Security Hardening"
+     ]
+    },
+    {
+     "name": "Multicloud & FinOps",
+     "weeks": "27–28",
+     "topics": [
+      "Portability, cross-cloud networking, Terraform/Pulumi, cost governance"
+     ],
+     "projects": [
+      "Multicloud App Deployment"
+     ]
+    },
+    {
+     "name": "AI for Cloud: AIOps, agentic ops & LLMOps infrastructure",
+     "weeks": "29–32",
+     "topics": [
+      "AI for IaC and incidents",
+      "Agents with MCP for cloud APIs (now real content)",
+      "Serving LLMs on Kubernetes, MLOps basics"
+     ],
+     "projects": [
+      "AI-Generated Terraform Engine",
+      "AI Incident Detection & RCA",
+      "GenAI Kubernetes Operations Assistant"
+     ]
+    },
+    {
+     "name": "Role specialisation (choose 1, full length)",
+     "weeks": "33–36",
+     "topics": [
+      "Same six role tracks as the 5-month program"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI CoLab + capstones",
+     "weeks": "37–39",
+     "topics": [
+      "2 capstones"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [],
+   "capstones": [
+    "P11",
+    "P15",
+    "P23",
+    "P35",
+    "P38",
+    "P41",
+    "P71",
+    "P72",
+    "P73",
+    "P74"
+   ]
+  },
+  {
+   "code": "AIL",
+   "name": "AI Leadership Program for Managers & Leaders",
+   "family": "AI for Business (no code)",
+   "tier": "Program",
+   "durationMonths": 5,
+   "totalWeeks": 22,
+   "whoFor": [
+    "Managers, team leads, delivery and project managers with 2+ years (tech or non-tech)",
+    "MBA graduates who joined in manager roles, and people fast-tracked into management",
+    "Business heads, founders and CXOs who must lead AI adoption"
+   ],
+   "notFor": [
+    "Individual contributors who want AI for their own tasks (→ Applied AI Practitioner)",
+    "Hands-on tech leads who want to build (→ GenAI & Agentic AI Master)"
+   ],
+   "entry": "2+ years of work experience, including any people, project or business responsibility. No coding.",
+   "targetRoles": [
+    "AI Transformation Lead",
+    "AI Product / Program Manager",
+    "AI-enabled Engineering or Business Manager"
+   ],
+   "certificates": "IBM + AI CoLab certificate",
+   "modules": [
+    {
+     "name": "AI literacy for leaders",
+     "weeks": "1–2",
+     "topics": [
+      "How LLMs and agents work",
+      "Capabilities, limits and cost",
+      "The model and vendor landscape"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Personal AI productivity: Claude, Copilot & connectors",
+     "weeks": "3–5",
+     "topics": [
+      "Microsoft 365 Copilot and Gemini for Workspace",
+      "Claude with connectors: Gmail, Drive, Calendar, Slack, Notion",
+      "Claude Projects and Skills for repeatable team work",
+      "A Claude Code demo: what your engineers can now build in a day",
+      "Meeting intelligence"
+     ],
+     "projects": [
+      "AI Meeting Intelligence & Action Item Tracker"
+     ]
+    },
+    {
+     "name": "No-code agents & process automation",
+     "weeks": "6–8",
+     "topics": [
+      "n8n, Make, Copilot Studio",
+      "MCP connectors",
+      "Designing human approval"
+     ],
+     "projects": [
+      "Agentic Workflow & Task Automation Blueprint"
+     ]
+    },
+    {
+     "name": "AI strategy, use-case discovery & ROI",
+     "weeks": "9–11",
+     "topics": [
+      "Use-case canvas",
+      "Build vs buy, vendor evaluation",
+      "AI business case and ROI"
+     ],
+     "projects": [
+      "AI Project Scope, Effort & ROI Assessment"
+     ]
+    },
+    {
+     "name": "AI product & delivery management",
+     "weeks": "12–14",
+     "topics": [
+      "AI PRDs and success metrics",
+      "Evals for non-engineers",
+      "Agile delivery of AI projects (Scrum, Jira)"
+     ],
+     "projects": [
+      "GenAI Product Roadmap & Prioritization",
+      "AI Sprint Planning & Jira Workflow"
+     ]
+    },
+    {
+     "name": "Data-driven decisions with AI",
+     "weeks": "15–16",
+     "topics": [
+      "Power BI Copilot, KPI insights, forecasting basics"
+     ],
+     "projects": [
+      "GenAI KPI Insights & Forecast Dashboard"
+     ]
+    },
+    {
+     "name": "AI governance, risk & responsible AI",
+     "weeks": "17–18",
+     "topics": [
+      "DPDP Act, EU AI Act, RBI/SEBI/IRDAI guidance",
+      "AI policies and risk registers"
+     ],
+     "projects": [
+      "AI Risk Assessment & Mitigation Framework"
+     ]
+    },
+    {
+     "name": "Leading AI transformation",
+     "weeks": "19",
+     "topics": [
+      "Change management, upskilling, org design"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Capstone",
+     "weeks": "20–22",
+     "topics": [
+      "AI transformation plan for your own organisation, reviewed by a panel"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [],
+   "capstones": [
+    "P01",
+    "P48",
+    "P52",
+    "P78",
+    "P79"
+   ]
+  },
+  {
+   "code": "MCS",
+   "name": "Master's Degree in CS: Data Science & AI (Woolf University)",
+   "family": "Degree",
+   "tier": "Degree",
+   "durationMonths": null,
+   "totalWeeks": null,
+   "whoFor": [
+    "Graduates with 60%+ aggregate (BE/B.Tech, BSc, BCA, BBA, B.Com, MBA) who need a formal master's degree for promotion, HR policy or immigration"
+   ],
+   "notFor": [
+    "Leads who only need job skills; a certification program is faster and cheaper"
+   ],
+   "entry": "Bachelor's degree with 60%+ aggregate.",
+   "targetRoles": [
+    "Data Scientist",
+    "ML Engineer",
+    "BI Developer"
+   ],
+   "certificates": "Master's degree via Woolf University (90 ECTS) + IBM project certification",
+   "modules": [
+    {
+     "name": "Term 1 · Foundation",
+     "weeks": "Not stated",
+     "topics": [
+      "Python, NumPy, pandas"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AI-assisted data work: Claude Code, Copilot & MCP",
+     "weeks": "Not stated",
+     "topics": [
+      "Claude Code for data pipelines, notebooks and refactoring analysis code",
+      "GitHub Copilot in VS Code and Jupyter",
+      "MCP servers for databases and warehouses (Postgres, BigQuery, Snowflake)",
+      "Claude connectors to Drive and Sheets for data briefs",
+      "Checking AI-generated analysis: numbers, joins and leakage"
+     ],
+     "projects": [
+      "Automate an EDA-to-report pipeline with Claude Code",
+      "Query a database in plain English through an MCP server"
+     ]
+    },
+    {
+     "name": "Term 2 · Statistics & ML",
+     "weeks": "Not stated",
+     "topics": [
+      "Applied statistics, ML"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Terms 3–5 · Specialisation",
+     "weeks": "Not stated",
+     "topics": [
+      "Data Science & Analytics, or AI & ML"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [],
+   "capstones": [
+    "P03",
+    "P10",
+    "P13",
+    "P21",
+    "P25",
+    "P31",
+    "P32",
+    "P34",
+    "P36",
+    "P40",
+    "P46",
+    "P47",
+    "P51",
+    "P59",
+    "P62",
+    "P65",
+    "P76"
+   ]
+  }
+ ],
+ "personas": [
+  {
+   "id": "student",
+   "group": "Students & freshers",
+   "name": "College student (not yet graduated)",
+   "signals": "Pursuing any degree; 1st–3rd year; preparing for placements",
+   "pains": [
+    "Wants something on the resume beyond the degree",
+    "Doesn't know which career to pick",
+    "Limited budget"
+   ],
+   "primary": "AAP",
+   "why": "Short, no-code and useful in any role, so it doesn't lock a student into one career.",
+   "upsell": "DABA",
+   "alternative": "DSG-C",
+   "avoid": [
+    "FDE-M",
+    "SDE-M",
+    "CD",
+    "AIL"
+   ],
+   "probes": [
+    "Which degree and year are you in?",
+    "Do you want to code, or use AI tools?",
+    "When are your campus placements?"
+   ],
+   "note": "Only DABA's graduate requirement is defined. Confirm whether IIT Patna certificates need graduation before promising them.",
+   "fdePriority": false
+  },
+  {
+   "id": "non-grad",
+   "group": "Students & freshers",
+   "name": "Non-graduate (12th or diploma)",
+   "signals": "Not studying; 12th pass or diploma; may be working or self-employed",
+   "pains": [
+    "Many job openings require a degree",
+    "Wants a practical skill fast"
+   ],
+   "primary": "AAP",
+   "why": "Fits if they are working, freelancing or running a business and will use AI directly.",
+   "upsell": null,
+   "alternative": "MCS",
+   "avoid": [
+    "DABA",
+    "DSG-C",
+    "DSG-M",
+    "CD",
+    "CD-M"
+   ],
+   "probes": [
+    "Are you working, freelancing or running a business?",
+    "Are you planning to finish a degree?",
+    "What do you want AI to do for you?"
+   ],
+   "note": "Don't promise placement outcomes. If their goal is a salaried job, hand them to a counsellor.",
+   "fdePriority": false
+  },
+  {
+   "id": "fresher-tech",
+   "group": "Students & freshers",
+   "name": "Fresher with a CS/IT/engineering degree",
+   "signals": "0–1 year; B.Tech/BCA/MCA/B.Sc CS; can code a little",
+   "pains": [
+    "No callbacks",
+    "Projects look like everyone else's",
+    "Unsure: data, GenAI or development?"
+   ],
+   "primary": "DSG-C",
+   "why": "The broadest entry path into data and AI, with a project portfolio and capstones.",
+   "upsell": null,
+   "alternative": "DABA",
+   "avoid": [
+    "GAI-SD",
+    "SDE-M",
+    "GAI-M",
+    "FDE-M",
+    "CD",
+    "CD-M",
+    "AIL"
+   ],
+   "probes": [
+    "What have you built in code?",
+    "Do you prefer data and numbers, or building apps?",
+    "Have you done DSA practice?"
+   ],
+   "note": "Engineering programs (SDE, FDE, GenAI for Developers) need 1+ year of experience. Offer them after the first job.",
+   "fdePriority": false
+  },
+  {
+   "id": "fresher-nontech",
+   "group": "Students & freshers",
+   "name": "Fresher with a non-CS degree",
+   "signals": "B.Com, BBA, BA, B.Sc (non-CS), MBA fresher",
+   "pains": [
+    "Afraid of coding",
+    "Wants a corporate job beyond sales or BPO"
+   ],
+   "primary": "DABA",
+   "why": "Starts with Excel, statistics, SQL and BI, the skills analyst jobs screen for.",
+   "upsell": "DSG-C",
+   "alternative": "AAP",
+   "avoid": [
+    "GAI-M",
+    "FDE-M",
+    "SDE-M",
+    "CD"
+   ],
+   "probes": [
+    "How comfortable are you with Excel?",
+    "Which roles are you applying for?",
+    "Would you try a little Python?"
+   ],
+   "note": "",
+   "fdePriority": false
+  },
+  {
+   "id": "career-gap",
+   "group": "Students & freshers",
+   "name": "Career-gap returnee",
+   "signals": "6 months+ gap: maternity, health, exams, layoff",
+   "pains": [
+    "Gap shows on the resume",
+    "Skills feel outdated"
+   ],
+   "primary": "DABA",
+   "why": "Non-tech returnees → DABA; tech returnees → Data Science & GenAI Program. Both give fresh projects that explain the gap.",
+   "upsell": "DSG-C",
+   "alternative": "DSG-C",
+   "avoid": [
+    "AIL"
+   ],
+   "probes": [
+    "What was your role before the break?",
+    "How long was the gap?",
+    "Full-time or flexible work?"
+   ],
+   "note": "",
+   "fdePriority": false
+  },
+  {
+   "id": "creative",
+   "group": "Non-tech professionals",
+   "name": "Marketing, design or content professional",
+   "signals": "Marketer, graphic/UI designer, content writer, social media manager, video editor",
+   "pains": [
+    "Clients expect faster turnaround",
+    "AI tools undercut freelance rates",
+    "Hours lost on resizes and variants"
+   ],
+   "primary": "AAP",
+   "why": "Marketing & Creative track: AI images, video, voice, ad variants, SEO and AI-search content, campaign automation.",
+   "upsell": "DABA",
+   "alternative": "AIL",
+   "avoid": [
+    "DSG-C",
+    "GAI-M",
+    "CD"
+   ],
+   "probes": [
+    "Which tools do you use daily (Canva, Adobe, Figma)?",
+    "Do you want to grow in this role or switch?",
+    "Freelance or salaried?"
+   ],
+   "note": "Upsell to DABA (Marketing analytics track) if they want a marketing-analyst job. Offer the AI Leadership Program to creative heads who manage teams.",
+   "fdePriority": false
+  },
+  {
+   "id": "nontech-upskill",
+   "group": "Non-tech professionals",
+   "name": "Non-tech professional staying in role",
+   "signals": "Sales, HR, finance, operations, consulting, teaching",
+   "pains": [
+    "Fear of being replaced",
+    "Repetitive reports and email"
+   ],
+   "primary": "AAP",
+   "why": "No-code AI with a function track for sales, HR or finance and operations.",
+   "upsell": "DABA",
+   "alternative": "AIL",
+   "avoid": [
+    "GAI-M",
+    "DSG-M",
+    "FDE-M"
+   ],
+   "probes": [
+    "Which tasks take most of your week?",
+    "Grow in role or switch?",
+    "Which AI tools have you tried?"
+   ],
+   "note": "",
+   "fdePriority": false
+  },
+  {
+   "id": "nontech-switch",
+   "group": "Non-tech professionals",
+   "name": "Non-tech professional switching to analytics",
+   "signals": "2–10 years in sales, ops, BPO, banking ops, HR or marketing; wants an analyst title",
+   "pains": [
+    "Stuck salary",
+    "No technical skills on resume"
+   ],
+   "primary": "DABA",
+   "why": "Turns domain experience into an analyst profile; a domain track keeps them in their own industry.",
+   "upsell": "DSG-C",
+   "alternative": "AAP",
+   "avoid": [
+    "FDE-M",
+    "SDE-M",
+    "CD"
+   ],
+   "probes": [
+    "Which domain have you worked in?",
+    "Do you build reports today?",
+    "What salary jump are you targeting?"
+   ],
+   "note": "",
+   "fdePriority": false
+  },
+  {
+   "id": "analyst",
+   "group": "Data & analytics",
+   "name": "Working analyst moving into data science",
+   "signals": "MIS, BI, reporting, business or data analyst; knows Excel/SQL/Power BI",
+   "pains": [
+    "Hit the ceiling of dashboard work",
+    "No ML or Python on resume"
+   ],
+   "primary": "DSG-C",
+   "why": "Builds on SQL and BI and adds Python, statistics, ML and GenAI.",
+   "upsell": "DSG-M",
+   "alternative": "GAI-M",
+   "avoid": [
+    "DABA",
+    "AAP"
+   ],
+   "probes": [
+    "How much Python have you written?",
+    "Models or AI apps?",
+    "Years of experience?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "data-pro",
+   "group": "Data & analytics",
+   "name": "Data scientist, data engineer or ML engineer",
+   "signals": "Writes Python daily; builds models or pipelines; wants GenAI and agent skills",
+   "pains": [
+    "Peers moving to GenAI roles",
+    "No production LLM work to show"
+   ],
+   "primary": "FDE-M",
+   "why": "The Data & Analytics elective (text-to-SQL, data agents, conversational BI) with advanced RAG and LLMOps.",
+   "upsell": null,
+   "alternative": "DSG-M",
+   "avoid": [
+    "DABA",
+    "DSG-C",
+    "AAP"
+   ],
+   "probes": [
+    "Have you shipped an LLM feature?",
+    "Client-facing or core engineering?",
+    "Want CV and MLOps depth instead?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "dev-junior",
+   "group": "Software developers",
+   "name": "Developer (1–5 years) moving into AI",
+   "signals": "Service-company developer; Java/.NET/Python/JS",
+   "pains": [
+    "Maintenance work, low salary",
+    "Worried AI will replace coders"
+   ],
+   "primary": "GAI-SD",
+   "why": "Five months, developer-only: LLM apps, RAG, agents, evals and AI system design.",
+   "upsell": "SDE-M",
+   "alternative": "GAI-M",
+   "avoid": [
+    "DABA",
+    "AAP",
+    "DSG-C"
+   ],
+   "probes": [
+    "Which stack do you work on?",
+    "AI role, or product-company switch?",
+    "Have you practised DSA?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "dev-product",
+   "group": "Software developers",
+   "name": "Developer targeting a product company",
+   "signals": "1–6 years; FAANG or product-company goal; fails DSA or system-design rounds",
+   "pains": [
+    "Rejected in DSA or system-design rounds",
+    "Wants a bigger salary jump"
+   ],
+   "primary": "SDE-M",
+   "why": "DSA (in Java, C++ or Python) and LLD/HLD come first, then GenAI.",
+   "upsell": null,
+   "alternative": "GAI-SD",
+   "avoid": [
+    "DABA",
+    "AAP"
+   ],
+   "probes": [
+    "Which round do you fail?",
+    "Target companies?",
+    "DSA language?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "dev-senior",
+   "group": "Software developers",
+   "name": "Senior developer, backend, full-stack or solutions engineer",
+   "signals": "4–12 years; builds APIs and services; open to client-facing work",
+   "pains": [
+    "Wants an AI title, not just AI on the resume",
+    "Needs enterprise RAG and agent experience"
+   ],
+   "primary": "FDE-M",
+   "why": "Software engineering, advanced RAG, LLMOps, AI system design and client solutioning in one path.",
+   "upsell": null,
+   "alternative": "GAI-M",
+   "avoid": [
+    "DABA",
+    "DSG-C",
+    "AAP"
+   ],
+   "probes": [
+    "Do you enjoy client and stakeholder work?",
+    "Which cloud do you deploy on?",
+    "Built anything with LLM APIs?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "qa",
+   "group": "Software developers",
+   "name": "QA or test engineer",
+   "signals": "Manual or automation tester; Selenium, Playwright, Cypress, Pytest",
+   "pains": [
+    "Manual testing roles shrinking",
+    "Wants DevOps or AI testing skills"
+   ],
+   "primary": "CD",
+   "why": "If the goal is DevOps: Cloud & DevOps role track with the QA & Test specialisation.",
+   "upsell": "CD-M",
+   "alternative": "GAI-M",
+   "avoid": [
+    "AAP",
+    "DABA"
+   ],
+   "probes": [
+    "Manual or automation?",
+    "Interested in CI/CD and cloud, or in AI-driven testing?",
+    "Which tools do you use?"
+   ],
+   "note": "If the goal is AI testing, offer the GenAI & Agentic AI Master with the QA & Test specialisation.",
+   "fdePriority": true
+  },
+  {
+   "id": "cloud-pro",
+   "group": "Cloud & infrastructure",
+   "name": "Cloud, DevOps, SRE or platform engineer",
+   "signals": "Already works on AWS/Azure, CI/CD, Kubernetes",
+   "pains": [
+    "Asked to run LLM workloads without training",
+    "Wants an AI platform or LLMOps role"
+   ],
+   "primary": "GAI-CD",
+   "why": "Agents, LLMOps and AI infrastructure for people who already know cloud.",
+   "upsell": "CD-M",
+   "alternative": "FDE-M",
+   "avoid": [
+    "CD",
+    "AAP"
+   ],
+   "probes": [
+    "Which cloud and tools daily?",
+    "Python comfort?",
+    "Run AI platforms or build AI apps?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "infra-ops",
+   "group": "Cloud & infrastructure",
+   "name": "IT infrastructure professional moving to cloud",
+   "signals": "IT support/ITOps, system admin, network engineer, DBA; 1+ year",
+   "pains": [
+    "Role being automated or outsourced",
+    "Night shifts, low growth",
+    "No cloud certification"
+   ],
+   "primary": "CD",
+   "why": "One program; pick the role track that matches their job.",
+   "upsell": "CD-M",
+   "alternative": "GAI-CD",
+   "avoid": [
+    "AIL",
+    "AAP"
+   ],
+   "probes": [
+    "Current role and stack?",
+    "Any cloud certification?",
+    "Linux and scripting comfort?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "nontech-cloud",
+   "group": "Cloud & infrastructure",
+   "name": "Non-IT person asking about cloud jobs",
+   "signals": "No IT background; heard cloud pays well",
+   "pains": [
+    "Wants a high-paying tech job",
+    "No IT experience"
+   ],
+   "primary": "DABA",
+   "why": "Cloud programs need 1+ year of IT experience. Analytics is the realistic tech entry for non-IT people.",
+   "upsell": "DSG-C",
+   "alternative": "AAP",
+   "avoid": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "probes": [
+    "Have you used a command line or written a script?",
+    "Why cloud specifically?",
+    "Open to analytics?"
+   ],
+   "note": "Be upfront that cloud programs require IT experience. Don't sell CD to this lead.",
+   "fdePriority": false
+  },
+  {
+   "id": "tech-manager",
+   "group": "Managers & leaders",
+   "name": "Tech manager, engineering lead or architect",
+   "signals": "2+ years; delivery manager, EM, architect, or an MBA in a manager role",
+   "pains": [
+    "Asked to lead AI initiatives",
+    "Team is ahead of them on AI"
+   ],
+   "primary": "AIL",
+   "why": "Strategy, ROI, governance and AI delivery management, no coding.",
+   "upsell": "GAI-M",
+   "alternative": "FDE-M",
+   "avoid": [
+    "DABA",
+    "AAP"
+   ],
+   "probes": [
+    "Hands-on or fully managerial?",
+    "Which AI initiative is on your table?",
+    "Team size?"
+   ],
+   "note": "If they still code and want to build, offer the GenAI & Agentic AI Master.",
+   "fdePriority": true
+  },
+  {
+   "id": "biz-leader",
+   "group": "Managers & leaders",
+   "name": "Business leader, founder or CXO",
+   "signals": "Business head, founder, consultant; wants AI strategy",
+   "pains": [
+    "Pressure to have an AI strategy",
+    "Can't judge vendors or proposals"
+   ],
+   "primary": "AIL",
+   "why": "No-code leadership program with a capstone on their own organisation's AI plan.",
+   "upsell": null,
+   "alternative": "AAP",
+   "avoid": [
+    "GAI-M",
+    "FDE-M",
+    "SDE-M",
+    "DSG-M"
+   ],
+   "probes": [
+    "What business outcome do you want?",
+    "Build yourself or lead a team?",
+    "Time per week?"
+   ],
+   "note": "",
+   "fdePriority": false
+  },
+  {
+   "id": "domain-pro",
+   "group": "Domain specialists",
+   "name": "Domain professional in BFSI, healthcare, manufacturing or retail",
+   "signals": "Analyst, risk, ops or product person; comfortable with some code",
+   "pains": [
+    "Wants AI roles inside their industry",
+    "Generic courses ignore their domain"
+   ],
+   "primary": "GAI-M",
+   "why": "Two domain specialisations on top of the GenAI core.",
+   "upsell": null,
+   "alternative": "DSG-M",
+   "avoid": [
+    "AAP"
+   ],
+   "probes": [
+    "Which industry and function?",
+    "Build models or apply AI?",
+    "Coding background?"
+   ],
+   "note": "If they don't code, route them to DABA (domain analytics track) or AAP.",
+   "fdePriority": true
+  },
+  {
+   "id": "undecided-tech",
+   "group": "Domain specialists",
+   "name": "Tech professional who 'wants AI' with no target role",
+   "signals": "Any IT role; vague goal; comparing institutes",
+   "pains": [
+    "Confused by options",
+    "Fears picking the wrong track"
+   ],
+   "primary": "GAI-M",
+   "why": "Broadest master; specialisations are chosen in month 6, after the core.",
+   "upsell": null,
+   "alternative": "GAI-SD",
+   "avoid": [],
+   "probes": [
+    "What do you want to be doing in 12 months?",
+    "Coding daily or rarely?",
+    "Budget and timeline?"
+   ],
+   "note": "",
+   "fdePriority": true
+  },
+  {
+   "id": "degree",
+   "group": "Domain specialists",
+   "name": "Lead who needs a formal degree",
+   "signals": "Mentions MS, M.Tech, degree, immigration, HR policy",
+   "pains": [
+    "Needs a degree for promotion, visa or policy"
+   ],
+   "primary": "MCS",
+   "why": "Only degree route. Needs a bachelor's with 60%+.",
+   "upsell": null,
+   "alternative": "DSG-M",
+   "avoid": [],
+   "probes": [
+    "Do you need a degree, or will a certification work?",
+    "Is it for promotion, visa or a job requirement?",
+    "Bachelor's aggregate?"
+   ],
+   "note": "",
+   "fdePriority": false
+  }
+ ],
+ "routing": [
+  {
+   "question": "Did a tech professional ask about FDE (Forward Deployed AI Engineer)?",
+   "rule": "Yes → recommend Forward Deployed AI Engineer first, before the default mapping. Only redirect if they don't code at all; for newer coders, add Python and backend pre-work."
+  },
+  {
+   "question": "Does the lead code at work, or have a CS/IT degree?",
+   "rule": "No → AAP, DABA or AIL. Yes → continue."
+  },
+  {
+   "question": "How much work experience?",
+   "rule": "0 years → fresher programs only (AAP, DABA, DS & GenAI Program). 1+ year → any program. AI Leadership needs 2+ years, including MBAs in manager roles; no 8-year minimum."
+  },
+  {
+   "question": "Are they a graduate?",
+   "rule": "No → AAP only (confirm IIT Patna eligibility). Students still studying → AAP now, DABA or DSG-C after graduating."
+  },
+  {
+   "question": "Current role",
+   "rule": "Developer, data, cloud/infra, QA, manager, domain specialist or fresher → see lead types."
+  },
+  {
+   "question": "Goal",
+   "rule": "Use AI in current role · switch role · product-company jump · lead AI adoption · formal degree."
+  }
+ ],
+ "projects": [
+  {
+   "id": "P01",
+   "domain": "Banking & BFSI",
+   "title": "Loan Officer's AI Desk",
+   "track": "No-code AI",
+   "programs": [
+    "AAP",
+    "AIL"
+   ],
+   "objective": "Cut the time a loan officer spends reading applications and policy documents.",
+   "tools": [
+    "Claude Projects",
+    "Google Drive connector",
+    "Gmail connector",
+    "Google Sheets"
+   ],
+   "outcome": "An assistant that summarises each application, flags missing documents against policy and drafts the follow-up email."
+  },
+  {
+   "id": "P02",
+   "domain": "Banking & BFSI",
+   "title": "Collections Performance Dashboard",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show collection managers which buckets, regions and agents are slipping, early enough to act.",
+   "tools": [
+    "SQL",
+    "Power BI",
+    "DAX",
+    "Excel"
+   ],
+   "outcome": "A drill-down dashboard of roll rates, cure rates and agent productivity with a weekly AI-written summary."
+  },
+  {
+   "id": "P03",
+   "domain": "Banking & BFSI",
+   "title": "Credit Risk Scoring with Explainability",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Predict probability of default and explain every decision in a form auditors accept.",
+   "tools": [
+    "Python",
+    "XGBoost",
+    "SHAP",
+    "MLflow"
+   ],
+   "outcome": "A scorecard model with reason codes per applicant and a fairness check across customer segments."
+  },
+  {
+   "id": "P04",
+   "domain": "Banking & BFSI",
+   "title": "Enterprise Knowledge Copilot for Bank Staff",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M",
+    "GAI-SD"
+   ],
+   "objective": "Let 10,000 branch staff get cited answers from policy, product and RBI circulars, each seeing only what their role allows.",
+   "tools": [
+    "LangGraph",
+    "Qdrant",
+    "FastAPI",
+    "Presidio",
+    "Ragas"
+   ],
+   "outcome": "A permission-aware RAG copilot with citations, PII masking and an evaluation report showing answer accuracy."
+  },
+  {
+   "id": "P05",
+   "domain": "Banking & BFSI",
+   "title": "Agentic KYC Verification Pipeline",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M"
+   ],
+   "objective": "Verify KYC documents end-to-end and route only true exceptions to a human.",
+   "tools": [
+    "LangGraph",
+    "Vision LLM",
+    "Rule engine",
+    "FastAPI"
+   ],
+   "outcome": "A pipeline that extracts, cross-checks and approves documents, with a human-approval step and audit log."
+  },
+  {
+   "id": "P06",
+   "domain": "Insurance",
+   "title": "Claims Intake Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Turn emailed claim documents into a clean claim record without manual typing.",
+   "tools": [
+    "Claude",
+    "Gmail connector",
+    "Zapier",
+    "Google Sheets"
+   ],
+   "outcome": "An automation that reads incoming claim emails, extracts fields into a sheet and replies with missing items."
+  },
+  {
+   "id": "P07",
+   "domain": "Insurance",
+   "title": "Claims Turnaround Analysis",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Find where claims get stuck and which products drive the most delays.",
+   "tools": [
+    "SQL",
+    "Python (pandas)",
+    "Tableau"
+   ],
+   "outcome": "A TAT funnel by stage, product and region with three specific process recommendations."
+  },
+  {
+   "id": "P08",
+   "domain": "Insurance",
+   "title": "Autonomous Claims Processing Agent",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M"
+   ],
+   "objective": "Automate claim validation against policy terms, keeping humans on high-value exceptions.",
+   "tools": [
+    "LangGraph",
+    "Document AI",
+    "PostgreSQL",
+    "Approval gates"
+   ],
+   "outcome": "A deployed agent that validates claims, explains its decision and escalates exceptions, cutting manual review."
+  },
+  {
+   "id": "P09",
+   "domain": "Fintech & Payments",
+   "title": "Merchant Reconciliation Service",
+   "track": "GenAI Engineering",
+   "programs": [
+    "SDE-M",
+    "GAI-SD",
+    "FDE-M"
+   ],
+   "objective": "Match millions of payment and settlement records and explain every mismatch.",
+   "tools": [
+    "Python",
+    "PostgreSQL",
+    "FastAPI",
+    "LLM explanations"
+   ],
+   "outcome": "A reconciliation service with an AI layer that writes plain-language reasons for each break."
+  },
+  {
+   "id": "P10",
+   "domain": "Fintech & Payments",
+   "title": "Real-Time Fraud Detection & Explanation",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M",
+    "GAI-M"
+   ],
+   "objective": "Flag fraudulent transactions in real time and tell investigators why.",
+   "tools": [
+    "Kafka",
+    "XGBoost",
+    "SHAP",
+    "LLM summaries"
+   ],
+   "outcome": "A streaming fraud model with investigator-ready case summaries."
+  },
+  {
+   "id": "P11",
+   "domain": "Fintech & Payments",
+   "title": "Payments Platform on Kubernetes",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "objective": "Run a payment API that survives a zone failure without losing transactions.",
+   "tools": [
+    "AWS EKS",
+    "Terraform",
+    "Helm",
+    "Prometheus",
+    "Grafana"
+   ],
+   "outcome": "A multi-AZ deployment with autoscaling, alerting and a tested failover runbook."
+  },
+  {
+   "id": "P12",
+   "domain": "Healthcare",
+   "title": "Patient FAQ & Appointment Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Answer routine patient questions and book appointments without front-desk calls.",
+   "tools": [
+    "Claude Projects",
+    "Google Calendar connector",
+    "n8n",
+    "Website widget"
+   ],
+   "outcome": "A clinic assistant that answers from approved content, books slots and hands sensitive questions to staff."
+  },
+  {
+   "id": "P13",
+   "domain": "Healthcare",
+   "title": "Hospital Readmission Risk Model",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Identify patients likely to be readmitted within 30 days so care teams can intervene.",
+   "tools": [
+    "Python",
+    "LightGBM",
+    "SHAP",
+    "Power BI"
+   ],
+   "outcome": "A risk model plus a ward-level dashboard of high-risk patients and top drivers."
+  },
+  {
+   "id": "P14",
+   "domain": "Healthcare",
+   "title": "Clinical Documentation Assistant",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M"
+   ],
+   "objective": "Draft de-identified clinical notes and ICD codes for clinician review.",
+   "tools": [
+    "FastAPI",
+    "Presidio",
+    "Fine-tuned LLM",
+    "Audit trail"
+   ],
+   "outcome": "An assistant that cuts documentation time while keeping clinicians in control of every note."
+  },
+  {
+   "id": "P15",
+   "domain": "Healthcare",
+   "title": "HIPAA-Ready Cloud Landing Zone",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "objective": "Host a health app with encryption, access logging and backups that meet compliance checks.",
+   "tools": [
+    "AWS",
+    "Terraform",
+    "KMS",
+    "CloudTrail",
+    "AWS Backup"
+   ],
+   "outcome": "A reusable, audited infrastructure template with automated compliance checks."
+  },
+  {
+   "id": "P16",
+   "domain": "Pharma & Life Sciences",
+   "title": "Medical Literature Digest",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Keep medical affairs teams current on new publications without hours of reading.",
+   "tools": [
+    "Claude",
+    "PubMed via MCP connector",
+    "Notion connector"
+   ],
+   "outcome": "A weekly digest of new papers summarised and filed in Notion with key findings highlighted."
+  },
+  {
+   "id": "P17",
+   "domain": "Pharma & Life Sciences",
+   "title": "Drug Safety Signal Investigator",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "DSG-M",
+    "FDE-M"
+   ],
+   "objective": "Spot emerging adverse-event signals in safety reports faster.",
+   "tools": [
+    "LangChain",
+    "Vector DB",
+    "Python",
+    "Ragas"
+   ],
+   "outcome": "A RAG investigator that clusters reports, surfaces signals and links each claim to its source."
+  },
+  {
+   "id": "P18",
+   "domain": "Pharma & Life Sciences",
+   "title": "Clinical Trial Enrolment Analytics",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show which trial sites are behind on enrolment and why.",
+   "tools": [
+    "SQL",
+    "Tableau",
+    "Excel"
+   ],
+   "outcome": "A site-level enrolment tracker with forecasts and an AI-written status note for sponsors."
+  },
+  {
+   "id": "P19",
+   "domain": "Retail & E-commerce",
+   "title": "Product Listing Factory",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Create on-brand product titles, descriptions and images for hundreds of SKUs.",
+   "tools": [
+    "Claude",
+    "Google Sheets connector",
+    "Nano Banana",
+    "Canva"
+   ],
+   "outcome": "A repeatable workflow that produces marketplace-ready listings from a spreadsheet of SKUs."
+  },
+  {
+   "id": "P20",
+   "domain": "Retail & E-commerce",
+   "title": "Sales & Returns Insight Dashboard",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show category managers what sells, what comes back and why.",
+   "tools": [
+    "SQL",
+    "Power BI",
+    "Python (pandas)"
+   ],
+   "outcome": "A dashboard linking sales, returns and review themes, with return-rate drivers by category."
+  },
+  {
+   "id": "P21",
+   "domain": "Retail & E-commerce",
+   "title": "Demand Forecasting for Inventory",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Forecast SKU-level demand to reduce stock-outs and overstock.",
+   "tools": [
+    "Python",
+    "Prophet",
+    "LightGBM",
+    "Power BI"
+   ],
+   "outcome": "Weekly forecasts per SKU and store with accuracy tracking and reorder suggestions."
+  },
+  {
+   "id": "P22",
+   "domain": "Retail & E-commerce",
+   "title": "Agentic Catalog & Pricing Agent",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M",
+    "GAI-SD",
+    "SDE-M"
+   ],
+   "objective": "Keep catalog data clean and recommend prices that respond to competitors and stock.",
+   "tools": [
+    "LangGraph",
+    "CrewAI",
+    "PostgreSQL",
+    "MCP"
+   ],
+   "outcome": "An agent that fixes listing attributes and proposes price changes for human approval."
+  },
+  {
+   "id": "P23",
+   "domain": "Retail & E-commerce",
+   "title": "Sale-Day Autoscaling Platform",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "objective": "Keep the storefront up during a 10x traffic spike.",
+   "tools": [
+    "Kubernetes",
+    "HPA",
+    "CloudFront",
+    "Redis",
+    "k6"
+   ],
+   "outcome": "A load-tested platform that scales automatically and holds response times during peak traffic."
+  },
+  {
+   "id": "P24",
+   "domain": "Manufacturing",
+   "title": "Shift Report Summariser",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Turn messy shift logs into a clear handover note every morning.",
+   "tools": [
+    "Claude",
+    "Google Drive connector",
+    "Make"
+   ],
+   "outcome": "An automated daily handover with downtime, defects and actions pulled from shift logs."
+  },
+  {
+   "id": "P25",
+   "domain": "Manufacturing",
+   "title": "Predictive Maintenance Classifier",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Predict machine failures from sensor data before they stop the line.",
+   "tools": [
+    "Python",
+    "scikit-learn",
+    "Featuretools",
+    "Power BI"
+   ],
+   "outcome": "A failure-risk model and maintenance priority list per machine."
+  },
+  {
+   "id": "P26",
+   "domain": "Manufacturing",
+   "title": "Quality & SOP Intelligence Platform",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M"
+   ],
+   "objective": "Help line engineers fix defects using SOPs, manuals and past incidents.",
+   "tools": [
+    "LangChain",
+    "Azure OpenAI",
+    "Vector DB",
+    "Vision model"
+   ],
+   "outcome": "A troubleshooting assistant that answers from manuals and suggests fixes from similar past defects."
+  },
+  {
+   "id": "P27",
+   "domain": "Manufacturing",
+   "title": "OEE Performance Dashboard",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show plant heads availability, performance and quality losses by line.",
+   "tools": [
+    "SQL",
+    "Power BI",
+    "DAX"
+   ],
+   "outcome": "An OEE dashboard with loss-tree drill-down and weekly improvement targets."
+  },
+  {
+   "id": "P28",
+   "domain": "Supply Chain & Logistics",
+   "title": "Delivery Exception Notifier",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Tell customers about delayed shipments before they call.",
+   "tools": [
+    "Claude",
+    "n8n",
+    "Google Sheets",
+    "WhatsApp Business API"
+   ],
+   "outcome": "An automation that detects delays and sends personalised updates with a new ETA."
+  },
+  {
+   "id": "P29",
+   "domain": "Supply Chain & Logistics",
+   "title": "Inventory & OTIF Control Tower",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Give planners one view of stock, orders and on-time-in-full performance.",
+   "tools": [
+    "SQL",
+    "Tableau",
+    "Excel"
+   ],
+   "outcome": "A control-tower dashboard with alerts for low cover and late suppliers."
+  },
+  {
+   "id": "P30",
+   "domain": "Supply Chain & Logistics",
+   "title": "Supply Chain Exception Agent",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M"
+   ],
+   "objective": "Detect disruptions, simulate options and recommend the best response.",
+   "tools": [
+    "LangGraph",
+    "Kafka",
+    "Kubernetes",
+    "OR-Tools"
+   ],
+   "outcome": "An agent that proposes re-routing or re-sourcing options with cost and delay impact."
+  },
+  {
+   "id": "P31",
+   "domain": "Supply Chain & Logistics",
+   "title": "Route & Delivery Time Prediction",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Predict delivery times accurately enough to promise them to customers.",
+   "tools": [
+    "Python",
+    "XGBoost",
+    "Geospatial features",
+    "FastAPI"
+   ],
+   "outcome": "An ETA model served as an API, with error tracked by city and time of day."
+  },
+  {
+   "id": "P32",
+   "domain": "Telecom",
+   "title": "Churn Prediction & Retention Offers",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Find subscribers likely to leave and the offer most likely to keep them.",
+   "tools": [
+    "Python",
+    "XGBoost",
+    "SHAP",
+    "SQL"
+   ],
+   "outcome": "A churn model with per-customer reasons and a ranked retention-offer list."
+  },
+  {
+   "id": "P33",
+   "domain": "Telecom",
+   "title": "Network Operations Copilot",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M",
+    "GAI-CD"
+   ],
+   "objective": "Help NOC engineers find root causes of outages from alarms, logs and runbooks.",
+   "tools": [
+    "LangGraph",
+    "Prometheus",
+    "Runbook RAG",
+    "MCP"
+   ],
+   "outcome": "A copilot that groups alarms, suggests root cause and drafts the incident report."
+  },
+  {
+   "id": "P34",
+   "domain": "Telecom",
+   "title": "5G Traffic Forecasting",
+   "track": "Data Science",
+   "programs": [
+    "DSG-M"
+   ],
+   "objective": "Forecast cell-level bandwidth demand to plan capacity.",
+   "tools": [
+    "Python",
+    "LSTM",
+    "Kafka",
+    "Grafana"
+   ],
+   "outcome": "Hourly demand forecasts per cell with capacity alerts."
+  },
+  {
+   "id": "P35",
+   "domain": "Telecom",
+   "title": "Cloud Network Foundation",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "objective": "Design secure, hybrid cloud networking for a telecom IT estate.",
+   "tools": [
+    "AWS VPC",
+    "Transit Gateway",
+    "Terraform",
+    "Direct Connect"
+   ],
+   "outcome": "A multi-VPC network deployed from code, with routing, firewalls and flow-log monitoring."
+  },
+  {
+   "id": "P36",
+   "domain": "Energy & Utilities",
+   "title": "Smart Meter Anomaly Detection",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Catch faulty meters and energy theft from consumption patterns.",
+   "tools": [
+    "Python",
+    "LSTM autoencoder",
+    "Pandas",
+    "Power BI"
+   ],
+   "outcome": "An anomaly model and a field-inspection list ranked by likely loss."
+  },
+  {
+   "id": "P37",
+   "domain": "Energy & Utilities",
+   "title": "Outage Communication Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Keep customers informed during outages with accurate, consistent messages.",
+   "tools": [
+    "Claude",
+    "Zapier",
+    "Google Sheets",
+    "SMS gateway"
+   ],
+   "outcome": "An automation that turns outage records into area-wise customer updates."
+  },
+  {
+   "id": "P38",
+   "domain": "Energy & Utilities",
+   "title": "IoT Telemetry Platform",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "objective": "Ingest and store sensor data from thousands of field devices reliably.",
+   "tools": [
+    "AWS IoT Core",
+    "Kinesis",
+    "Terraform",
+    "Grafana"
+   ],
+   "outcome": "A scalable telemetry pipeline with dashboards and device-health alerts."
+  },
+  {
+   "id": "P39",
+   "domain": "Automotive & Mobility",
+   "title": "Vehicle Diagnostics Assistant",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M",
+    "GAI-SD",
+    "SDE-M"
+   ],
+   "objective": "Help service technicians diagnose faults from sensor codes and service bulletins.",
+   "tools": [
+    "AutoGen",
+    "AWS Bedrock",
+    "RAG",
+    "FastAPI"
+   ],
+   "outcome": "An assistant that explains fault codes and suggests repair steps with references."
+  },
+  {
+   "id": "P40",
+   "domain": "Automotive & Mobility",
+   "title": "Used-Car Price Estimator",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Price used vehicles fairly from their specs, history and market.",
+   "tools": [
+    "Python",
+    "LightGBM",
+    "SHAP",
+    "Streamlit"
+   ],
+   "outcome": "A pricing app that shows the estimate and what drives it."
+  },
+  {
+   "id": "P41",
+   "domain": "Automotive & Mobility",
+   "title": "Ride-Sharing Platform Design",
+   "track": "Software Engineering",
+   "programs": [
+    "SDE-M",
+    "GAI-SD",
+    "CD-M"
+   ],
+   "objective": "Design a ride-matching system that handles city-scale demand.",
+   "tools": [
+    "System design",
+    "Kafka",
+    "Redis",
+    "PostgreSQL"
+   ],
+   "outcome": "An HLD/LLD with capacity estimates, matching logic and failure handling, defended in a review."
+  },
+  {
+   "id": "P42",
+   "domain": "Education & EdTech",
+   "title": "AI Teaching Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Create lesson plans, quizzes and feedback faster for a full class.",
+   "tools": [
+    "Claude Projects",
+    "Google Drive connector",
+    "Gamma"
+   ],
+   "outcome": "A teaching assistant that drafts lessons and quizzes from the syllabus and grades short answers with a rubric."
+  },
+  {
+   "id": "P43",
+   "domain": "Education & EdTech",
+   "title": "Learner Drop-off Analytics",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Find where learners drop out of courses and what keeps them going.",
+   "tools": [
+    "SQL",
+    "Python (pandas)",
+    "Tableau"
+   ],
+   "outcome": "A funnel and cohort analysis with recommended interventions."
+  },
+  {
+   "id": "P44",
+   "domain": "Education & EdTech",
+   "title": "Personalised Learning Path Agent",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M",
+    "GAI-SD",
+    "SDE-M"
+   ],
+   "objective": "Recommend the next lesson for each learner based on progress and gaps.",
+   "tools": [
+    "LangGraph",
+    "Vector DB",
+    "FastAPI",
+    "Evals"
+   ],
+   "outcome": "An agent that builds a personalised path and explains why each step was chosen."
+  },
+  {
+   "id": "P45",
+   "domain": "Media & Entertainment",
+   "title": "Content Repurposing Studio",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Turn one long video or article into a week of social content.",
+   "tools": [
+    "Claude",
+    "ElevenLabs",
+    "Runway",
+    "Canva"
+   ],
+   "outcome": "A workflow that produces clips, captions, posts and a voice-over from a single source."
+  },
+  {
+   "id": "P46",
+   "domain": "Media & Entertainment",
+   "title": "Content Recommendation Engine",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Recommend content viewers are likely to finish.",
+   "tools": [
+    "Python",
+    "Implicit feedback models",
+    "Embeddings",
+    "FastAPI"
+   ],
+   "outcome": "A recommender with offline accuracy metrics and an A/B test plan."
+  },
+  {
+   "id": "P47",
+   "domain": "Media & Entertainment",
+   "title": "Audience Sentiment Pipeline",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M",
+    "GAI-M"
+   ],
+   "objective": "Track how audiences feel about shows and stars across social media.",
+   "tools": [
+    "Python",
+    "Transformers (BERT)",
+    "Power BI"
+   ],
+   "outcome": "A daily sentiment dashboard with topic drill-down."
+  },
+  {
+   "id": "P48",
+   "domain": "Marketing & Advertising",
+   "title": "Campaign-in-a-Day",
+   "track": "No-code AI",
+   "programs": [
+    "AAP",
+    "AIL"
+   ],
+   "objective": "Go from one brief to a full multi-channel campaign creative set in a day.",
+   "tools": [
+    "Claude",
+    "Nano Banana",
+    "Canva",
+    "Google Drive connector"
+   ],
+   "outcome": "Ads, social posts, emails and a landing-page draft in brand voice, with a review checklist."
+  },
+  {
+   "id": "P49",
+   "domain": "Marketing & Advertising",
+   "title": "SEO & AI-Search Content Engine",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Plan and draft content that ranks in Google and gets cited by AI assistants.",
+   "tools": [
+    "Claude Code",
+    "Semrush via MCP",
+    "Google Search Console",
+    "Notion"
+   ],
+   "outcome": "A content plan and drafts built from keyword data, with a tracking sheet for rankings."
+  },
+  {
+   "id": "P50",
+   "domain": "Marketing & Advertising",
+   "title": "Campaign ROI & Attribution Dashboard",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show which channels actually drive conversions and what each costs.",
+   "tools": [
+    "SQL",
+    "Power BI",
+    "Google Analytics data",
+    "Excel"
+   ],
+   "outcome": "A dashboard of CAC, ROAS and attribution by channel with budget-shift recommendations."
+  },
+  {
+   "id": "P51",
+   "domain": "Marketing & Advertising",
+   "title": "Customer Segmentation for Targeting",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Group customers by behaviour so campaigns target the right people.",
+   "tools": [
+    "Python",
+    "K-Means",
+    "PCA",
+    "Tableau"
+   ],
+   "outcome": "Named customer segments with size, value and the message that suits each."
+  },
+  {
+   "id": "P52",
+   "domain": "HR & People",
+   "title": "Hiring Pipeline Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP",
+    "AIL"
+   ],
+   "objective": "Speed up screening while keeping it fair and consistent.",
+   "tools": [
+    "Claude Projects",
+    "Gmail connector",
+    "Google Sheets",
+    "n8n"
+   ],
+   "outcome": "A workflow that scores CVs against a rubric, drafts replies and logs every decision for review."
+  },
+  {
+   "id": "P53",
+   "domain": "HR & People",
+   "title": "Attrition Risk Dashboard",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show HR which teams are at risk of losing people and why.",
+   "tools": [
+    "Excel",
+    "Power Query",
+    "Power BI",
+    "SQL"
+   ],
+   "outcome": "An attrition dashboard with drivers by team, tenure and manager."
+  },
+  {
+   "id": "P54",
+   "domain": "HR & People",
+   "title": "HR Policy Copilot",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M",
+    "GAI-SD",
+    "SDE-M"
+   ],
+   "objective": "Answer employee policy questions instantly with sources.",
+   "tools": [
+    "LangChain",
+    "Vector DB",
+    "FastAPI",
+    "Slack app"
+   ],
+   "outcome": "A Slack bot that answers from HR policy with citations and escalates sensitive cases."
+  },
+  {
+   "id": "P55",
+   "domain": "Legal & Compliance",
+   "title": "Contract Review Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Flag risky clauses in contracts before legal review.",
+   "tools": [
+    "Claude Projects",
+    "Google Drive connector",
+    "Clause checklist"
+   ],
+   "outcome": "A first-pass review that highlights deviations from standard terms with suggested redlines."
+  },
+  {
+   "id": "P56",
+   "domain": "Legal & Compliance",
+   "title": "Hybrid Legal Search Engine",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M"
+   ],
+   "objective": "Find relevant case files and clauses across thousands of documents.",
+   "tools": [
+    "Elasticsearch",
+    "pgvector",
+    "Cohere Rerank",
+    "FastAPI"
+   ],
+   "outcome": "Hybrid keyword and semantic search with reranking and measured retrieval accuracy."
+  },
+  {
+   "id": "P57",
+   "domain": "Legal & Compliance",
+   "title": "Regulatory Change Tracker",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "FDE-M"
+   ],
+   "objective": "Track new regulations and map them to internal policies that need updating.",
+   "tools": [
+    "LangGraph",
+    "RAG",
+    "Web scraping",
+    "Notion API"
+   ],
+   "outcome": "An agent that summarises new circulars and lists affected policies and owners."
+  },
+  {
+   "id": "P58",
+   "domain": "Real Estate & Construction",
+   "title": "Property Listing & Lead Responder",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Write listings and reply to buyer enquiries within minutes.",
+   "tools": [
+    "Claude",
+    "Gmail connector",
+    "Canva",
+    "Zapier"
+   ],
+   "outcome": "Listings, brochures and auto-replies that qualify leads and book site visits."
+  },
+  {
+   "id": "P59",
+   "domain": "Real Estate & Construction",
+   "title": "House Price Predictor",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Estimate property prices from location, size and amenities.",
+   "tools": [
+    "Python",
+    "XGBoost",
+    "Geospatial data",
+    "Streamlit"
+   ],
+   "outcome": "A price estimator app with comparable properties and key drivers."
+  },
+  {
+   "id": "P60",
+   "domain": "Real Estate & Construction",
+   "title": "Project Cost Overrun Analytics",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Show which construction projects are drifting over budget and why.",
+   "tools": [
+    "SQL",
+    "Power BI",
+    "Excel"
+   ],
+   "outcome": "A cost-variance dashboard by project, phase and contractor."
+  },
+  {
+   "id": "P61",
+   "domain": "Travel & Hospitality",
+   "title": "Guest Concierge Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Answer guest questions and upsell services around the clock.",
+   "tools": [
+    "Claude Projects",
+    "WhatsApp Business",
+    "n8n"
+   ],
+   "outcome": "A concierge bot that answers from hotel info, takes requests and suggests add-ons."
+  },
+  {
+   "id": "P62",
+   "domain": "Travel & Hospitality",
+   "title": "Dynamic Room Pricing",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Set room prices that respond to demand, events and competitors.",
+   "tools": [
+    "Python",
+    "Demand forecasting",
+    "Optimisation",
+    "Power BI"
+   ],
+   "outcome": "A pricing recommender with expected revenue uplift per night."
+  },
+  {
+   "id": "P63",
+   "domain": "Travel & Hospitality",
+   "title": "Booking Platform Design",
+   "track": "Software Engineering",
+   "programs": [
+    "SDE-M",
+    "GAI-SD"
+   ],
+   "objective": "Design a booking system that never double-books under heavy load.",
+   "tools": [
+    "System design",
+    "PostgreSQL",
+    "Redis locks",
+    "Kafka"
+   ],
+   "outcome": "An HLD/LLD with concurrency handling and capacity plan, defended in a review."
+  },
+  {
+   "id": "P64",
+   "domain": "Agriculture",
+   "title": "Crop Advisory Assistant",
+   "track": "No-code AI",
+   "programs": [
+    "AAP"
+   ],
+   "objective": "Give farmers advice in their language on crops, weather and pests.",
+   "tools": [
+    "Claude",
+    "Weather API via connector",
+    "WhatsApp",
+    "Voice (ElevenLabs)"
+   ],
+   "outcome": "A multilingual voice and text advisor grounded in agronomy guides."
+  },
+  {
+   "id": "P65",
+   "domain": "Agriculture",
+   "title": "Crop Yield Prediction",
+   "track": "Data Science",
+   "programs": [
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Predict yield by district to plan procurement and storage.",
+   "tools": [
+    "Python",
+    "Satellite indices",
+    "LightGBM",
+    "Power BI"
+   ],
+   "outcome": "District-level yield forecasts with confidence ranges."
+  },
+  {
+   "id": "P66",
+   "domain": "Public Sector",
+   "title": "Citizen Services Assistant",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-M"
+   ],
+   "objective": "Answer citizen questions on schemes in multiple languages, offline-capable.",
+   "tools": [
+    "vLLM",
+    "Qdrant",
+    "Guardrails",
+    "On-prem deployment"
+   ],
+   "outcome": "An air-gapped multilingual assistant with calibrated refusals and audit logs."
+  },
+  {
+   "id": "P67",
+   "domain": "Public Sector",
+   "title": "Grievance Analytics",
+   "track": "Analytics",
+   "programs": [
+    "DABA",
+    "DSG-C",
+    "DSG-M"
+   ],
+   "objective": "Find patterns in citizen complaints so departments fix root causes.",
+   "tools": [
+    "SQL",
+    "Python (pandas)",
+    "Tableau",
+    "LLM topic tagging"
+   ],
+   "outcome": "A grievance dashboard by department, topic and resolution time."
+  },
+  {
+   "id": "P68",
+   "domain": "IT Services & SaaS",
+   "title": "Build Your Own MCP Server",
+   "track": "No-code AI",
+   "programs": [
+    "AAP",
+    "GAI-M",
+    "FDE-M",
+    "GAI-SD",
+    "SDE-M"
+   ],
+   "objective": "Connect Claude to a tool your team uses that has no ready-made connector.",
+   "tools": [
+    "Claude Code",
+    "MCP SDK",
+    "Google Sheets or CRM API",
+    "Claude Desktop"
+   ],
+   "outcome": "A working MCP server, built with Claude Code, that lets Claude read and update your team's tracker."
+  },
+  {
+   "id": "P69",
+   "domain": "IT Services & SaaS",
+   "title": "Multi-Tenant SaaS Copilot",
+   "track": "GenAI Engineering",
+   "programs": [
+    "FDE-M",
+    "GAI-SD",
+    "SDE-M"
+   ],
+   "objective": "Add an in-product AI copilot that keeps every customer's data separate.",
+   "tools": [
+    "Next.js",
+    "LangGraph",
+    "FastAPI",
+    "Usage metering"
+   ],
+   "outcome": "A copilot with per-tenant knowledge, tool actions, streaming UI and usage billing."
+  },
+  {
+   "id": "P70",
+   "domain": "IT Services & SaaS",
+   "title": "Developer Productivity Agent Suite",
+   "track": "GenAI Engineering",
+   "programs": [
+    "SDE-M",
+    "GAI-SD",
+    "FDE-M"
+   ],
+   "objective": "Speed up code review, test writing and migrations across a large codebase.",
+   "tools": [
+    "Claude Code",
+    "MCP",
+    "GitHub API",
+    "LangGraph"
+   ],
+   "outcome": "Agents that review PRs, generate tests and propose migrations as reviewable pull requests."
+  },
+  {
+   "id": "P71",
+   "domain": "IT Services & SaaS",
+   "title": "Enterprise GitOps Platform",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD"
+   ],
+   "objective": "Deploy every app and environment from Git with automatic sync and rollback.",
+   "tools": [
+    "ArgoCD",
+    "GitHub Actions",
+    "Kubernetes",
+    "Helm"
+   ],
+   "outcome": "A GitOps platform with environment promotion, drift detection and one-click rollback."
+  },
+  {
+   "id": "P72",
+   "domain": "IT Services & SaaS",
+   "title": "AI Incident Triage & RCA Bot",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD",
+    "CD-M",
+    "GAI-CD",
+    "FDE-M"
+   ],
+   "objective": "Cut time-to-resolve by having AI read alerts and logs first.",
+   "tools": [
+    "LangGraph",
+    "ELK",
+    "Prometheus",
+    "Slack"
+   ],
+   "outcome": "A bot that groups alerts, proposes root cause and runs safe runbook steps after approval."
+  },
+  {
+   "id": "P73",
+   "domain": "IT Services & SaaS",
+   "title": "DevSecOps Compliance Pipeline",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "CD-M",
+    "CD"
+   ],
+   "objective": "Block insecure code and images before they reach production.",
+   "tools": [
+    "SonarQube",
+    "Trivy",
+    "Vault",
+    "OPA",
+    "GitHub Actions"
+   ],
+   "outcome": "A pipeline with code, image and secret scanning and signed artefacts."
+  },
+  {
+   "id": "P74",
+   "domain": "IT Services & SaaS",
+   "title": "LLM Inference Platform on Kubernetes",
+   "track": "Cloud & DevOps",
+   "programs": [
+    "GAI-CD",
+    "CD-M",
+    "FDE-M"
+   ],
+   "objective": "Serve open-weight LLMs cheaply and reliably for internal teams.",
+   "tools": [
+    "vLLM",
+    "KServe",
+    "Kubernetes",
+    "OpenTelemetry"
+   ],
+   "outcome": "A GPU-autoscaled inference platform with per-team cost tracking."
+  },
+  {
+   "id": "P75",
+   "domain": "IT Services & SaaS",
+   "title": "QA Intelligence Platform",
+   "track": "GenAI Engineering",
+   "programs": [
+    "GAI-M",
+    "CD"
+   ],
+   "objective": "Generate tests, triage bugs and pick the right regression suite automatically.",
+   "tools": [
+    "LangGraph",
+    "Playwright",
+    "Jira API",
+    "TestRail"
+   ],
+   "outcome": "A QA assistant that writes tests from requirements and cuts regression run time."
+  },
+  {
+   "id": "P76",
+   "domain": "Food-tech & Quick Commerce",
+   "title": "Food Image Tagging",
+   "track": "Data Science",
+   "programs": [
+    "DSG-M"
+   ],
+   "objective": "Tag dishes and attributes automatically from menu photos.",
+   "tools": [
+    "PyTorch",
+    "CNN transfer learning",
+    "FastAPI"
+   ],
+   "outcome": "An image tagger that fills menu attributes and flags poor photos."
+  },
+  {
+   "id": "P77",
+   "domain": "Food-tech & Quick Commerce",
+   "title": "Delivery Operations Dashboard",
+   "track": "GenAI Engineering",
+   "programs": [
+    "SDE-M",
+    "GAI-SD",
+    "FDE-M"
+   ],
+   "objective": "Give ops teams a live view of delays and AI explanations for each.",
+   "tools": [
+    "FastAPI",
+    "Pandas",
+    "Redis",
+    "LLM summaries"
+   ],
+   "outcome": "A real-time dashboard with delay hotspots and auto-written incident notes."
+  },
+  {
+   "id": "P78",
+   "domain": "Cross-industry leadership",
+   "title": "AI Transformation Plan for Your Organisation",
+   "track": "Leadership",
+   "programs": [
+    "AIL"
+   ],
+   "objective": "Decide where AI will create value in your business and how to roll it out safely.",
+   "tools": [
+    "Use-case canvas",
+    "ROI model",
+    "Risk register",
+    "Claude"
+   ],
+   "outcome": "A board-ready plan with prioritised use cases, ROI, governance and a 90-day pilot."
+  },
+  {
+   "id": "P79",
+   "domain": "Cross-industry leadership",
+   "title": "AI Vendor Evaluation Scorecard",
+   "track": "Leadership",
+   "programs": [
+    "AIL"
+   ],
+   "objective": "Choose between AI vendors on evidence, not demos.",
+   "tools": [
+    "Evaluation rubric",
+    "Test prompts",
+    "Cost model"
+   ],
+   "outcome": "A scored comparison of 3 vendors on accuracy, cost, security and fit."
+  }
+ ],
+ "retired": [
+  {
+   "old": "GenAI & Agentic AI Certification Program",
+   "now": "Tech leads → GAI-M or GAI-SD · Freshers → DSG-C · Non-tech → AAP"
+  },
+  {
+   "old": "AI Engineer(ing) Master Program",
+   "now": "FDE-M; shorter path → GAI-SD"
+  },
+  {
+   "old": "C&D for ITS & ITOps / SysAdmin / DBA / Network / QA",
+   "now": "CD (role track)"
+  },
+  {
+   "old": "Advanced Cloud & DevOps Certification Program",
+   "now": "CD, 'General IT & Developers' track"
+  },
+  {
+   "old": "Legacy DS & AI Foundation / Freshers / Advanced DS&AI / AI & ML",
+   "now": "DSG-C"
+  },
+  {
+   "old": "Legacy DS & AI Master / DS&AI for BFSI",
+   "now": "DSG-M"
+  },
+  {
+   "old": "Legacy DS & AI for Managers & Leaders",
+   "now": "AIL"
+  },
+  {
+   "old": "Legacy Data Analytics / HR Analytics / Marketing Analytics / BA Master",
+   "now": "DABA domain tracks"
+  }
+ ]
+}

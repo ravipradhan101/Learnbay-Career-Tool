@@ -1,6 +1,6 @@
 'use client'
 
-// The conversation engine behind the chat (Lumi the guide, then the counsellor). Flows are plain async scripts ("say this, then ask that"):
+// The conversation engine behind the chat (Woody the guide, then the counsellor). Flows are plain async scripts ("say this, then ask that"):
 //   await bot.say('What do you do today?'); const role = await bot.choose(ROLES)
 // Starting another flow (e.g. a click in the left panel) cancels the running one cleanly.
 
@@ -14,7 +14,7 @@ import type { ReportCard } from '@/lib/report-card'
 import type { ToolId } from '@/lib/tools-meta'
 
 /** A project picked from the library for this learner (kept in the card so a reopened chat shows the same ones). */
-export type ProjectItem = { title: string; description: string; tools: string[]; kind: string; domain: string | null; domainLabel?: string | null }
+export type ProjectItem = { title: string; description: string; tools: string[]; kind: string; domain: string | null; domainLabel?: string | null; objective?: string | null; outcome?: string | null; industry?: string | null }
 
 export type Choice = {
   id: string; label: string; hint?: string; icon?: IconName
@@ -39,6 +39,8 @@ export type Card =
   | { type: 'elig-result'; result: EligCompleted }
   | { type: 'usp'; ids: UspId[]; lead?: string }
   | { type: 'booking' }
+  | { type: 'session-ended' }
+  | { type: 'meet'; mode: 'now' | 'pick'; source: string }
   | { type: 'masterclass'; interest: string; label: string }
   | { type: 'call'; source: 'button' | 'chat'; phone: string; by: string }
   | { type: 'call-guest' }
@@ -60,6 +62,7 @@ export type Card =
   | { type: 'decision'; eligible: boolean | null; programId?: string }
   | { type: 'bridge'; have: string[]; add: string[]; role: string; readiness: number | null; program: string }
   | { type: 'fit'; rows: { programId: string; name: string; score: number; reasons: string[] }[] }
+  | ({ type: 'path' } & import('@/lib/lead-match').PathCardData)
 
 type Base = { id: string; at: number }
 export type Item = Base & (
@@ -119,6 +122,7 @@ function cardLabel(c: Card): string {
     case 'fit': return `fit scores: ${c.rows.map((r) => `${r.name} ${r.score}/10`).join(', ')}`
     case 'elig-result': return `eligibility result: ${c.result.score}/100`
     case 'booking': return 'booking a call with a Senior Counsellor'
+    case 'meet': return 'booking a video call with an expert on Google Meet'
     case 'bridge': return `transition plan: has ${c.have.join(', ')}; needs ${c.add.join(', ')}`
     default: return `${c.type} card`
   }
@@ -289,7 +293,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
   const flowActive = useRef(0)
   const conversationId = useRef<string | null>(null)
   const reduced = useRef(false)
-  // Who is talking now (Lumi or the allocated counsellor); every message remembers who said it.
+  // Who is talking now (Woody or the allocated counsellor); every message remembers who said it.
   const [who, setWho] = useState(speaker)
   const whoRef = useRef(speaker)
   whoRef.current = who
@@ -373,7 +377,8 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
   /** A long answer with key points: the lead goes out first, and the learner picks which point to read next. */
   const [more, setMore] = useState<MorePart[]>([])
   const splitLong = (text: string): { head: string; parts: MorePart[] } | null => {
-    if (text.split(/\s+/).length <= 45) return null
+    // Anything longer than a short paragraph arrives in parts: the lead now, each point on tap.
+    if (text.split(/\s+/).length <= 32) return null
     const lines = text.split('\n')
     const parts: MorePart[] = []
     const head: string[] = []
@@ -396,7 +401,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
     const lines: string[] = []
     for (const i of itemsRef.current.slice(-18)) {
       if (i.kind === 'user') lines.push(`Learner: ${i.text}`)
-      else if (i.kind === 'bot') lines.push(`${i.by === 'bot' ? 'Lumi' : 'Counsellor'}: ${i.text}`)
+      else if (i.kind === 'bot') lines.push(`${i.by === 'bot' ? 'Woody' : 'Counsellor'}: ${i.text}`)
       else if (i.kind === 'card') lines.push(`[On screen: ${cardLabel(i.card)}]`)
       else if (i.kind === 'divider') lines.push(`--- ${i.text} ---`)
     }
@@ -415,7 +420,8 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
     const res = await postJson('/api/assistant', { context, message, intent, conversationId: conversationId.current, pending, counsel, recent: recentTranscript() })
     setThinking(false)
     if (!res.ok) {
-      replace(typingId, { id: typingId, at: Date.now(), kind: 'bot', by: whoRef.current, text: res.status === 401 ? 'Please sign in again so I can pick up where we left off.' : res.error })
+      // Signed out on this device: the studio shows a sign-in notice; the counsellor says nothing about it.
+      replace(typingId, res.status === 401 || !res.error ? null : { id: typingId, at: Date.now(), kind: 'bot', by: whoRef.current, text: res.error })
       return { failed: true }
     }
     if (typeof res.data.conversationId === 'string') conversationId.current = res.data.conversationId
@@ -483,6 +489,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
       event(text, tone = 'info') { alive(); add({ id: newId(), at: Date.now(), kind: 'event', text, tone }) },
       speakAs(id) { alive(); whoRef.current = id; setWho(id) },
       async say(text, opts) {
+        if (!text.trim()) return
         alive()
         // Never say the same thing twice in a row (e.g. "Welcome back" on every reload).
         const last = [...itemsRef.current].reverse().find((i) => i.kind !== 'typing' && i.kind !== 'event')

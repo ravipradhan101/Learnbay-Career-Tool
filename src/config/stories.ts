@@ -1,4 +1,4 @@
-// Content shown while Lumi finds a counsellor, and in the studio's right pane.
+// Content shown while Woody finds a counsellor, and in the studio's right pane.
 //
 // Only real content here. ALUMNI_STORIES is for real, consented learner stories (name, photo, before → after role,
 // company, hike) once the team shares them; until then it stays empty and nothing invented is shown as a story.
@@ -33,4 +33,4 @@ export const TRACK_PROJECTS: Record<string, { title: string; tools: string }[]> 
   ],
 }
 
-export const CERTIFICATIONS = ['IBM project certification', 'Microsoft certification (selected programs)', 'IIT Patna (Applied AI Practitioner)']
+export const CERTIFICATIONS = ['IBM certificate (most programs)', 'Microsoft Azure (selected programs)', 'IIT Patna (Vishlesan I-Hub Foundation, selected programs)']

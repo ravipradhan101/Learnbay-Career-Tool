@@ -54,12 +54,17 @@ export function skillGapSummary(r: SkillGapResult): ReportSummary {
 
 export function salarySummary(r: SalaryResult, current: { minLpa: number; maxLpa: number | null } | null): ReportSummary {
   const top = [...r.targetRoles].sort((a, b) => b.maxLpa - a.maxLpa)[0]
+  // A fresher's headline is their own target role (the one the report is about), not the best-paid alternative.
+  const first = r.targetRoles.find((t) => t.role.toLowerCase() === r.targetRole.toLowerCase()) ?? r.targetRoles[0]
   const bestEmployer = r.companyTypes?.length ? [...r.companyTypes].sort((a, b) => b.maxLpa - a.maxLpa)[0] : null
   const premium = r.skillPremiums?.find((k) => k.impact === 'High') ?? r.skillPremiums?.[0]
   return {
-    headline: { value: `+${r.growth.minPercent}–${r.growth.maxPercent}%`, label: 'potential salary growth', note: firstSentence(r.growth.note || r.summary) },
+    // A fresher has no salary to grow from: their headline is the typical first salary in the target role.
+    headline: r.fresher && first
+      ? { value: `${lpaText(first.minLpa)}–${lpaText(first.maxLpa)}`, label: `typical first salary as ${first.role}`, note: firstSentence(r.summary) }
+      : { value: `+${r.growth.minPercent}–${r.growth.maxPercent}%`, label: 'potential salary growth', note: firstSentence(r.growth.note || r.summary) },
     kpis: ([
-      { label: current ? 'You today' : 'Your role today', value: current ? (current.maxLpa ? `${lpaText(current.minLpa)}–${lpaText(current.maxLpa)}` : `${lpaText(current.minLpa)}+`) : `${lpaText(r.currentRoleMarket.minLpa)}–${lpaText(r.currentRoleMarket.maxLpa)}`, sub: 'per year', tone: 'warning' },
+      { label: current ? 'You today' : r.fresher ? 'Fresher start' : 'Your role today', value: current ? (current.maxLpa ? `${lpaText(current.minLpa)}–${lpaText(current.maxLpa)}` : `${lpaText(current.minLpa)}+`) : `${lpaText(r.currentRoleMarket.minLpa)}–${lpaText(r.currentRoleMarket.maxLpa)}`, sub: 'per year', tone: 'warning' },
       ...(top ? [{ label: top.role, value: `${lpaText(top.minLpa)}–${lpaText(top.maxLpa)}`, sub: 'market range', tone: 'success' as const }] : []),
       ...(bestEmployer ? [{ label: 'Pays most', value: bestEmployer.type, sub: `up to ${lpaText(bestEmployer.maxLpa)}`, tone: 'primary' as const }] : []),
       ...(premium ? [{ label: 'Biggest pay lever', value: premium.skill, sub: `${premium.impact} impact`, tone: 'accent' as const }] : []),
@@ -68,8 +73,8 @@ export function salarySummary(r: SalaryResult, current: { minLpa: number; maxLpa
       premium
         ? { title: `Add ${premium.skill}`, detail: shorten(premium.note), href: '/dashboard/roadmap', cta: 'Plan it' }
         : { title: 'Close your top skill gap', href: '/dashboard/skill-gap', cta: 'See my gaps' },
-      ...(r.negotiationTips?.[0] ? [{ title: 'Before your next offer', detail: shorten(r.negotiationTips[0]) }] : []),
-      { title: 'Plan your switch with a Senior Counsellor', detail: 'A free call on which role, which companies, and a realistic number for you.', href: '/dashboard/sessions', cta: 'Book free call' },
+      ...(r.negotiationTips?.[0] ? [{ title: r.fresher ? 'Before your first offer' : 'Before your next offer', detail: shorten(r.negotiationTips[0]) }] : []),
+      { title: r.fresher ? 'Plan your first job with a Senior Counsellor' : 'Plan your switch with a Senior Counsellor', detail: 'A free call on which role, which companies, and a realistic number for you.', href: '/dashboard/sessions', cta: 'Book free call' },
     ],
   }
 }

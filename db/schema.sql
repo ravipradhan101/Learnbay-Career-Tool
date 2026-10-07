@@ -499,3 +499,194 @@ CREATE TABLE IF NOT EXISTS course_roles (
   created_at  timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (program_id, domain_key)
 );
+
+-- v19: sales team (staff portal at /admin/crm). Four roles on admin_users: one protected admin (all access), managers,
+-- associates (under a manager, or independent) and ISMs (under an associate, mapped directly to a manager, or neither).
+-- Existing accounts become managers; ravi@learnbay.co is the admin. New rows default to the least privileged role.
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'manager';
+ALTER TABLE admin_users ALTER COLUMN role SET DEFAULT 'ism';
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS phone text;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS team text;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS manager_id uuid REFERENCES admin_users(id) ON DELETE SET NULL;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS associate_id uuid REFERENCES admin_users(id) ON DELETE SET NULL;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS in_rotation boolean NOT NULL DEFAULT true;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS rr_last_assigned_at timestamptz;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS created_by uuid;
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'admin_users_role_check') THEN
+    ALTER TABLE admin_users ADD CONSTRAINT admin_users_role_check CHECK (role IN ('admin', 'manager', 'associate', 'ism'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'admin_users_parent_check') THEN
+    ALTER TABLE admin_users ADD CONSTRAINT admin_users_parent_check CHECK (
+      (role IN ('admin', 'manager') AND manager_id IS NULL AND associate_id IS NULL)
+      OR (role = 'associate' AND associate_id IS NULL)
+      OR (role = 'ism' AND NOT (manager_id IS NOT NULL AND associate_id IS NOT NULL)));
+  END IF;
+END $$;
+-- Exactly one admin, ever.
+CREATE UNIQUE INDEX IF NOT EXISTS admin_users_one_admin ON admin_users ((true)) WHERE role = 'admin';
+CREATE INDEX IF NOT EXISTS admin_users_manager_idx ON admin_users(manager_id);
+CREATE INDEX IF NOT EXISTS admin_users_associate_idx ON admin_users(associate_id);
+INSERT INTO admin_users (email, role, name) SELECT 'ravi@learnbay.co', 'manager', 'Ravi Pradhan'
+ WHERE NOT EXISTS (SELECT 1 FROM admin_users WHERE email = 'ravi@learnbay.co');
+UPDATE admin_users SET role = 'admin', manager_id = NULL, associate_id = NULL, active = true
+ WHERE email = 'ravi@learnbay.co' AND NOT EXISTS (SELECT 1 FROM admin_users WHERE role = 'admin');
+-- The admin account cannot be deleted, deactivated, demoted or renamed to another email, by any code path.
+CREATE OR REPLACE FUNCTION protect_admin_user() RETURNS trigger AS $$
+BEGIN
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.role = 'admin' THEN RAISE EXCEPTION 'The admin account is protected and cannot be deleted.'; END IF;
+    RETURN OLD;
+  END IF;
+  IF OLD.role = 'admin' AND (NEW.role <> 'admin' OR NEW.active = false OR NEW.email <> OLD.email) THEN
+    RAISE EXCEPTION 'The admin account is protected and cannot be changed this way.';
+  END IF;
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS admin_users_protect ON admin_users;
+CREATE TRIGGER admin_users_protect BEFORE UPDATE OR DELETE ON admin_users FOR EACH ROW EXECUTE FUNCTION protect_admin_user();
+
+-- Who owns each lead (a learner account) and how they got it. Leads with no row are unassigned (the admin queue).
+CREATE TABLE IF NOT EXISTS lead_owners (
+  user_id      uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  owner_id     uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  source       text NOT NULL CHECK (source IN ('crm', 'round_robin', 'manual', 'self')),
+  status       text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'interested', 'not_interested', 'enrolled', 'lost')),
+  created_by   uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  assigned_by  uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  assigned_at  timestamptz NOT NULL DEFAULT now(),
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lead_owners_owner_idx ON lead_owners(owner_id, assigned_at DESC);
+-- Every change of owner (for tracing who held a lead when).
+CREATE TABLE IF NOT EXISTS lead_assignments (
+  id          bigserial PRIMARY KEY,
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  from_id     uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  to_id       uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  source      text NOT NULL,
+  by_id       uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  note        text,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lead_assignments_user_idx ON lead_assignments(user_id, created_at DESC);
+-- What staff did on a lead account (the learner's own actions stay in lead_events). actor_kind is the actor role
+-- at the time, so analytics can split work by ISM, associate, manager and admin.
+CREATE TABLE IF NOT EXISTS lead_activities (
+  id          bigserial PRIMARY KEY,
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  actor_kind  text NOT NULL CHECK (actor_kind IN ('admin', 'manager', 'associate', 'ism', 'system')),
+  actor_id    uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  action      text NOT NULL,
+  detail      jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lead_activities_user_idx ON lead_activities(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS lead_activities_created_idx ON lead_activities(created_at);
+CREATE INDEX IF NOT EXISTS lead_activities_actor_idx ON lead_activities(actor_id, created_at);
+-- Calls to make and reminders. Booked calls and call requests become tasks automatically (kind + source_id);
+-- a task still open after missed_at is a missed call, charged to the owner at that time.
+CREATE TABLE IF NOT EXISTS lead_tasks (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  owner_id      uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  kind          text NOT NULL CHECK (kind IN ('call_booked', 'call_request', 'follow_up', 'reminder')),
+  title         text NOT NULL,
+  note          text,
+  due_at        timestamptz NOT NULL,
+  missed_at     timestamptz,
+  status        text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'done', 'cancelled')),
+  outcome       text,
+  outcome_note  text,
+  source_id     uuid,
+  created_by    uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  completed_by  uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  completed_at  timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS lead_tasks_source_idx ON lead_tasks(kind, source_id);
+CREATE INDEX IF NOT EXISTS lead_tasks_owner_idx ON lead_tasks(owner_id, status, due_at);
+CREATE INDEX IF NOT EXISTS lead_tasks_user_idx ON lead_tasks(user_id, due_at DESC);
+-- Staff notes on a lead.
+CREATE TABLE IF NOT EXISTS lead_notes (
+  id          bigserial PRIMARY KEY,
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  author_id   uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  body        text NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lead_notes_user_idx ON lead_notes(user_id, created_at DESC);
+-- Who changed which staff account, and how (privilege audit trail).
+CREATE TABLE IF NOT EXISTS staff_audit (
+  id          bigserial PRIMARY KEY,
+  actor_id    uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  target_id   uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  action      text NOT NULL,
+  detail      jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS staff_audit_created_idx ON staff_audit(created_at DESC);
+-- Learners who sign up from now on are allocated automatically; older accounts wait for the admin to distribute them.
+CREATE TABLE IF NOT EXISTS crm_settings (
+  key         text PRIMARY KEY,
+  value       jsonb NOT NULL,
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO crm_settings (key, value) VALUES ('allocation_started_at', to_jsonb(now())) ON CONFLICT (key) DO NOTHING;
+
+-- v20: video (Google Meet) and phone meetings between a learner and a staff member. A learner can ask to connect now
+-- (an ISM is given a meeting starting in 30 minutes) or pick a time; staff can book meetings with their leads.
+-- The exclusion constraint makes double-booking a host impossible, whatever code path creates the meeting.
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS meet_url text;
+CREATE TABLE IF NOT EXISTS meetings (
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id            uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  host_id            uuid NOT NULL REFERENCES admin_users(id) ON DELETE RESTRICT,
+  mode               text NOT NULL DEFAULT 'video' CHECK (mode IN ('video', 'phone')),
+  kind               text NOT NULL CHECK (kind IN ('instant', 'scheduled')),
+  starts_at          timestamptz NOT NULL,
+  ends_at            timestamptz NOT NULL,
+  meet_url           text,
+  calendar_event_id  text,
+  status             text NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'no_show', 'cancelled')),
+  requested_by       text NOT NULL CHECK (requested_by IN ('user', 'staff')),
+  created_by         uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  source             text,
+  note               text,
+  cancel_reason      text,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  CHECK (ends_at > starts_at)
+);
+CREATE INDEX IF NOT EXISTS meetings_user_idx ON meetings(user_id, starts_at DESC);
+CREATE INDEX IF NOT EXISTS meetings_host_idx ON meetings(host_id, starts_at);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'meetings_no_clash') THEN
+    ALTER TABLE meetings ADD CONSTRAINT meetings_no_clash
+      EXCLUDE USING gist (host_id WITH =, tstzrange(starts_at, ends_at, '[)') WITH &&) WHERE (status = 'scheduled');
+  END IF;
+END $$;
+-- Meetings are tasks for their host too (missed if no outcome within 1 hour of the start).
+ALTER TABLE lead_tasks DROP CONSTRAINT IF EXISTS lead_tasks_kind_check;
+ALTER TABLE lead_tasks ADD CONSTRAINT lead_tasks_kind_check CHECK (kind IN ('call_booked', 'call_request', 'follow_up', 'reminder', 'meeting'));
+
+-- v21: 2026 catalogue projects carry their objective, what the learner achieves and the industry they come from.
+-- catalogue_ref is the project's id in the catalogue (P01…), so re-importing the catalogue updates them in place.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS objective text;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS outcome text;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS industry text;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS catalogue_ref text;
+CREATE UNIQUE INDEX IF NOT EXISTS projects_catalogue_ref_idx ON projects (catalogue_ref) WHERE catalogue_ref IS NOT NULL;
+-- Programs merged in the 2026 catalogue: their projects also belong to the program that replaced them. The old ids stay
+-- on the project, so Cloud & DevOps role-track projects still go only to learners in that role.
+UPDATE projects SET programs = (SELECT array_agg(DISTINCT x) FROM unnest(programs || ARRAY['cloud-devops-engineering']) x)
+ WHERE programs && ARRAY['advanced-cloud-devops', 'cloud-devops-network', 'cloud-devops-qa-testers', 'cloud-devops-sysadmin', 'cloud-devops-it-support-ops', 'cloud-devops-dba']
+   AND NOT ('cloud-devops-engineering' = ANY(programs));
+UPDATE projects SET programs = (SELECT array_agg(DISTINCT x) FROM unnest(programs || ARRAY['forward-deployed-ai-engineer']) x)
+ WHERE 'ai-engineering-master' = ANY(programs) AND NOT ('forward-deployed-ai-engineer' = ANY(programs));

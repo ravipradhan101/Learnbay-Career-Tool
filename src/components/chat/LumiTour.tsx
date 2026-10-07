@@ -6,7 +6,7 @@ import { Avatar } from './Avatar'
 import { BOT_NAME } from '@/lib/counsellors'
 
 /**
- * One stop on Lumi's tour. `targets` are `data-tour` names, tried in order: the first one visible on screen is
+ * One stop on Woody's tour. `targets` are `data-tour` names, tried in order: the first one visible on screen is
  * highlighted (e.g. the left menu on a laptop, the ☰ button on a phone). With none visible, the step shows centred.
  */
 export type TourStep = { targets: string[]; title: string; text: string; icon?: IconName }
@@ -30,7 +30,7 @@ function visibleBox(names: string[]): { el: HTMLElement; box: Box; name: string 
   return null
 }
 
-/** Lumi's guided tour of the studio: a spotlight on each feature with a short note, Back / Next, and Skip at any time. */
+/** Woody's guided tour of the studio: a spotlight on each feature with a short note, Back / Next, and Skip at any time. */
 export function LumiTour({ steps, onEnd }: { steps: TourStep[]; onEnd: (finished: boolean) => void }) {
   const [i, setI] = useState(0)
   const [box, setBox] = useState<Box | null>(null)

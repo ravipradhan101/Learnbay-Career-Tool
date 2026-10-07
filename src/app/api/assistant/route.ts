@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   if ((usage?.total ?? 0) >= LIMITS.userTotal || (usage?.today ?? 0) >= LIMITS.userPerDay) {
     return jsonError(429, 'You have reached your question limit for now. A Senior Counsellor can take it from here — book a free session.', { limit: true })
   }
-  if (!(await rateLimit(`assist:user:${user.id}`, 8, 60))) return jsonError(429, 'Please slow down a little and try again in a minute.')
+  if (!(await rateLimit(`assist:user:${user.id}`, 15, 60))) return jsonError(429, 'You’re typing faster than I can read! Give me a few seconds, then send that again.')
   if (intent && !(await rateLimit(`assist:intent:${user.id}`, 12, 24 * 3600))) return jsonOk({ reply: '', suggestions: [], action: null, allowed: true, skipped: true })
 
   const [answers, results, counsellor, booking, companies] = await Promise.all([
@@ -82,12 +82,21 @@ export async function POST(request: Request) {
   // The projects the program's library holds for this learner (so the counsellor names real ones).
   const recommended = answers ? programForLearner(answers) : undefined
   const projectTitlesList = recommended ? await projectTitles(recommended.id, answers ?? {}, 12).catch(() => []) : []
+  const ask = () => askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel, projectTitles: projectTitlesList, booked: booking ? whenLabel(booking.d, booking.t) : null, companies, recent })
   let out
   try {
-    out = await askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel, projectTitles: projectTitlesList, booked: booking ? whenLabel(booking.d, booking.t) : null, companies, recent })
+    // One more try before giving up: the model occasionally returns an unusable answer.
+    out = await ask().catch((err) => { console.error('[assistant] retrying after', (err as Error).message); return ask() })
   } catch (err) {
     console.error('[assistant] failed', (err as Error).message)
-    return jsonError(502, 'I am busy right now. Please try again in a moment.')
+    // The counsellor is never "busy": an opening line is simply skipped (the chat carries on by itself), and a
+    // question gets an honest ask-again with useful next steps.
+    if (intent) return jsonOk({ reply: '', suggestions: [], action: null, allowed: true, skipped: true, conversationId })
+    return jsonOk({
+      reply: 'Sorry, I didn’t quite catch that. Could you say it again in a few words?',
+      suggestions: ['Which program fits me?', 'What will I learn?', 'Talk to a Senior Counsellor'],
+      action: null, allowed: true, offerCall: false, conversationId,
+    })
   }
   // The learner said something that changes their profile (e.g. "I don't code", "I'm a designer now", "I want data
   // science instead"): save it, so the recommended program, cards and reports follow straight away.

@@ -1,7 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { transaction } from '@/lib/db'
 import { PROGRAMS } from '@/config/programs'
-import { TRACKS, type Answers } from '@/lib/questions'
+import { TRACKS, trackOf, type Answers } from '@/lib/questions'
 import { defaultTargetRole } from '@/lib/segments'
 import { skillFamily } from '@/lib/skills'
 import { isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
@@ -19,7 +19,8 @@ export async function POST(request: Request) {
   const body = await readJson<{ interest?: unknown; program?: unknown }>(request, 1_000)
   // A program the learner approved (e.g. Applied AI Practitioner instead of GenAI & Agentic AI), or a whole track.
   const program = PROGRAMS.find((p) => p.id === body?.program)
-  const target = program ? TRACKS.find((t) => program.interests.includes(t.interest)) : TRACKS.find((t) => t.interest === body?.interest)
+  // Data science and analytics programs sit in the AI & Data Science track (trackOf).
+  const target = program ? TRACKS.find((t) => program.interests.some((i) => trackOf(i)?.interest === t.interest)) : TRACKS.find((t) => t.interest === body?.interest)
   if (!target && !program) return jsonError(400, 'Unknown track.')
 
   const answers = await transaction(async (db) => {

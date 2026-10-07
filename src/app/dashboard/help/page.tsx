@@ -10,7 +10,7 @@ const FAQ: [string, string][] = [
   ['Are the salary numbers guaranteed?', 'No. They are indicative market ranges for your experience and city. Your actual offers depend on company, interviews and negotiation.'],
   ['Who can see my results?', 'Only you, after logging in with your email code. If you create a share link, anyone with the link can see that analysis — never your email, phone or current salary. You can turn the link off any time.'],
   ['How do I log in again?', 'Use Login on the home page with the same email. We send a 6-digit code — no password needed.'],
-  ['Are Lumi and the counsellors in the chat real people?', 'They are Learnbay’s virtual career guide and virtual counsellors: they reply instantly, any time, using your answers and Learnbay’s published programs. To talk to a person, tap the phone icon or book a free 1:1 and a Learnbay Senior Career Counsellor will connect with you.'],
+  ['Are Woody and the counsellors in the chat real people?', 'They are Learnbay’s virtual guide and virtual counsellors: they reply instantly, any time, using your answers and Learnbay’s published programs. To talk to a person, tap the phone icon or book a free 1:1 and a Learnbay Senior Career Counsellor will connect with you.'],
   ['How do I talk to a person?', 'Choose “Talk to a Senior Counsellor” in the left panel and pick a date and time. A Learnbay Senior Career Counsellor will connect with you.'],
 ]
 

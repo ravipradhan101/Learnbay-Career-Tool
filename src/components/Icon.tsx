@@ -50,6 +50,7 @@ const PATHS = {
   chevronRight: 'M9 6l6 6-6 6',
   chevronLeft: 'M15 6l-6 6 6 6',
   mic: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3',
+  video: 'M3 7h12v10H3zM15 10l6-3v10l-6-3',
 } as const
 
 export type IconName = keyof typeof PATHS

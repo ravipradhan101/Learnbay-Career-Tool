@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'node:crypto'
 import { ensureDefaultFlows, processDueEmails } from '@/lib/email/flows'
+import { dailyCrmDigest } from '@/lib/crm/digest'
 
 /**
  * For hosts without a long-running server (serverless): call this from a scheduler with
@@ -12,7 +13,10 @@ export async function POST(request: Request) {
     return new Response('Not found', { status: 404 })
   }
   await ensureDefaultFlows()
-  return Response.json(await processDueEmails())
+  const emails = await processDueEmails()
+  // The sales CRM's daily job runs separately: a failure there never affects learner emails.
+  const crm = await dailyCrmDigest().catch((err) => ({ error: (err as Error).message }))
+  return Response.json({ ...emails, crm })
 }
 
 export const GET = POST

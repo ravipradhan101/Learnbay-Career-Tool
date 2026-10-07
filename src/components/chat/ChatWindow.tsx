@@ -16,7 +16,7 @@ export const nameOf = (who: string) => (who === 'bot' ? BOT_NAME : getCounsellor
 export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, profile, rating }: {
   chat: ChatApi
   onSend: (text: string) => void
-  /** Omitted before login (with Lumi): no call button. */
+  /** Omitted before login (with Woody): no call button. */
   onCall?: () => void
   headerRight?: React.ReactNode
   footer?: React.ReactNode
@@ -110,7 +110,7 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
   }, [text])
 
   return (
-    <section className="tc" aria-label={`Chat with ${nameOf(who)}, ${isBot ? 'your career guide' : 'your career counsellor'}`}>
+    <section className="tc" aria-label={`Chat with ${nameOf(who)}, ${isBot ? 'your guide' : 'your career counsellor'}`}>
       <header className="tc-header">
         {openProfile && !isBot ? (
           <button type="button" className="tc-who-btn" onClick={() => openProfile(who)} aria-label={`View ${nameOf(who)}'s profile`} aria-expanded={profileOf === who}>
@@ -128,7 +128,7 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
             <Avatar who={who} size={38} online />
             <div className="tc-who">
               <div className="tc-name"><b>{nameOf(who)}</b><span className="tc-badge">{isBot ? GUIDE_TITLE : COUNSELLOR_TITLE}</span></div>
-              <span className="tc-status">Online · {isBot ? 'virtual career guide' : 'virtual counsellor'}</span>
+              <span className="tc-status">Online · {isBot ? 'virtual guide' : 'virtual counsellor'}</span>
             </div>
           </>
         )}

@@ -1,53 +1,63 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Icon } from '../Icon'
+import { Icon, type IconName } from '../Icon'
 import { OPEN_WHY_EVENT } from './WhyLearnbayButton'
-import { COMPARISON, LAB_CITIES, PUBLISHED_STORY, USPS, type UspId } from '@/config/usps'
+import { LAB_CITIES, PUBLISHED_STORY } from '@/config/usps'
+import { curriculumOf } from '@/lib/roles'
 import { track } from '@/lib/analytics'
 import { trackEvent } from '@/lib/track'
 
-const PRIORITIES: { id: string; label: string; usp: UspId }[] = [
-  { id: 'projects', label: 'Real, hands-on projects', usp: 'projects' },
-  { id: 'mentors', label: 'Live teaching and doubt support', usp: 'mentors' },
-  { id: 'placement', label: 'Help landing the job', usp: 'placement' },
-  { id: 'flexibility', label: 'Fits around my job', usp: 'hybrid' },
-  { id: 'domain', label: 'Relevance to my industry', usp: 'domain' },
-  { id: 'certification', label: 'A recognised certificate', usp: 'certification' },
-]
-const BLOCKERS: { id: string; label: string; usp: UspId; answer: string }[] = [
-  { id: 'generic', label: 'Courses felt too generic for my background', usp: 'customisation', answer: 'Role-specific tracks start from your current job, so you skip what you already know.' },
-  { id: 'theory', label: 'Too much theory, not enough doing', usp: 'projects', answer: 'Every program is project-based: capstones plus real problem statements from AI companies.' },
-  { id: 'alone', label: 'No one to ask when I got stuck', usp: 'mentors', answer: 'Live classes with industry mentors, and 24/7 student support between classes.' },
-  { id: 'time', label: 'Hard to fit around work', usp: 'hybrid', answer: 'Live online classes built for working professionals, with a hybrid option if you want in-person project time.' },
-  { id: 'after', label: 'Unclear what happens after the course', usp: 'placement', answer: 'Placement support with mock interviews, resume build-up and interview calls.' },
-  { id: 'first', label: 'This is my first time upskilling', usp: 'customisation', answer: 'A guided path matched to your background, with a counsellor to help you pick the right track.' },
-]
-const MODES = [
-  { id: 'live', label: 'Live online classes', hint: 'Learn from anywhere, in real time' },
-  { id: 'hybrid', label: 'Online plus some in-person project work', hint: 'At a Project Innovation Lab' },
-  { id: 'unsure', label: 'Not sure yet', hint: 'A counsellor can help you decide' },
-]
-const PAGES = 5
+export type WhyProfile = {
+  role: string; interest: string; city: string | null
+  program: { id?: string; name: string; url: string; features: string[] }
+  /** Their industry in the catalogue's words (e.g. "Banking & BFSI"), to pick a capstone from their world. */
+  industry?: string | null
+}
 
-export type WhyProfile = { role: string; interest: string; city: string | null; program: { name: string; url: string; features: string[] } }
+type Round = { id: string; icon: IconName; area: string; typical: string; learnbay: string; forYou: string }
 
+/**
+ * "How Learnbay is different" as a 60-second game. The first screen already shows the difference side by side,
+ * personalised to their program; then six quick "which one is Learnbay?" rounds, each revealing what it means for
+ * them; then their score and summary. Every fact comes from the 2026 catalogue or Learnbay's published comparison.
+ */
 export function WhyLearnbay({ profile }: { profile: WhyProfile }) {
   const [open, setOpen] = useState(false)
-  const [page, setPage] = useState(0)
-  const [priorities, setPriorities] = useState<string[]>([])
-  const [blocker, setBlocker] = useState('')
-  const [mode, setMode] = useState('')
+  const [step, setStep] = useState(0) // 0 = hook, 1..n = rounds, n+1 = result
+  const [picked, setPicked] = useState<Record<string, 'right' | 'wrong'>>({})
   const source = useRef('')
   const dialog = useRef<HTMLDivElement>(null)
+
+  const course = useMemo(() => curriculumOf(profile.program.id ?? ''), [profile.program.id])
+  const capstone = useMemo(() => {
+    // Their own industry's capstone when the program has one (exact catalogue industry names), else the first.
+    return course.projects.find((p) => profile.industry && p.domain === profile.industry) ?? course.projects[0]
+  }, [course.projects, profile.industry])
+  const spec = course.electives.slice(0, 3)
+  const lab = profile.city ? LAB_CITIES[profile.city] : undefined
+
+  const rounds: Round[] = useMemo(() => [
+    { id: 'live', icon: 'users', area: 'How you learn', typical: 'Mostly recorded videos, a few live sessions', learnbay: '100% live classes with industry mentors, online or hybrid', forYou: lab ? `Live online, with in-person project time at the Learnbay lab in ${lab} if you want it.` : 'Live online classes you can ask questions in, built around a working day.' },
+    { id: 'fit', icon: 'target', area: 'Built for whom', typical: 'One generic curriculum for everyone', learnbay: `A program for your starting point${spec.length ? `, with tracks like ${spec.slice(0, 2).join(' and ')}` : ''}`, forYou: `${profile.program.name}: matched to a ${profile.role.toLowerCase()} moving into ${profile.interest}.` },
+    { id: 'projects', icon: 'folder', area: 'Projects', typical: 'Toy projects and simulations', learnbay: 'Projects in every module, plus industry capstones', forYou: capstone ? `A capstone like “${capstone.title}” (${capstone.domain}): ${capstone.objective}` : 'Capstones drawn from real industry scenarios.' },
+    { id: 'ai', icon: 'sparkles', area: 'Today’s AI tools', typical: 'Tools from a few years ago', learnbay: 'Claude, Claude Code, GitHub Copilot and MCP taught as a real module', forYou: 'You learn the AI tools teams are adopting now, tailored to your kind of work.' },
+    { id: 'support', icon: 'message', area: 'When you’re stuck', typical: 'Limited support hours', learnbay: 'A project mentor, 1:1 doubt clearing and 24/7 student support', forYou: 'Someone to ask, every time, so you never stall for a week on one bug or concept.' },
+    { id: 'after', icon: 'briefcase', area: 'After the course', typical: 'A certificate, then you’re on your own', learnbay: 'Mock interviews, resume build-up and interview calls', forYou: course.certifications[0] ? `Plus your certificates: ${course.certifications[0]}.` : 'Plus recognised certification for your program.' },
+  ], [capstone, course.certifications, lab, profile.interest, profile.program.name, profile.role, spec])
+
+  // Which side Learnbay sits on in each round (fixed per open, so it can't be guessed by position).
+  const [sides, setSides] = useState<boolean[]>([])
 
   useEffect(() => {
     const onOpen = (e: Event) => {
       source.current = String((e as CustomEvent).detail?.source ?? '')
-      setPage(0)
+      setStep(0)
+      setPicked({})
+      setSides(Array.from({ length: 6 }, () => Math.random() < 0.5))
       setOpen(true)
-      track('step_view', 'why:1', { source: source.current })
+      track('step_view', 'why:hook', { source: source.current })
     }
     window.addEventListener(OPEN_WHY_EVENT, onOpen)
     return () => window.removeEventListener(OPEN_WHY_EVENT, onOpen)
@@ -55,146 +65,118 @@ export function WhyLearnbay({ profile }: { profile: WhyProfile }) {
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
     dialog.current?.focus()
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  function close() {
-    if (page < PAGES - 1) track('action', 'why_learnbay_closed', { page: page + 1 })
-    setOpen(false)
-  }
-  function go(n: number) {
-    setPage(n)
-    track('step_view', `why:${n + 1}`)
-    if (n === PAGES - 1) trackEvent('why_learnbay_completed', { priorities: priorities.join(','), blocker, mode })
-  }
-  const togglePriority = (id: string) =>
-    setPriorities((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= 2 ? [p[1], id] : [...p, id]))
-
   if (!open) return null
-  const canNext = page === 0 ? priorities.length > 0 : page === 1 ? Boolean(blocker) : page === 2 ? Boolean(mode) : true
-  const chosen = PRIORITIES.filter((p) => priorities.includes(p.id))
-  const block = BLOCKERS.find((b) => b.id === blocker)
-  const lab = profile.city ? LAB_CITIES[profile.city] : undefined
-  const highlight = new Set<UspId>([...chosen.map((c) => c.usp), ...(block ? [block.usp] : []), ...(mode === 'hybrid' ? ['hybrid' as UspId] : [])])
+  const last = rounds.length + 1
+  const score = Object.values(picked).filter((v) => v === 'right').length
+  const go = (n: number) => {
+    setStep(n)
+    if (n === last) trackEvent('why_learnbay_completed', { score: String(score), of: String(rounds.length) })
+    else track('step_view', n === 0 ? 'why:hook' : `why:round:${n}`)
+  }
+  const round = step >= 1 && step <= rounds.length ? rounds[step - 1] : null
+  const answered = round ? picked[round.id] : undefined
+  const choose = (isLearnbay: boolean) => {
+    if (!round || answered) return
+    setPicked((p) => ({ ...p, [round.id]: isLearnbay ? 'right' : 'wrong' }))
+    track('action', 'why:pick', { round: round.id, right: String(isLearnbay) })
+  }
 
   return (
-    <div className="modal-backdrop why-backdrop" onClick={(e) => e.target === e.currentTarget && close()}>
-      <div className="why-modal" role="dialog" aria-modal="true" aria-labelledby="why-title" tabIndex={-1} ref={dialog}>
-        <div className="why-top">
-          <div className="why-dots" aria-label={`Screen ${page + 1} of ${PAGES}`}>{Array.from({ length: PAGES }, (_, i) => <i key={i} className={i <= page ? 'on' : undefined} />)}</div>
-          <button type="button" className="icon-btn" aria-label="Close" onClick={close}><Icon name="x" /></button>
-        </div>
-        <div className="why-viewport">
-          <div className="why-track" style={{ transform: `translateX(-${page * 100}%)` }}>
-            {/* 1 */}
-            <section className="why-page" aria-hidden={page !== 0}>
-              <span className="eyebrow">How Learnbay is different · 1 of 5</span>
-              <h2 id="why-title">What matters most to you in a program?</h2>
-              <p className="muted small">Pick up to two.</p>
-              <div className="option-list">
-                {PRIORITIES.map((p) => (
-                  <button key={p.id} type="button" className="option" aria-pressed={priorities.includes(p.id)} onClick={() => togglePriority(p.id)} tabIndex={page === 0 ? 0 : -1}>
-                    <span className="option-icon"><Icon name={USPS[p.usp].icon} /></span>{p.label}
-                  </button>
-                ))}
-              </div>
-            </section>
-            {/* 2 */}
-            <section className="why-page" aria-hidden={page !== 1}>
-              <span className="eyebrow">2 of 5</span>
-              <h2>What has held you back before?</h2>
-              <p className="muted small">Be honest. There is no wrong answer.</p>
-              <div className="option-list">
-                {BLOCKERS.map((b) => (
-                  <button key={b.id} type="button" role="radio" aria-checked={blocker === b.id} className="option" onClick={() => setBlocker(b.id)} tabIndex={page === 1 ? 0 : -1}>
-                    <span className="option-mark" />{b.label}
-                  </button>
-                ))}
-              </div>
-            </section>
-            {/* 3 */}
-            <section className="why-page" aria-hidden={page !== 2}>
-              <span className="eyebrow">3 of 5</span>
-              <h2>How do you prefer to learn?</h2>
-              <div className="option-list">
-                {MODES.map((m) => (
-                  <button key={m.id} type="button" role="radio" aria-checked={mode === m.id} className="option" onClick={() => setMode(m.id)} tabIndex={page === 2 ? 0 : -1}>
-                    <span className="option-mark" />{m.label}<span className="hint" style={{ marginLeft: 'auto' }}>{m.hint}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-            {/* 4 */}
-            <section className="why-page" aria-hidden={page !== 3}>
-              <span className="eyebrow">4 of 5</span>
-              <h2>Built differently, where it matters to you</h2>
-              <p className="muted small">Highlighted rows match what you told us.</p>
-              <div className="why-compare">
-                <div className="why-compare-head"><span /><span>Typical courses</span><span>Learnbay</span></div>
-                {COMPARISON.map((c) => (
-                  <div key={c.area} className={`why-compare-row${highlight.has(c.usp) ? ' hl' : ''}`}>
-                    <b>{c.area}</b>
-                    <span className="muted"><Icon name="x" size="0.85rem" /> {c.others}</span>
-                    <span><Icon name="checkCircle" size="0.9rem" className="text-success" /> {c.learnbay}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="xsmall muted">Comparison as published on learnbay.co.</p>
-            </section>
-            {/* 5 */}
-            <section className="why-page why-summary" aria-hidden={page !== 4}>
-              <span className="eyebrow">Your Learnbay fit</span>
-              <h2>{profile.role} → {profile.interest}</h2>
-              <div className="why-grid">
-                {chosen.map((c) => (
-                  <div className="why-card" key={c.id}>
-                    <span className="fc-icon"><Icon name={USPS[c.usp].icon} /></span>
-                    <small>You care about: {c.label.toLowerCase()}</small>
-                    <b>{USPS[c.usp].title}</b>
-                    <p>{USPS[c.usp].short}</p>
-                  </div>
-                ))}
-                {block && (
-                  <div className="why-card accent">
-                    <span className="fc-icon"><Icon name="bulb" /></span>
-                    <small>What held you back: {block.label.toLowerCase()}</small>
-                    <b>How that changes here</b>
-                    <p>{block.answer}</p>
-                  </div>
-                )}
-                <div className="why-card">
-                  <span className="fc-icon"><Icon name="grid" /></span>
-                  <small>How you like to learn</small>
-                  <b>{mode === 'hybrid' ? 'Hybrid learning' : mode === 'live' ? '100% live online' : 'Live online or hybrid'}</b>
-                  <p>{mode === 'hybrid' && lab ? `There is a Learnbay Project Innovation Lab in ${lab} for in-person project work.` : mode === 'hybrid' ? 'In-person project work at Project Innovation Labs in 7 cities.' : USPS.hybrid.short}</p>
-                </div>
-                <div className="why-card program">
-                  <span className="fc-icon"><Icon name="award" /></span>
-                  <small>Suggested for your goal</small>
-                  <b>{profile.program.name}</b>
-                  <p>{profile.program.features.join(' · ')}</p>
-                  <a href={profile.program.url} target="_blank" rel="noopener noreferrer" className="small">Program details <Icon name="external" size="0.8rem" /></a>
-                </div>
-              </div>
-              <blockquote className="why-story">“{PUBLISHED_STORY.quote}”<cite>{PUBLISHED_STORY.name}, {PUBLISHED_STORY.role} · as published on {PUBLISHED_STORY.source}</cite></blockquote>
-              <div className="row">
-                <Link href="/dashboard/eligibility" className="btn btn-primary" onClick={() => setOpen(false)}>Check my eligibility</Link>
-                <Link href="/dashboard/sessions" className="btn btn-outline" onClick={() => setOpen(false)}>Talk to a counsellor</Link>
-              </div>
-            </section>
+    <div className="modal-backdrop why-backdrop" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
+      <div className="wl" role="dialog" aria-modal="true" aria-labelledby="wl-title" tabIndex={-1} ref={dialog}>
+        <div className="wl-top">
+          <div className="wl-stars" aria-label={`${score} of ${rounds.length} stars`}>
+            {rounds.map((r) => <span key={r.id} className={picked[r.id] === 'right' ? 'on' : picked[r.id] ? 'miss' : ''}>★</span>)}
           </div>
+          <button type="button" className="wl-x" aria-label="Close" onClick={() => setOpen(false)}><Icon name="x" /></button>
         </div>
-        <div className="why-nav">
-          <button type="button" className="btn btn-ghost btn-sm" disabled={page === 0} onClick={() => go(page - 1)}><Icon name="arrowLeft" size="1rem" /> Back</button>
-          {page < PAGES - 1
-            ? <button type="button" className="btn btn-primary btn-sm" disabled={!canNext} onClick={() => go(page + 1)}>{page === 3 ? 'See my summary' : 'Next'} <Icon name="arrowRight" size="1rem" /></button>
-            : <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>Close</button>}
-        </div>
+
+        {step === 0 && (
+          <section className="wl-page wl-hook">
+            <span className="wl-eyebrow">How Learnbay is different</span>
+            <h2 id="wl-title">Same goal. A very different way to get there.</h2>
+            <div className="wl-vs">
+              <div className="wl-side typical">
+                <b>Typical course</b>
+                <ul>
+                  <li><Icon name="x" size="0.85rem" /> Recorded videos</li>
+                  <li><Icon name="x" size="0.85rem" /> Same syllabus for everyone</li>
+                  <li><Icon name="x" size="0.85rem" /> Toy projects</li>
+                  <li><Icon name="x" size="0.85rem" /> On your own after</li>
+                </ul>
+              </div>
+              <span className="wl-vs-badge">VS</span>
+              <div className="wl-side learnbay">
+                <b>{profile.program.name}</b>
+                <ul>
+                  <li><Icon name="check" size="0.85rem" /> Live classes with industry mentors</li>
+                  <li><Icon name="check" size="0.85rem" /> {spec.length ? `Tracks: ${spec.slice(0, 2).join(', ')}` : `Built for ${profile.interest}`}</li>
+                  <li><Icon name="check" size="0.85rem" /> {capstone ? `Capstone: ${capstone.title}` : 'Industry capstones'}</li>
+                  <li><Icon name="check" size="0.85rem" /> Interview prep and interview calls</li>
+                </ul>
+              </div>
+            </div>
+            <button type="button" className="wl-play" onClick={() => go(1)}>
+              <Icon name="play" size="1rem" /> Play “spot the difference” · 6 quick rounds
+            </button>
+            <button type="button" className="wl-skip" onClick={() => go(last)}>Skip to my summary</button>
+          </section>
+        )}
+
+        {round && (
+          <section className="wl-page wl-round" key={round.id}>
+            <span className="wl-eyebrow">Round {step} of {rounds.length} · {round.area}</span>
+            <h2 id="wl-title">Which one is Learnbay?</h2>
+            <div className="wl-pick">
+              {[sides[step - 1], !sides[step - 1]].map((isLearnbay, i) => {
+                const text = isLearnbay ? round.learnbay : round.typical
+                const state = !answered ? '' : isLearnbay ? 'is-lb' : 'is-typical'
+                return (
+                  <button key={i} type="button" className={`wl-card ${state}`} disabled={Boolean(answered)} onClick={() => choose(isLearnbay)}>
+                    <span className="wl-card-icon"><Icon name={answered ? (isLearnbay ? 'checkCircle' : 'x') : round.icon} size="1.2rem" /></span>
+                    <span>{text}</span>
+                    {answered && <small>{isLearnbay ? 'Learnbay' : 'Typical course'}</small>}
+                  </button>
+                )
+              })}
+            </div>
+            {answered && (
+              <div className={`wl-reveal ${answered}`} role="status">
+                <b>{answered === 'right' ? 'Spot on! +1 ★' : 'That one’s the typical course.'}</b>
+                <p><span>For you:</span> {round.forYou}</p>
+                <button type="button" className="wl-next" onClick={() => go(step + 1)}>{step === rounds.length ? 'See my result' : 'Next round'} <Icon name="arrowRight" size="0.95rem" /></button>
+              </div>
+            )}
+          </section>
+        )}
+
+        {step === last && (
+          <section className="wl-page wl-result">
+            <span className="wl-eyebrow">Your result</span>
+            <h2 id="wl-title">{score >= 5 ? 'You know exactly what to look for.' : score >= 3 ? 'Nicely spotted.' : 'Now you know what to look for.'}</h2>
+            <p className="wl-score"><b>{score}</b>/{rounds.length} differences spotted</p>
+            <div className="wl-summary">
+              {rounds.slice(0, 3).concat(rounds[5]).map((r) => (
+                <div key={r.id} className="wl-sum-card">
+                  <span className="wl-card-icon"><Icon name={r.icon} size="1rem" /></span>
+                  <div><b>{r.learnbay}</b><small>{r.forYou}</small></div>
+                </div>
+              ))}
+            </div>
+            <blockquote className="why-story">“{PUBLISHED_STORY.quote}”<cite>{PUBLISHED_STORY.name}, {PUBLISHED_STORY.role} · as published on {PUBLISHED_STORY.source}</cite></blockquote>
+            <div className="wl-actions">
+              <Link href="/dashboard/sessions" className="wl-play" onClick={() => setOpen(false)}>Talk to a Senior Counsellor, free</Link>
+              <a href={profile.program.url} target="_blank" rel="noopener noreferrer" className="wl-skip">Program details <Icon name="external" size="0.8rem" /></a>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )

@@ -1,6 +1,8 @@
-import { programForLearner } from './segments'
+import { programForLearner, routeFor } from './segments'
+import { personaById } from '@/config/catalogue'
 import { ALL_PROBES, ALL_TRIGGERS, PROBES, SEGMENT_LABEL, STUDY_STAGES, segmentOf } from './segments'
 import { PROGRAMS, programsForInterest } from '@/config/programs'
+import { PROGRAM_DETAILS } from '@/config/program-details'
 import { RESOURCES } from '@/config/resources'
 import { generateJson } from './gemini'
 import {
@@ -50,7 +52,12 @@ Rules:
 function programCatalog(a: Answers): string {
   const chosen = programForLearner(a)
   const preferred = programsForInterest(a.interest)
-  return `${chosen ? `The learner's counsellor recommends ${chosen.name} (programId ${chosen.id}). Use programId ${chosen.id}, and build the plan, skills and projects around what that program teaches.\n` : ''}` +
+  const syllabus = chosen ? PROGRAM_DETAILS[chosen.id]?.moduleDetails.map((m) => `  - ${m.name}: ${m.topics.join('; ')}${m.projects.length ? ` (projects: ${m.projects.join('; ')})` : ''}`).join('\n') : ''
+  const d = chosen ? PROGRAM_DETAILS[chosen.id] : undefined
+  const persona = personaById(routeFor(a).persona)
+  const later = persona?.upsell && persona.upsell !== chosen?.code ? PROGRAMS.find((p) => p.code === persona.upsell) : undefined
+  const length = d?.durationMonths ? ` It runs ${d.durationMonths} months (${d.totalWeeks} weeks).` : ''
+  return `${chosen ? `The learner's counsellor recommends ${chosen.name} (programId ${chosen.id}). Use programId ${chosen.id}, and build the plan, skills and projects around what that program teaches.${length}${later ? ` Learnbay's next step for them after it: ${later.name} (mention it only as a later step).` : ''}\nIts syllabus (2026), module by module:\n${syllabus}\n` : ''}` +
     `Learnbay program catalog (prefer these for their interest: ${preferred.map((p) => p.id).join(', ')}):\n` +
     PROGRAMS.map((p) => `- ${p.id}: ${p.name}. ${p.summary} Best for: ${p.bestFor}.`).join('\n')
 }
@@ -239,13 +246,21 @@ const SCHEMAS: Record<ToolId, Record<string, unknown>> = {
 
 const TASKS: Record<ToolId, string> = {
   'skill-gap': 'Produce a detailed skill gap analysis for the target role: readiness, skill-by-skill levels, how to close each top gap, what employers look for, interview topics, proof projects, a 4-week starter plan and common mistakes.',
-  salary: 'Produce a detailed, indicative India salary benchmark in INR lakhs per annum (LPA) for their experience level and city: target role ranges, employer types, cities, the career ladder, skill premiums and negotiation tips. Keep every range realistic and internally consistent. Target roles: pick roles (fitting their recommended program) whose typical range sits at least 20% above their current CTC band, so the move is a real step up; the growth range starts at 20% or more. These are indicative market ranges, never a promise. If their current CTC is above ₹50 LPA: a 20% jump is not automatic at that level, so be honest; use their company type to explain how an AI-focused role or AI leadership adds career value (scope, leadership, staying relevant) and where it can move pay, and if an AI role would not help them, say so and suggest the Learnbay program that fits better (for leaders, the GenAI & Agentic AI Program for Managers & Leaders).',
-  roadmap: 'Produce a detailed month-by-month career roadmap paced to their weekly hours and timeline: phases with deliverables and practice, projects, monthly checkpoints, interview preparation, portfolio tips and risks.',
+  salary: 'Produce a detailed, indicative India salary benchmark in INR lakhs per annum (LPA) for their experience level and city: target role ranges, employer types, cities, the career ladder, skill premiums and negotiation tips. Keep every range realistic and internally consistent. Target roles: pick roles (fitting their recommended program) whose typical range sits at least 20% above their current CTC band, so the move is a real step up; the growth range starts at 20% or more. Never inflate a range to meet that: someone switching into a field they have not worked in is hired at junior-to-mid level for that field (their past years count as transferable experience, not years in the role), so their target ranges are what such a switcher is typically offered; if that is not 20% above their current pay, choose roles where it honestly is, or say plainly in growth.note that the gain comes further up the ladder. Freshers and students (no work experience): currentRoleMarket is the typical fresher starting range for their background in their city, the summary is about their first salary (not "growth"), and growth is measured against that starting range. These are indicative market ranges, never a promise. If their current CTC is above ₹50 LPA: a 20% jump is not automatic at that level, so be honest; use their company type to explain how an AI-focused role or AI leadership adds career value (scope, leadership, staying relevant) and where it can move pay, and if an AI role would not help them, say so and suggest the Learnbay program that fits better (for leaders, the GenAI & Agentic AI Program for Managers & Leaders).',
+  roadmap: 'Produce a detailed month-by-month career roadmap paced to their weekly hours and timeline: phases with deliverables and practice, projects, monthly checkpoints, interview preparation, portfolio tips and risks. The phases follow the recommended program\'s syllabus in order, and durationMonths is never shorter than the program\'s length; if their timeline is shorter, say honestly in the summary what they can show by then and what comes after.',
 }
 
 // ---------- Sanitising ----------
 
-const s = (v: unknown, max = 400, fallback = ''): string => (typeof v === 'string' ? v.replace(/[<>]/g, '').trim().slice(0, max) : fallback)
+/** Clean text kept within `max`: ends at the last full sentence that fits, never mid-word. */
+const s = (v: unknown, max = 400, fallback = ''): string => {
+  if (typeof v !== 'string') return fallback
+  const t = v.replace(/[<>]/g, '').trim()
+  if (t.length <= max) return t
+  const cut = t.slice(0, max)
+  const end = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '))
+  return end > max * 0.4 ? cut.slice(0, end + 1) : `${cut.replace(/\s+\S*$/, '').replace(/[,;:–-]+$/, '')}…`
+}
 const n = (v: unknown, min: number, max: number, fallback: number) => Math.min(max, Math.max(min, typeof v === 'number' && Number.isFinite(v) ? v : fallback))
 const obj = (v: unknown) => (v && typeof v === 'object' ? (v as Record<string, unknown>) : {})
 const arr = <T>(v: unknown, map: (x: unknown) => T | null, max: number): T[] => (Array.isArray(v) ? v : []).map(map).filter((x): x is T => x !== null).slice(0, max)
@@ -322,6 +337,7 @@ function sanitize(tool: ToolId, raw: unknown, a: Answers): ToolResultMap[ToolId]
     const result: SalaryResult = {
       ...base,
       currentRoleMarket: range(r.currentRoleMarket, [6, 12]),
+      fresher: a.experience === '0',
       targetRoles: arr(r.targetRoles, (x) => {
         const t = obj(x)
         const role = s(t.role, 60)
@@ -357,7 +373,8 @@ function sanitize(tool: ToolId, raw: unknown, a: Answers): ToolResultMap[ToolId]
   }
   const result: RoadmapResult = {
     ...base,
-    durationMonths: Math.round(n(r.durationMonths, 3, 18, 6)),
+    // A roadmap shorter than the program it follows contradicts the program card next to it.
+    durationMonths: Math.max(Math.round(n(r.durationMonths, 3, 18, 6)), Math.min(18, PROGRAM_DETAILS[programForLearner(a)?.id ?? '']?.durationMonths ?? 0)),
     weeklyHours: s(r.weeklyHours, 40),
     phases: arr(r.phases, (x) => {
       const p = obj(x)

@@ -27,6 +27,8 @@ export type SalaryResult = ProgramFit & {
   targetRole: string
   summary: string
   currentRoleMarket: { minLpa: number; maxLpa: number }
+  /** No work experience yet: the report is about a first salary, not growth from a current one. */
+  fresher?: boolean
   targetRoles: { role: string; minLpa: number; maxLpa: number }[]
   growth: { minPercent: number; maxPercent: number; note: string }
   drivers: string[]

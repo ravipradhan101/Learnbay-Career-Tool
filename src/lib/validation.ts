@@ -1,3 +1,4 @@
+import { MAP_ANSWER_OPTIONS } from '@/config/map-questions'
 import { PROGRAMS } from '@/config/programs'
 import { ALL_PROBES, ALL_TRIGGERS, STUDY_STAGES } from './segments'
 import {
@@ -37,6 +38,13 @@ export function sanitizeAnswers(input: unknown): Answers {
   set('trigger', pickOne(ALL_TRIGGERS, a.trigger))
   set('probe', pickOne(ALL_PROBES, a.probe))
   set('learning', pickOne(LEARNING_SOURCES, a.learning))
+  if (a.mapAnswers && typeof a.mapAnswers === 'object' && !Array.isArray(a.mapAnswers)) {
+    const answers: Record<string, string> = {}
+    for (const [k, v] of Object.entries(a.mapAnswers as Record<string, unknown>)) {
+      if (typeof v === 'string' && MAP_ANSWER_OPTIONS[k]?.includes(v)) answers[k] = v
+    }
+    if (Object.keys(answers).length) out.mapAnswers = answers
+  }
   set('difficulty', pickOne(DIFFICULTIES, a.difficulty))
   if (a.skillLevels && typeof a.skillLevels === 'object' && !Array.isArray(a.skillLevels)) {
     const levels: Record<string, string> = {}

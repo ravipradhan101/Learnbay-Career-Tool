@@ -2,32 +2,30 @@
 // applied AI"). Client-safe. The counsellor model also judges this; a clear name here always wins, so a named program
 // is never swapped for the one recommended from the profile.
 
-/** Most specific first: "GenAI for Cloud & DevOps" must not be read as "Cloud & DevOps", nor "Advanced Data Science" as "Data Science". */
+/**
+ * Most specific first: "GenAI for Cloud & DevOps" must not be read as "Cloud & DevOps", nor "Data Science & GenAI Master"
+ * as the Program. Old program names (retired or merged in the 2026 catalogue) point to the program that replaced them.
+ */
 const NAMES: [RegExp, string][] = [
   [/\bforward[- ]?deployed\b|\bfde\b/, 'forward-deployed-ai-engineer'],
-  [/\bsde\b|software development engineer/, 'sde-genai-agentic-ai'],
-  [/\bai engineer(ing)?\s+(master|program|programme|course|certification|pg)/, 'ai-engineering-master'],
+  [/\bai engineer(ing)?\s+(master|program|programme|course|certification|pg)/, 'forward-deployed-ai-engineer'],
+  [/\bsde\b|software development engineer|dsa (and|&) system design/, 'sde-genai-agentic-ai'],
   [/applied ai|ai practitioner|iit patna/, 'applied-ai-practitioner'],
-  [/(genai|gen ai|generative ai|agentic)[^.?!]{0,40}\b(managers?|leaders?|leadership)\b|\b(managers?|leaders?) (and|&) (leaders?|managers?)\b/, 'genai-agentic-ai-managers-leaders'],
+  [/\bai leadership\b|(genai|gen ai|generative ai|agentic|ai)[^.?!]{0,40}\b(managers?|leaders?|leadership)\b|\b(managers?|leaders?) (and|&) (leaders?|managers?)\b/, 'genai-agentic-ai-managers-leaders'],
   [/(genai|gen ai|generative ai|agentic)[^.?!]{0,40}\bsoftware developers?\b/, 'genai-software-developers'],
   [/(genai|gen ai|generative ai|agentic)[^.?!]{0,40}\b(cloud|devops)\b/, 'genai-agentic-ai-cloud-devops'],
-  [/advanced data science/, 'data-science-genai-master'],
-  [/\bms (in )?(cs|computer science)\b|masters? (degree )?in (cs|computer science)/, 'ms-cs-data-science-ai'],
+  [/advanced data science|data science (and|&) (gen ?ai|ai) master/, 'data-science-genai-master'],
+  [/\bms (in )?(cs|computer science)\b|masters? (degree )?in (cs|computer science)|woolf/, 'ms-cs-data-science-ai'],
   [/\bdaba\b|business analytics|data (and|&) business analytics|data analytics (course|program)/, 'data-business-analytics-genai'],
-  [/(cloud|devops)[^.?!]{0,40}\bnetwork(ing)? (professionals?|engineers?|admins?)\b|\bnetwork professionals?\b/, 'cloud-devops-network'],
-  [/(cloud|devops)[^.?!]{0,40}\b(qa|testers?|test engineers?|testing)\b/, 'cloud-devops-qa-testers'],
-  [/(cloud|devops)[^.?!]{0,40}\b(system admin(istrators?|s)?|sysadmins?)\b/, 'cloud-devops-sysadmin'],
-  [/(cloud|devops)[^.?!]{0,40}\b(it support|itops|it operations)\b/, 'cloud-devops-it-support-ops'],
-  [/(cloud|devops)[^.?!]{0,40}\b(dba|database admin(istrators?|s)?)\b/, 'cloud-devops-dba'],
-  [/advanced cloud/, 'advanced-cloud-devops'],
   [/(ai[- ]powered )?cloud (and|&) devops (engineering )?(master|masters)/, 'ai-cloud-devops-master'],
+  [/(cloud|devops)[^.?!]{0,40}\b(network(ing)? (professionals?|engineers?|admins?)|qa|testers?|test engineers?|system admin(istrators?|s)?|sysadmins?|it support|itops|it operations|dba|database admin(istrators?|s)?|role tracks?)\b|\bnetwork professionals?\b|advanced cloud|cloud (and|&) devops engineering/, 'cloud-devops-engineering'],
   [/(genai|gen ai|generative ai) (and|&) agentic ai master/, 'genai-agentic-ai-master'],
   [/data science (and|&) (gen ?ai|ai) (program|programme|course|certification)/, 'data-science-genai-program'],
-  [/(genai|gen ai|generative ai) (and|&) agentic ai (program|programme|course|certification)/, 'genai-agentic-ai-program'],
+  [/(genai|gen ai|generative ai) (and|&) agentic ai (program|programme|course|certification)/, 'genai-agentic-ai-master'],
 ]
 
 /** Names that only ever mean the program; anything else needs a word like "program" or "course" nearby. */
-const ALWAYS = new Set(['forward-deployed-ai-engineer', 'applied-ai-practitioner', 'ms-cs-data-science-ai', 'data-business-analytics-genai', 'advanced-cloud-devops', 'cloud-devops-network', 'genai-software-developers', 'genai-agentic-ai-managers-leaders'])
+const ALWAYS = new Set(['forward-deployed-ai-engineer', 'applied-ai-practitioner', 'ms-cs-data-science-ai', 'data-business-analytics-genai', 'cloud-devops-engineering', 'genai-software-developers', 'genai-agentic-ai-managers-leaders'])
 const ABOUT_A_PROGRAM = /\b(program|programme|course|certification|master|masters|syllabus|curriculum|brochure|modules?|fees?|enrol|enroll|join|details|link)\b/
 
 /** The program the learner names in this message, if any (e.g. "tell me about the AI Engineer program"). */

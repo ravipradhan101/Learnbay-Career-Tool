@@ -8,7 +8,7 @@ import { Logo } from '../Logo'
 import { LogoutButton } from '../LogoutButton'
 import { ChatWindow } from './ChatWindow'
 import { looksLikeGibberish, matchTyped, otherAnswer, useChat, type Bot, type Item, type ProjectItem } from './engine'
-import { ADOPT_KEY, sectionResume, counselFlow, trackChangeFlow, eligibilityFlow, endFlow, homeFlow, masterclassFlow, restartFlow, sessionsFlow, switchFlow, toolFlow, type StudioCtx } from './flows'
+import { ADOPT_KEY, sectionResume, counselFlow, trackChangeFlow, eligibilityFlow, endFlow, homeFlow, meetFlow, masterclassFlow, restartFlow, sessionsFlow, switchFlow, toolFlow, type StudioCtx } from './flows'
 import { StudioPanel } from './StudioPanel'
 import { LumiGuide, type GuideHandle, type GuideLine } from './LumiGuide'
 import { LumiTour, type TourStep } from './LumiTour'
@@ -18,7 +18,7 @@ import { track as trackEvent } from '@/lib/analytics'
 import { Avatar } from './Avatar'
 import { skillFamily } from '@/lib/skills'
 import { programForLearner } from '@/lib/segments'
-import { clearGuestChat, getJson, postJson, sessionGet as storageGet, sessionSet as storageSet } from '@/lib/client'
+import { SESSION_ENDED, clearGuestChat, getJson, postJson, sessionGet as storageGet, sessionSet as storageSet } from '@/lib/client'
 import { COUNSELLOR_TITLE, askedFor, getCounsellor } from '@/lib/counsellors'
 import { initials, trackOf, type Answers } from '@/lib/questions'
 import type { ToolState } from '@/lib/report-card'
@@ -91,6 +91,17 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     window.addEventListener('lcn:rated', on)
     return () => window.removeEventListener('lcn:rated', on)
   }, [])
+  // Signed out on this device (expired, or signed out in another tab): one quiet notice with a way back in.
+  const sessionNoticeShown = useRef(false)
+  useEffect(() => {
+    const on = () => {
+      if (sessionNoticeShown.current) return
+      sessionNoticeShown.current = true
+      chat.addStaticCard({ type: 'session-ended' })
+    }
+    window.addEventListener(SESSION_ENDED, on)
+    return () => window.removeEventListener(SESSION_ENDED, on)
+  }, [chat])
   const toolsRef = useRef(tools)
   toolsRef.current = tools
   const answersRef = useRef(answers)
@@ -177,6 +188,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     set latestSession(v) { latest.current = v },
     go: (href: string) => {
       if (href === 'call') return ctx.call('chat')
+      if (href === 'video' || href === 'video:now') return chat.run((bot) => meetFlow(bot, ctx, 'chat', href === 'video:now'))
       if (href.startsWith('switch:')) return chat.run((bot) => switchFlow(bot, ctx, href.slice(7)))
       const t = topicOf(href)
       if (t === topicRef.current) startTopic.current(t, 'menu')
@@ -234,8 +246,8 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
       }
       return true
     },
-    switchTrack: async (interest: string) => {
-      const r = await postJson('/api/profile/track', { interest })
+    switchTrack: async (interest: string, program?: string) => {
+      const r = await postJson('/api/profile/track', program ? { interest, program } : { interest })
       if (!r.ok) return false
       const next = { ...answersRef.current, ...((r.data.answers as Answers | undefined) ?? { interest }) }
       answersRef.current = next
@@ -407,7 +419,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     body: () => `Come back to your Career Studio, ${data.first}: your plan is right where you left it.`,
   })
 
-  // ---------- Lumi, the guide ----------
+  // ---------- Woody, the guide ----------
   const guideHelp = (): GuideLine => ({
     text: `What can I help you with, ${data.first}?`,
     actions: [
@@ -420,7 +432,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     ].slice(0, 6),
   })
 
-  // ---------- Lumi's tour: offered on the first visit, and any time from her menu ----------
+  // ---------- Woody's tour: offered on the first visit, and any time from his menu ----------
   const tourKey = `lcn_tour:${data.userId}`
   const tourSeen = () => { try { return window.localStorage.getItem(tourKey) === '1' } catch { return true } }
   const markTour = () => { try { window.localStorage.setItem(tourKey, '1') } catch { /* ignore */ } }
@@ -438,11 +450,11 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
   ]
   const startTour = () => { markTour(); guide.current?.close(); setDrawer(null); setTouring(true) }
   const guideHello = (): GuideLine => {
-    if (tourSeen()) return { text: `Hi ${data.first}! I’m Lumi, your guide here. I’m always in the corner, so tap me whenever you need help.` }
+    if (tourSeen()) return { text: `Hi ${data.first}! I’m Woody, your guide here. I’m always in the corner, so tap me whenever you need help.` }
     // Offered once: whatever they choose (or if they close it), it isn't offered again; "Show me around" is in my menu.
     markTour()
     return {
-        text: `Hi ${data.first}! I’m Lumi, your guide in the Career Studio. Want a 30-second tour of where everything is: your reports, readiness score, the free counselling call and more?`,
+        text: `Hi ${data.first}! I’m Woody, your guide in the Career Studio. Want a 30-second tour of where everything is: your reports, readiness score, the free counselling call and more?`,
         actions: [{ id: 'tour', label: 'Take the quick tour', icon: 'target', primary: true }, { id: 'tour-skip', label: 'I’ll explore on my own' }],
       }
   }
@@ -471,7 +483,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     if (!lines.length) return null
     return { text: `Leaving already, ${data.first}? ${lines.join(' ')}`, actions: [...actions, { id: 'later', label: 'I’ll come back later' }] }
   }
-  // ---------- feedback: asked by Lumi after a few tasks, or at the end (never after a single task) ----------
+  // ---------- feedback: asked by Woody after a few tasks, or at the end (never after a single task) ----------
   const tasksDone = [done['skill-gap'], done.salary, done.roadmap, done.eligibility, done.sessions].filter(Boolean).length
   const ratedKey = `lcn_rated:${data.userId}:${who.id}`
   const alreadyRated = () => { try { return window.localStorage.getItem(ratedKey) === '1' } catch { return false } }
@@ -484,7 +496,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     const sent = await guide.current.askRating({ counsellor: who.id, counsellorName: who.name, testTaken: done.eligibility, threadId }, text)
     if (sent) { try { window.localStorage.setItem(ratedKey, '1') } catch { /* ignore */ } }
   }
-  // After a few tasks, once per visit, Lumi asks (a short pause first, so it never interrupts a step).
+  // After a few tasks, once per visit, Woody asks (a short pause first, so it never interrupts a step).
   useEffect(() => {
     if (tasksDone < 3) return
     try { if (window.sessionStorage.getItem(`lcn_rating_asked:${data.userId}`) === '1') return } catch { return }
@@ -523,7 +535,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     setDrawer(null)
     ctx.go(id)
   }
-  /** Log out: Lumi says goodbye, and logging out happens only when the learner taps her Log out button. */
+  /** Log out: Woody says goodbye, and logging out happens only when the learner taps his Log out button. */
   const confirmLogout = async () => {
     if (!guide.current) return true
     const canRate = !alreadyRated() && tasksDone > 0
@@ -560,7 +572,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
       <div className="ts-foot">
         <button type="button" className="ts-lumi" onClick={() => { setDrawer(null); guide.current?.say(guideHelp()) }}>
           <Avatar who="bot" size={40} online />
-          <span><b>Lumi · your guide</b><small>Ask me anything</small></span>
+          <span><b>Woody · your guide</b><small>Ask me anything</small></span>
           <Icon name="message" size="1rem" />
         </button>
         <div className="ts-foot-row">

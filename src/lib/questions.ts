@@ -4,7 +4,7 @@ export type Option = { id: string; label: string; hint?: string; keywords?: stri
 
 // ---------- Onboarding (asked in the chat before contact details) ----------
 
-/** Career goal (asked by Lumi). Shapes how the counsellor talks to them and what they pitch. */
+/** Career goal (asked by Woody). Shapes how the counsellor talks to them and what they pitch. */
 export const GOALS: Option[] = [
   { id: 'switch', label: 'Switch to a better tech role' },
   { id: 'upskill', label: 'Grow faster in my current role' },
@@ -13,19 +13,27 @@ export const GOALS: Option[] = [
   { id: 'explore', label: 'Explore where AI fits for me' },
 ]
 
-/** The three tracks offered on the start screen; each maps to a program area (interest). */
-export const TRACKS: (Option & { interest: string; programId: string; roles: string[]; bestFor: string; icon: 'sparkles' | 'briefcase' | 'cloud' })[] = [
+/**
+ * The three tracks on the start screen, in this order. The AI & Data Science track covers AI, data science, analytics
+ * and no-code AI: the counsellor probes their background, coding, need and goal and routes them to the right program
+ * (Learnbay's Lead–Course Map), so the start screen never asks people to choose between programs. `path` is one short
+ * line on how the track is matched, deliberately not a list of programs.
+ */
+export const TRACKS: (Option & { interest: string; programId: string; roles: string[]; bestFor: string; path: string; icon: 'sparkles' | 'briefcase' | 'cloud' })[] = [
   {
-    id: 'ai', interest: 'ai', programId: 'genai-agentic-ai-master', icon: 'sparkles', label: 'AI track', hint: 'GenAI & Agentic AI',
-    bestFor: 'Engineers, data, QA and IT professionals moving into AI', roles: ['AI Engineer', 'GenAI Developer', 'Agentic AI Engineer'],
+    id: 'ai', interest: 'ai', programId: 'genai-agentic-ai-master', icon: 'sparkles', label: 'AI & Data Science track', hint: 'AI, GenAI, data science and analytics',
+    bestFor: 'Freshers, non-coders, analysts, developers and managers who want AI or data in their career', roles: ['AI Engineer', 'Data Scientist', 'Data Analyst', 'AI-powered version of your role'],
+    path: 'Your counsellor matches you to the right AI, data or no-code program for your background',
   },
   {
     id: 'fde', interest: 'fde', programId: 'forward-deployed-ai-engineer', icon: 'briefcase', label: 'FDE track', hint: 'Forward Deployed Engineering',
-    bestFor: 'Engineers who enjoy building AI solutions with clients', roles: ['Forward Deployed AI Engineer', 'AI Solutions Engineer'],
+    bestFor: 'People who write code (1+ year in tech) and enjoy building AI solutions with clients', roles: ['Forward Deployed AI Engineer', 'AI Solutions Engineer'],
+    path: 'Forward Deployed AI Engineer Master Program',
   },
   {
-    id: 'cloud-devops', interest: 'cloud-devops', programId: 'ai-cloud-devops-master', icon: 'cloud', label: 'Cloud & DevOps track', hint: 'AI-powered cloud and DevOps',
-    bestFor: 'SysAdmin, support, network, QA and DevOps professionals', roles: ['Cloud Engineer', 'DevOps / SRE Engineer', 'MLOps Engineer'],
+    id: 'cloud-devops', interest: 'cloud-devops', programId: 'cloud-devops-engineering', icon: 'cloud', label: 'Cloud & DevOps track', hint: 'AI-powered cloud and DevOps',
+    bestFor: 'IT professionals (1+ year): sysadmin, support, network, DBA, QA, developers and DevOps', roles: ['Cloud Engineer', 'DevOps / SRE Engineer', 'MLOps Engineer'],
+    path: 'A role track matched to your current IT job',
   },
 ]
 
@@ -36,7 +44,7 @@ export const TRACKS: (Option & { interest: string; programId: string; roles: str
  */
 export const TRACK_TARGET: Record<string, string> = { fde: 'fde', 'cloud-devops': 'cloud-engineer' }
 
-/** Industry or domain the learner comes from (asked by Lumi). */
+/** Industry or domain the learner comes from (asked by Woody). */
 /** `keywords`: what people type for that industry (typed answers only; never shown). Anything else becomes "Other" with their words. */
 export const DOMAINS: Option[] = [
   { id: 'it-services', label: 'IT services / consulting', keywords: ['it services', 'it company', 'consulting', 'consultancy', 'outsourcing', 'service based', 'service company', 'infosys', 'tcs', 'wipro', 'accenture', 'cognizant', 'capgemini', 'hcl', 'tech mahindra'] },
@@ -299,18 +307,20 @@ export const COUNTRY_CODES: { code: string; label: string; flag: string; digits:
 ]
 
 export type Answers = {
-  // onboarding (Lumi)
+  // onboarding (Woody)
   goal?: string
   domain?: string
   /** Their own industry, typed when it isn't in the list (domain = 'other'). */
   domainOther?: string
-  /** Freshers: final year, job hunting, or working outside tech (asked by Lumi). */
+  /** Freshers: final year, job hunting, or working outside tech (asked by Woody). */
   studyStage?: string
   // first conversation with the counsellor
   /** "What made you start looking at this now?" (their own reason: the only source of urgency). */
   trigger?: string
   /** The answer to their segment's question (see lib/segments). */
   probe?: string
+  /** Answers to the Lead–Course Map's probe questions (config/map-questions), by question id. */
+  mapAnswers?: Record<string, string>
   learning?: string
   difficulty?: string
   skillLevels?: Record<string, string>
@@ -350,7 +360,8 @@ export const experienceLabel = (a: Answers) => labelOf(EXPERIENCE, a.experience)
 export const interestLabel = (a: Answers) => labelOf(INTERESTS, a.interest) ?? 'Not specified'
 export const goalLabel = (a: Answers) => labelOf(GOALS, a.goal)
 export const domainLabel = (a: Answers) => (a.domain === DOMAIN_OTHER ? a.domainOther || undefined : labelOf(DOMAINS, a.domain))
-export const trackOf = (interest: string | undefined) => TRACKS.find((t) => t.interest === interest) ?? null
+/** The start-screen track for an interest: data science and analytics sit in the AI & Data Science track. */
+export const trackOf = (interest: string | undefined) => TRACKS.find((t) => t.interest === (interest === 'analytics' || interest === 'data-science' ? 'ai' : interest)) ?? null
 export function targetRoleOptions(a: Answers): Option[] {
   const list = TARGET_ROLES[a.interest ?? 'ai'] ?? TARGET_ROLES.ai
   // "AI-skilled version of my current role" says exactly which role ("AI-powered Marketer").

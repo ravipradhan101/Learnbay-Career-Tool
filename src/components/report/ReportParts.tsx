@@ -5,6 +5,7 @@ import { Gauge, KpiTiles } from './Charts'
 import { getProgram } from '@/config/programs'
 import { USPS, type UspId } from '@/config/usps'
 import { curriculumOf } from '@/lib/roles'
+import { moduleFor, weeksLabel } from '@/lib/plan'
 import type { ReportSummary } from '@/lib/report-summary'
 
 /** Top of every report: the one number that matters, what it means, and 3-4 key numbers. */
@@ -135,5 +136,84 @@ export function EligibilityStrip({ area }: { area: string }) {
       <span><b>Are you eligible for a {area} program?</b><small>10 quick questions · about 4 minutes · score straight away</small></span>
       <Icon name="arrowRight" size="1rem" />
     </Link>
+  )
+}
+
+// ---------- Your plan with Learnbay (every report) ----------
+
+/**
+ * The learner, what to focus on, how each focus area is learnt in their Learnbay program (the module that teaches it),
+ * and how Learnbay helps: strengths, the program's own certificates and projects from their industry.
+ */
+export function PlanWithLearnbay({ profile, focus, programId, industries = [] }: {
+  profile: { label: string; value: string }[]
+  focus: string[]
+  programId: string
+  /** The learner's industries in the catalogue's words, closest first (their capstones lead). */
+  industries?: string[]
+}) {
+  const p = getProgram(programId)
+  const course = curriculumOf(programId)
+  const used = new Set<string>()
+  const items = focus.slice(0, 4).map((f) => { const module = moduleFor(f, course.moduleDetails, used); if (module) used.add(module.name); return { focus: f, module } })
+
+  const rank = (d: string | undefined) => { const i = d ? industries.indexOf(d) : -1; return i < 0 ? 99 : i }
+  // Their industry's capstones first; otherwise (freshers, no match) two from different industries, never two of a kind.
+  const sorted = [...course.projects].sort((a, b) => rank(a.domain) - rank(b.domain))
+  const projects = rank(sorted[0]?.domain) < 99 ? sorted.slice(0, 2) : sorted.filter((x, i) => sorted.findIndex((y) => y.domain === x.domain) === i).slice(0, 2)
+  const helps: UspId[] = ['customisation', 'projects', 'mentors', 'placement']
+  return (
+    <section className="plan-lb" aria-label="Your plan with Learnbay">
+      <div className="plan-lb-head">
+        <span className="eyebrow">Your plan with Learnbay</span>
+        <h2>From where you are to {p.name}</h2>
+      </div>
+      {profile.length > 0 && (
+        <div className="plan-lb-profile">
+          <span className="plan-lb-label">About you</span>
+          <div className="plan-lb-chips">{profile.map((x) => <span key={x.label} className="plan-chip"><small>{x.label}</small><b>{x.value}</b></span>)}</div>
+        </div>
+      )}
+      {items.length > 0 && (
+        <div className="plan-lb-focus">
+          <span className="plan-lb-label">Focus on these, in this order</span>
+          <ol>
+            {items.map((x, i) => (
+              <li key={x.focus}>
+                <span className="plan-n">{i + 1}</span>
+                <div>
+                  <b>{x.focus}</b>
+                  <small>{x.module ? <>Learnt in <em>{x.module.name}</em>{/\d/.test(x.module.weeks) ? ` (${weeksLabel(x.module.weeks)})` : ''}</> : 'Covered in your plan with your Senior Counsellor'}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+      <div className="plan-lb-helps">
+        <span className="plan-lb-label">How Learnbay helps you get there</span>
+        <div className="plan-lb-grid">
+          {helps.map((id) => (
+            <div key={id} className="plan-help">
+              <span className="usp-icon"><Icon name={USPS[id].icon} size="1.05rem" /></span>
+              <div><b>{USPS[id].title}</b><small>{USPS[id].short}</small></div>
+            </div>
+          ))}
+        </div>
+        {course.certifications[0] && <p className="plan-lb-cert"><Icon name="award" size="0.95rem" /> Certificates in {p.name}: {course.certifications[0]}</p>}
+        {projects.length > 0 && (
+          <div className="plan-lb-projects">
+            {projects.map((x) => (
+              <div key={x.title} className="plan-project">
+                <span className="eyebrow">{x.domain} · capstone</span>
+                <b>{x.title}</b>
+                <small>{x.objective}</small>
+                {x.outcome && <small className="plan-outcome">You’ll achieve: {x.outcome}</small>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   )
 }

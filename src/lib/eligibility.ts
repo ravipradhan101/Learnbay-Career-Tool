@@ -10,6 +10,7 @@ import { generateJson } from './gemini'
 import { sendMail } from './mailer'
 import { learnerUrl } from './links'
 import { EDU_LEVELS, PROGRAMMER, experienceLabel, interestLabel, labelOf, roleLabel, type Answers } from './questions'
+import { programForLearner } from './segments'
 
 // Timing, question count and attempts come from the active question set (Admin → Eligibility test) and are
 // copied onto each attempt when it starts, so admin edits never change a test that is already running.
@@ -417,7 +418,7 @@ async function afterCompletion(t: TestRow) {
   if (u.answers) prepareNextAttempt(t.user_id, u.answers)
   const band = bandFor(t.score ?? 0)
   const first = (u.name ?? '').trim().split(/\s+/)[0] || 'there'
-  const program = programsForInterest(u.answers?.interest)[0] ?? getProgram(null)
+  const program = (u.answers ? programForLearner(u.answers) : undefined) ?? programsForInterest(u.answers?.interest)[0] ?? getProgram(null)
   const b = t.breakdown!
   const maxAttempts = rulesOf(await activeSetFor(u.answers?.interest)).maxAttempts
   const left = Math.max(0, maxAttempts - u.attempts)

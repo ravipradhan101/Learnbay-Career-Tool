@@ -1,9 +1,14 @@
-// Learnbay program catalog. Names, URLs and features are taken from the
-// Course structured data published on https://www.learnbay.co/ and program pages (checked 24 Sep 2026).
-// The AI may only recommend programs from this list. Edit here when programs change.
+// Learnbay's 13 programs (2026 catalogue, see config/catalogue.ts). Names, audiences, entry rules, syllabus and
+// certificates come from the catalogue; each program links to its page on learnbay.co. The AI may only recommend
+// programs from this list. Program ids are the ones the app has always used, so saved choices and links keep working;
+// retired programs resolve to the program that replaced them (RETIRED_IDS).
+
+import { CODE_TO_ID, CODING, MIN_YEARS, catalogueProgram } from './catalogue'
 
 export type Program = {
   id: string
+  /** Catalogue code (AAP, DABA, GAI-M…). */
+  code: string
   interests: string[]
   name: string
   url: string
@@ -11,215 +16,147 @@ export type Program = {
   features: string[]
   focusAreas: string[]
   bestFor: string
+  durationMonths: number | null
+  /** Years of work experience needed to join (0 = open to freshers). */
+  minYears: number
+  coding: 'no' | 'some' | 'yes'
 }
 
-export const PROGRAMS: Program[] = [
+type Def = Omit<Program, 'id' | 'name' | 'durationMonths' | 'minYears' | 'coding'>
+
+const DEFS: Def[] = [
   {
-    id: 'genai-agentic-ai-master',
-    interests: ['ai'],
-    name: 'GenAI & Agentic AI Master Program',
-    url: 'https://www.learnbay.co/genai-and-agentic-ai-master-program',
-    summary: 'For working professionals: build AI agents, RAG and LLMOps projects with career support.',
-    features: ['Built for working professionals', 'AI agents, RAG & LLMOps projects', 'Career support'],
-    focusAreas: ['GenAI', 'LLMs', 'AI agents', 'RAG', 'LLMOps'],
-    bestFor: 'Working professionals (developers, QA, analysts) moving into GenAI and agentic AI roles',
-  },
-  {
-    id: 'ai-engineering-master',
-    interests: ['ai', 'fde'],
-    name: 'AI Engineering Master Program',
-    url: 'https://www.learnbay.co/ai-engineering-master-program',
-    summary: 'Learn GenAI, Agentic AI, RAG and production AI through real projects.',
-    features: ['GenAI & Agentic AI', 'RAG and production AI', 'Real projects'],
-    focusAreas: ['GenAI', 'Agentic AI', 'RAG', 'Production AI'],
-    bestFor: 'Engineers who want to build and ship production AI systems as AI Engineers',
-  },
-  {
-    id: 'sde-genai-agentic-ai',
-    interests: ['ai'],
-    name: 'SDE Master Program With GenAI & Agentic AI',
-    url: 'https://www.learnbay.co/artificial-intelligence/sde-master-program-genai-agentic-ai',
-    summary: 'Master GenAI, Agentic AI, DSA and system design to crack top SDE roles.',
-    features: ['DSA & system design', 'GenAI & Agentic AI', 'Real-world AI projects'],
-    focusAreas: ['DSA', 'System design', 'GenAI', 'Agentic AI'],
-    bestFor: 'Software developers targeting top SDE roles with AI skills',
-  },
-  {
-    id: 'data-science-genai-master',
-    interests: ['data-science', 'analytics'],
-    name: 'Advanced Data Science & GenAI Master Program',
-    url: 'https://www.learnbay.co/datascience/data-science-and-ai-master-certification-program',
-    summary: 'Data science and GenAI skills through live training and hands-on projects.',
-    features: ['Live training', 'Hands-on projects', 'Data Science & GenAI certification'],
-    focusAreas: ['Data science', 'Machine learning', 'GenAI'],
-    bestFor: 'Analysts and professionals moving into data science and GenAI roles',
-  },
-  {
-    id: 'genai-agentic-ai-cloud-devops',
-    interests: ['cloud-devops', 'ai'],
-    name: 'GenAI & AgenticAI for Cloud & DevOps',
-    url: 'https://www.learnbay.co/genai-agentic-ai-for-cloud-devops',
-    summary: 'Become an AI-ready Cloud & DevOps engineer: LLMs, agents, and AI-powered CI/CD and ops workflows.',
-    features: ['LLMs & agents', 'AI-powered CI/CD', 'AI-powered ops workflows'],
-    focusAreas: ['LLMs', 'AI agents', 'CI/CD', 'Cloud operations'],
-    bestFor: 'Cloud and DevOps engineers adding GenAI and agentic AI to their work',
-  },
-  {
-    id: 'ai-cloud-devops-master',
-    interests: ['cloud-devops'],
-    name: 'AI-Powered Cloud & DevOps Master Program',
-    url: 'https://www.learnbay.co/cloud-and-devops/ai-powered-cloud-devops-masters-certification',
-    summary: 'Live classes, projects and multi-cloud training for Cloud & DevOps careers.',
-    features: ['Live classes', 'Projects', 'Multi-cloud training'],
-    focusAreas: ['Cloud', 'DevOps', 'Multi-cloud'],
-    bestFor: 'Professionals building or switching into Cloud & DevOps careers',
-  },
-  {
-    id: 'applied-ai-practitioner',
-    interests: ['ai', 'analytics'],
-    name: 'Applied AI Practitioner Program',
+    code: 'AAP', interests: ['ai', 'analytics'],
     url: 'https://www.learnbay.co/artificial-intelligence/applied-ai-practitioner-program',
-    summary: '4-month applied AI program: master 35+ AI tools, IIT Patna certification, no coding required.',
-    features: ['35+ AI tools', 'IIT Patna certification', 'No coding required'],
-    focusAreas: ['AI tools', 'Applied AI', 'Workflow automation'],
-    bestFor: 'Managers, business and non-technical professionals using AI in their work',
+    summary: 'Use AI in the job you already do, without coding: prompting, AI content, Claude connectors and MCP, Claude Code for non-developers, agents and automation, a function track and a startup capstone.',
+    features: ['No coding, no experience needed', 'Function track: Marketing, Sales, HR or Finance & Ops', 'IBM, IIT Patna and AI CoLab certificates'],
+    focusAreas: ['Prompting & context engineering', 'AI content (image, video, voice)', 'Connectors & MCP', 'Claude Code for non-developers', 'Agents & workflow automation'],
+    bestFor: 'Non-tech professionals, freelancers, business owners and students who want to use AI in their own work',
   },
   {
-    id: 'forward-deployed-ai-engineer',
-    interests: ['fde', 'ai'],
-    name: 'Forward Deployed AI Engineer Program',
-    url: 'https://www.learnbay.co/artificial-intelligence/forward-deployed-engineer-course',
-    summary: '12 months of live mentor-led training in LLMs, RAG, Agentic AI and LLMOps with real AI startup projects.',
-    features: ['100% live, mentor-led', '80+ live projects', 'Certification in collaboration with IBM and Microsoft'],
-    focusAreas: ['GenAI', 'RAG', 'Agentic AI', 'LLMOps', 'Client solution engineering'],
-    bestFor: 'Working professionals who want to build and deploy AI solutions directly with clients',
-  },
-  {
-    id: 'data-business-analytics-genai',
-    interests: ['analytics', 'data-science'],
-    name: 'Data & Business Analytics Course with Gen AI',
+    code: 'DABA', interests: ['analytics', 'data-science'],
     url: 'https://www.learnbay.co/artificial-intelligence/generative-ai-analytics-course',
-    summary: 'Hands-on Data & Business Analytics course powered by Generative AI, with top tools and real-world projects.',
-    features: ['Powered by Generative AI', 'Top analytics tools', 'Real-world projects'],
-    focusAreas: ['Data analytics', 'Business analytics', 'BI tools', 'GenAI for analysis'],
-    bestFor: 'Analysts and business professionals moving into data and business analytics roles',
+    summary: 'Become a data or business analyst: Excel with Copilot, statistics, SQL, Python for analysts, Power BI and Tableau, then GenAI and agents for analytics, with a domain track and a startup capstone.',
+    features: ['Open to any graduate, no coding needed', 'Domain track: Marketing, HR, Finance & BFSI, Supply Chain or Product', 'IBM, IIT Patna and AI CoLab certificates'],
+    focusAreas: ['Excel & Copilot', 'Statistics & A/B testing', 'SQL', 'Power BI & Tableau', 'GenAI & agents for analytics'],
+    bestFor: 'Graduates of any stream, career-gap returnees and non-tech professionals moving into analyst roles',
   },
   {
-    // From https://www.learnbay.co/genai-agentic-ai-managers-leaders (checked 29 Sep 2026). Prerequisites: Python, ML and basic deep learning.
-    id: 'genai-agentic-ai-managers-leaders',
-    interests: ['ai'],
-    name: 'GenAI & Agentic AI Program for Managers & Leaders',
-    url: 'https://www.learnbay.co/genai-agentic-ai-managers-leaders',
-    summary: 'For managers and leaders: GenAI for business transformation, workflow automation and project management, with real projects.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'IBM certification in Generative AI'],
-    focusAreas: ['GenAI for managers', 'Agentic AI', 'Digital business transformation', 'GenAI for project management'],
-    bestFor: 'Managers and team leads with Python and ML basics who lead or will lead AI initiatives',
-  },
-  // Added 29 Sep 2026 from each program's page (see config/program-details.ts for modules, projects and tools).
-  {
-    id: 'genai-software-developers',
-    interests: ['ai'],
-    name: 'GenAI & Agentic AI Program for Software Developers',
-    url: 'https://www.learnbay.co/artificial-intelligence/genai-software-developers',
-    summary: 'For developers with 1+ years: add GenAI and agentic AI to the software you already build.',
-    features: ['130+ hours of live classes', '40+ guided projects', 'IBM and Microsoft certification'],
-    focusAreas: ['GenAI', 'Agentic AI', 'LLMOps', 'AI in software products'],
-    bestFor: 'Software developers and engineers with 1+ years of experience moving into AI',
-  },
-  {
-    id: 'genai-agentic-ai-program',
-    interests: ['ai'],
-    name: 'Generative AI & Agentic AI Program',
-    url: 'https://www.learnbay.co/genai-agentic-ai-program',
-    summary: 'GenAI and agentic AI for freshers, working professionals and developers starting their AI journey.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'IBM certification'],
-    focusAreas: ['GenAI', 'Agentic AI', 'Automation'],
-    bestFor: 'Freshers and early-career professionals who code a little and want to start in AI',
-  },
-  {
-    id: 'data-science-genai-program',
-    interests: ['data-science'],
-    name: 'Data Science & GenAI Program',
+    code: 'DSG-C', interests: ['data-science', 'ai'],
     url: 'https://www.learnbay.co/data-science-genai-program',
-    summary: 'IBM-certified data science and GenAI program, open to freshers and non-technical professionals.',
-    features: ['250+ hours of live classes', '30+ guided projects', 'IBM certification'],
-    focusAreas: ['Data science', 'Machine learning', 'GenAI'],
-    bestFor: 'Freshers and non-technical professionals starting in data science',
+    summary: 'Start in data science: Python, statistics, machine learning, SQL and BI, deep learning, GenAI with RAG, agentic AI and PySpark, ending with one ML and one GenAI capstone.',
+    features: ['Open to freshers; Python taught from scratch', 'Two capstones: classic ML and GenAI', 'IBM and IIT Patna certificates'],
+    focusAreas: ['Python', 'Statistics', 'Machine learning', 'Deep learning & NLP', 'GenAI, RAG & agents'],
+    bestFor: 'CS, IT, engineering or maths graduates, and analysts moving into data science and ML',
   },
   {
-    id: 'ms-cs-data-science-ai',
-    interests: ['data-science'],
-    name: 'MS in Computer Science (Data Science & AI specialisation)',
-    url: 'https://www.learnbay.co/datascience/data-science-and-ai-masters-in-cs',
-    summary: 'A master\'s degree in Computer Science with a Data Science & AI specialisation, for bachelor\'s degree holders.',
-    features: ['Accredited master\'s degree', 'Data Science & AI specialisation', 'Projects and capstone'],
-    focusAreas: ['Computer science', 'Data science', 'AI'],
-    bestFor: 'Working professionals with a bachelor\'s degree who want a master\'s degree in data science and AI',
+    code: 'DSG-M', interests: ['data-science'],
+    url: 'https://www.learnbay.co/datascience/data-science-and-ai-master-certification-program',
+    summary: 'The full data science and AI path for working professionals: ML, deep learning, GenAI and agents, computer vision and MLOps/LLMOps, with two domain electives and four capstones.',
+    features: ['For 1+ year of experience', 'Two domain electives: BFSI, Retail, Manufacturing & Supply Chain, Healthcare & Pharma', 'IBM, Microsoft, IIT Patna and 2 AI CoLab certificates'],
+    focusAreas: ['Machine learning', 'Deep learning & computer vision', 'GenAI, RAG & agents', 'MLOps & LLMOps', 'Domain AI'],
+    bestFor: 'Working professionals in tech, analytics or engineering, and domain specialists, aiming for data scientist, ML or AI roles',
   },
   {
-    id: 'advanced-cloud-devops',
-    interests: ['cloud-devops'],
-    name: 'Advanced Cloud & DevOps Program',
+    code: 'GAI-SD', interests: ['ai'],
+    url: 'https://www.learnbay.co/artificial-intelligence/genai-software-developers',
+    summary: 'For working developers: AI-engineering Python, Claude Code and Copilot, LLM engineering and RAG, agentic AI with MCP and A2A, LLMOps, evals and guardrails, and AI system design.',
+    features: ['For developers with 1+ year', 'Developer-only: no beginner modules', 'IBM and Microsoft Azure AI Fundamentals'],
+    focusAreas: ['LLM engineering & RAG', 'Agentic AI, MCP & A2A', 'LLMOps, evals & guardrails', 'AI system design'],
+    bestFor: 'Software developers (1–5 years) and QA automation engineers who code daily and want GenAI engineering roles',
+  },
+  {
+    code: 'SDE-M', interests: ['ai'],
+    url: 'https://www.learnbay.co/artificial-intelligence/sde-master-program-genai-agentic-ai',
+    summary: 'Crack product-company interviews: DSA in Java, C++ or Python, low- and high-level system design, then the GenAI developer core, electives and a mock-interview sprint.',
+    features: ['For developers with 1+ year', 'DSA and system design first, then GenAI', 'IBM, Microsoft, IIT Patna and AI CoLab certificates'],
+    focusAreas: ['DSA', 'LLD & HLD system design', 'GenAI & agentic AI', 'Interview preparation'],
+    bestFor: 'Developers in service companies who want SDE roles at product companies, or keep failing DSA and system-design rounds',
+  },
+  {
+    code: 'FDE-M', interests: ['fde', 'ai'],
+    url: 'https://www.learnbay.co/artificial-intelligence/forward-deployed-engineer-course',
+    summary: 'Become a Forward Deployed AI Engineer: Python and software engineering for FDE, LLM engineering, advanced enterprise RAG, agentic AI, cloud and LLMOps, AI system design and client solution engineering.',
+    features: ['For engineers with 1+ year who code', 'Elective: Software & SaaS, Data & Analytics, or Cloud & Enterprise', 'IBM, Microsoft, IIT Patna and 2 AI CoLab certificates'],
+    focusAreas: ['Enterprise RAG', 'Agentic AI engineering', 'Cloud, LLMOps & AIOps', 'AI system design', 'Client solution engineering'],
+    bestFor: 'Backend, full-stack, data, ML, solutions and cloud engineers who want to build and deploy AI with clients',
+  },
+  {
+    code: 'GAI-M', interests: ['ai'],
+    url: 'https://www.learnbay.co/genai-and-agentic-ai-master-program',
+    summary: 'The broad GenAI master for tech professionals: Python for GenAI, Claude Code and MCP, ML and transformers, LLMs and RAG, agentic AI, LLMOps and responsible AI, then two specialisations you pick after the core.',
+    features: ['For tech professionals with 1+ year', 'Pick 2 of 7 specialisations: Developers, Cloud & DevOps, QA & Test, BFSI, Retail, Manufacturing, Healthcare', 'IBM, Microsoft, IIT Patna and 2 AI CoLab certificates'],
+    focusAreas: ['LLM engineering & RAG', 'Agentic AI & automation', 'LLMOps', 'Responsible AI', 'Role or domain specialisations'],
+    bestFor: 'Tech professionals who code (developers, QA, data, cloud) and domain professionals who want GenAI plus a role or industry specialisation',
+  },
+  {
+    code: 'GAI-CD', interests: ['cloud-devops', 'ai'],
+    url: 'https://www.learnbay.co/genai-agentic-ai-for-cloud-devops',
+    summary: 'AI for people who already run cloud: Claude Code and Copilot for infrastructure, RAG over runbooks and logs, agents for operations, LLM serving on Kubernetes and AI FinOps.',
+    features: ['For cloud/DevOps engineers with 1+ year', 'Agents, LLMOps and AI infrastructure', 'IBM GenAI certificate'],
+    focusAreas: ['AI for infrastructure', 'RAG over runbooks', 'Agentic AI for operations', 'LLM serving on Kubernetes', 'AI FinOps'],
+    bestFor: 'Cloud, DevOps, SRE and platform engineers already working on AWS/Azure, CI/CD and Kubernetes',
+  },
+  {
+    code: 'CD', interests: ['cloud-devops'],
     url: 'https://www.learnbay.co/cloud-and-devops/advanced-cloud-computing-and-devops-program',
-    summary: 'Beginner-friendly Cloud & DevOps training for IT and non-IT working professionals.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'Beginner-friendly'],
-    focusAreas: ['Cloud', 'DevOps', 'Linux', 'CI/CD'],
-    bestFor: 'Working professionals from any domain, including non-IT, starting Cloud & DevOps',
+    summary: 'Move from IT into cloud and DevOps through your own role track: Linux, AWS to Solutions Architect Associate, Azure Administrator, the DevOps toolchain, AIOps, then four capstones for your role.',
+    features: ['For IT professionals with 1+ year', 'Role track: IT Support & ITOps, System Admin, Network, DBA, QA & Test, or General IT & Developers', 'Microsoft Azure certification track'],
+    focusAreas: ['Linux & scripting', 'AWS & Azure', 'Docker, Kubernetes & Terraform', 'CI/CD & monitoring', 'AIOps'],
+    bestFor: 'IT support, system admins, network engineers, DBAs, QA engineers and developers moving into cloud and DevOps',
   },
   {
-    id: 'cloud-devops-network',
-    interests: ['cloud-devops'],
-    name: 'Cloud & DevOps for Network Professionals',
-    url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-network-professionals',
-    summary: 'Cloud & DevOps built on networking experience: cloud networking, automation and multi-cloud.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'Network-specific projects'],
-    focusAreas: ['Cloud networking', 'DevOps', 'Automation'],
-    bestFor: 'Network engineers and admins with 1+ years moving into cloud and DevOps',
+    code: 'CD-M', interests: ['cloud-devops'],
+    url: 'https://www.learnbay.co/cloud-and-devops/ai-powered-cloud-devops-masters-certification',
+    summary: 'The cloud architect path: AWS and Azure architecture, GitOps, Kubernetes and platform engineering, cloud system design, DevSecOps, multicloud and FinOps, and AI for cloud with agents and LLMOps.',
+    features: ['For IT professionals with 1+ year', 'One full role specialisation', 'IBM, Microsoft Azure, IIT Patna and 2 AI CoLab certificates'],
+    focusAreas: ['AWS & Azure architecture', 'Kubernetes & platform engineering', 'DevSecOps', 'Multicloud & FinOps', 'AIOps & LLMOps'],
+    bestFor: 'Infra, DevOps and developer professionals aiming for cloud architect, platform, DevSecOps or SRE roles',
   },
   {
-    id: 'cloud-devops-qa-testers',
-    interests: ['cloud-devops'],
-    name: 'Cloud & DevOps for QA & Software Test Engineers',
-    url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-qa-and-software-test-engineers',
-    summary: 'Cloud & DevOps for testers: CI/CD, test infrastructure automation and test observability.',
-    features: ['150+ hours of live classes', '10+ QA-specific projects', 'Microsoft certification'],
-    focusAreas: ['CI/CD', 'Test automation infrastructure', 'Cloud', 'Kubernetes'],
-    bestFor: 'QA and test engineers with 1+ years moving into SDET and QA DevOps roles',
+    code: 'AIL', interests: ['ai'],
+    url: 'https://www.learnbay.co/genai-agentic-ai-managers-leaders',
+    summary: 'Lead AI adoption without coding: AI literacy, personal AI productivity, no-code agents, AI strategy and ROI, AI product and delivery management, governance and responsible AI, and an AI plan for your own organisation.',
+    features: ['No coding; for 2+ years with people, project or business responsibility', 'Capstone: an AI transformation plan for your organisation', 'IBM and AI CoLab certificates'],
+    focusAreas: ['AI strategy & ROI', 'No-code agents', 'AI product & delivery', 'AI governance & risk', 'Leading AI transformation'],
+    bestFor: 'Managers, team and delivery leads, MBAs in manager roles, business heads and founders who lead AI adoption',
   },
   {
-    id: 'cloud-devops-sysadmin',
-    interests: ['cloud-devops'],
-    name: 'Cloud & DevOps for System Administrators',
-    url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-system-administrators',
-    summary: 'Cloud & DevOps built on system administration: automation, infrastructure as code and cloud ops.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'Sysadmin-specific projects'],
-    focusAreas: ['Cloud', 'Infrastructure as code', 'Automation'],
-    bestFor: 'System administrators with 1+ years moving into cloud and DevOps',
-  },
-  {
-    id: 'cloud-devops-it-support-ops',
-    interests: ['cloud-devops'],
-    name: 'Cloud & DevOps for IT Support & IT Operations',
-    url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-it-support-and-it-operations',
-    summary: 'Cloud & DevOps for support and operations teams: cloud operations, monitoring and automation.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'Cloud ops projects'],
-    focusAreas: ['Cloud operations', 'Monitoring', 'DevOps'],
-    bestFor: 'IT support and operations professionals with 1+ years moving into cloud ops and DevOps',
-  },
-  {
-    id: 'cloud-devops-dba',
-    interests: ['cloud-devops'],
-    name: 'Cloud & DevOps for Database Administrators',
-    url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-database-administrators',
-    summary: 'Cloud & DevOps for DBAs: cloud databases, automation and data platform operations.',
-    features: ['150+ hours of live classes', '10+ guided projects', 'Database-specific projects'],
-    focusAreas: ['Cloud databases', 'Automation', 'DevOps'],
-    bestFor: 'Database administrators with 1+ years moving into cloud and DevOps',
+    code: 'MCS', interests: ['data-science'],
+    url: 'https://www.learnbay.co/datascience/data-science-and-ai-masters-in-cs',
+    summary: "A Master's degree in Computer Science (Data Science & AI) via Woolf University, for graduates who need a formal degree for promotion, HR policy or immigration.",
+    features: ["Master's degree via Woolf University (90 ECTS)", "Needs a bachelor's degree with 60%+", 'Specialise in Data Science & Analytics, or AI & ML'],
+    focusAreas: ['Python', 'Statistics & ML', 'Data Science & Analytics or AI & ML'],
+    bestFor: "Graduates with 60%+ who need a formal master's degree",
   },
 ]
 
+export const PROGRAMS: Program[] = DEFS.map((d) => {
+  const c = catalogueProgram(d.code)!
+  return { ...d, id: CODE_TO_ID[d.code], name: c.name, durationMonths: c.durationMonths, minYears: MIN_YEARS[d.code] ?? 1, coding: CODING[d.code] ?? 'some' }
+})
+
+/** Programs that were retired or merged (2026 catalogue) → the program that replaced them. */
+export const RETIRED_IDS: Record<string, string> = {
+  'ai-engineering-master': 'forward-deployed-ai-engineer',
+  'genai-agentic-ai-program': 'genai-agentic-ai-master',
+  'advanced-cloud-devops': 'cloud-devops-engineering',
+  'cloud-devops-network': 'cloud-devops-engineering',
+  'cloud-devops-qa-testers': 'cloud-devops-engineering',
+  'cloud-devops-sysadmin': 'cloud-devops-engineering',
+  'cloud-devops-it-support-ops': 'cloud-devops-engineering',
+  'cloud-devops-dba': 'cloud-devops-engineering',
+}
+
+export function resolveProgramId(id: string | null | undefined): string | undefined {
+  if (!id) return undefined
+  const now = RETIRED_IDS[id] ?? id
+  return PROGRAMS.some((p) => p.id === now) ? now : undefined
+}
+
 export function getProgram(id: string | null | undefined): Program {
-  return PROGRAMS.find((p) => p.id === id) ?? PROGRAMS[0]
+  const now = resolveProgramId(id)
+  return PROGRAMS.find((p) => p.id === now) ?? PROGRAMS.find((p) => p.code === 'GAI-M')!
 }
 
 export function programsForInterest(interest: string | undefined): Program[] {
@@ -227,9 +164,19 @@ export function programsForInterest(interest: string | undefined): Program[] {
   return list.length ? list : PROGRAMS
 }
 
-/** The flagship program for a track picked on the start screen (falls back to the first match for other areas). */
+/** The Cloud & DevOps role track that matches their job (the program has one track per IT role). */
+export const CLOUD_TRACK: Record<string, { track: string; url: string }> = {
+  'it-support': { track: 'IT Support & ITOps', url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-it-support-and-it-operations' },
+  sysadmin: { track: 'System Admin', url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-system-administrators' },
+  'network-admin': { track: 'Network', url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-network-professionals' },
+  dba: { track: 'DBA', url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-database-administrators' },
+  'qa-engineer': { track: 'QA & Test', url: 'https://www.learnbay.co/cloud-and-devops/cloud-computing-and-devops-for-qa-and-software-test-engineers' },
+}
+export const cloudTrackFor = (role: string | undefined) => (role && CLOUD_TRACK[role]) || { track: 'General IT & Developers', url: DEFS.find((d) => d.code === 'CD')!.url }
+
+/** The flagship program for a track picked on the start screen. */
 export function programFor(interest: string | null | undefined): Program | undefined {
-  const flagship: Record<string, string> = { ai: 'genai-agentic-ai-master', fde: 'forward-deployed-ai-engineer', 'cloud-devops': 'ai-cloud-devops-master' }
-  const id = interest ? flagship[interest] : undefined
-  return (id ? PROGRAMS.find((p) => p.id === id) : undefined) ?? programsForInterest(interest ?? undefined)[0]
+  const flagship: Record<string, string> = { ai: 'GAI-M', fde: 'FDE-M', 'cloud-devops': 'CD', 'data-science': 'DSG-C', analytics: 'DABA' }
+  const code = interest ? flagship[interest] : undefined
+  return (code ? PROGRAMS.find((p) => p.code === code) : undefined) ?? programsForInterest(interest ?? undefined)[0]
 }

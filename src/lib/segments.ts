@@ -1,8 +1,12 @@
-// Who the learner is, from what Lumi collected (experience × background, with "do you code?" as a modifier),
+// Who the learner is, from what Woody collected (experience × background, with "do you code?" as a modifier),
 // and what the counsellor asks each kind of learner. See the Counsellor Conversation Playbook.
 
-import { PROGRAMS, getProgram, programFor, type Program } from '@/config/programs'
+import { PROGRAMS, getProgram, programFor, resolveProgramId, type Program } from '@/config/programs'
 import { DATA_SIDE_ROLES, NONTECH_ROLES, TRACK_TARGET, type Answers, type Option } from './questions'
+import { eligibility, routeFor } from './lead-match'
+
+// Who they are and which programs fit is calculated in lib/lead-match (the Lead–Course Map); re-exported here.
+export { codes, eligibility, inferredProgrammer, pathFor, routeFor, scorePersonas, yearsOf, type LeadPath, type PathOption, type Route } from './lead-match'
 
 export type Segment = 'fresher' | 'early' | 'mid' | 'domain' | 'nontech' | 'senior'
 
@@ -27,7 +31,7 @@ export function segmentOf(a: Answers): Segment {
   return 'mid'
 }
 
-/** Freshers only (asked by Lumi): where they are in their studies. */
+/** Freshers only (asked by Woody): where they are in their studies. */
 export const STUDY_STAGES: Option[] = [
   { id: 'final-year', label: 'Final year student' },
   { id: 'job-hunting', label: 'Graduated, looking for my first job' },
@@ -46,6 +50,7 @@ export const TRIGGERS: Option[] = [
   { id: 'job-worry', label: 'Worried about my job' },
   { id: 'ai-at-work', label: 'AI is coming into my work' },
   { id: 'stuck', label: 'Feeling stuck in my role' },
+  { id: 'career-break', label: 'Coming back after a career break' },
   { id: 'exploring', label: 'Just exploring' },
 ]
 export const ALL_TRIGGERS: Option[] = [...TRIGGERS_FRESHER, ...TRIGGERS.filter((t) => t.id !== 'exploring')]
@@ -123,63 +128,23 @@ export function inferredRole(a: Answers): string | undefined {
   return segmentOf(a) === 'fresher' ? 'student' : undefined
 }
 
-/** Whether they code, when the role already says it. */
-export function inferredProgrammer(a: Answers): string | undefined {
-  if (a.role === 'software-engineer' || a.role === 'devops-cloud') return 'yes'
-  return undefined
-}
-
-const THREE_PLUS = new Set(['3-5', '6-9', '10-15', '15+'])
 /** Works with data today (analysts, MIS / Excel / reporting) or wants a data career. */
 export const dataSide = (a: Answers) => DATA_SIDE_ROLES.includes(a.role ?? '') || a.probe === 'reports' || a.interest === 'data-science'
 
+// ---------- Who they are (the Lead–Course Map's lead types) and which program fits ----------
+
 /**
- * The program the counsellor recommends (rules agreed with Learnbay):
- * - Cloud & DevOps: the specialisation for their current role; beginners and non-IT start with Advanced Cloud & DevOps.
- * - FDE: hands-on engineering; people who don't code go to the Applied AI Practitioner Program.
- * - Freshers: Data Science & GenAI Program (data people) or the GenAI & Agentic AI Program.
- * - Non-coders: on the data side (analytics, MIS, Excel) GenAI & Agentic AI, which teaches Python, ML, DL and NLP first
- *   (Master for 3+ years, the Program under 3); everyone else (designer, marketer, banker, PM…) the Applied AI
- *   Practitioner Program with projects for their role.
- * - Leaders who lead or will lead AI work: GenAI & Agentic AI for Managers & Leaders.
- * - Data people who code: Advanced Data Science & GenAI Master with 3+ years and regular coding, else the Program.
- * - Developers by goal: AI Engineering Master (AI Engineer), SDE Master (product-company SDE), else GenAI & Agentic AI
- *   for Software Developers.
- * - Everyone else on the AI track: GenAI & Agentic AI Master for 3+ years, the Program under 3.
+ * The program the counsellor recommends. A program the learner approved in the chat stands, as long as they can join it.
  */
 export function programForLearner(a: Answers): Program | undefined {
-  // The learner approved a program in the chat: that decision stands.
-  if (a.program && PROGRAMS.some((p) => p.id === a.program)) return getProgram(a.program)
-  const s = segmentOf(a)
-  const fresher = s === 'fresher'
-  const seasoned = THREE_PLUS.has(a.experience ?? '')
-  if (a.interest === 'cloud-devops') {
-    const byRole: Record<string, string> = {
-      'network-admin': 'cloud-devops-network', sysadmin: 'cloud-devops-sysadmin', 'it-support': 'cloud-devops-it-support-ops',
-      dba: 'cloud-devops-dba', 'qa-engineer': 'cloud-devops-qa-testers', 'devops-cloud': 'genai-agentic-ai-cloud-devops',
-    }
-    if (a.role && byRole[a.role]) return getProgram(byRole[a.role])
-    if (fresher || a.programmer === 'no' || s === 'nontech' || s === 'domain') return getProgram('advanced-cloud-devops')
-    return getProgram('ai-cloud-devops-master')
-  }
-  if (a.interest === 'fde') return getProgram(a.programmer === 'no' ? 'applied-ai-practitioner' : 'forward-deployed-ai-engineer')
-  const data = dataSide(a)
-  if (fresher) return getProgram(data ? 'data-science-genai-program' : 'genai-agentic-ai-program')
-  if (a.interest === 'analytics') return getProgram('data-business-analytics-genai')
-  if (a.programmer === 'no') {
-    if (data) return getProgram(seasoned ? 'genai-agentic-ai-master' : 'genai-agentic-ai-program')
-    return getProgram('applied-ai-practitioner')
-  }
-  if (s === 'senior' && (a.probe === 'leading' || a.probe === 'asked-to-lead')) return getProgram('genai-agentic-ai-managers-leaders')
-  if (data) return getProgram(seasoned && a.programmer === 'yes' ? 'data-science-genai-master' : 'data-science-genai-program')
-  if (a.role === 'software-engineer') {
-    if (a.targetRole === 'ai-engineer') return getProgram('ai-engineering-master')
-    if (a.targetRole === 'sde-product') return getProgram('sde-genai-agentic-ai')
-    return getProgram('genai-software-developers')
-  }
-  if (a.role === 'devops-cloud') return getProgram('genai-agentic-ai-cloud-devops')
-  if (a.interest === 'ai' || !a.interest) return getProgram(seasoned ? 'genai-agentic-ai-master' : 'genai-agentic-ai-program')
-  return programFor(a.interest)
+  const approved = resolveProgramId(a.program)
+  if (approved && eligibility(approved, a).ok) return getProgram(approved)
+  return PROGRAMS.find((p) => p.code === routeFor(a).code) ?? programFor(a.interest)
+}
+
+/** The lead type (from the Lead–Course Map) this learner matches. */
+export function personaOf(a: Answers): string {
+  return routeFor(a).persona
 }
 
 /** The target role when the learner hasn't picked one: what their recommended program leads to for them. */
@@ -189,17 +154,16 @@ const CLOUD_TARGET: Record<string, string> = {
 }
 
 export function defaultTargetRole(a: Answers): string | undefined {
-  // Cloud & DevOps: the role their specialisation leads to (a network admin becomes a Cloud Network Engineer…).
-  if (a.interest === 'cloud-devops') return CLOUD_TARGET[a.role ?? ''] ?? TRACK_TARGET['cloud-devops']
-  const id = programForLearner({ ...a, targetRole: undefined })?.id
-  if (!id) return undefined
-  if (id === 'applied-ai-practitioner' || id === 'genai-agentic-ai-managers-leaders' || id === 'data-business-analytics-genai') return 'ai-enabled-current'
-  if (id === 'forward-deployed-ai-engineer') return 'fde'
-  if (id.startsWith('data-science') || id === 'ms-cs-data-science-ai') return 'data-scientist'
-  if (a.programmer === 'no') return 'ai-enabled-current'
-  if (id === 'ai-engineering-master') return 'ai-engineer'
-  if (id === 'genai-agentic-ai-cloud-devops') return 'mlops-engineer'
+  const code = programForLearner({ ...a, targetRole: undefined })?.code
+  if (!code) return undefined
+  if (code === 'CD' || code === 'CD-M' || code === 'GAI-CD') return CLOUD_TARGET[a.role ?? ''] ?? TRACK_TARGET['cloud-devops']
+  // Students and freshers have no current role to AI-enable: their goal is a first job in the field they chose.
+  if (code === 'AAP' && a.experience === '0' && (a.interest === 'data-science' || a.interest === 'analytics')) return 'data-analyst'
+  if (code === 'AAP' || code === 'AIL') return 'ai-enabled-current'
+  if (code === 'DABA') return a.interest === 'analytics' ? 'data-analyst' : 'ai-enabled-current'
+  if (code === 'FDE-M') return 'fde'
+  if (code === 'DSG-C' || code === 'DSG-M' || code === 'MCS') return 'data-scientist'
+  if (code === 'SDE-M') return 'sde-product'
   if (a.role === 'qa-engineer') return 'ai-enabled-current'
-  if (id === 'sde-genai-agentic-ai') return 'sde-product'
   return 'genai-developer'
 }

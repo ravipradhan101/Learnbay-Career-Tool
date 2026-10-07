@@ -36,11 +36,11 @@ export function AdminLoginForm({ next = '/admin' }: { next?: string }) {
     window.location.href = next
   }
 
-  const title = mode === 'login' ? 'Admin reports' : 'Set or reset password'
+  const title = mode === 'login' ? 'Team sign-in' : 'Set or reset password'
   const sub = mode === 'login'
-    ? 'Sign in to see analytics, AI usage and leads.'
+    ? 'Admin, managers, associates and ISMs sign in here.'
     : mode === 'request'
-      ? 'We’ll email a 6-digit code to the admin address.'
+      ? 'We’ll email a 6-digit code to your work address.'
       : info
   return (
     <form className="auth-card" onSubmit={submit} noValidate>
@@ -50,9 +50,9 @@ export function AdminLoginForm({ next = '/admin' }: { next?: string }) {
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="field">
-        <label className="label" htmlFor="ad-email">Admin email</label>
+        <label className="label" htmlFor="ad-email">Work email</label>
         <input id="ad-email" className="input" type="email" autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={254}
-          readOnly={mode === 'reset'} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admissions@learnbay.co" />
+          readOnly={mode === 'reset'} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@learnbay.co" />
       </div>
       {mode === 'reset' && (
         <div className="field">

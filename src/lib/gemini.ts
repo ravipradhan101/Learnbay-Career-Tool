@@ -20,8 +20,11 @@ type GenerateOptions = {
 }
 
 export class GeminiError extends Error {
-  constructor(message: string, readonly retryable: boolean) {
+  /** The model's raw text, when it answered but not in the requested format. */
+  raw?: string
+  constructor(message: string, readonly retryable: boolean, raw?: string) {
     super(message)
+    this.raw = raw
   }
 }
 
@@ -178,8 +181,9 @@ export async function generateJson<T>(opts: GenerateOptions & { jsonSchema: Reco
     const stripped = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '')
     try {
       return JSON.parse(stripped) as T
-    } catch {
-      throw new GeminiError('Gemini returned invalid JSON', true)
+    } catch (err) {
+      console.error('[gemini] invalid JSON', (err as Error).message, '| start:', stripped.slice(0, 160).replace(/\s+/g, ' '), '| end:', stripped.slice(-240).replace(/\s+/g, ' '), `| length ${stripped.length}`)
+      throw new GeminiError('Gemini returned invalid JSON', true, stripped)
     }
   }
 }

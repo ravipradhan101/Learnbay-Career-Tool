@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   if (!(await rateLimit(`counsellor:${user.id}`, 20, 3600))) return jsonError(429, 'Please try again in a little while.')
   const body = await readJson<{ action?: unknown; to?: unknown }>(request, 500)
   if (body?.action === 'assign') {
-    // Lumi's "finding your counsellor" step: the next counsellor in the rotation (or the current one if active).
+    // Woody's "finding your counsellor" step: the next counsellor in the rotation (or the current one if active).
     const c = await allocateCounsellor(user.id)
     return jsonOk({ counsellor: c })
   }
