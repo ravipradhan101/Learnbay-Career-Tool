@@ -5,6 +5,7 @@ import { triggerFlows } from '@/lib/email/flows'
 import { sendSessionEmails } from '@/lib/mailer'
 import { experienceLabel, interestLabel, roleLabel, type Answers } from '@/lib/questions'
 import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
+import { emitLeadEvent } from '@/lib/crm/webhooks'
 import {
   BOOKING_DAYS, SESSION_SHORT, SESSION_TIMES, SESSION_TYPE_ID, SLOT_CAPACITY, istDate, slotOpen, whenLabel, type Booking, type DaySlots,
 } from '@/lib/sessions'
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
   })
   if (!created) return jsonError(409, 'That slot just filled up. Please pick another time.')
   triggerFlows(user.id, 'session_booked')
+  emitLeadEvent('call.booked', user.id, { date: slot.date, time: slot.time, ...(note ? { note } : {}) })
   const when = whenLabel(slot.date, slot.time)
   try {
     await sendSessionEmails({ learner: { id: user.id, name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note, summary: await profileSummary(user.id) })

@@ -690,3 +690,74 @@ UPDATE projects SET programs = (SELECT array_agg(DISTINCT x) FROM unnest(program
    AND NOT ('cloud-devops-engineering' = ANY(programs));
 UPDATE projects SET programs = (SELECT array_agg(DISTINCT x) FROM unnest(programs || ARRAY['forward-deployed-ai-engineer']) x)
  WHERE 'ai-engineering-master' = ANY(programs) AND NOT ('forward-deployed-ai-engineer' = ANY(programs));
+
+-- v22: Pseudo Sales CRM. Lead intelligence (intent score and AI summary of each learner's conversations and actions),
+-- the link to the company CRM (matched by email or phone; an existing CRM record is never overwritten, only enriched),
+-- and developer tools: API keys for the public API and signed outgoing webhooks with a delivery log.
+CREATE TABLE IF NOT EXISTS lead_insights (
+  user_id       uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  intent        int NOT NULL CHECK (intent BETWEEN 0 AND 100),
+  band          text NOT NULL CHECK (band IN ('hot', 'warm', 'cold')),
+  factors       jsonb NOT NULL DEFAULT '[]'::jsonb,
+  summary       jsonb,
+  covers_until  timestamptz,
+  generated_at  timestamptz,
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS lead_insights_intent_idx ON lead_insights(intent DESC);
+CREATE TABLE IF NOT EXISTS lead_external (
+  user_id     uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  crm_id      text,
+  existed     boolean NOT NULL DEFAULT false,
+  matched_by  text CHECK (matched_by IN ('email', 'phone')),
+  checked_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS api_keys (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name          text NOT NULL,
+  prefix        text NOT NULL,
+  key_hash      text NOT NULL UNIQUE,
+  scopes        text[] NOT NULL DEFAULT ARRAY['read'],
+  created_by    uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  last_used_at  timestamptz,
+  revoked_at    timestamptz
+);
+CREATE TABLE IF NOT EXISTS webhook_endpoints (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  url          text NOT NULL CHECK (url LIKE 'https://%'),
+  description  text,
+  events       text[] NOT NULL,
+  secret       text NOT NULL,
+  active       boolean NOT NULL DEFAULT true,
+  created_by   uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS webhook_deliveries (
+  id           bigserial PRIMARY KEY,
+  endpoint_id  uuid NOT NULL REFERENCES webhook_endpoints(id) ON DELETE CASCADE,
+  event        text NOT NULL,
+  payload      jsonb NOT NULL,
+  status       int,
+  ok           boolean NOT NULL DEFAULT false,
+  duration_ms  int,
+  response     text,
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS webhook_deliveries_endpoint_idx ON webhook_deliveries(endpoint_id, created_at DESC);
+
+-- v23: reports rebuilt by the sales team. The answers staff logged on the call are kept with the report (the learner's
+-- own profile is never changed from the CRM), and every earlier version of a report is kept for reference.
+ALTER TABLE tool_results ADD COLUMN IF NOT EXISTS staff_answers jsonb;
+ALTER TABLE tool_results ADD COLUMN IF NOT EXISTS generated_by uuid REFERENCES admin_users(id) ON DELETE SET NULL;
+CREATE TABLE IF NOT EXISTS tool_result_history (
+  id          bigserial PRIMARY KEY,
+  user_id     uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  tool        text NOT NULL,
+  data        jsonb NOT NULL,
+  answers     jsonb,
+  built_by    uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  built_at    timestamptz,
+  replaced_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS tool_result_history_user_idx ON tool_result_history(user_id, tool, replaced_at DESC);

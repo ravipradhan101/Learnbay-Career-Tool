@@ -47,6 +47,7 @@ export const ACTION_LABEL: Record<string, string> = {
   status_changed: 'Changed the status',
   profile_updated: 'Updated profile details',
   report_generated: 'Generated a report',
+  report_regenerated: 'Rebuilt a report with answers from the call',
   report_emailed: 'Emailed a report',
   email_sent: 'Sent an email',
   note_added: 'Added a note',
@@ -56,6 +57,7 @@ export const ACTION_LABEL: Record<string, string> = {
   meeting_booked: 'Booked a meeting',
   meeting_cancelled: 'Cancelled a meeting',
   meeting_link: 'Added a Google Meet link',
+  api_enriched: 'Main CRM sent details (nothing overwritten)',
 }
 export const actionLabel = (a: string) => ACTION_LABEL[a] ?? a.replace(/_/g, ' ')
 

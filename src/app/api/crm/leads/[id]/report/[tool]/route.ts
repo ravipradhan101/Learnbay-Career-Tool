@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const meta = getTool(tool)
   if (!me || !meta || !isUuid(id)) return new Response('Not found', { status: 404 })
   const row = await queryOne<{ data: ToolResultMap[typeof meta.id]; answers: Answers; name: string | null; owner_id: string | null }>(
-    `SELECT t.data, a.answers, u.name, lo.owner_id FROM tool_results t JOIN users u ON u.id = t.user_id JOIN assessments a ON a.user_id = u.id
+    `SELECT t.data, coalesce(a.answers, '{}') || coalesce(t.staff_answers, '{}') AS answers, u.name, lo.owner_id FROM tool_results t JOIN users u ON u.id = t.user_id LEFT JOIN assessments a ON a.user_id = u.id
        LEFT JOIN lead_owners lo ON lo.user_id = u.id
       WHERE t.user_id = $1 AND t.tool = $2 AND t.status = 'ready'`,
     [id, meta.id],

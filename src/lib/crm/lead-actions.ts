@@ -3,7 +3,7 @@ import { env } from '../env'
 import type { StaffUser } from '../admin-auth'
 import { getReadyResults } from '../data'
 import { sendMail } from '../mailer'
-import { isAnswered, isValidPhone, type Answers } from '../questions'
+import { isAnswered, isValidPhone, type Answers, type ToolQuestionKey } from '../questions'
 import { emailToolReport } from '../report-email'
 import { cleanText, normalizeEmail, rateLimit } from '../security'
 import { generateTool } from '../tools'
@@ -11,7 +11,7 @@ import { getTool, QUESTION_TITLES } from '../tools-meta'
 import type { ToolResultMap } from '../tool-types'
 import { firstName, sanitizeAnswers } from '../validation'
 import { claimCreatedLead, logActivity, reassignLead } from './allocate'
-import { notifyCrm } from './connector'
+import { emitLeadEvent } from './webhooks'
 import type { LeadRef } from './guard'
 import { assignableIds, byId, displayName, staffDirectory } from './scope'
 import { isLeadStatus, isOutcome, outcomeLabel, statusLabel } from './roles'
@@ -70,64 +70,12 @@ export async function createLead(me: StaffUser, b: Record<string, unknown>): Pro
   }
 }
 
-export async function setStatus(me: StaffUser, lead: LeadRef, status: unknown): Promise<Result> {
-  if (!isLeadStatus(status)) return fail('Choose a status.')
-  const from = lead.status ?? 'new'
-  if (from === status) return { ok: true, message: 'No change.' }
-  await transaction(async (db) => {
-    await db.query(
-      `INSERT INTO lead_owners (user_id, owner_id, source, status, assigned_by) VALUES ($1, NULL, 'manual', $2, $3)
-       ON CONFLICT (user_id) DO UPDATE SET status = EXCLUDED.status, updated_at = now()`,
-      [lead.id, status, me.id],
-    )
-    await logActivity(db, me, lead.id, 'status_changed', { from, to: status })
-  })
-  void notifyCrm('status_changed', { id: lead.id, email: lead.email, status })
-  return { ok: true, message: `Status: ${statusLabel(status)}.` }
-}
-
 export async function reassign(me: StaffUser, lead: LeadRef, toId: unknown, note: unknown): Promise<Result> {
   if (me.role === 'ism') return fail('ISMs can’t reassign leads.', 403)
   const dir = await staffDirectory()
   if (typeof toId !== 'string' || !assignableIds(me, dir).has(toId)) return fail('You can’t give a lead to that person.', 403)
   await reassignLead(me, lead.id, toId, cleanText(note, 300))
   return { ok: true, message: `Given to ${toId === me.id ? 'you' : displayName(byId(dir).get(toId))}.` }
-}
-
-/** Staff fill in or correct the learner's details (contact and profile answers) without signing in as them. */
-export async function updateProfile(me: StaffUser, lead: LeadRef, b: Record<string, unknown>): Promise<Result> {
-  const fields: string[] = []
-  const name = 'name' in b ? cleanText(b.name, 80) : ''
-  if ('name' in b && name.length < 2) return fail('Enter the full name.')
-  let phoneCountry: string | null = null
-  let phone: string | null = null
-  if ('phone' in b) {
-    phoneCountry = typeof b.phoneCountry === 'string' ? b.phoneCountry : lead.phone_country ?? '+91'
-    phone = typeof b.phone === 'string' ? b.phone.replace(/[\s-]/g, '') : ''
-    if (!isValidPhone(phoneCountry, phone)) return fail('Enter a valid phone number.')
-  }
-  const incoming = sanitizeAnswers(b.answers)
-  await transaction(async (db) => {
-    if (name && name !== lead.name) { await db.query(`UPDATE users SET name = $2, updated_at = now() WHERE id = $1`, [lead.id, name]); fields.push('name') }
-    if (phone && (phone !== lead.phone || phoneCountry !== lead.phone_country)) {
-      await db.query(`UPDATE users SET phone_country = $2, phone = $3, updated_at = now() WHERE id = $1`, [lead.id, phoneCountry, phone])
-      fields.push('phone')
-    }
-    if (Object.keys(incoming).length) {
-      const cur = (await db.query<{ answers: Answers }>(`SELECT answers FROM assessments WHERE user_id = $1 FOR UPDATE`, [lead.id])).rows[0]?.answers ?? {}
-      const changed = (Object.keys(incoming) as (keyof Answers)[]).filter((k) => JSON.stringify(cur[k]) !== JSON.stringify(incoming[k]))
-      if (changed.length) {
-        const next = { ...cur, ...incoming }
-        await db.query(
-          `INSERT INTO assessments (user_id, answers) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET answers = EXCLUDED.answers, updated_at = now()`,
-          [lead.id, JSON.stringify(next)],
-        )
-        fields.push(...changed)
-      }
-    }
-    if (fields.length) await logActivity(db, me, lead.id, 'profile_updated', { fields })
-  })
-  return { ok: true, message: fields.length ? 'Details saved.' : 'Nothing changed.' }
 }
 
 const MAX_ATTEMPTS = 6
@@ -166,7 +114,69 @@ export async function generateReport(me: StaffUser, lead: LeadRef, tool: unknown
     return fail('The report could not be built just now. Please try again.', 502)
   }
   await logActivity(null, me, lead.id, 'report_generated', { tool: meta.id })
+  emitLeadEvent('report.generated', lead.id, { tool: meta.id, name: meta.name, by: 'staff' })
   return { ok: true, message: `${meta.name} is ready.` }
+}
+
+/** What a report needs, with the learner's own answer and any answer staff logged for it last time. */
+export async function reportQuestions(userId: string, tool: string): Promise<{ key: ToolQuestionKey; title: string; answer: unknown; logged: unknown }[] | null> {
+  const meta = getTool(tool)
+  if (!meta) return null
+  const row = await queryOne<{ answers: Answers | null; staff_answers: Answers | null }>(
+    `SELECT a.answers, t.staff_answers FROM users u LEFT JOIN assessments a ON a.user_id = u.id LEFT JOIN tool_results t ON t.user_id = u.id AND t.tool = $2 WHERE u.id = $1`,
+    [userId, meta.id],
+  )
+  return meta.questions.map((k) => ({ key: k, title: QUESTION_TITLES[k]?.title ?? k, answer: row?.answers?.[k] ?? null, logged: row?.staff_answers?.[k] ?? null }))
+}
+
+/**
+ * Rebuilds a report from answers staff logged on the call. The learner's own profile is never changed: the logged
+ * answers are kept with the report, the earlier version goes to history, and the learner sees the new one.
+ */
+export async function regenerateReport(me: StaffUser, lead: LeadRef, tool: unknown, raw: unknown): Promise<Result> {
+  const meta = getTool(String(tool))
+  if (!meta) return fail('Unknown report.')
+  if (!(await rateLimit(`crm:gen:${me.id}`, 40, 3600))) return fail('Too many reports in an hour. Please try again later.', 429)
+  const logged = sanitizeAnswers(raw)
+  const own = (await queryOne<{ answers: Answers }>(`SELECT answers FROM assessments WHERE user_id = $1`, [lead.id]))?.answers ?? {}
+  // Only the questions this report asks; everything else comes from the learner's own profile.
+  const picked = Object.fromEntries(meta.questions.filter((k) => logged[k] !== undefined).map((k) => [k, logged[k]])) as Answers
+  const answers: Answers = { ...own, ...picked }
+  const missing = meta.questions.filter((q) => !isAnswered(answers, q))
+  if (missing.length) return fail(`Answer ${missing.map((q) => QUESTION_TITLES[q]?.title ?? q).join(', ')} first.`, 400, { missing })
+
+  await query(`INSERT INTO tool_results (user_id, tool) VALUES ($1, $2) ON CONFLICT (user_id, tool) DO NOTHING`, [lead.id, meta.id])
+  const claimed = await queryOne<{ id: string; prev: unknown; prev_answers: unknown; prev_by: string | null; prev_at: Date }>(
+    `UPDATE tool_results t SET status = 'generating', attempts = 0, generating_started_at = now(), error = NULL, updated_at = now()
+       FROM tool_results old
+      WHERE old.id = t.id AND t.user_id = $1 AND t.tool = $2
+        AND NOT (t.status = 'generating' AND t.generating_started_at > now() - interval '4 minutes')
+      RETURNING t.id, old.data AS prev, old.staff_answers AS prev_answers, old.generated_by AS prev_by, old.updated_at AS prev_at`,
+    [lead.id, meta.id],
+  )
+  if (!claimed) return { ok: true, message: 'This report is being built right now.' }
+  try {
+    const prior = (await getReadyResults(lead.id)) as Partial<ToolResultMap>
+    delete prior[meta.id]
+    const data = await generateTool(meta.id, answers, firstName(lead.name), prior, lead.id)
+    await transaction(async (db) => {
+      if (claimed.prev) {
+        await db.query(`INSERT INTO tool_result_history (user_id, tool, data, answers, built_by, built_at) VALUES ($1, $2, $3, $4, $5, $6)`,
+          [lead.id, meta.id, JSON.stringify(claimed.prev), claimed.prev_answers ? JSON.stringify(claimed.prev_answers) : null, claimed.prev_by, claimed.prev_at])
+      }
+      await db.query(`UPDATE tool_results SET status = 'ready', data = $2, staff_answers = $3, generated_by = $4, updated_at = now() WHERE id = $1`,
+        [claimed.id, JSON.stringify(data), JSON.stringify(picked), me.id])
+      await logActivity(db, me, lead.id, 'report_regenerated', { tool: meta.id, answers: picked })
+    })
+  } catch (err) {
+    const message = (err as Error).message
+    console.error(`[crm:report:${meta.id}] regeneration failed`, message)
+    // Put the earlier report back so the learner is never left without one.
+    await query(`UPDATE tool_results SET status = CASE WHEN data IS NULL THEN 'failed' ELSE 'ready' END, error = $2, updated_at = now() WHERE id = $1`, [claimed.id, message.slice(0, 500)])
+    return fail('The report could not be built just now. Please try again.', 502)
+  }
+  emitLeadEvent('report.generated', lead.id, { tool: meta.id, name: meta.name, by: 'staff', answers: picked })
+  return { ok: true, message: `${meta.name} rebuilt with the answers you logged.` }
 }
 
 /** Emails a ready report (with its PDF) to the learner's own registered email, never to another address. */
@@ -175,7 +185,8 @@ export async function emailReport(me: StaffUser, lead: LeadRef, tool: unknown): 
   if (!meta) return fail('Unknown report.')
   if (!(await rateLimit(`crm:report-email:${lead.id}:${meta.id}`, 3, 3600))) return fail('This report was emailed to them a few times in the last hour already.', 429)
   const row = await queryOne<{ data: ToolResultMap[typeof meta.id]; answers: Answers }>(
-    `SELECT t.data, a.answers FROM tool_results t JOIN assessments a ON a.user_id = t.user_id WHERE t.user_id = $1 AND t.tool = $2 AND t.status = 'ready'`,
+    `SELECT t.data, coalesce(a.answers, '{}') || coalesce(t.staff_answers, '{}') AS answers
+       FROM tool_results t LEFT JOIN assessments a ON a.user_id = t.user_id WHERE t.user_id = $1 AND t.tool = $2 AND t.status = 'ready'`,
     [lead.id, meta.id],
   )
   if (!row) return fail('Generate this report first.')
@@ -186,6 +197,7 @@ export async function emailReport(me: StaffUser, lead: LeadRef, tool: unknown): 
     return fail('The email could not be sent just now. Please try again in a minute.', 502)
   }
   await logActivity(null, me, lead.id, 'report_emailed', { tool: meta.id })
+  emitLeadEvent('report.emailed', lead.id, { tool: meta.id, name: meta.name })
   return { ok: true, message: `${meta.name} emailed to ${lead.email}.` }
 }
 
@@ -233,6 +245,7 @@ export async function addNote(me: StaffUser, lead: LeadRef, text: unknown): Prom
   if (body.length < 2) return fail('Write a note.')
   await query(`INSERT INTO lead_notes (user_id, author_id, body) VALUES ($1, $2, $3)`, [lead.id, me.id, body])
   await logActivity(null, me, lead.id, 'note_added', {})
+  emitLeadEvent('note.added', lead.id, { body, author: me.name ?? me.email })
   return { ok: true, message: 'Note added.' }
 }
 
@@ -284,14 +297,17 @@ export async function completeTask(me: StaffUser, lead: LeadRef, taskId: unknown
           `UPDATE lead_owners SET status = $2, updated_at = now() WHERE user_id = $1 AND (status = 'new' OR $2 IN ('enrolled', 'not_interested')) AND status <> $2 RETURNING user_id`,
           [lead.id, next],
         )
-        if (r.rowCount) await logActivity(db, me, lead.id, 'status_changed', { from, to: next })
+        if (r.rowCount) {
+          await logActivity(db, me, lead.id, 'status_changed', { from, to: next })
+          emitLeadEvent('lead.status_changed', lead.id, { from, to: next, by: 'call_outcome' })
+        }
       }
       if (task.kind === 'meeting' && task.source_id && close) await closeMeetingFromTask(db, task.source_id, outcome)
       if (task.kind === 'call_booked' && task.source_id && outcome === 'connected') await db.query(`UPDATE counsellor_requests SET status = 'contacted' WHERE id = $1 AND status = 'new'`, [task.source_id])
       if (task.kind === 'call_request' && task.source_id && outcome === 'connected') await db.query(`UPDATE call_requests SET status = 'contacted' WHERE id = $1`, [task.source_id])
     }
   })
-  void notifyCrm('call_logged', { id: lead.id, outcome })
+  emitLeadEvent('call.logged', lead.id, { outcome, closed: close, ...(note ? { note } : {}) })
   return { ok: true, message: close ? `Logged: ${outcomeLabel(outcome)}.` : `Logged: ${outcomeLabel(outcome)}. The call stays open for another try.` }
 }
 
@@ -304,6 +320,7 @@ export async function bookMeeting(me: StaffUser, lead: LeadRef, b: Record<string
   const r = await bookByStaff(me.id, lead.id, { hostId, startsAt: b.startsAt, minutes: b.minutes, mode: b.mode, note: b.note })
   if (!r.ok) return fail(r.error, r.status)
   await logActivity(null, me, lead.id, 'meeting_booked', { mode: r.meeting.mode, when: r.meeting.when, host: hostId })
+  emitLeadEvent('meeting.booked', lead.id, { mode: r.meeting.mode, when: r.meeting.when, host: byId(dir).get(hostId)?.email ?? null })
   const host = displayName(byId(dir).get(hostId))
   return { ok: true, message: `Booked ${r.meeting.when} with ${hostId === me.id ? 'you' : host}. ${r.meeting.mode === 'video' ? (r.meeting.meetUrl ? 'The Meet link is in both emails.' : 'Add a Meet link below so they get it.') : 'Both of you have the details by email.'}` }
 }

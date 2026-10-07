@@ -1,7 +1,8 @@
 import type { PoolClient } from 'pg'
 import { query, queryOne, transaction } from '../db'
 import type { StaffUser } from '../admin-auth'
-import { lookupCrmOwner, notifyCrm } from './connector'
+import { lookupCrm, recordCrmMatch } from './connector'
+import { emitLeadEvent } from './webhooks'
 
 type Db = Pick<PoolClient, 'query'>
 type Actor = Pick<StaffUser, 'id' | 'role'> | null
@@ -40,25 +41,31 @@ async function roundRobin(db: Db, userId: string, by: Actor, fromId: string | nu
   return { ownerId: ism?.id ?? null, assigned: Boolean(ism) }
 }
 
-/** The active staff account the CRM says owns this person, if any. */
-async function crmOwnerFor(email: string, phone: string | null): Promise<string | null> {
-  const ownerEmail = await lookupCrmOwner({ email, phone })
-  if (!ownerEmail) return null
-  return (await queryOne<{ id: string }>(`SELECT id FROM admin_users WHERE email = $1 AND active AND role <> 'admin'`, [ownerEmail]))?.id ?? null
+/**
+ * Asks the main CRM whether it already has this person (by email or phone) and records the answer. Returns the active
+ * staff account it names as owner, if any.
+ */
+async function crmOwnerFor(userId: string, email: string, phone: string | null): Promise<string | null> {
+  const m = await lookupCrm({ email, phone })
+  if (!m) return null
+  await recordCrmMatch(userId, m).catch((err) => console.error('[crm] record match failed', (err as Error).message))
+  if (m.exists) emitLeadEvent('lead.matched', userId, { crmId: m.crmId, matchedBy: m.matchedBy })
+  if (!m.ownerEmail) return null
+  return (await queryOne<{ id: string }>(`SELECT id FROM admin_users WHERE email = $1 AND active AND role <> 'admin'`, [m.ownerEmail]))?.id ?? null
 }
 
 /**
  * A brand-new lead (sign-up). Leads that already have a row are left alone, so this is safe to call more than once.
  * The connected CRM is asked first; if it names an owner who works here, the lead goes to them, otherwise round robin.
  */
-export async function allocateNewLead(userId: string): Promise<void> {
+export async function allocateNewLead(userId: string, via: 'sign_up' | 'api' = 'sign_up'): Promise<void> {
   if (await queryOne(`SELECT 1 FROM lead_owners WHERE user_id = $1`, [userId])) return
   const u = await queryOne<{ email: string; phone: string | null; name: string | null }>(
     `SELECT email, CASE WHEN phone IS NULL THEN NULL ELSE coalesce(phone_country, '') || phone END AS phone, name FROM users WHERE id = $1`,
     [userId],
   )
   if (!u) return
-  const crmOwner = await crmOwnerFor(u.email, u.phone)
+  const crmOwner = await crmOwnerFor(userId, u.email, u.phone)
   const ownerId = await transaction(async (db) => {
     if (crmOwner) {
       const r = await db.query(`INSERT INTO lead_owners (user_id, owner_id, source) VALUES ($1, $2, 'crm') ON CONFLICT (user_id) DO NOTHING RETURNING user_id`, [userId, crmOwner])
@@ -69,7 +76,7 @@ export async function allocateNewLead(userId: string): Promise<void> {
     }
     return (await roundRobin(db, userId, null)).ownerId
   })
-  void notifyCrm('lead_created', { id: userId, email: u.email, name: u.name, phone: u.phone, ownerId, source: crmOwner ? 'crm' : 'round_robin' })
+  emitLeadEvent('lead.created', userId, { via, assigned: ownerId ? (crmOwner ? 'main_crm_owner' : 'round_robin') : 'waiting' })
 }
 
 /**
@@ -77,7 +84,7 @@ export async function allocateNewLead(userId: string): Promise<void> {
  * them (and the caller is told). Otherwise it goes to the person the creator chose (checked by the caller).
  */
 export async function claimCreatedLead(me: StaffUser, userId: string, email: string, phone: string, toId: string): Promise<{ ownerId: string; source: 'crm' | 'self' | 'manual' }> {
-  const crmOwner = await crmOwnerFor(email, phone)
+  const crmOwner = await crmOwnerFor(userId, email, phone)
   const ownerId = crmOwner ?? toId
   const source = crmOwner ? 'crm' : toId === me.id ? 'self' : 'manual'
   await transaction(async (db) => {
@@ -90,7 +97,7 @@ export async function claimCreatedLead(me: StaffUser, userId: string, email: str
     await db.query(`INSERT INTO lead_assignments (user_id, to_id, source, by_id) VALUES ($1, $2, $3, $4)`, [userId, ownerId, source, me.id])
     await logActivity(db, me, userId, 'lead_created', { to: ownerId, source })
   })
-  void notifyCrm('lead_created', { id: userId, email, phone, ownerId, source })
+  emitLeadEvent('lead.created', userId, { via: 'staff', assigned: source })
   return { ownerId, source }
 }
 
@@ -115,7 +122,7 @@ export async function reassignLead(me: StaffUser, userId: string, toId: string, 
     await logActivity(db, me, userId, 'reassigned', { from: cur?.owner_id ?? null, to: toId, ...(note ? { note } : {}) })
     return cur?.owner_id ?? null
   })
-  void notifyCrm('lead_assigned', { id: userId, ownerId: toId })
+  emitLeadEvent('lead.assigned', userId, { by: 'staff', reassigned: Boolean(from) })
   return { from }
 }
 
@@ -130,6 +137,7 @@ export async function distributeUnassigned(me: StaffUser, limit = 200): Promise<
   for (const r of rows) {
     const done = await transaction((db) => roundRobin(db, r.id, me))
     if (!done.assigned) break
+    emitLeadEvent('lead.assigned', r.id, { by: 'round_robin' })
     assigned++
   }
   const left = Number((await queryOne<{ n: string }>(`SELECT count(*) AS n FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id WHERE lo.owner_id IS NULL`))?.n ?? 0)
@@ -156,6 +164,7 @@ export async function rotateLeads(me: StaffUser, userIds: string[]): Promise<num
     const from = (await queryOne<{ owner_id: string | null }>(`UPDATE lead_owners lo SET owner_id = NULL FROM lead_owners old WHERE old.user_id = lo.user_id AND lo.user_id = $1 RETURNING old.owner_id`, [id]))?.owner_id ?? null
     const r = await transaction((db) => roundRobin(db, id, me, from))
     if (!r.assigned) break
+    emitLeadEvent('lead.assigned', id, { by: 'round_robin', reassigned: true })
     await query(`UPDATE lead_tasks SET owner_id = $2 WHERE user_id = $1 AND status = 'open' AND kind <> 'meeting' AND (missed_at IS NULL OR missed_at > now())`, [id, r.ownerId])
     n++
   }

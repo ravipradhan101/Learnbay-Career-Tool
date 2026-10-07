@@ -10,7 +10,7 @@ import { TASK_KIND_LABEL } from '@/lib/crm/roles'
 import { COUNTRY_CODES } from '@/lib/questions'
 import { istDate } from '@/lib/sessions'
 
-export const metadata = { title: { absolute: 'Today | Sales CRM' } }
+export const metadata = { title: { absolute: 'Today | Pseudo Sales CRM' } }
 
 export default async function CrmToday() {
   const me = await requireStaff()
@@ -26,9 +26,9 @@ export default async function CrmToday() {
 
   return (
     <>
-      <div className="row between" style={{ alignItems: 'flex-end' }}>
+      <div className="crm-page-head">
         <div>
-          <h1 className="admin-h1">Good to see you, {(me.name ?? me.email).split(/[\s@]/)[0]}</h1>
+          <h1>Good to see you, {(me.name ?? me.email).split(/[\s@]/)[0]}</h1>
           <p className="muted small">Today at a glance for {scopeLabel}. Calls you must make are at the top.</p>
         </div>
         <NewLeadButton assignable={assignable} countries={COUNTRY_CODES.map((c) => ({ code: c.code, label: `${c.flag} ${c.code}` }))} />

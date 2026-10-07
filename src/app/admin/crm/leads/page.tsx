@@ -4,6 +4,8 @@ import { NewLeadButton } from '@/components/crm/NewLeadButton'
 import { DistributeButton } from '@/components/crm/DistributeButton'
 import { Person, StatusPill, relative } from '@/components/crm/parts'
 import { requireStaff } from '@/lib/admin-auth'
+import { background } from '@/lib/background'
+import { refreshScores } from '@/lib/crm/insights'
 import { listLeads, PAGE_SIZE } from '@/lib/crm/data'
 import { assignableIds, byId, displayName, staffDirectory, visibleIds } from '@/lib/crm/scope'
 import { syncTasks } from '@/lib/crm/tasks'
@@ -24,12 +26,15 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const f = {
     q: one(sp.q).slice(0, 80), status: isLeadStatus(one(sp.status)) ? one(sp.status) : '', owner: visible.has(owner) ? owner : '',
     unassigned: one(sp.unassigned) === '1', missed: one(sp.missed) === '1', page: Math.max(1, Number(one(sp.page)) || 1),
+    band: ['hot', 'warm', 'cold'].includes(one(sp.band)) ? one(sp.band) : '', sort: one(sp.sort) === 'intent' ? 'intent' as const : 'new' as const,
   }
   const { rows, total } = await listLeads(me, f)
+  // Missing or old intent scores are worked out after the page is sent; they show on the next load.
+  background('crm:scores', () => refreshScores(rows))
   const people = byId(dir)
   const assignable = dir.filter((s) => assignableIds(me, dir).has(s.id)).map((s) => ({ id: s.id, label: s.id === me.id ? `Me (${s.name ?? s.email})` : `${s.name ?? s.email} · ${s.role.toUpperCase()}` }))
   const qs = (patch: Record<string, string | number>) => {
-    const all = { q: f.q, status: f.status, owner: f.owner, unassigned: f.unassigned ? '1' : '', missed: f.missed ? '1' : '', page: f.page, ...patch }
+    const all = { q: f.q, status: f.status, owner: f.owner, unassigned: f.unassigned ? '1' : '', missed: f.missed ? '1' : '', band: f.band, sort: f.sort === 'intent' ? 'intent' : '', page: f.page, ...patch }
     const p = new URLSearchParams(Object.entries(all).filter(([, v]) => String(v) !== '').map(([k, v]) => [k, String(v)]))
     return `/admin/crm/leads?${p.toString()}`
   }
@@ -37,9 +42,9 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <div className="row between" style={{ alignItems: 'flex-end' }}>
+      <div className="crm-page-head">
         <div>
-          <h1 className="admin-h1">Leads</h1>
+          <h1>Leads</h1>
           <p className="muted small">{me.role === 'admin' ? 'Every lead, including unassigned ones.' : me.role === 'ism' ? 'Leads you own.' : 'Leads owned by you and your team.'} {fmtInt(total)} match.</p>
         </div>
         <div className="row">
@@ -60,6 +65,12 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             {dir.filter((s) => visible.has(s.id)).map((s) => <option key={s.id} value={s.id}>{displayName(s)} · {s.role.toUpperCase()}{s.active ? '' : ' (inactive)'}</option>)}
           </select>
         )}
+        <select className="select" name="band" defaultValue={f.band} aria-label="Intent">
+          <option value="">Any intent</option><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option>
+        </select>
+        <select className="select" name="sort" defaultValue={f.sort === 'intent' ? 'intent' : ''} aria-label="Sort">
+          <option value="">Newest first</option><option value="intent">Highest intent first</option>
+        </select>
         <label className="small row" style={{ gap: '0.35rem' }}><input type="checkbox" name="missed" value="1" defaultChecked={f.missed} /> Has a missed call</label>
         {me.role === 'admin' && <label className="small row" style={{ gap: '0.35rem' }}><input type="checkbox" name="unassigned" value="1" defaultChecked={f.unassigned} /> Unassigned only</label>}
         <button className="btn btn-soft btn-sm">Filter</button>
@@ -68,11 +79,12 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
       <div className="table-scroll">
         <table className="admin-table crm-pin1">
-          <thead><tr><th>Lead</th><th>Phone</th><th>Owner</th><th>Status</th><th>How assigned</th><th className="num">Reports</th><th>Next call / reminder</th><th>Last staff touch</th><th>Signed up</th></tr></thead>
+          <thead><tr><th>Lead</th><th>Intent</th><th>Phone</th><th>Owner</th><th>Status</th><th>How assigned</th><th className="num">Reports</th><th>Next call / reminder</th><th>Last staff touch</th><th>Signed up</th></tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className={r.missed ? 'crm-missed' : undefined}>
                 <td><Link href={`/admin/crm/leads/${r.id}`}><b>{r.name || '(no name)'}</b></Link><div className="small muted">{r.email}</div></td>
+                <td>{r.intent === null ? <span className="small muted">—</span> : <span className={`crm-intent-mini ${r.band ?? ''}`} title={`Purchase intent ${r.intent}/100 (${r.band})`}><i aria-hidden="true" />{r.intent}</span>}</td>
                 <td className="small">{r.phone ? `${r.phone_country ?? ''} ${r.phone}` : '—'}</td>
                 <td><Person s={r.owner_id ? people.get(r.owner_id) : null} /></td>
                 <td><StatusPill status={r.status} />{r.missed > 0 && <div><span className="pill danger">{r.missed} missed</span></div>}</td>
@@ -83,7 +95,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                 <td className="small">{fmtDate(r.created_at)}</td>
               </tr>
             ))}
-            {!rows.length && <tr><td colSpan={9} className="muted">No leads match.</td></tr>}
+            {!rows.length && <tr><td colSpan={10} className="muted">No leads match.</td></tr>}
           </tbody>
         </table>
       </div>

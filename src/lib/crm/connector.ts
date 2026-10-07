@@ -1,48 +1,57 @@
+import { query } from '../db'
+
 /**
- * The bridge to the company CRM (to be connected later). Both calls are optional and switched off until their URL is
- * set, so the app works the same without a CRM. Keys come only from the environment, never from code.
+ * The bridge to the main Sales CRM. Switched off until CRM_LOOKUP_URL is set, so this app works the same without it.
+ * Keys come only from the environment, never from code.
  *
- * Owner lookup, on every NEW lead (a new sign-up or a lead created by staff):
+ * Lookup, on every NEW lead (a sign-up, a lead created by staff, or one sent in through the API):
  *   POST CRM_LOOKUP_URL   Authorization: Bearer CRM_API_KEY
- *   body     { "email": "...", "phone": "+919876543210" }
- *   response { "ownerEmail": "isha@learnbay.co" }   or   { "ownerEmail": null } when the CRM has no owner
- * If the owner is an active staff account here, the lead is mapped to them; otherwise round robin decides.
+ *   body     { "email": "asha@example.com", "phone": "+919876543210" }
+ *   response { "exists": true, "crmId": "L-10293", "matchedBy": "email" | "phone", "ownerEmail": "isha@learnbay.co" | null }
+ *            or { "exists": false }
+ * (An older answer with only { "ownerEmail": … } still works.)
  *
- * Events out (optional), so the CRM can mirror what happens here:
- *   POST CRM_WEBHOOK_URL  Authorization: Bearer CRM_API_KEY
- *   body { "event": "lead_created" | "lead_assigned" | "status_changed" | "call_logged", "lead": {...}, "at": ISO time }
+ * When the person already exists there, nothing in the main CRM is overwritten: this app records the match and every
+ * later webhook for them says "mode": "enrich", so the main CRM only adds what is missing. If the owner named by the
+ * main CRM works here, the lead goes to them; otherwise round robin decides. Outgoing events live in ./webhooks.
  */
 const TIMEOUT_MS = 5_000
 
-function config() {
-  const key = process.env.CRM_API_KEY
-  return { lookupUrl: process.env.CRM_LOOKUP_URL, webhookUrl: process.env.CRM_WEBHOOK_URL, headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) } }
-}
+export type CrmMatch = { exists: boolean; crmId: string | null; ownerEmail: string | null; matchedBy: 'email' | 'phone' | null }
 
 export const crmConnected = () => Boolean(process.env.CRM_LOOKUP_URL)
 
-/** The CRM owner's email for this person, or null (no CRM, no owner, or the CRM did not answer in time). */
-export async function lookupCrmOwner(lead: { email: string; phone: string | null }): Promise<string | null> {
-  const { lookupUrl, headers } = config()
-  if (!lookupUrl?.startsWith('https://')) return null
+/** What the main CRM knows about this person, or null (not connected, or it did not answer in time). */
+export async function lookupCrm(lead: { email: string; phone: string | null }): Promise<CrmMatch | null> {
+  const url = process.env.CRM_LOOKUP_URL
+  if (!url?.startsWith('https://')) return null
+  const key = process.env.CRM_API_KEY
   try {
-    const res = await fetch(lookupUrl, { method: 'POST', headers, body: JSON.stringify(lead), signal: AbortSignal.timeout(TIMEOUT_MS) })
+    const res = await fetch(url, {
+      method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS),
+      headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
+      body: JSON.stringify(lead),
+    })
     if (!res.ok) return null
-    const data = (await res.json()) as { ownerEmail?: unknown }
-    return typeof data.ownerEmail === 'string' && data.ownerEmail.includes('@') ? data.ownerEmail.trim().toLowerCase() : null
+    const d = (await res.json()) as Record<string, unknown>
+    const ownerEmail = typeof d.ownerEmail === 'string' && d.ownerEmail.includes('@') ? d.ownerEmail.trim().toLowerCase() : null
+    const rawId = d.crmId ?? d.id
+    const crmId = typeof rawId === 'string' || typeof rawId === 'number' ? String(rawId).slice(0, 120) : null
+    const exists = typeof d.exists === 'boolean' ? d.exists : Boolean(crmId || ownerEmail)
+    const matchedBy = d.matchedBy === 'email' || d.matchedBy === 'phone' ? d.matchedBy : exists ? 'email' : null
+    return { exists, crmId, ownerEmail, matchedBy }
   } catch (err) {
-    console.error('[crm] owner lookup failed', (err as Error).message)
+    console.error('[crm] lookup failed', (err as Error).message)
     return null
   }
 }
 
-/** Fire-and-forget event to the CRM. Never throws. */
-export async function notifyCrm(event: string, lead: Record<string, unknown>): Promise<void> {
-  const { webhookUrl, headers } = config()
-  if (!webhookUrl?.startsWith('https://')) return
-  try {
-    await fetch(webhookUrl, { method: 'POST', headers, body: JSON.stringify({ event, lead, at: new Date().toISOString() }), signal: AbortSignal.timeout(TIMEOUT_MS) })
-  } catch (err) {
-    console.error('[crm] webhook failed', (err as Error).message)
-  }
+/** Remembers what the main CRM said, so the lead page and every webhook can show it. */
+export async function recordCrmMatch(userId: string, m: Pick<CrmMatch, 'exists' | 'crmId' | 'matchedBy'>): Promise<void> {
+  await query(
+    `INSERT INTO lead_external (user_id, crm_id, existed, matched_by, checked_at) VALUES ($1, $2, $3, $4, now())
+     ON CONFLICT (user_id) DO UPDATE SET crm_id = coalesce(EXCLUDED.crm_id, lead_external.crm_id), existed = lead_external.existed OR EXCLUDED.existed,
+       matched_by = coalesce(lead_external.matched_by, EXCLUDED.matched_by), checked_at = now()`,
+    [userId, m.crmId, m.exists, m.exists ? m.matchedBy : null],
+  )
 }

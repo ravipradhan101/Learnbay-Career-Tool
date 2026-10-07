@@ -1,27 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  CITIES, CTC_BANDS, DOMAINS, EXPERIENCE, GOALS, INTERESTS, PROGRAMMER, ROLES, ROLE_OTHER, SKILLS, TIMELINES, WEEKLY_HOURS, COUNTRY_CODES,
-  targetRoleOptions, type Answers, type Option,
-} from '@/lib/questions'
-import { LEAD_STATUSES } from '@/lib/crm/roles'
+import { CITIES, CTC_BANDS, SKILLS, TIMELINES, WEEKLY_HOURS, isAnswered, targetRoleOptions, type Answers, type Option, type ToolQuestionKey } from '@/lib/questions'
 import { Msg, useAction } from './useAction'
 
 type Opt = { id: string; label: string }
-
-export function StatusControl({ leadId, status }: { leadId: string; status: string }) {
-  const { run, busy, msg } = useAction(`/api/crm/leads/${leadId}`)
-  return (
-    <div className="field">
-      <label className="label" htmlFor="lead-status">Status</label>
-      <select id="lead-status" className="select" value={status} disabled={busy} onChange={(e) => void run({ action: 'status', status: e.target.value })}>
-        {LEAD_STATUSES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
-      </select>
-      <Msg msg={msg} />
-    </div>
-  )
-}
 
 export function ReassignControl({ leadId, ownerId, options }: { leadId: string; ownerId: string | null; options: Opt[] }) {
   const [to, setTo] = useState(ownerId ?? '')
@@ -45,106 +28,117 @@ export function ReassignControl({ leadId, ownerId, options }: { leadId: string; 
   )
 }
 
-function Select({ id, label, value, options, onChange }: { id: string; label: string; value: string | undefined; options: Option[]; onChange: (v: string) => void }) {
-  return (
-    <div className="field">
-      <label className="label" htmlFor={id}>{label}</label>
-      <select id={id} className="select" value={value ?? ''} onChange={(e) => onChange(e.target.value)}>
-        <option value="">Not given</option>
-        {options.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-      </select>
-    </div>
-  )
+type Report = { id: string; name: string; status: string; updatedAt: string | null; builtBy: string | null; versions: number; questions: ToolQuestionKey[]; staffAnswers: Answers | null }
+
+const QUESTION_OPTIONS: Partial<Record<ToolQuestionKey, Option[]>> = { ctc: CTC_BANDS, city: CITIES, weeklyHours: WEEKLY_HOURS, timeline: TIMELINES }
+const labelFor = (opts: Option[], v: unknown) => opts.find((o) => o.id === v)?.label
+
+/** What the learner said for a question, in words. */
+function said(key: ToolQuestionKey, a: Answers): string {
+  const v = a[key]
+  if (Array.isArray(v)) return v.length ? v.map((x) => labelFor(SKILLS, x) ?? x).join(', ') : ''
+  if (!v) return ''
+  if (key === 'targetRole') return labelFor(targetRoleOptions(a), v) ?? String(v)
+  return labelFor(QUESTION_OPTIONS[key] ?? [], v) ?? String(v)
 }
 
-/** Fill in or correct the learner's details. Only what changed is saved, and the change is logged under your name. */
-export function ProfileForm({ leadId, name, phoneCountry, phone, answers }: { leadId: string; name: string; phoneCountry: string; phone: string; answers: Answers }) {
-  const [c, setC] = useState({ name, phoneCountry: phoneCountry || '+91', phone })
-  const [a, setA] = useState<Answers>(answers)
-  const { run, busy, msg } = useAction(`/api/crm/leads/${leadId}`)
-  const put = (k: keyof Answers) => (v: string) => setA({ ...a, [k]: v || undefined })
-  const skills = new Set(a.skills ?? [])
-  return (
-    <form className="stack" onSubmit={(e) => {
-      e.preventDefault()
-      const changed = Object.fromEntries(Object.entries(a).filter(([k, v]) => v !== undefined && JSON.stringify(v) !== JSON.stringify(answers[k as keyof Answers])))
-      void run({ action: 'profile', ...(c.name !== name ? { name: c.name } : {}), ...(c.phone !== phone || c.phoneCountry !== phoneCountry ? { phone: c.phone, phoneCountry: c.phoneCountry } : {}), answers: changed })
-    }}>
-      <div className="crm-form-grid">
-        <div className="field"><label className="label" htmlFor="pf-name">Full name</label><input id="pf-name" className="input" maxLength={80} value={c.name} onChange={(e) => setC({ ...c, name: e.target.value })} /></div>
-        <div className="field">
-          <label className="label" htmlFor="pf-phone">Phone</label>
-          <div className="row" style={{ flexWrap: 'nowrap', gap: '0.5rem' }}>
-            <select className="select" style={{ width: '6.5rem' }} aria-label="Country code" value={c.phoneCountry} onChange={(e) => setC({ ...c, phoneCountry: e.target.value })}>
-              {COUNTRY_CODES.map((x) => <option key={x.code} value={x.code}>{x.flag} {x.code}</option>)}
-            </select>
-            <input id="pf-phone" className="input" inputMode="tel" maxLength={15} value={c.phone} onChange={(e) => setC({ ...c, phone: e.target.value })} />
-          </div>
-        </div>
-        <Select id="pf-role" label="Current role" value={a.role} options={[...ROLES, { id: ROLE_OTHER, label: 'Other' }]} onChange={put('role')} />
-        {a.role === ROLE_OTHER && <div className="field"><label className="label" htmlFor="pf-ro">Their role</label><input id="pf-ro" className="input" maxLength={60} value={a.roleOther ?? ''} onChange={(e) => setA({ ...a, roleOther: e.target.value })} /></div>}
-        <Select id="pf-exp" label="Experience" value={a.experience} options={EXPERIENCE} onChange={put('experience')} />
-        <Select id="pf-prog" label="Codes?" value={a.programmer} options={PROGRAMMER} onChange={put('programmer')} />
-        <Select id="pf-int" label="Interested in" value={a.interest} options={INTERESTS} onChange={put('interest')} />
-        <Select id="pf-dom" label="Industry" value={a.domain} options={DOMAINS} onChange={put('domain')} />
-        {a.domain === 'other' && <div className="field"><label className="label" htmlFor="pf-do">Their industry</label><input id="pf-do" className="input" maxLength={60} value={a.domainOther ?? ''} onChange={(e) => setA({ ...a, domainOther: e.target.value })} /></div>}
-        <Select id="pf-goal" label="Goal" value={a.goal} options={GOALS} onChange={put('goal')} />
-        <Select id="pf-target" label="Target role" value={a.targetRole} options={targetRoleOptions(a)} onChange={put('targetRole')} />
-        <Select id="pf-ctc" label="Current CTC" value={a.ctc} options={CTC_BANDS} onChange={put('ctc')} />
-        <Select id="pf-city" label="City" value={a.city} options={CITIES} onChange={put('city')} />
-        <Select id="pf-hours" label="Hours a week" value={a.weeklyHours} options={WEEKLY_HOURS} onChange={put('weeklyHours')} />
-        <Select id="pf-time" label="Timeline" value={a.timeline} options={TIMELINES} onChange={put('timeline')} />
-      </div>
-      <fieldset className="crm-skills">
-        <legend className="label">Skills they have</legend>
-        {SKILLS.map((s) => (
-          <label key={s.id} className="small"><input type="checkbox" checked={skills.has(s.id)} onChange={(e) => {
-            const next = new Set(skills)
-            if (e.target.checked) next.add(s.id); else next.delete(s.id)
-            setA({ ...a, skills: [...next] })
-          }} /> {s.label}</label>
-        ))}
-      </fieldset>
-      <Msg msg={msg} />
-      <button className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }} disabled={busy}>{busy ? 'Saving…' : 'Save details'}</button>
-    </form>
-  )
-}
-
-type Report = { id: string; name: string; status: string; missing: string[] }
-
-/** Build a report for the lead, open it, and email it to them. */
-export function ReportsPanel({ leadId, reports }: { leadId: string; reports: Report[] }) {
+/**
+ * The learner's reports. Each one can be rebuilt from answers staff log on the call: the panel asks only the questions
+ * that report needs (pre-filled with what the learner or the last call said), builds it, and can email it to them.
+ * The learner's own profile is not changed.
+ */
+export function ReportsPanel({ leadId, reports, answers, titles }: { leadId: string; reports: Report[]; answers: Answers; titles: Record<string, string> }) {
   const { run, busy, msg } = useAction(`/api/crm/leads/${leadId}`)
   const [working, setWorking] = useState('')
-  async function act(action: 'generate' | 'email-report', tool: string) {
+  const [open, setOpen] = useState('')
+  async function act(action: 'regenerate' | 'email-report', tool: string, extra: Record<string, unknown> = {}) {
     setWorking(`${action}:${tool}`)
-    await run({ action, tool })
+    const r = await run({ action, tool, ...extra })
     setWorking('')
+    if (r.ok && action === 'regenerate') setOpen('')
   }
   return (
     <div className="stack" style={{ gap: '0.6rem' }}>
-      {reports.map((r) => (
-        <div key={r.id} className="crm-report">
-          <div><b>{r.name}</b><div className="small muted">{r.status === 'ready' ? 'Ready' : r.status === 'generating' ? 'Being built…' : r.status === 'failed' ? 'Failed last time' : r.missing.length ? `Needs: ${r.missing.join(', ')}` : 'Not built yet'}</div></div>
-          <div className="row" style={{ gap: '0.4rem' }}>
-            {r.status === 'ready' ? (
-              <>
-                <a className="btn btn-ghost btn-sm" href={`/api/crm/leads/${leadId}/report/${r.id}`} target="_blank" rel="noopener">Open PDF</a>
-                <button type="button" className="btn btn-soft btn-sm" disabled={busy} onClick={() => { if (window.confirm(`Email the ${r.name} to this lead?`)) void act('email-report', r.id) }}>
-                  {working === `email-report:${r.id}` ? 'Sending…' : 'Email to lead'}
+      {reports.map((r) => {
+        const ready = r.status === 'ready'
+        return (
+          <div key={r.id} className="crm-report-box">
+            <div className="crm-report">
+              <div>
+                <b>{r.name}</b>
+                <div className="small muted">
+                  {ready ? `Ready${r.builtBy ? ` · built by ${r.builtBy}` : ''}${r.updatedAt ? ` · ${new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}${r.versions ? ` · ${r.versions} earlier version${r.versions === 1 ? '' : 's'} kept` : ''}`
+                    : r.status === 'generating' ? 'Being built…' : r.status === 'failed' ? 'Failed last time' : 'Not built yet'}
+                </div>
+              </div>
+              <div className="row" style={{ gap: '0.4rem' }}>
+                {ready && <a className="btn btn-ghost btn-sm" href={`/api/crm/leads/${leadId}/report/${r.id}`} target="_blank" rel="noopener">Open PDF</a>}
+                {ready && (
+                  <button type="button" className="btn btn-soft btn-sm" disabled={busy} onClick={() => { if (window.confirm(`Email the ${r.name} to this lead?`)) void act('email-report', r.id) }}>
+                    {working === `email-report:${r.id}` ? 'Sending…' : 'Email to lead'}
+                  </button>
+                )}
+                <button type="button" className="btn btn-ghost btn-sm" aria-expanded={open === r.id} onClick={() => setOpen(open === r.id ? '' : r.id)}>
+                  {open === r.id ? 'Close' : ready ? 'Rebuild' : 'Build'}
                 </button>
-              </>
-            ) : (
-              <button type="button" className="btn btn-soft btn-sm" disabled={busy || r.missing.length > 0} onClick={() => void act('generate', r.id)} title={r.missing.length ? 'Fill in the profile details first' : undefined}>
-                {working === `generate:${r.id}` ? 'Building… (up to a minute)' : 'Generate'}
-              </button>
-            )}
+              </div>
+            </div>
+            {open === r.id && <ReportQuestions report={r} answers={answers} titles={titles} busy={busy} working={working === `regenerate:${r.id}`} onBuild={(a) => act('regenerate', r.id, { answers: a })} />}
           </div>
-        </div>
-      ))}
+        )
+      })}
       <Msg msg={msg} />
     </div>
+  )
+}
+
+function ReportQuestions({ report, answers, titles, busy, working, onBuild }: {
+  report: Report; answers: Answers; titles: Record<string, string>; busy: boolean; working: boolean; onBuild: (a: Answers) => void
+}) {
+  const start = Object.fromEntries(report.questions.map((k) => [k, report.staffAnswers?.[k] ?? answers[k]])) as Answers
+  const [a, setA] = useState<Answers>(start)
+  const merged = { ...answers, ...a }
+  const missing = report.questions.filter((k) => !isAnswered(merged, k))
+  return (
+    <form className="crm-questions" onSubmit={(e) => { e.preventDefault(); onBuild(a) }}>
+      <p className="small muted" style={{ margin: 0 }}>Ask these on the call and log their answers. The report is rebuilt from them; their own profile stays as they left it.</p>
+      {report.questions.map((k) => {
+        const id = `rq-${report.id}-${k}`
+        const own = said(k, answers)
+        const hint = own ? `They said: ${own}` : 'Not answered by the learner yet'
+        if (k === 'skills') {
+          const chosen = new Set(a.skills ?? [])
+          return (
+            <fieldset key={k} className="crm-skills">
+              <legend className="label">{titles[k] ?? k}</legend>
+              {SKILLS.map((s) => (
+                <label key={s.id} className="small"><input type="checkbox" checked={chosen.has(s.id)} onChange={(e) => {
+                  const next = new Set(chosen)
+                  if (e.target.checked) next.add(s.id); else next.delete(s.id)
+                  setA({ ...a, skills: [...next] })
+                }} /> {s.label}</label>
+              ))}
+              <span className="crm-faint" style={{ flexBasis: '100%' }}>{hint}</span>
+            </fieldset>
+          )
+        }
+        const opts = k === 'targetRole' ? targetRoleOptions(merged) : QUESTION_OPTIONS[k] ?? []
+        return (
+          <div key={k} className="field">
+            <label className="label" htmlFor={id}>{titles[k] ?? k}</label>
+            <select id={id} className="select" value={(a[k] as string | undefined) ?? ''} onChange={(e) => setA({ ...a, [k]: e.target.value || undefined })}>
+              <option value="">Choose…</option>
+              {opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+            </select>
+            <span className="crm-faint">{hint}</span>
+          </div>
+        )
+      })}
+      <div className="row" style={{ gap: '0.5rem' }}>
+        <button className="btn btn-primary btn-sm" disabled={busy || missing.length > 0}>{working ? 'Building… (up to a minute)' : report.status === 'ready' ? 'Rebuild report' : 'Build report'}</button>
+        {missing.length > 0 && <span className="small muted">Still needed: {missing.map((k) => titles[k] ?? k).join(', ')}</span>}
+      </div>
+    </form>
   )
 }
 

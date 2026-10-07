@@ -17,7 +17,7 @@ const TABS = [
   { href: '/admin/projects', label: 'Projects' },
   { href: '/admin/course-roles', label: 'Courses & roles' },
   { href: '/admin/companies', label: 'Companies' },
-  { href: '/admin/crm', label: 'Sales CRM ↗' },
+  { href: '/admin/crm', label: 'Pseudo Sales CRM ↗' },
 ]
 
 /** Report tabs; the selected date range carries across tabs. */

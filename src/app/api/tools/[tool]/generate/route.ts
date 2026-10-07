@@ -9,6 +9,7 @@ import { clientIp, isSameOrigin, jsonError, jsonOk, rateLimits } from '@/lib/sec
 import { generateTool } from '@/lib/tools'
 import { getTool } from '@/lib/tools-meta'
 import { firstName } from '@/lib/validation'
+import { emitLeadEvent } from '@/lib/crm/webhooks'
 
 export const maxDuration = 180
 const MAX_ATTEMPTS = 4
@@ -45,7 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ too
   try {
     const prior = await getReadyResults(user.id)
     const data = await generateTool(meta.id, profile.answers, firstName(user.name), prior, user.id)
-    await query(`UPDATE tool_results SET status = 'ready', data = $2, updated_at = now() WHERE id = $1`, [claimed.id, JSON.stringify(data)])
+    await query(`UPDATE tool_results SET status = 'ready', data = $2, staff_answers = NULL, generated_by = NULL, updated_at = now() WHERE id = $1`, [claimed.id, JSON.stringify(data)])
   } catch (err) {
     const message = (err as Error).message
     console.error(`[tool:${meta.id}] generation failed`, message)
@@ -53,6 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ too
     return jsonError(502, 'We could not build this just now. Please try again.')
   }
   triggerFlows(user.id, 'tool_completed')
+  emitLeadEvent('report.generated', user.id, { tool: meta.id, name: meta.name, by: 'learner' })
   background('tool:email', () => sendToolReadyEmail(user.id, user.email, firstName(user.name), meta.name, meta.route))
   return jsonOk({ status: 'ready' })
 }

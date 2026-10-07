@@ -38,10 +38,10 @@ export function CrmNav({ isAdmin }: { isAdmin: boolean }) {
     return () => { alive = false; clearInterval(t) }
   }, [])
 
-  const tabs = isAdmin ? [...TABS, { href: '/admin', label: 'Admin reports ↗' }] : TABS
+  const tabs = isAdmin ? [...TABS, { href: '/admin/crm/developers', label: 'Developers' }, { href: '/admin', label: 'Admin reports ↗' }] : TABS
   return (
     <div className="row between" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
-      <nav className="admin-tabs" aria-label="Sales CRM">
+      <nav className="admin-tabs" aria-label="Pseudo Sales CRM">
         {tabs.map((t) => (
           <Link key={t.href} href={t.href} aria-current={(t.href === '/admin/crm' ? pathname === t.href : pathname.startsWith(t.href) && t.href !== '/admin') ? 'page' : undefined}>{t.label}</Link>
         ))}

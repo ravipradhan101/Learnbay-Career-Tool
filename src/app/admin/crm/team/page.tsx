@@ -57,9 +57,9 @@ export default async function TeamPage() {
 
   return (
     <>
-      <div className="row between" style={{ alignItems: 'flex-end' }}>
+      <div className="crm-page-head">
         <div>
-          <h1 className="admin-h1">Team</h1>
+          <h1>Team</h1>
           <p className="muted small">
             {me.role === 'admin' ? 'Everyone on the sales team. You manage all accounts except your own, which is protected.'
               : me.role === 'manager' ? 'Your team. You can add associates and ISMs and move them within your team; the admin changes roles and deactivates accounts.'

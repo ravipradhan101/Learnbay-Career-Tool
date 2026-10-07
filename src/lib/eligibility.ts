@@ -11,6 +11,7 @@ import { sendMail } from './mailer'
 import { learnerUrl } from './links'
 import { EDU_LEVELS, PROGRAMMER, experienceLabel, interestLabel, labelOf, roleLabel, type Answers } from './questions'
 import { programForLearner } from './segments'
+import { emitLeadEvent } from './crm/webhooks'
 
 // Timing, question count and attempts come from the active question set (Admin → Eligibility test) and are
 // copied onto each attempt when it starts, so admin edits never change a test that is already running.
@@ -415,6 +416,7 @@ async function afterCompletion(t: TestRow) {
   if (!u) return
   await query(`INSERT INTO lead_events (user_id, type, detail) VALUES ($1, 'eligibility_completed', $2)`, [t.user_id, JSON.stringify({ score: String(t.score), band: t.band ?? '', attempt: String(t.attempt) })])
   triggerFlows(t.user_id, 'eligibility_completed')
+  emitLeadEvent('eligibility.completed', t.user_id, { track: t.track, attempt: t.attempt, score: t.score, band: t.band, correct: t.correct, total: t.total })
   if (u.answers) prepareNextAttempt(t.user_id, u.answers)
   const band = bandFor(t.score ?? 0)
   const first = (u.name ?? '').trim().split(/\s+/)[0] || 'there'

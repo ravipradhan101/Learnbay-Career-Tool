@@ -18,10 +18,11 @@ const inScope = (n: number) => `($${n}::uuid[] IS NULL OR lo.owner_id = ANY($${n
 
 // ---------- Leads ----------
 
-export type LeadFilters = { q: string; status: string; owner: string; unassigned: boolean; missed: boolean; page: number }
+export type LeadFilters = { q: string; status: string; owner: string; unassigned: boolean; missed: boolean; page: number; band?: string; sort?: 'new' | 'intent' }
 export type LeadRow = {
   id: string; name: string | null; email: string; phone_country: string | null; phone: string | null; created_at: Date; last_login_at: Date | null
   owner_id: string | null; status: string | null; source: string | null; reports: number; next_due: Date | null; missed: number; last_touch: Date | null
+  intent: number | null; band: string | null; scored_at: Date | null
 }
 export const PAGE_SIZE = 50
 
@@ -33,21 +34,23 @@ export async function listLeads(me: StaffUser, f: LeadFilters): Promise<{ rows: 
     AND ($3 = '' OR coalesce(lo.status, 'new') = $3)
     AND ($4 = '' OR lo.owner_id::text = $4)
     AND (NOT $5 OR lo.owner_id IS NULL)
-    AND (NOT $6 OR EXISTS (SELECT 1 FROM lead_tasks t WHERE t.user_id = u.id AND ${MISSED_SQL}))`
-  const params = [scope, like, f.status, f.owner, f.unassigned && me.role === 'admin', f.missed]
+    AND (NOT $6 OR EXISTS (SELECT 1 FROM lead_tasks t WHERE t.user_id = u.id AND ${MISSED_SQL}))
+    AND ($7 = '' OR li.band = $7)`
+  const params = [scope, like, f.status, f.owner, f.unassigned && me.role === 'admin', f.missed, f.band ?? '']
   const [rows, total] = await Promise.all([
     query<LeadRow>(
       `SELECT u.id, u.name, u.email, u.phone_country, u.phone, u.created_at, u.last_login_at, lo.owner_id, lo.status, lo.source,
               (SELECT count(*)::int FROM tool_results t WHERE t.user_id = u.id AND t.status = 'ready') AS reports,
               (SELECT min(t.due_at) FROM lead_tasks t WHERE t.user_id = u.id AND t.status = 'open') AS next_due,
               (SELECT count(*)::int FROM lead_tasks t WHERE t.user_id = u.id AND ${MISSED_SQL}) AS missed,
-              (SELECT max(a.created_at) FROM lead_activities a WHERE a.user_id = u.id AND a.actor_id IS NOT NULL) AS last_touch
-         FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id
+              (SELECT max(a.created_at) FROM lead_activities a WHERE a.user_id = u.id AND a.actor_id IS NOT NULL) AS last_touch,
+              li.intent, li.band, li.updated_at AS scored_at
+         FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id LEFT JOIN lead_insights li ON li.user_id = u.id
         WHERE ${where}
-        ORDER BY u.created_at DESC LIMIT ${PAGE_SIZE} OFFSET $7`,
+        ORDER BY ${f.sort === 'intent' ? 'li.intent DESC NULLS LAST, ' : ''}u.created_at DESC LIMIT ${PAGE_SIZE} OFFSET $8`,
       [...params, Math.max(0, f.page - 1) * PAGE_SIZE],
     ),
-    queryOne<{ n: number }>(`SELECT count(*)::int AS n FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id WHERE ${where}`, params),
+    queryOne<{ n: number }>(`SELECT count(*)::int AS n FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id LEFT JOIN lead_insights li ON li.user_id = u.id WHERE ${where}`, params),
   ])
   return { rows, total: total?.n ?? 0 }
 }
@@ -85,7 +88,10 @@ export async function leadDetail(id: string) {
       [id],
     ),
     queryOne<{ answers: Answers; updated_at: Date }>(`SELECT answers, updated_at FROM assessments WHERE user_id = $1`, [id]),
-    query<{ tool: string; status: string; updated_at: Date }>(`SELECT tool, status, updated_at FROM tool_results WHERE user_id = $1`, [id]),
+    query<{ tool: string; status: string; updated_at: Date; staff_answers: Answers | null; generated_by: string | null; versions: number }>(
+      `SELECT t.tool, t.status, t.updated_at, t.staff_answers, t.generated_by,
+              (SELECT count(*)::int FROM tool_result_history h WHERE h.user_id = t.user_id AND h.tool = t.tool) AS versions
+         FROM tool_results t WHERE t.user_id = $1`, [id]),
     query<{ id: string; date: string | null; time: string | null; status: string; rescheduled: number; created_at: Date }>(
       `SELECT id, to_char(preferred_date, 'YYYY-MM-DD') AS date, preferred_time AS time, status, rescheduled, created_at
          FROM counsellor_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10`,
@@ -111,7 +117,7 @@ export async function leadDetail(id: string) {
 
   const staffName = (sid: unknown) => (typeof sid === 'string' ? displayName(ids.get(sid)) : '')
   const timeline: TimelineItem[] = []
-  const staffTools = new Set(activities.filter((a) => a.action === 'report_generated').map((a) => String(a.detail.tool)))
+  const staffTools = new Set(activities.filter((a) => a.action === 'report_generated' || a.action === 'report_regenerated').map((a) => String(a.detail.tool)))
   if (!user.created_by) timeline.push({ at: user.created_at, actor: 'user', who: user.name ?? 'Learner', text: 'Signed up on Career Studio' })
   for (const e of events) timeline.push({ at: e.created_at, actor: 'user', who: user.name ?? 'Learner', text: USER_EVENTS[e.type] ?? e.type.replace(/_/g, ' '), detail: e.detail?.tool ? getTool(e.detail.tool)?.name : undefined })
   for (const r of reports) {
@@ -123,9 +129,12 @@ export async function leadDetail(id: string) {
   for (const a of activities) {
     const d = a.detail as Record<string, unknown>
     let detail = ''
-    if (a.action === 'reassigned' || a.action === 'allocated' || a.action === 'lead_created') detail = `to ${staffName(d.to)}${a.action === 'reassigned' && d.from ? ` (from ${staffName(d.from)})` : ''}${d.source === 'crm' ? ' · CRM owner' : d.source === 'round_robin' ? ' · round robin' : ''}`
+    if (a.action === 'lead_created' && d.via === 'api') detail = `through the API (${String(d.key ?? '')})`
+    else if (a.action === 'api_enriched') detail = [Array.isArray(d.filled) && d.filled.length ? `filled ${(d.filled as string[]).join(', ')}` : 'nothing to fill', d.note ? 'note added' : '', `matched by ${String(d.matchedBy ?? 'email')}`].filter(Boolean).join(' · ')
+    else if (a.action === 'status_changed' && d.via === 'main_crm') detail = `${String(d.from ?? 'new')} → ${String(d.to ?? '')} · synced from the main CRM`.replace(/_/g, ' ')
+    else if (a.action === 'reassigned' || a.action === 'allocated' || a.action === 'lead_created') detail = `to ${staffName(d.to)}${a.action === 'reassigned' && d.from ? ` (from ${staffName(d.from)})` : ''}${d.source === 'crm' ? ' · CRM owner' : d.source === 'round_robin' ? ' · round robin' : ''}`
     else if (a.action === 'status_changed') detail = `${String(d.from ?? 'new')} → ${String(d.to ?? '')}`.replace(/_/g, ' ')
-    else if (a.action === 'report_generated' || a.action === 'report_emailed') detail = getTool(String(d.tool))?.name ?? ''
+    else if (a.action === 'report_generated' || a.action === 'report_regenerated' || a.action === 'report_emailed') detail = getTool(String(d.tool))?.name ?? ''
     else if (a.action === 'email_sent') detail = String(d.subject ?? '')
     else if (a.action === 'call_logged' || a.action === 'task_done') detail = [outcomeLabel(d.outcome as string), d.note ? `“${String(d.note)}”` : ''].filter(Boolean).join(' · ')
     else if (a.action === 'task_created') detail = String(d.title ?? '')
@@ -137,7 +146,13 @@ export async function leadDetail(id: string) {
 
   return {
     user, answers: answers?.answers ?? {}, answersUpdated: answers?.updated_at ?? null,
-    reports: TOOLS.map((t) => ({ id: t.id, name: t.name, status: reports.find((r) => r.tool === t.id)?.status ?? 'none', updated_at: reports.find((r) => r.tool === t.id)?.updated_at ?? null, questions: t.questions })),
+    reports: TOOLS.map((t) => {
+      const r = reports.find((x) => x.tool === t.id)
+      return {
+        id: t.id, name: t.name, status: r?.status ?? 'none', updated_at: r?.updated_at ?? null, questions: t.questions,
+        staffAnswers: r?.staff_answers ?? null, builtBy: r?.generated_by ? displayName(ids.get(r.generated_by)) : r?.status === 'ready' ? 'the learner' : null, versions: r?.versions ?? 0,
+      }
+    }),
     bookings, tasks, notes: notes.map((n) => ({ ...n, author: staffName(n.author_id) })),
     timeline: timeline.slice(0, 150),
     assignments: assignments.map((a) => ({ ...a, from: staffName(a.from_id), to: staffName(a.to_id), by: a.by_id ? staffName(a.by_id) : 'System' })),
@@ -226,7 +241,7 @@ export async function teamStats(me: StaffUser, since: Date): Promise<(PersonStat
        (SELECT count(*)::int FROM lead_tasks t WHERE t.owner_id = s.id AND ${MISSED_SQL} AND t.missed_at >= $2) AS missed,
        (SELECT count(*)::int FROM lead_tasks t WHERE t.completed_by = s.id AND t.kind IN ('call_booked', 'call_request', 'follow_up', 'meeting') AND t.status = 'done' AND t.completed_at >= $2) AS calls_done,
        (SELECT count(*)::int FROM lead_activities a WHERE a.actor_id = s.id AND a.created_at >= $2) AS actions,
-       (SELECT count(*)::int FROM lead_activities a WHERE a.actor_id = s.id AND a.action = 'report_generated' AND a.created_at >= $2) AS reports,
+       (SELECT count(*)::int FROM lead_activities a WHERE a.actor_id = s.id AND a.action IN ('report_generated', 'report_regenerated') AND a.created_at >= $2) AS reports,
        (SELECT count(*)::int FROM lead_activities a WHERE a.actor_id = s.id AND a.action IN ('email_sent', 'report_emailed') AND a.created_at >= $2) AS emails
      FROM admin_users s WHERE s.id = ANY($1::uuid[])`,
     [people.map((p) => p.id), since],
@@ -259,7 +274,7 @@ export async function activityMatrix(me: StaffUser, since: Date) {
        (SELECT count(*)::int FROM lead_events x WHERE x.type = 'meeting_booked' AND x.created_at >= $2 AND ${leadScope}) AS meeting_booked`,
     [scope, since],
   )
-  const actions = ['lead_created', 'allocated', 'reassigned', 'status_changed', 'profile_updated', 'report_generated', 'report_emailed', 'email_sent', 'call_booked', 'call_requested', 'meeting_booked', 'meeting_cancelled', 'call_logged', 'task_created', 'task_done', 'note_added']
+  const actions = ['lead_created', 'allocated', 'reassigned', 'status_changed', 'profile_updated', 'report_generated', 'report_regenerated', 'report_emailed', 'email_sent', 'call_booked', 'call_requested', 'meeting_booked', 'meeting_cancelled', 'call_logged', 'task_created', 'task_done', 'note_added']
   const kinds: ActorKind[] = ['user', 'ism', 'associate', 'manager', 'admin', 'system']
   const label: Record<string, string> = { call_booked: 'Booked a call', call_requested: 'Asked for a call', lead_created: 'Created the lead / signed up' }
   return {
