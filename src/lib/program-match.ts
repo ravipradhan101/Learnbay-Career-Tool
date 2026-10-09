@@ -8,7 +8,7 @@
  */
 const NAMES: [RegExp, string][] = [
   [/\bforward[- ]?deployed\b|\bfde\b/, 'forward-deployed-ai-engineer'],
-  [/\bai engineer(ing)?\s+(master|program|programme|course|certification|pg)/, 'forward-deployed-ai-engineer'],
+  [/\bai engineer(ing)?\s+(master|program|programme|course|certification|pg)/, 'ai-engineering-master'],
   [/\bsde\b|software development engineer|dsa (and|&) system design/, 'sde-genai-agentic-ai'],
   [/applied ai|ai practitioner|iit patna/, 'applied-ai-practitioner'],
   [/\bai leadership\b|(genai|gen ai|generative ai|agentic|ai)[^.?!]{0,40}\b(managers?|leaders?|leadership)\b|\b(managers?|leaders?) (and|&) (leaders?|managers?)\b/, 'genai-agentic-ai-managers-leaders'],

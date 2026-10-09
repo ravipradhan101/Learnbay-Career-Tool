@@ -3,14 +3,17 @@
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Icon, type IconName } from '../Icon'
 import { Avatar, type BruceMood } from './Avatar'
+import { BruceGames, type CodeLevel } from './BruceGames'
 import { track } from '@/lib/analytics'
 import { postJson } from '@/lib/client'
+import { canSpeak, nextVoice, setVoiceOn, speak, stopSpeaking, voiceOn, VOICE_EVENT } from '@/lib/bruce-voice'
 import { BOT_NAME, GUIDE_TITLE } from '@/lib/counsellors'
 
 export type GuideAction = { id: string; label: string; icon?: IconName; primary?: boolean }
 /** The feedback form Bruce shows under his message. */
 export type RatingAsk = { counsellor: string; counsellorName: string; testTaken: boolean; threadId: string | null }
-export type GuideLine = { text: string; actions?: GuideAction[]; autoCloseMs?: number; rating?: RatingAsk }
+/** `asked`: the learner's own question, shown above Bruce's answer. `dance`: he dances while he says it. `game`: his brain games. */
+export type GuideLine = { text: string; actions?: GuideAction[]; autoCloseMs?: number; rating?: RatingAsk; asked?: string; dance?: boolean; game?: boolean }
 export type GuideHandle = {
   say: (line: GuideLine) => void
   /** Shows the line and resolves with the action picked, or null if Bruce is closed (X, Esc, outside click). */
@@ -18,12 +21,28 @@ export type GuideHandle = {
   /** Opens the feedback pop-up; resolves true when sent, false when skipped or closed. */
   askRating: (ask: RatingAsk, text: string) => Promise<boolean>
   close: () => void
+  /** Opens his menu (help, plus his games and a dance). */
+  menu: () => void
 }
 
 const SEEN_KEY = 'lcn_lumi_hi'
 const NUDGED_KEY = 'lcn_lumi_nudged'
 const IDLE_KEY = 'lcn_lumi_idle'
 const IDLE_MS = 120_000
+const CHATTER_KEY = 'lcn_bruce_chatter'
+
+/** Where his answers can take the learner (from /api/guide). */
+const GO_ACTION: Record<string, GuideAction> = {
+  chat: { id: 'chat', label: 'Ask my counsellor', icon: 'message' },
+  tour: { id: 'tour', label: 'Show me around', icon: 'target' },
+  '/dashboard/skill-gap': { id: '/dashboard/skill-gap', label: 'Open my Skill Gap', icon: 'target' },
+  '/dashboard/salary': { id: '/dashboard/salary', label: 'Open my Salary Benchmark', icon: 'rupee' },
+  '/dashboard/roadmap': { id: '/dashboard/roadmap', label: 'Open my Roadmap', icon: 'route' },
+  '/dashboard/eligibility': { id: '/dashboard/eligibility', label: 'Check my eligibility', icon: 'award' },
+  '/dashboard/sessions': { id: '/dashboard/sessions', label: 'Book my free call', icon: 'calendar' },
+  '/dashboard/masterclasses': { id: '/dashboard/masterclasses', label: 'See masterclasses', icon: 'play' },
+  '/dashboard/profile': { id: '/dashboard/profile', label: 'Open my profile', icon: 'user' },
+}
 
 const flag = (key: string) => { try { return window.sessionStorage.getItem(key) === '1' } catch { return false } }
 const setFlag = (key: string) => { try { window.sessionStorage.setItem(key, '1') } catch { /* ignore */ } }
@@ -34,8 +53,12 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
  * he pops up with a typed message when there is something worth knowing (before you leave, after a long pause),
  * and helps with anything when tapped.
  */
-export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onAction, ref }: {
+export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 0, codeLevel = 'easy', onAction, ref }: {
   first: string
+  /** Where his Python games start: starter (doesn't code), intermediate (a little), advanced (developers and IT). */
+  codeLevel?: CodeLevel
+  /** How much he has grown: one step per report or task the learner has finished (0-3 shown). */
+  grow?: number
   /** The learner (his hello and nudge happen once per visit per learner, even when several share a browser tab). */
   who: string
   /** His first hello this visit (e.g. offering the tour to someone new). */
@@ -54,6 +77,10 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
   const [line, setLine] = useState<GuideLine | null>(null)
   const [shown, setShown] = useState('')
   const [typing, setTyping] = useState(false)
+  const [talking, setTalking] = useState(false)
+  const [voice, setVoice] = useState(false)
+  const [question, setQuestion] = useState('')
+  const [gameMood, setGameMood] = useState<BruceMood | null>(null)
   const run = useRef(0)
   const closeTimer = useRef<number | null>(null)
   const ratingDone = useRef<((sent: boolean) => void) | null>(null)
@@ -62,6 +89,8 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
   const nudgeRef = useRef(nudge)
   nudgeRef.current = nudge
   const helloRef = useRef(hello)
+  const helpRef = useRef(help)
+  helpRef.current = help
   helloRef.current = hello
   const quietRef = useRef(quiet)
   quietRef.current = quiet
@@ -78,10 +107,32 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
     settleChoice(null)
     run.current++
     if (closeTimer.current) window.clearTimeout(closeTimer.current)
+    stopSpeaking()
+    setTalking(false)
     setLine(null)
     setShown('')
     setTyping(false)
   }, [])
+
+  // His voice: off until the learner turns it on (remembered on this device, shared with his corner bubble).
+  useEffect(() => {
+    setVoice(voiceOn())
+    const on = (e: Event) => setVoice(Boolean((e as CustomEvent<boolean>).detail))
+    window.addEventListener(VOICE_EVENT, on)
+    return () => window.removeEventListener(VOICE_EVENT, on)
+  }, [])
+  /** Tries the next good voice on this device and says hello in it. */
+  const changeVoice = () => {
+    const name = nextVoice()
+    track('action', 'bruce_voice_change', { voice: name ?? undefined })
+    speak(`Hi ${first}! This is my ${name ?? 'new'} voice. Do you like it?`, setTalking)
+  }
+  const toggleVoice = () => {
+    const on = !voice
+    setVoiceOn(on)
+    track('action', 'bruce_voice', { on })
+    if (on) speak(shown || `Yay! Now you can hear me, ${first}!`, setTalking)
+  }
 
   /** Bruce "types" the line like the counsellors: typing dots for a moment, then the whole message at once. */
   const say = useCallback(async (next: GuideLine) => {
@@ -95,6 +146,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
     if (id !== run.current) return
     setShown(next.text)
     setTyping(false)
+    speak(next.text, (t) => { if (id === run.current) setTalking(t) })
     if (next.autoCloseMs) closeTimer.current = window.setTimeout(() => { if (id === run.current) close() }, next.autoCloseMs)
   }, [close])
 
@@ -112,12 +164,53 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
     void say(next)
   }), [say])
 
+  /** A typed question: Bruce answers in a few friendly lines (and out loud when his voice is on). */
+  const askBruce = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const q = question.trim()
+    if (q.length < 2 || typing) return
+    setQuestion('')
+    settleRating(false)
+    settleChoice(null)
+    track('action', 'bruce_ask')
+    const id = ++run.current
+    if (closeTimer.current) window.clearTimeout(closeTimer.current)
+    stopSpeaking()
+    setLine({ text: '', asked: q })
+    setShown('')
+    setTyping(true)
+    const r = await postJson('/api/guide', { question: q })
+    if (id !== run.current) return
+    const reply = r.ok ? (typeof r.data.reply === 'string' ? r.data.reply : '') : r.error
+    const go = r.ok && typeof r.data.go === 'string' ? GO_ACTION[r.data.go] : undefined
+    void say({ text: reply || `Oops, my leaves got tangled, ${first}! Try asking me again in a moment.`, asked: q, actions: go ? [{ ...go, primary: true }] : undefined })
+  }
+
+  /** His brain games, inside his pop-up. */
+  const startGames = () => {
+    settleRating(false)
+    settleChoice(null)
+    run.current++
+    if (closeTimer.current) window.clearTimeout(closeTimer.current)
+    setGameMood('excited')
+    setLine({ text: '', game: true })
+    setShown('')
+    setTyping(false)
+    speak(`Game time, ${first}! Pick one and I’ll explain every answer.`, setTalking)
+  }
+  const gameReact = (mood: BruceMood, said: string) => {
+    setGameMood(mood)
+    speak(said, setTalking)
+  }
+
   const act = (id: string) => {
+    if (id === 'bruce-games') { startGames(); return }
+    if (id === 'bruce-dance') { track('action', 'bruce_dance'); void say({ text: DANCES[Math.floor(Math.random() * DANCES.length)], dance: true, autoCloseMs: 6000 }); return }
     if (choiceDone.current) { const r = choiceDone.current; choiceDone.current = null; run.current++; setLine(null); setShown(''); r(id); return }
     onAction(id)
   }
 
-  useImperativeHandle(ref, () => ({ say: (l) => { void say(l) }, choose, askRating, close }), [say, choose, askRating, close])
+  useImperativeHandle(ref, () => ({ say: (l) => { void say(l) }, choose, askRating, close, menu: () => { void say(withFun(helpRef.current())) } }), [say, choose, askRating, close])
   chooseRef.current = choose
 
   useEffect(() => {
@@ -126,6 +219,9 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [line, close])
+
+  /** His menu always ends with a little fun. */
+  const withFun = (l: GuideLine): GuideLine => ({ ...l, actions: [...(l.actions ?? []), { id: 'bruce-games', label: 'Play a quick brain game', icon: 'bulb' }, { id: 'bruce-dance', label: `Make ${BOT_NAME} dance`, icon: 'music' }] })
 
   // First visit this session: a short hello, so learners know he’s there. It waits until the counsellor has finished
   // their opening (never a pop-up over a half-typed message), and gives up waiting after about 30 seconds.
@@ -196,15 +292,30 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
     <div className={`rg ${line ? 'rg-open' : ''}`}>
       {line && (
         <div className="rg-overlay" onClick={close}>
-        <div className="rg-bubble" role="dialog" aria-modal="true" aria-label={`${BOT_NAME}, your guide`} onClick={(e) => e.stopPropagation()}>
+        <div className={`rg-bubble${line.game ? ' rg-game' : ''}`} role="dialog" aria-modal="true" aria-label={`${BOT_NAME}, your guide`} onClick={(e) => e.stopPropagation()}>
           <button type="button" className="rg-x" aria-label="Close" onClick={close}><Icon name="x" size="1.1rem" /></button>
+          {canSpeak() && (
+            <div className="rg-voice-wrap">
+              {voice && (
+                <button type="button" className="rg-voice-change" onClick={changeVoice} title="Try another voice" aria-label={`Try another voice for ${BOT_NAME}`}>
+                  <Icon name="refresh" size="0.95rem" />
+                </button>
+              )}
+              <button type="button" className={`rg-voice${voice ? ' on' : ''}`} aria-pressed={voice} onClick={toggleVoice}
+                title={voice ? `Mute ${BOT_NAME}` : `Hear ${BOT_NAME}’s voice`}>
+                <Icon name={voice ? 'volume' : 'mute'} size="1rem" /><span>{voice ? 'Voice on' : 'Voice off'}</span>
+              </button>
+            </div>
+          )}
           <div className="rg-top">
-            <Avatar who="bot" size={60} online mood={typing ? 'thinking' : line.rating ? 'innocent' : line.actions?.length ? 'present' : 'wave'} />
+            <Avatar who="bot" size={line.game ? 46 : 60} online grow={grow} mood={line.game ? (gameMood === 'dance' || !talking ? gameMood ?? 'present' : 'talk') : typing ? 'thinking' : line.dance ? 'dance' : talking ? 'talk' : line.rating ? 'innocent' : line.actions?.length ? 'present' : 'wave'} />
             <span className="rg-who"><b>{BOT_NAME}</b><span>{GUIDE_TITLE}</span></span>
           </div>
-          <p className="rg-text" aria-live="polite">
+          {line.game && <BruceGames who={who} first={first} level={codeLevel} onReact={gameReact} onExit={() => { setGameMood(null); void say(withFun(help())) }} />}
+          {!line.game && line.asked && <p className="rg-asked"><span>You asked</span>{line.asked}</p>}
+          {!line.game && <p className="rg-text" aria-live="polite">
             {typing ? <span className="rg-dots" aria-label={`${BOT_NAME} is typing`}><i /><i /><i /></span> : <span className="tc-pop">{shown}</span>}
-          </p>
+          </p>}
           {!typing && line.rating && (
             <RatingForm
               ask={line.rating}
@@ -217,7 +328,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
               onSkip={close}
             />
           )}
-          {!typing && !line.rating && !(line.actions && line.actions.length) && (
+          {!typing && !line.game && !line.rating && !(line.actions && line.actions.length) && (
             <div className="rg-actions"><button type="button" className="rg-act primary" onClick={close}>Got it</button></div>
           )}
           {!typing && line.actions && line.actions.length > 0 && (
@@ -229,16 +340,51 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onActio
               ))}
             </div>
           )}
+          {!line.rating && !line.game && (
+            <form className="rg-ask" onSubmit={askBruce}>
+              <input value={question} onChange={(e) => setQuestion(e.target.value)} maxLength={300} placeholder={`Ask ${BOT_NAME} anything…`} aria-label={`Ask ${BOT_NAME} a question`} enterKeyHint="send" />
+              <button type="submit" aria-label="Send" disabled={question.trim().length < 2 || typing}><Icon name="send" size="0.95rem" /></button>
+            </form>
+          )}
         </div>
         </div>
       )}
-      <BruceFace open={Boolean(line)} onOpen={() => (line ? close() : void say(help()))} />
+      <BruceFace open={Boolean(line)} grow={grow} who={who} first={first} quiet={() => Boolean(quietRef.current?.() || busyRef.current?.())} onOpen={() => (line ? close() : void say(withFun(help())))} />
     </div>
   )
 }
 
-const GIGGLES = ['Hehe, that tickles!', 'Hihi! Stop it, I’m ticklish!', 'Hehehe, okay okay, I’m awake!']
-const WAKE_UPS = ['I’m awake! I wasn’t sleeping… just resting my eyes.', 'Huh? I’m up, I’m up! I was thinking, not sleeping.']
+const GIGGLES = [
+  'Hehe, that tickles! My leaves are very ticklish.',
+  'Hihi! Stop it, I’m giggling so much my roots are shaking!',
+  'Hehehe, okay okay, you win! Tickle champion!',
+  'Bwahaha! Careful, I might drop a leaf!',
+]
+const WAKE_UPS = [
+  'I’m awake! I wasn’t sleeping… just resting my eyes.',
+  'Huh? I’m up, I’m up! I was doing some photosynthesis, very important work.',
+  'Oh hi! I was dreaming about growing a whole forest of skills with you.',
+]
+const DANCES = ['Watch my moves! A little sapling shuffle, just for you!', 'Leaf to the left, leaf to the right… I’ve got the groove!', 'Dancing for your progress! Every step counts, and so does every wiggle.']
+const GROW_LINES = [
+  (n: string) => `Look, ${n}! I grew a new leaf! You finished a step, so we both grew a little.`,
+  (n: string) => `Wow, I’m getting taller! That’s your progress, ${n}. Keep going!`,
+  (n: string) => `A flower! I bloomed, ${n}! You’ve done so much already. I’m so proud of us.`,
+]
+/** Little things he says now and then (a few times a visit, never over anything else). */
+const CHATTER = [
+  (n: string) => `Psst, ${n}! Fun fact: a tree grows a little every day, and so do skills. Small steps really add up.`,
+  () => 'Did you know? Nobody learns everything at once. Every expert started with one skill, then the next.',
+  (n: string) => `You’re doing great, ${n}. Taking time to plan your career is already a big step.`,
+  () => 'Tip from a tiny tree: your counsellor in the chat loves questions. There are no silly ones!',
+  () => 'Stretch break! Roll your shoulders, sip some water. I’ll wait right here.',
+  () => 'Fun fact: trees talk to each other through their roots. I talk to you through this little bubble!',
+  (n: string) => `Hey ${n}, if anything feels confusing, tap me and type your question. I love helping.`,
+  (n: string) => `Need a little break, ${n}? Tap me for a quick brain game: maths, logic, system design or Python!`,
+]
+const CHATTER_FIRST_MS = 90_000
+const CHATTER_EVERY_MS = 150_000
+const CHATTER_MAX = 3
 type Bubble = { text: string; ask?: boolean }
 
 /**
@@ -246,10 +392,11 @@ type Bubble = { text: string; ask?: boolean }
  * Several quick taps: he giggles. Drag and throw him: he flies, falls, says "Ouch!", then offers help; with no answer
  * in 5 seconds he goes back to his place. Tap him while he dozes: "I'm awake! I wasn't sleeping…", then he helps.
  */
-function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
+function BruceFace({ open, onOpen, grow, who, first, quiet }: { open: boolean; onOpen: () => void; grow: number; who: string; first: string; quiet: () => boolean }) {
   const [mood, setMood] = useState<BruceMood>('idle')
+  const [talking, setTalking] = useState(false)
   const [bubble, setBubble] = useState<Bubble | null>(null)
-  const [offset, setOffset] = useState<{ x: number; y: number } | null>(null)
+  const [offset, setOffset] = useState<{ x: number; y: number; r?: number } | null>(null)
   const [returning, setReturning] = useState(false)
   // On the left half of the screen his bubble opens to his right, so it never runs off the edge.
   const [sayRight, setSayRight] = useState(false)
@@ -293,14 +440,50 @@ function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
   const say = (text: string, m: BruceMood, ms: number, then?: () => void) => {
     setMood(m)
     setBubble({ text })
-    if (ms) later(() => { setBubble(null); then?.() }, ms)
+    speak(text, setTalking)
+    // When he speaks out loud, the bubble stays until he has finished the sentence.
+    const wait = voiceOn() ? Math.max(ms, 900 + text.length * 70) : ms
+    if (ms) later(() => { setBubble(null); then?.() }, wait)
   }
+
+  // He grows with the learner: a new leaf, a taller sprout, then a flower, with a happy dance (not on page load).
+  const grown = useRef<number | null>(null)
+  const stage = Math.min(3, Math.max(0, grow))
+  useEffect(() => {
+    const before = grown.current
+    grown.current = stage
+    if (before === null || stage <= before || open || flying.current) return
+    track('action', 'bruce_grew', { stage })
+    later(() => say(GROW_LINES[stage - 1](first), 'dance', 4200, () => setMood('idle')), 1200)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage])
+
+  // Now and then he says something friendly or fun (a few times a visit; never while anything else is going on).
+  useEffect(() => {
+    const key = `${CHATTER_KEY}:${who}`
+    const count = () => { try { return Number(window.sessionStorage.getItem(key) ?? 0) } catch { return CHATTER_MAX } }
+    let t = 0
+    const tick = () => {
+      const n = count()
+      if (n >= CHATTER_MAX) return
+      const free = !open && !awayRef.current && !flying.current && moodRef.current === 'idle' && !document.hidden && !quiet() && !document.querySelector('[role="dialog"]')
+      if (free) {
+        try { window.sessionStorage.setItem(key, String(n + 1)) } catch { /* ignore */ }
+        track('action', 'bruce_chatter')
+        say(CHATTER[Math.floor(Math.random() * CHATTER.length)](first), 'wave', 6500, () => setMood('idle'))
+      }
+      t = window.setTimeout(tick, free ? CHATTER_EVERY_MS : 30_000)
+    }
+    t = window.setTimeout(tick, CHATTER_FIRST_MS)
+    return () => window.clearTimeout(t)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, who, first])
 
   /** One tap: help (waking him first if he dozed off, or after a fall). */
   const primary = () => {
     track('action', 'bruce_tap', { mood: moodRef.current })
     if (moodRef.current === 'sleep') {
-      say(WAKE_UPS[Math.floor(Math.random() * WAKE_UPS.length)], 'excited', 1800, () => { setMood('idle'); onOpen() })
+      say(WAKE_UPS[Math.floor(Math.random() * WAKE_UPS.length)], 'excited', 2400, () => { setMood('idle'); onOpen() })
       return
     }
     if (awayRef.current) { goHome(); later(onOpen, 760); return }
@@ -310,7 +493,7 @@ function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
   const giggle = () => {
     track('action', 'bruce_giggle')
     clearTimers()
-    say(GIGGLES[Math.floor(Math.random() * GIGGLES.length)], 'playful', 1700, () => setMood(awayRef.current ? 'present' : 'idle'))
+    say(GIGGLES[Math.floor(Math.random() * GIGGLES.length)], 'playful', 2200, () => setMood(awayRef.current ? 'present' : 'idle'))
   }
   const registerClick = () => {
     clicks.current++
@@ -329,40 +512,59 @@ function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
     awayRef.current = true
     const r = wrap.current?.getBoundingClientRect()
     setSayRight(Boolean(r && r.left + r.width / 2 < window.innerWidth / 2))
-    say('Ouch! That hurt my butt!', 'ouch', 1700, () => {
+    say('Ouch! That hurt my butt! Good thing trees are tough.', 'ouch', 2000, () => {
       setMood('present')
       setBubble({ text: 'Anyway… can I help you with something?', ask: true })
-      later(() => say('I’m going back to my place. If you need me, wake me up!', 'wave', 2200, goHome), 5000)
+      speak('Anyway, can I help you with something?', setTalking)
+      later(() => say('I’m going back to my place. If you need me, just tap me!', 'wave', 2200, goHome), 5000)
     })
   }
 
+  /**
+   * The throw: real-feeling physics. Gravity pulls him down, he leans the way he flies, each bounce on the floor is
+   * lower than the last (with a little squash as he hits it), then he slides to a stop and stands up straight.
+   */
   const fly = (x0: number, y0: number, vx0: number, vy0: number, homeX: number, homeY: number) => {
     const el = wrap.current
     if (!el) return
     flying.current = true
     const w = el.offsetWidth
     const h = el.offsetHeight
-    let x = x0, y = y0, vx = Math.max(-40, Math.min(40, vx0)), vy = Math.max(-40, Math.min(40, vy0))
+    let x = x0, y = y0, vx = Math.max(-38, Math.min(38, vx0)), vy = Math.max(-38, Math.min(38, vy0))
+    let lean = 0
     let bounces = 0
-    const floor = window.innerHeight - h - 8
+    let grounded = false
+    const floor = window.innerHeight - h - 6
     // Animation frames pause in a hidden tab; a timer keeps the fall going so he always lands.
     const next = (f: () => void) => (document.hidden ? window.setTimeout(f, 16) : requestAnimationFrame(f))
     // One physics tick per 1/60 s of real time, so the fall takes the same time on a slow device or a throttled tab.
     let last = performance.now()
     const tick = (): boolean => {
-      vy += 1.1
+      if (!grounded) {
+        vy += 0.95
+        vx *= 0.994
+      }
       x += vx
       y += vy
-      if (x < 8) { x = 8; vx = -vx * 0.6 }
-      if (x > window.innerWidth - w - 8) { x = window.innerWidth - w - 8; vx = -vx * 0.6 }
-      if (y < 8) { y = 8; vy = -vy * 0.5 }
-      if (y >= floor) {
+      if (x < 6) { x = 6; vx = -vx * 0.55 }
+      if (x > window.innerWidth - w - 6) { x = window.innerWidth - w - 6; vx = -vx * 0.55 }
+      if (y < 6) { y = 6; vy = -vy * 0.5 }
+      if (!grounded && y >= floor) {
         y = floor
-        vy = -vy * 0.38
-        vx *= 0.75
         bounces++
-        if (Math.abs(vy) < 2 || bounces > 3) return true
+        // Each bounce keeps about half its height; once it's tiny (or after 6), he stays down and slides.
+        if (Math.abs(vy) < 3.2 || bounces > 6) { vy = 0; grounded = true }
+        else { vy = -vy * 0.52; vx *= 0.82 }
+        squash()
       }
+      if (grounded) {
+        y = floor
+        vx *= 0.86
+        lean *= 0.78
+        return Math.abs(vx) < 0.25 && Math.abs(lean) < 0.6
+      }
+      // He leans into the direction he's flying (never a full spin).
+      lean += (Math.max(-28, Math.min(28, vx * 2.2)) - lean) * 0.2
       return false
     }
     const step = () => {
@@ -371,16 +573,24 @@ function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
       last = now
       for (let i = 0; i < ticks; i++) {
         if (tick()) {
-          setOffset({ x: x - homeX, y: y - homeY })
+          setOffset({ x: x - homeX, y: y - homeY, r: 0 })
           flying.current = false
           landed()
           return
         }
       }
-      setOffset({ x: x - homeX, y: y - homeY })
+      setOffset({ x: x - homeX, y: y - homeY, r: lean })
       next(step)
     }
     next(step)
+  }
+  /** A quick squash as he hits the floor (restarts the animation on every bounce). */
+  const squash = () => {
+    const face = wrap.current?.querySelector('.rg-face')
+    if (!face) return
+    face.classList.remove('squash')
+    void (face as HTMLElement).offsetWidth
+    face.classList.add('squash')
   }
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -414,7 +624,7 @@ function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
     fly(e.clientX - d.grabX, e.clientY - d.grabY, d.vx, d.vy, d.homeX, d.homeY)
   }
 
-  const style = offset ? { transform: `translate(${offset.x}px, ${offset.y}px)`, transition: returning ? 'transform 0.7s cubic-bezier(.3,1.3,.5,1)' : 'none' } : undefined
+  const style = offset ? { transform: `translate(${offset.x}px, ${offset.y}px) rotate(${offset.r ?? 0}deg)`, transition: returning ? 'transform 0.7s cubic-bezier(.3,1.3,.5,1)' : 'none' } : undefined
   return (
     <div ref={wrap} className={`rg-bruce${offset ? ' free' : ''}`} style={style}>
       {bubble && (
@@ -431,8 +641,9 @@ function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
       <button type="button" className="rg-face" data-tour="lumi" aria-label={`Ask ${BOT_NAME}, your guide`}
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={() => { drag.current = null }}
         onClick={(e) => { if (e.detail === 0) primary() }}>
-        <span className="rg-ring" aria-hidden="true" />
-        <Avatar who="bot" size={68} online mood={mood} />
+        <span className="rg-glow" aria-hidden="true" />
+        <span className="rg-pad" aria-hidden="true" />
+        <Avatar who="bot" size={76} bare grow={stage} mood={talking && mood !== 'dance' && mood !== 'sleep' ? 'talk' : mood} />
         <span className="rg-tag">{mood === 'sleep' ? `Wake ${BOT_NAME}` : `Ask ${BOT_NAME}`}</span>
       </button>
     </div>

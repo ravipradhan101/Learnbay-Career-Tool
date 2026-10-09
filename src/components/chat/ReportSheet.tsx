@@ -11,6 +11,8 @@ import { domainLabel, experienceLabel, interestLabel, labelOf, PROGRAMMER, roleL
 import { currentCtcRange } from '@/lib/tools'
 import { getTool, type ToolId } from '@/lib/tools-meta'
 import type { RoadmapResult, SalaryResult, SkillGapResult } from '@/lib/tool-types'
+import { capstonesFor } from '@/lib/capstones'
+import { withCurriculum } from '@/lib/curriculum-phases'
 import { industriesFor } from '@/lib/projects'
 
 /** Industries worth naming in the report ("including your healthcare domain"); not student, business or IT services. */
@@ -32,10 +34,13 @@ export async function ReportSheet({ id }: { id: ToolId }) {
       </Sheet>
     )
   }
-  const [resume, elig, set] = await Promise.all([
+  const programId = (row.data as { programId: string }).programId
+  const [resume, elig, set, capstones] = await Promise.all([
     id === 'skill-gap' ? getResumeAnalysis(user.id) : Promise.resolve(null),
     queryOne<{ status: string }>(`SELECT status FROM eligibility_tests WHERE user_id = $1 AND status = 'completed' LIMIT 1`, [user.id]),
     activeSetFor(answers.interest),
+    // The roadmap's projects are tailored to them: every report's own-work capstone uses them once the roadmap exists.
+    capstonesFor(programId, answers, (tools.find((t) => t.tool === 'roadmap' && t.status === 'ready')?.data as RoadmapResult | undefined)?.projects ?? []),
   ])
   // Who the report is for, in their own answers (shown at the top of "Your plan with Learnbay").
   const profile = [
@@ -46,7 +51,7 @@ export async function ReportSheet({ id }: { id: ToolId }) {
     { label: 'Aiming for', value: targetRoleLabel(answers) },
     { label: 'Time a week', value: labelOf(WEEKLY_HOURS, answers.weeklyHours) ?? '' },
   ].filter((x) => x.value && x.value !== 'Not specified')
-  const extras: ReportExtras = { area: interestLabel(answers), role: roleLabel(answers), eligibilityDone: elig?.status === 'completed' || !set, hasSession, industry: INDUSTRY_DOMAINS.has(answers.domain ?? '') ? domainLabel(answers) ?? null : null, profile, industries: industriesFor(answers) }
+  const extras: ReportExtras = { area: interestLabel(answers), role: roleLabel(answers), eligibilityDone: elig?.status === 'completed' || !set, hasSession, industry: INDUSTRY_DOMAINS.has(answers.domain ?? '') ? domainLabel(answers) ?? null : null, profile, industries: industriesFor(answers), capstones }
   return (
     <Sheet title={meta.name} closeHref={back}>
       <div className="row between no-print">
@@ -55,7 +60,7 @@ export async function ReportSheet({ id }: { id: ToolId }) {
       </div>
       {id === 'skill-gap' && <SkillGapView r={row.data as SkillGapResult} extras={extras} />}
       {id === 'salary' && <SalaryView r={row.data as SalaryResult} current={currentCtcRange(answers)} extras={extras} />}
-      {id === 'roadmap' && <RoadmapView r={row.data as RoadmapResult} extras={extras} />}
+      {id === 'roadmap' && <RoadmapView r={withCurriculum(row.data as RoadmapResult)} extras={extras} />}
       {id === 'skill-gap' && <ResumeReview initial={resume?.data ?? null} />}
     </Sheet>
   )

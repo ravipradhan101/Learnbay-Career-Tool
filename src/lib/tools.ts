@@ -3,6 +3,7 @@ import { personaById } from '@/config/catalogue'
 import { ALL_PROBES, ALL_TRIGGERS, PROBES, SEGMENT_LABEL, STUDY_STAGES, segmentOf } from './segments'
 import { PROGRAMS, programsForInterest, resolveProgramId } from '@/config/programs'
 import { PROGRAM_DETAILS } from '@/config/program-details'
+import { curriculumBrief, curriculumPhases } from './curriculum-phases'
 import { RESOURCES } from '@/config/resources'
 import { generateJson } from './gemini'
 import {
@@ -406,6 +407,17 @@ function sanitize(tool: ToolId, raw: unknown, a: Answers): ToolResultMap[ToolId]
       return risk ? { risk, mitigation: s(k.mitigation, 240) } : null
     }, 3),
   }
+  // The phases' names, weeks and topics are the program's own syllabus; the AI's text fills in the rest of each phase.
+  const skeleton = curriculumPhases(result.programId)
+  if (skeleton) {
+    result.phases = skeleton.map((k, i) => {
+      const p = result.phases[i]
+      return { title: k.title, weeks: k.weeks, topics: k.topics, modules: k.modules, focus: p?.focus || `Learn ${k.title}`, milestone: p?.milestone || `Finish ${k.title}`, deliverables: p?.deliverables ?? [], practice: p?.practice ?? '' }
+    })
+    // The program's own length (the brochure's months), never the AI's guess.
+    const months = PROGRAM_DETAILS[result.programId]?.durationMonths
+    if (months) result.durationMonths = months
+  }
   if (result.phases.length < 3) throw new Error('Gemini returned an incomplete roadmap')
   return result
 }
@@ -423,7 +435,10 @@ export async function generateTool(tool: ToolId, answers: Answers, name: string,
   const resourceCatalog = tool === 'roadmap'
     ? `\n\nResource catalog (choose ids only from here):\n${RESOURCES.map((r) => `- ${r.id}: ${r.title} (${r.provider}) — ${r.topics.join(', ')}`).join('\n')}`
     : ''
-  const prompt = `${programCatalog(answers)}${resourceCatalog}\n\nLearner (first name ${name}):\n${describeLearner(answers)}${priorContext(prior)}\n\n${TASKS[tool]}`
+  // The roadmap's phases are the program's own modules, in order: fixed here, only tailored by the AI.
+  const skeleton = tool === 'roadmap' ? curriculumPhases(programForLearner(answers)?.id) : null
+  const phaseNote = skeleton ? `\n\nTHE FOUR PHASES ARE FIXED by the program's syllabus (same order, same modules, same weeks). Write phase i about exactly these modules, tailored to the learner (focus, milestone, deliverables and practice in their own work context); never drop, rename or reorder a module. When a phase has two or more modules, its focus, milestone and deliverables cover every one of them (e.g. a phase with an AI-tools module and the ML/DL/NLP foundation has a deliverable for each). Capstones and projects are always set in the learner's own industry and work (their role, tools and problems), never in an unrelated industry such as banking or marketing for someone in healthcare:\n${curriculumBrief(skeleton)}` : ''
+  const prompt = `${programCatalog(answers)}${resourceCatalog}\n\nLearner (first name ${name}):\n${describeLearner(answers)}${priorContext(prior)}\n\n${TASKS[tool]}${phaseNote}`
   const raw = await generateJson<unknown>({
     system: BASE_RULES,
     contents: [{ role: 'user', parts: [{ text: prompt }] }],

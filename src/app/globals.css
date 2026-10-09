@@ -714,7 +714,7 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 .rh-text p { margin: 0; color: var(--muted); font-size: 0.9375rem; line-height: 1.5; }
 .gauge { display: block; flex-shrink: 0; }
 .gauge-num { font-size: 2.1rem; font-weight: 800; fill: var(--ink); }
-.gauge-sub { font-size: 0.6rem; fill: var(--muted); }
+.gauge-sub { font-size: 0.72rem; fill: var(--muted); }
 
 .kpi-tiles { display: grid; gap: 0.625rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 40em) { .kpi-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -1005,3 +1005,22 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 @media (max-width: 760px) {
   .admin-tabs { -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); padding-right: 1.5rem; }
 }
+/* Capstones that fit the learner: the own-work one stands out */
+.plan-lb-helps > .plan-lb-label + .plan-lb-projects, .plan-lb-helps .plan-lb-grid + .plan-lb-label { margin-top: 18px; }
+.plan-project.own { border-style: solid; border-color: rgba(124, 58, 237, 0.45); background: linear-gradient(160deg, #faf5ff, #ffffff); }
+.plan-project .eyebrow { color: #7c3aed; }
+.phase-modules { margin: 6px 0; color: #3f3f5a; } .phase-modules b { color: #7c3aed; }
+.phase-mods { display: grid; gap: 10px; margin: 8px 0 10px; }
+.phase-mod { padding: 10px 12px; border-radius: 12px; background: #faf9ff; border: 1px solid rgba(124, 58, 237, 0.14); }
+.phase-mod > b { display: block; font-size: 0.86rem; color: #4c1d95; margin-bottom: 6px; }
+.lb-chips:has(> :only-child) { grid-template-columns: 1fr !important; }
+
+/* ---------- Readability and touch (responsive audit, 2026-10-09): no label under ~11.5px, tap areas of 40px+ ---------- */
+.kpi-label, .tc .kpi-label { font-size: 0.72rem !important; }
+.tc-eyebrow { font-size: 0.72rem; }
+.lp-facts dt, .lp-track dt { font-size: 0.72rem; }
+.outcome-here { font-size: 0.72rem; }
+/* Small round buttons keep their look but get a 40px invisible tap area. */
+.tc-avatar-btn, .ap-check { position: relative; }
+.tc-avatar-btn::after, .ap-check::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; }
+.lp-partners > span { font-size: 0.72rem; }

@@ -20,6 +20,7 @@ const ALIASES: Record<string, RegExp> = {
   'GAI-SD': /genai (&|and) agentic ai for software developers/i,
   'SDE-M': /sde master/i,
   'FDE-M': /forward deployed ai engineer(ing)? master/i,
+  AIE: /(?<!deployed )\bai engineer(ing)? master( certification)?( program)?\b/i,
   'GAI-M': /genai (&|and) agentic ai master/i,
   'GAI-CD': /genai (&|and) agentic ai for cloud/i,
   CD: /cloud (&|and) devops engineering(?! master)/i,
@@ -38,7 +39,6 @@ function programsIn(sentence: string) {
 // Old program names (the catalogue's "Old programs → new catalogue"): the counsellor explains the change, never uses them as current.
 const RETIRED: RegExp[] = [
   /genai (&|and) agentic ai certification program/i,
-  /(?<!deployed )\bai engineer(ing)? master( program)?\b/i,
   /advanced cloud (&|and) devops (certification )?program/i,
   /cloud (&|and) devops for (it support|itops|system admin|sysadmin|dba|database|network|qa)/i,
   /data science (&|and) ai (foundation|for freshers|master certification|for bfsi|for managers)/i,

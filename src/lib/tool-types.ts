@@ -46,7 +46,8 @@ export type RoadmapResult = ProgramFit & {
   summary: string
   durationMonths: number
   weeklyHours: string
-  phases: { title: string; weeks: string; focus: string; topics: string[]; milestone: string; deliverables?: string[]; practice?: string }[]
+  /** `modules`: the program modules this phase covers, with their weeks (from the syllabus). */
+  phases: { title: string; weeks: string; focus: string; topics: string[]; milestone: string; deliverables?: string[]; practice?: string; modules?: string[] }[]
   projects: { title: string; description: string; skills: string[]; difficulty: 'Beginner' | 'Intermediate' | 'Advanced' }[]
   tools: string[]
   resourceIds: string[]

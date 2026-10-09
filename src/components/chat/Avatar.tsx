@@ -8,7 +8,7 @@ import { BOT_NAME, GUIDE_PHOTO, getCounsellor, photoOf, type Look } from '@/lib/
  * /public/counsellors when one is there, otherwise an illustration. The "AI Career Counsellor" badge always
  * sits next to the name, so no one mistakes the AI for a real member of staff.
  */
-export function Avatar({ who, size = 44, online = false, mood }: { who: string; size?: number; online?: boolean; mood?: BruceMood }) {
+export function Avatar({ who, size = 44, online = false, mood, grow = 0, bare = false }: { who: string; size?: number; online?: boolean; mood?: BruceMood; grow?: number; bare?: boolean }) {
   const isBot = who === 'bot'
   const c = getCounsellor(who)
   const [noPhoto, setNoPhoto] = useState(false)
@@ -16,7 +16,7 @@ export function Avatar({ who, size = 44, online = false, mood }: { who: string; 
   return (
     <span className="tanya-avatar" style={{ width: size, height: size }}>
       {isBot && (noPhoto || !photo)
-        ? <LumiMascot size={size} mood={mood ?? (size <= 40 ? 'idle' : undefined)} />
+        ? <LumiMascot size={size} mood={mood ?? (size <= 40 ? 'idle' : undefined)} grow={grow} bare={bare} />
         : noPhoto || !photo
           ? <Person size={size} look={c.look} name={c.name} />
           : (
@@ -29,17 +29,20 @@ export function Avatar({ who, size = 44, online = false, mood }: { who: string; 
 }
 
 /** Bruce's moods: the pose, eyes and mouth change with what he's doing. */
-export type BruceMood = 'idle' | 'wave' | 'excited' | 'thinking' | 'playful' | 'present' | 'sleep' | 'ouch' | 'innocent'
+export type BruceMood = 'idle' | 'wave' | 'excited' | 'thinking' | 'playful' | 'present' | 'sleep' | 'ouch' | 'innocent' | 'dance' | 'talk'
 
 /**
  * Bruce, the guide: a little sapling kid, freshly sprouted, not a person. A bark head with a jagged crown and leafy
  * sprouts, big dark shiny eyes, a slim trunk body, twig arms and root feet. He has moods (see BruceMood): waving
  * hello, excited with both arms up, thinking with a hand on his chin, playful, holding out a hand to show something,
  * dozing with his eyes shut, "ouch" after a fall, and an innocent close-up of just his face resting on his hands.
+ * He dances when something good happens, his mouth moves while he talks, and he grows as the learner makes progress
+ * (`grow` 0-3: a new leaf, then a taller sprout, then a little flower on his crown).
  * Everything moves a little (see chat.css; all off for people who prefer reduced motion).
  * Drawn to stay readable from 28px (chat avatars) to 120px (welcome screens).
  */
-export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: boolean; mood?: BruceMood }) {
+/** `bare`: no round background or ground shadow (he floats free in his corner, over his hover pad). */
+export function LumiMascot({ size, wave = true, mood, grow = 0, bare = false }: { size: number; wave?: boolean; mood?: BruceMood; grow?: number; bare?: boolean }) {
   const id = useId().replace(/:/g, '')
   const m: BruceMood = mood ?? (wave ? 'wave' : 'idle')
   const twig = '#7a4f2c'
@@ -57,6 +60,10 @@ export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: b
         <path d="M44.6 5.2q4.2-2.6 5.4 1.4q-3.6 2-5.4-1.4z" fill={`url(#leaf${id})`} />
         <path d="M33 7.5q.2-2.8 1.8-3.8" stroke="#4d7c0f" strokeWidth="1.1" fill="none" strokeLinecap="round" />
         <circle cx="35" cy="3.6" r="1.2" fill="#86efac" />
+        {/* he grows as the learner makes progress */}
+        {grow >= 1 && <path className="bruce-new-leaf" d="M20.6 9.4q-4.6-1.2-5.2 2.6q3.8 1.2 5.2-2.6z" fill={`url(#leaf${id})`} />}
+        {grow >= 2 && <><path d="M33.6 7.4q.6-3.8-1.2-6.2" stroke="#4d7c0f" strokeWidth="1.1" fill="none" strokeLinecap="round" /><path className="bruce-new-leaf" d="M32.4 1.6q-3.8-2.2-5 1.2q3.4 1.6 5-1.2z" fill={`url(#leaf${id})`} /></>}
+        {grow >= 3 && <g className="bruce-flower"><circle cx="46.6" cy="3.2" r="1.5" fill="#f9a8d4" /><circle cx="48.8" cy="3.4" r="1.5" fill="#f9a8d4" /><circle cx="47.7" cy="1.4" r="1.5" fill="#f9a8d4" /><circle cx="47.7" cy="2.8" r="1" fill="#fde047" /></g>}
       </g>
       {/* bark head with a jagged crown */}
       <path d="M18.5 14.5L20.6 8.6L23.4 12.4L26.4 7.2L29.4 11.6L32.4 6.4L35.4 11.4L38.6 7.6L41.2 12.2L44.4 9L45.6 14.5Q46.6 24 45.4 30.4Q44 37.6 32 37.8Q20 37.6 18.6 30.4Q17.4 24 18.5 14.5Z" fill={`url(#bark${id})`} />
@@ -64,7 +71,9 @@ export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: b
       <path d="M21 16q5-2.4 9-1.6" stroke="#ffffff" strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.25" />
     </g>
   )
-  const eyes = m === 'sleep'
+  const eyes = m === 'dance'
+    ? <path d="M22.8 26.2q3.4-4.2 6.8 0M34.4 26.2q3.4-4.2 6.8 0" stroke="#1c1410" strokeWidth="2" fill="none" strokeLinecap="round" />
+    : m === 'sleep'
     ? <path d="M23.2 25q3 2.6 6 0M35 25q3 2.6 6 0" stroke="#1c1410" strokeWidth="1.8" fill="none" strokeLinecap="round" />
     : m === 'ouch'
       ? <path d="M23.4 22.6l5 2.6-5 2.6M40.8 22.6l-5 2.6 5 2.6" stroke="#1c1410" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -84,7 +93,11 @@ export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: b
             </g>
           </g>
         )
-  const mouth = m === 'excited' || m === 'ouch'
+  const mouth = m === 'talk'
+    ? <ellipse className="bruce-mouth-talk" cx="32" cy="32.2" rx="2.4" ry="1.9" fill="#3b1d10" />
+    : m === 'dance'
+      ? <path d="M27.6 31.2Q32 36.6 36.4 31.2Z" fill="#3b1d10" />
+      : m === 'excited' || m === 'ouch'
     ? <ellipse cx="32" cy="32.4" rx="2" ry="2.3" fill="#3b1d10" />
     : m === 'playful'
       ? <path d="M27.6 31.2Q32 36.6 36.4 31.2Z" fill="#3b1d10" />
@@ -113,8 +126,8 @@ export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: b
         </linearGradient>
         <clipPath id={`clip${id}`}><circle cx="32" cy="32" r="32" /></clipPath>
       </defs>
-      <g clipPath={`url(#clip${id})`}>
-        <rect width="64" height="64" fill={`url(#bg${id})`} />
+      <g clipPath={bare ? undefined : `url(#clip${id})`}>
+        {!bare && <rect width="64" height="64" fill={`url(#bg${id})`} />}
         {m === 'innocent' ? (
           // Just his face resting on his hands, close up.
           <g className="bruce-bot" transform="translate(32 34) scale(1.38) translate(-32 -24)">
@@ -125,7 +138,7 @@ export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: b
           </g>
         ) : (
           <g className="bruce-bot">
-            <ellipse cx="32" cy="60" rx="10" ry="1.8" fill="#94a3b8" opacity="0.3" />
+            {!bare && <ellipse cx="32" cy="60" rx="10" ry="1.8" fill="#94a3b8" opacity="0.3" />}
             {/* legs and root feet */}
             <path d="M29 50.5v5.2M35 50.5v5.2" stroke="#8a5a34" strokeWidth="3.2" strokeLinecap="round" />
             <path d="M25.6 57.4q3.2-2.4 6 .2M32.4 57.6q2.8-2.6 6-.2" stroke="#6f4423" strokeWidth="2.2" fill="none" strokeLinecap="round" />
@@ -135,7 +148,8 @@ export function LumiMascot({ size, wave = true, mood }: { size: number; wave?: b
             {head}
             {eyes}{cheeks}{mouth}
             {/* arms, by mood (drawn over the head so a hand on the chin or raised arms show) */}
-            {m === 'idle' && <>{arm('M28.4 40.5Q24.6 44.4 23.4 49')}{arm('M35.6 40.5Q39.4 44.4 40.6 49')}</>}
+            {(m === 'idle' || m === 'talk') && <>{arm('M28.4 40.5Q24.6 44.4 23.4 49')}{arm('M35.6 40.5Q39.4 44.4 40.6 49')}</>}
+            {m === 'dance' && <><g className="bruce-dance-l">{arm('M28.4 40.5Q21 39.4 16.6 32.4')}{fingers(16.6, 32.4, -1)}</g><g className="bruce-dance-r">{arm('M35.6 40.5Q43 39.4 47.4 32.4')}{fingers(47.4, 32.4, 1)}</g><g className="bruce-notes" fill="#6366f1"><path d="M10 20.5v-5.4l3.2-.9v5.2" stroke="#6366f1" strokeWidth="0.9" fill="none" /><circle cx="9.2" cy="20.6" r="1.2" /><circle cx="12.4" cy="19.6" r="1.2" /><path d="M53.4 18v-4.6" stroke="#6366f1" strokeWidth="0.9" /><circle cx="52.6" cy="18.2" r="1.2" /></g></>}
             {m === 'sleep' && <>{arm('M28.4 40.5Q25.6 45 26.6 49.4')}{arm('M35.6 40.5Q38.4 45 37.4 49.4')}</>}
             {m === 'wave' && <>{arm('M28.4 40.5Q24.6 44.4 23.4 49')}<g className="bruce-wave">{arm('M35.6 40.5Q41.4 37.6 43.4 31.4')}{fingers(43.4, 31.4, 1)}</g></>}
             {(m === 'excited' || m === 'ouch') && <g className="bruce-arms-up">{arm('M28.4 40.5Q20.6 39 15.4 31.2')}{fingers(15.4, 31.2, -1)}{arm('M35.6 40.5Q43.4 39 48.6 31.2')}{fingers(48.6, 31.2, 1)}</g>}

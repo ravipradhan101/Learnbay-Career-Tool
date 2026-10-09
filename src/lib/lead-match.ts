@@ -61,7 +61,7 @@ const INDUSTRIAL_CODE = /\b(robot(?!ic process)\w*|plc|cnc|scada|ladder|offline 
 export type Facts = {
   years?: number; coder: boolean; codesDaily: boolean; role: string; text: string
   dev: boolean; qa: boolean; cloudRole: boolean; infra: boolean; dataRole: boolean; manager: boolean; creative: boolean
-  founder: boolean; nonTechRole: boolean; it: boolean; domainIndustry: boolean; leading: boolean; wantsFde: boolean
+  founder: boolean; nonTechRole: boolean; it: boolean; domainIndustry: boolean; leading: boolean; wantsFde: boolean; wantsAie: boolean
   /** An engineer outside IT (robotics, automation, process, design...): technical, building AI in their industry. */
   engineer: boolean
 }
@@ -92,6 +92,7 @@ export function factsOf(a: Answers): Facts {
     dev, qa, cloudRole, infra, dataRole, manager, creative, founder, nonTechRole, it, engineer,
     domainIndustry: DOMAIN_INDUSTRIES.has(a.domain ?? ''), leading: manager || LEADING.has(a.probe ?? ''),
     wantsFde: a.interest === 'fde' || a.targetRole === 'fde' || a.targetRole === 'solutions-engineer',
+    wantsAie: a.targetRole === 'ai-engineer',
   }
 }
 
@@ -262,7 +263,7 @@ function orderFor(persona: string, a: Answers, f: Facts): string[] {
     case 'data-pro': return ans === 'ds-depth' || a.interest === 'data-science' ? first('DSG-M', 'FDE-M') : base
     case 'dev-junior': return a.interest === 'data-science' ? ['DSG-M', 'GAI-SD', 'GAI-M'] : base
     case 'dev-senior': return ans === 'no' ? first('GAI-M', 'FDE-M') : base
-    // "If the goal is AI testing, offer the GenAI & Agentic AI Master with the QA & Test specialisation."
+    // "If the goal is AI testing, offer the GenAI & Agentic AI Master (AI-driven testing)."
     case 'qa': return ans === 'ai' || (ans === undefined && a.interest === 'ai') ? ['GAI-M', 'CD', 'CD-M'] : base
     case 'cloud-pro': return ans === 'apps' ? first('GAI-CD', 'FDE-M') : base
     // Developers moving into cloud with 6+ years: the Master for architect-level roles.
@@ -287,14 +288,14 @@ function orderFor(persona: string, a: Answers, f: Facts): string[] {
 
 /** Why the first program, when the learner's answers moved it ahead of the map's default for their lead type. */
 const REORDER_WHY: Record<string, string> = {
-  'GAI-M': 'Wants to build with AI: the GenAI & Agentic AI Master, with a specialisation for their background (e.g. QA & Test).',
+  'GAI-M': 'Wants to build with AI: the GenAI & Agentic AI Master, with a specialisation for their background (e.g. Software Developers, Cloud & DevOps or their industry).',
   'DSG-M': 'Already codes and wants depth in data science: the full data science and AI path with domain electives.',
   'DSG-C': 'Builds on what they know and adds Python, statistics, ML and GenAI, with fresh projects.',
   DABA: 'Wants an analyst role: Excel, statistics, SQL and BI first, in their own domain.',
   'FDE-M': 'Asked about Forward Deployed Engineering and codes: the FDE Master comes first.',
   'SDE-M': 'Aiming for a product company: DSA and system design first, then GenAI.',
   'CD-M': 'Experienced engineer moving into cloud: the Master for architect-level roles.',
-  AIL: 'Leads people or AI work: strategy, ROI, governance and AI delivery, no coding.',
+  AIL: 'Leads people or AI work: GenAI and agentic AI for managers, business transformation and AI project delivery (Python taught from scratch).',
   AAP: 'No-code AI with a function track for their work.',
 }
 const catalogueWho = (code: string) => CATALOGUE.programs.find((p) => p.code === code)?.whoFor[0] ?? ''
@@ -313,6 +314,9 @@ export function pathFor(a: Answers): LeadPath {
   let order = orderFor(top.id, a, f)
   // Routing rule 1: a tech professional who asks about FDE hears about the FDE Master first (if they code at all).
   if (f.wantsFde && persona.fdePriority && f.coder && (f.years ?? 1) >= 1) order = ['FDE-M', ...order.filter((c) => c !== 'FDE-M')]
+  // Routing rule 2: a developer who codes daily and aims for the AI Engineer role also hears about the AI Engineer
+  // Master, right after their main recommendation (it never replaces it).
+  if (f.wantsAie && f.codesDaily && (f.years ?? 1) >= 1 && !avoid.has('AIE')) order = [order[0], 'AIE', ...order.slice(1).filter((c) => c !== 'AIE')]
   order = [...new Set(order)].filter((c) => !avoid.has(c) || c === order[0])
 
   const now: string[] = []

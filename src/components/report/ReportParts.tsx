@@ -5,6 +5,7 @@ import { Gauge, KpiTiles } from './Charts'
 import { getProgram } from '@/config/programs'
 import { USPS, type UspId } from '@/config/usps'
 import { curriculumOf } from '@/lib/roles'
+import type { Capstone } from '@/lib/capstones'
 import { moduleFor, weeksLabel } from '@/lib/plan'
 import type { ReportSummary } from '@/lib/report-summary'
 
@@ -59,6 +60,7 @@ export function LearnbayEdge({ ids, programId, coverage, booked = false }: { ids
         <b>{p.name}</b>
         {coverage && <span className="lb-cover"><b>{coverage.covers}/{coverage.total}</b> of your gaps covered</span>}
       </div>
+      {/* The plan section above already lists the other strengths: only what it doesn't cover appears here. */}
       <div className="lb-chips">
         {ids.map((id) => (
           <div className="lb-chip" key={id} title={USPS[id].detail}>
@@ -143,25 +145,22 @@ export function EligibilityStrip({ area }: { area: string }) {
 
 /**
  * The learner, what to focus on, how each focus area is learnt in their Learnbay program (the module that teaches it),
- * and how Learnbay helps: strengths, the program's own certificates and projects from their industry.
+ * and how Learnbay helps: six strengths (the certificate one names this program's own certificates) and capstones that
+ * fit the learner (lib/capstones: their profile, their industry, and one built on their own work).
  */
-export function PlanWithLearnbay({ profile, focus, programId, industries = [] }: {
+export function PlanWithLearnbay({ profile, focus, programId, capstones = [] }: {
   profile: { label: string; value: string }[]
   focus: string[]
   programId: string
-  /** The learner's industries in the catalogue's words, closest first (their capstones lead). */
-  industries?: string[]
+  capstones?: Capstone[]
 }) {
   const p = getProgram(programId)
   const course = curriculumOf(programId)
   const used = new Set<string>()
   const items = focus.slice(0, 4).map((f) => { const module = moduleFor(f, course.moduleDetails, used); if (module) used.add(module.name); return { focus: f, module } })
 
-  const rank = (d: string | undefined) => { const i = d ? industries.indexOf(d) : -1; return i < 0 ? 99 : i }
-  // Their industry's capstones first; otherwise (freshers, no match) two from different industries, never two of a kind.
-  const sorted = [...course.projects].sort((a, b) => rank(a.domain) - rank(b.domain))
-  const projects = rank(sorted[0]?.domain) < 99 ? sorted.slice(0, 2) : sorted.filter((x, i) => sorted.findIndex((y) => y.domain === x.domain) === i).slice(0, 2)
-  const helps: UspId[] = ['customisation', 'projects', 'mentors', 'placement']
+  const helps: UspId[] = ['customisation', 'domain', 'projects', 'mentors', 'certification', 'placement']
+  const cert = course.certifications.join(' · ')
   return (
     <section className="plan-lb" aria-label="Your plan with Learnbay">
       <div className="plan-lb-head">
@@ -196,22 +195,24 @@ export function PlanWithLearnbay({ profile, focus, programId, industries = [] }:
           {helps.map((id) => (
             <div key={id} className="plan-help">
               <span className="usp-icon"><Icon name={USPS[id].icon} size="1.05rem" /></span>
-              <div><b>{USPS[id].title}</b><small>{USPS[id].short}</small></div>
+              <div><b>{USPS[id].title}</b><small>{id === 'certification' && cert ? `In this program: ${cert}` : USPS[id].short}</small></div>
             </div>
           ))}
         </div>
-        {course.certifications[0] && <p className="plan-lb-cert"><Icon name="award" size="0.95rem" /> Certificates in {p.name}: {course.certifications[0]}</p>}
-        {projects.length > 0 && (
-          <div className="plan-lb-projects">
-            {projects.map((x) => (
-              <div key={x.title} className="plan-project">
-                <span className="eyebrow">{x.domain} · capstone</span>
-                <b>{x.title}</b>
-                <small>{x.objective}</small>
-                {x.outcome && <small className="plan-outcome">You’ll achieve: {x.outcome}</small>}
-              </div>
-            ))}
-          </div>
+        {capstones.length > 0 && (
+          <>
+            <span className="plan-lb-label">Capstones that fit you</span>
+            <div className="plan-lb-projects">
+              {capstones.map((x) => (
+                <div key={x.title} className={`plan-project${x.own ? ' own' : ''}`}>
+                  <span className="eyebrow">{x.label}</span>
+                  <b>{x.title}</b>
+                  <small>{x.objective}</small>
+                  {x.outcome && <small className="plan-outcome">You’ll achieve: {x.outcome}</small>}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </section>

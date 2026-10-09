@@ -550,6 +550,8 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     }
     guide.current?.close()
     if (id === 'later-close') return
+    // From one of Bruce's answers: back to the counsellor, cursor in the message box.
+    if (id === 'chat') { setDrawer(null); window.setTimeout(() => document.querySelector<HTMLTextAreaElement>('.ts-main textarea')?.focus(), 50); return }
     setDrawer(null)
     ctx.go(id)
   }
@@ -588,7 +590,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
         <NavItem href="/dashboard/masterclasses" icon="play" label="Masterclasses" active={topicOf(pathname) === 'masterclasses'} onSame={sameTopic} />
       </nav>
       <div className="ts-foot">
-        <button type="button" className="ts-lumi" onClick={() => { setDrawer(null); guide.current?.say(guideHelp()) }}>
+        <button type="button" className="ts-lumi" onClick={() => { setDrawer(null); guide.current?.menu() }}>
           <Avatar who="bot" size={40} online />
           <span><b>Bruce · your guide</b><small>Ask me anything</small></span>
           <Icon name="message" size="1rem" />
@@ -651,7 +653,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
           </aside>
         </>
       )}
-      <LumiGuide ref={guide} first={data.first} who={data.userId} hello={guideHello} help={guideHelp} nudge={guideNudge} quiet={() => touring} busy={() => chat.busy()} onAction={onGuide} />
+      <LumiGuide ref={guide} first={data.first} who={data.userId} hello={guideHello} help={guideHelp} nudge={guideNudge} quiet={() => touring} busy={() => chat.busy()} grow={tasksDone} codeLevel={data.answers.programmer === 'yes' || (!data.answers.programmer && ['software-engineer', 'devops-cloud', 'qa-engineer', 'sysadmin', 'network-admin', 'dba'].includes(data.answers.role ?? '')) ? 'hard' : data.answers.programmer === 'some' ? 'mid' : 'easy'} onAction={onGuide} />
       {touring && (
         <LumiTour
           steps={tourSteps}

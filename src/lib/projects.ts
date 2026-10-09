@@ -96,8 +96,9 @@ export function relevance(p: Pick<Project, 'title' | 'description' | 'objective'
   return THEMES.filter((t) => t.learner.test(mine) && t.project.test(text)).length
 }
 
-/** Old library projects that need code: never shown for the no-code programs (rewritten without code in 2026). */
-const NO_CODE_PROGRAMS = new Set(['applied-ai-practitioner', 'genai-agentic-ai-managers-leaders'])
+/** Old library projects that need code: never shown for the no-code program. (The Managers & Leaders program teaches
+ * Python from scratch, then ML, RAG and agents, so its code projects are fine.) */
+const NO_CODE_PROGRAMS = new Set(['applied-ai-practitioner'])
 const CODE_WORK = /\b(python|pandas|numpy|scikit|pytorch|tensorflow|bert|nltk|spacy|langchain|langgraph|faiss|pinecone|chromadb|hugging ?face|fastapi|oop|perceptron|colab|data structures|mcp sdk|autogen|vector store|embedding)/i
 
 export async function pickProjects(userId: string | null, programId: string, who: Answers, count = 4): Promise<Project[]> {

@@ -25,49 +25,41 @@
     "AI workflow specialist",
     "Freelance AI content creator"
    ],
-   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation) + AI CoLab startup certificate",
+   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation) + AI CoLab project certificate",
    "modules": [
     {
-     "name": "Induction: AI at work",
-     "weeks": "1",
+     "name": "Foundations of AI Reasoning & LLM Workflows",
+     "weeks": "1–3",
      "topics": [
-      "What GenAI and agents can and can't do",
-      "Choosing the right tool for a task",
-      "Setting up Claude, ChatGPT, Gemini and Copilot workspaces"
-     ],
-     "projects": []
-    },
-    {
-     "name": "AI foundations, prompting & context engineering",
-     "weeks": "2–3",
-     "topics": [
-      "How LLMs work: tokens, context windows, reasoning models",
-      "Prompt frameworks: role, context, task, format",
-      "Claude Projects, custom GPTs and Gems",
-      "Grounding answers in your own documents",
-      "Checking AI output: hallucination, citations, verification"
+      "How modern AI models process, predict, and reason",
+      "Prompt engineering for task control (role-based, fewshot, chain-of-thought)",
+      "Tokenization, embeddings, and contextual memory for intelligent responses",
+      "Retrieval-Augmented Generation (RAG):connecting private data to LLMs",
+      "Ethics, safety, and bias mitigation in AI responses",
+      "Evaluating AI outputs using qualitative and quantitative metrics"
      ],
      "projects": [
       "My AI Knowledge Assistant: answers questions from your team's policies and SOPs"
      ]
     },
     {
-     "name": "Multimodal content creation",
+     "name": "Generative & Multimodal AI for Real-World Content",
      "weeks": "4–5",
      "topics": [
-      "Image generation and editing (Nano Banana, Midjourney/Ideogram, Adobe Firefly)",
-      "Video (Runway, Veo) and voice (ElevenLabs)",
-      "Microsoft 365 Copilot and Gemini for Workspace in everyday work",
-      "Decks and documents (Gamma, Canva AI)",
-      "Brand consistency, copyright and disclosure"
+      "Text-to-image, text-to-video, and text-to-audiogeneration",
+      "Understanding diffusion and multimodal creativity",
+      "Building content workflows: ideation → generation→ feedback → iteration",
+      "Using AI for brand assets, marketing visuals, andlearning design",
+      "Applying AI ethics in synthetic media and responsible creation"
      ],
      "projects": [
-      "AI Content Studio: on-brand visuals, a voice-over, a short video and a deck from one brief"
+      "AI Content Studio: on-brand visuals, a voice-over, a short video and a deck from one brief",
+      "AI quality scorecard for one of your workflows"
      ]
     },
     {
      "name": "Connectors & MCP: plugging AI into your tools",
-     "weeks": "6–7",
+     "weeks": "6",
      "topics": [
       "What connectors are: Claude reading and acting in Gmail, Google Drive, Calendar, Slack, Notion, Canva",
       "The connectors directory vs custom connectors",
@@ -84,7 +76,7 @@
     },
     {
      "name": "Claude Code for non-developers",
-     "weeks": "8–10",
+     "weeks": "7–9",
      "topics": [
       "Installing Claude Code (desktop app and terminal) and a 30-minute terminal primer",
       "Describing what you want and reviewing what Claude builds; plan mode",
@@ -101,45 +93,52 @@
      ]
     },
     {
-     "name": "Agents & workflow automation",
-     "weeks": "11–12",
+     "name": "Agentic AI & Intelligent Automation",
+     "weeks": "10–11",
      "topics": [
-      "What an agent is: goals, tools, memory, human approval",
-      "Zapier, Make and n8n automations",
-      "Agents that use connectors and MCP tools",
-      "Scheduled and recurring AI tasks",
-      "Human-in-the-loop design"
+      "Fundamentals of autonomous agents and multiagent reasoning.",
+      "Task decomposition and tool calling for business workflows.",
+      "Connecting CRMs, spreadsheets, and communication platforms.",
+      "Using “Vibe Coding” to describe logic naturally for agents.",
+      "AI task chaining and feedback loop automation.",
+      "Integrating AI insights into daily business processes."
      ],
      "projects": [
       "AI Workflow Co-Pilot: reads a sheet or inbox, drafts actions, sends a daily summary"
      ]
     },
     {
-     "name": "Measuring AI at work & responsible AI",
-     "weeks": "13",
+     "name": "No-Code App Development & AI Deployment",
+     "weeks": "12",
      "topics": [
-      "Quality scorecards and LLM-as-judge checks",
-      "Tracking cost and time saved",
-      "Responsible AI, data privacy and India's DPDP Act"
-     ],
-     "projects": [
-      "AI quality scorecard for one of your workflows"
-     ]
-    },
-    {
-     "name": "Function track (choose 1)",
-     "weeks": "14–15",
-     "topics": [
-      "See specialisations"
+      "Low-code and no-code app creation with A integration.",
+      "Connecting APIs, embeddings, and vector stores to create user-ready products.",
+      "Designing front-end interfaces for chatbots and copilots.",
+      "Testing endpoints, debugging, and managing data securely.",
+      "Collecting user feedback and improving model performance."
      ],
      "projects": []
     },
     {
-     "name": "AI CoLab capstone with a startup",
-     "weeks": "16–17",
+     "name": "AIOps, Optimization & Observability",
+     "weeks": "13–14",
      "topics": [
-      "Build an AI solution for a real startup brief",
-      "Product thinking, demo and pitch"
+      "AIOps essentials: monitoring, observability, and selfhealing pipelines.",
+      "Defining KPIs for AI performance (accuracy, latency, cost, drift).",
+      "Automating alerts, testing, and continuous improvement.",
+      "Visualizing AI usage and cost with BI dashboards.",
+      "AI governance and compliance considerations in production."
+     ],
+     "projects": []
+    },
+    {
+     "name": "Startup Collaboration Capstone: AI CoLab Experience",
+     "weeks": "15–17",
+     "topics": [
+      "Build your own AI product with startup companies.",
+      "Product thinking and end-user problem solving.",
+      "Cross-functional teamwork: business + tech + creative roles.",
+      "Documenting, presenting, and pitching your AI solution."
      ],
      "projects": [
       "Startup capstone + Startup Experience Certificate"
@@ -226,25 +225,24 @@
     "Marketing / HR / Finance Analyst",
     "BI Developer (junior)"
    ],
-   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation) + AI CoLab startup certificate",
+   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation) + AI CoLab project certificate",
    "modules": [
     {
-     "name": "Induction + Excel for analytics with Copilot",
+     "name": "Foundations of AI Reasoning & LLM Workflows",
      "weeks": "1–3",
      "topics": [
-      "Functions, lookups, cleaning, Power Query",
-      "PivotTables, what-if, goal seek",
-      "Power Pivot and DAX basics",
-      "Copilot in Excel"
+      "How modern AI models process, predict, and reason",
+      "Prompt engineering for task control (role-based, fewshot, chain-of-thought)",
+      "Tokenization, embeddings, and contextual memory for intelligent responses",
+      "Retrieval-Augmented Generation (RAG):connecting private data to LLMs",
+      "Ethics, safety, and bias mitigation in AI responses",
+      "Evaluating AI outputs using qualitative and quantitative metrics"
      ],
-     "projects": [
-      "Employee Performance & Attrition Dashboard",
-      "Business Performance Insights Dashboard"
-     ]
+     "projects": []
     },
     {
-     "name": "AI copilots for analysts: Claude, Microsoft Copilot & connectors",
-     "weeks": "4",
+     "name": "AI copilots for analysts: Claude, Claude Code, Copilot & MCP",
+     "weeks": "4–5",
      "topics": [
       "Copilot in Excel and Power BI",
       "Claude with Google Drive and Sheets connectors",
@@ -254,32 +252,112 @@
      ],
      "projects": [
       "Folder Automator: merge a month of CSVs into one clean report",
-      "Ask-the-database assistant over MCP"
+      "Ask-the-database assistant over MCP",
+      "Employee Performance & Attrition Dashboard",
+      "Business Performance Insights Dashboard",
+      "Retail Sales EDA in pandas",
+      "Ask-your-reports assistant"
      ]
     },
     {
-     "name": "Statistics & business metrics",
-     "weeks": "5–7",
+     "name": "Generative & Multimodal AI for Real-World Content",
+     "weeks": "6–7",
      "topics": [
-      "Descriptive statistics and distributions",
-      "Sampling, confidence intervals, hypothesis tests",
-      "A/B testing and experiment readouts",
-      "Correlation vs causation",
-      "KPI trees, cohorts and funnels"
+      "Text-to-image, text-to-video, and text-to-audiogeneration",
+      "Understanding diffusion and multimodal creativity",
+      "Building content workflows: ideation → generation→ feedback → iteration",
+      "Using AI for brand assets, marketing visuals, andlearning design",
+      "Applying AI ethics in synthetic media and responsible creation"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Agentic AI & Intelligent Automation",
+     "weeks": "8",
+     "topics": [
+      "Fundamentals of autonomous agents and multiagent reasoning.",
+      "Task decomposition and tool calling for business workflows.",
+      "Connecting CRMs, spreadsheets, and communication platforms.",
+      "Using “Vibe Coding” to describe logic naturally for agents.",
+      "AI task chaining and feedback loop automation.",
+      "Integrating AI insights into daily business processes."
+     ],
+     "projects": [
+      "Weekly KPI report agent"
+     ]
+    },
+    {
+     "name": "No-Code App Development & AI Deployment",
+     "weeks": "9–10",
+     "topics": [
+      "Low-code and no-code app creation with A integration.",
+      "Connecting APIs, embeddings, and vector stores to create user-ready products.",
+      "Designing front-end interfaces for chatbots and copilots.",
+      "Testing endpoints, debugging, and managing data securely.",
+      "Collecting user feedback and improving model performance."
+     ],
+     "projects": []
+    },
+    {
+     "name": "AIOps, Optimization & Observability",
+     "weeks": "11–12",
+     "topics": [
+      "AIOps essentials: monitoring, observability, and selfhealing pipelines.",
+      "Defining KPIs for AI performance (accuracy, latency, cost, drift).",
+      "Automating alerts, testing, and continuous improvement.",
+      "Visualizing AI usage and cost with BI dashboards.",
+      "AI governance and compliance considerations in production."
+     ],
+     "projects": []
+    },
+    {
+     "name": "Startup Collaboration Capstone: AI CoLab Experience",
+     "weeks": "13–15",
+     "topics": [
+      "Build your own AI product with startup companies.",
+      "Product thinking and end-user problem solving.",
+      "Cross-functional teamwork: business + tech + creative roles.",
+      "Documenting, presenting, and pitching your AI solution."
+     ],
+     "projects": [
+      "Startup analytics capstone"
+     ]
+    },
+    {
+     "name": "Excel",
+     "weeks": "16–18",
+     "topics": [
+      "Excel Basics & Core Functions: Interface, data types, formulas",
+      "Lookup functions, conditional functions, and text functions.",
+      "Data Preparation & Cleaning: Import/export, missing data handling, validation, formatting",
+      "Power Query for cleaning & automation.",
+      "Statistical & Analytical Techniques: Descriptive statistics,exploratory analysis, filters/sorting, what-if analysis, goal seek.",
+      "Pivot-Based Analysis: PivotTables for summarization, grouping, segmentation, slicers, and data-driven insights",
+      "Charts & Visualization Methods: Bar, line, pie, scatter, combo charts, advanced charting, conditional formatting for insights.",
+      "Interactive Dashboards: PivotCharts, KPI visuals, storytelling layouts, mini dashboard creation.",
+      "Data Modeling & Power Tools: Power Pivot, relationships, basic DAX concepts, Excel add-ins for extended analytics.",
+      "Projects & Applications: Business case studies, forecasting, reporting mini-projects, and real-world analytics workflows."
      ],
      "projects": [
       "A/B Test Readout for a pricing experiment",
-      "KPI tree for an e-commerce business"
+      "KPI tree for an e-commerce business",
+      "Campaign Report (Power BI)",
+      "Interactive Sales Dashboard (Tableau)"
      ]
     },
     {
-     "name": "SQL",
-     "weeks": "8–10",
+     "name": "SQL (Structured Query Language)",
+     "weeks": "19–21",
      "topics": [
-      "Joins, subqueries, GROUP BY/HAVING",
-      "CTEs and window functions",
-      "Views, indexes and query plans",
-      "AI-assisted SQL, and checking it"
+      "Core SQL & RDBMS Basics: Syntax, data types, tables, CRUD operations, querying single tables.",
+      "Filtering & Retrieval: WHERE, ORDER BY, DISTINCT, logical operators, formatting results.",
+      "Joins & Multi-Table Queries: INNER, LEFT, RIGHT, FULL, CROSS joins, UNION, subqueries, nested queries.",
+      "Aggregations & Analytics: GROUP BY, HAVING, summary stats, ranking functions, Top-N analysis.",
+      "Advanced SQL for Analytics",
+      "Views & Modifications: INSERT/UPDATE/DELETE, creating views, inline views.",
+      "Optimization: Indexes, execution plans, performance tuning.",
+      "Advanced Database Concepts: Normalization, stored procedures, functions, triggers, user-defined objects.",
+      "SQL in Practice: Integrating SQL with Python, advanced analytical queries for real datasets."
      ],
      "projects": [
       "SQL Sales Aggregator",
@@ -287,72 +365,37 @@
      ]
     },
     {
-     "name": "Python for analysts",
-     "weeks": "11–13",
+     "name": "PowerBI",
+     "weeks": "22–24",
      "topics": [
-      "pandas for cleaning and EDA",
-      "Charts with Matplotlib/Seaborn",
-      "Using AI coding assistants in notebooks"
-     ],
-     "projects": [
-      "Retail Sales EDA in pandas"
-     ]
-    },
-    {
-     "name": "Power BI, Tableau & data storytelling",
-     "weeks": "14–17",
-     "topics": [
-      "Data modelling and DAX, time intelligence",
-      "Tableau LOD expressions and dashboards",
-      "Copilot in Power BI",
-      "Storytelling and executive summaries"
-     ],
-     "projects": [
-      "Campaign Report (Power BI)",
-      "Interactive Sales Dashboard (Tableau)"
-     ]
-    },
-    {
-     "name": "GenAI for analysts",
-     "weeks": "18–20",
-     "topics": [
-      "How LLMs work, prompting for analysis",
-      "Asking questions of reports and documents (RAG, no code)",
-      "AI-generated visuals and decks for presentations"
-     ],
-     "projects": [
-      "Ask-your-reports assistant"
-     ]
-    },
-    {
-     "name": "Agents & automation for analytics",
-     "weeks": "21–22",
-     "topics": [
-      "Text-to-SQL agents and how to verify them",
-      "MCP connectors to databases and sheets",
-      "Automated weekly reporting with n8n/Zapier"
-     ],
-     "projects": [
-      "Weekly KPI report agent"
-     ]
-    },
-    {
-     "name": "Domain analytics track (choose 1)",
-     "weeks": "23–24",
-     "topics": [
-      "See specialisations"
+      "Data Prep with Power Query: Clean, transform,merge, unpivot, format text/date/number fields.",
+      "Data Modeling: Relationships, granularity, aggregations, time-series basics, calculated columns.",
+      "Core Visuals & Interactivity: Bar, pie, line, maps, cards, slicers, filters, drill-down, bookmarks.",
+      "Connecting & Working with Data: Load from Excel/SQL, model views, query editor, BI best practices.",
+      "Visuals, Dashboards & DAX Analytics",
+      "Advanced Visuals: Funnel, ribbon, waterfall, treemap, gauge, scatter, KPIs & combos.",
+      "DAX for Analytics: Measures, calculations, time intelligence functions.",
+      "Dashboard Design: Layouts, formatting, interactivity, storytelling, sharing & collaboration.",
+      "Projects: Customer segmentation dashboard, exploratory BI reports, hands-on visual assignments."
      ],
      "projects": []
     },
     {
-     "name": "Capstone + AI CoLab",
+     "name": "Tableau",
      "weeks": "25–27",
      "topics": [
-      "End-to-end analysis: question → data → dashboard → AI summary → recommendation"
+      "Connecting & Preparing Data: Data types, joins, blending, pivots, transformations, SQL connections.",
+      "Core Visual Building: Bar, line, pie, scatter, bubble, maps (geo, custom geocoding, polygon, WMS).",
+      "Data Exploration Tools: Filters, groups, sets, parameters, drill-down, marks, dimensions & measures.",
+      "View & Layout Tools: Shelves, cards, sorting, formatting, captions, exporting, metadata management.",
+      "Visuals, Dashboards & DAX Analytics",
+      "Advanced Visuals: Funnel, ribbon, waterfall, treemap, gauge, scatter, KPIs & combos.",
+      "Advanced Visuals: Tree maps, heat maps, bump charts, funnel, waterfall, histogram, bullet & motion charts.",
+      "Calculations & Analytics: Calculated fields, LOD expressions, trends, forecasting, predictive visuals.",
+      "Dashboards & Storytelling: Interactive dashboards, stories, actions, design best practices, publishing & collaboration (Tableau Online).",
+      "Projects & Applications: Build multi-chart dashboards, map-based visuals, predictive model integration."
      ],
-     "projects": [
-      "Startup analytics capstone"
-     ]
+     "projects": []
     }
    ],
    "specialisations": [
@@ -429,24 +472,47 @@
     "Data Analyst → Data Scientist",
     "AI Analyst"
    ],
-   "certificates": "IBM + IIT Patna (Vishlesan I-Hub Foundation)",
+   "certificates": "IBM certificate",
    "modules": [
     {
-     "name": "Induction + Python for data science",
-     "weeks": "1–5",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "Core and advanced Python, OOP",
-      "NumPy, pandas, Matplotlib, Seaborn",
-      "Git basics and notebooks"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
      ],
      "projects": [
       "Banking System Simulation",
-      "Retail Sales Data EDA"
+      "Retail Sales Data EDA",
+      "AI Data Analyst Agent (text-to-SQL)",
+      "LLM Toxicity & Guardrail Engine",
+      "Credit risk scoring with explainability",
+      "Enterprise document Q&A with evaluation"
      ]
     },
     {
+     "name": "Python for GenAI",
+     "weeks": "2–5",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
+     ],
+     "projects": []
+    },
+    {
      "name": "AI-assisted data work: Claude Code, Copilot & MCP",
-     "weeks": "6–7",
+     "weeks": "6",
      "topics": [
       "Claude Code for data pipelines, notebooks and refactoring analysis code",
       "GitHub Copilot in VS Code and Jupyter",
@@ -460,59 +526,15 @@
      ]
     },
     {
-     "name": "Statistics & EDA",
-     "weeks": "8–11",
+     "name": "Foundation for GenAI",
+     "weeks": "7–12",
      "topics": [
-      "Probability, distributions, sampling",
-      "Hypothesis testing (z, t, chi-square), A/B tests",
-      "EDA, outliers, five-point summary"
-     ],
-     "projects": [
-      "Survey Correlation Study",
-      "KPI Statistical Analysis",
-      "Patient Data Insights"
-     ]
-    },
-    {
-     "name": "Machine learning",
-     "weeks": "12–15",
-     "topics": [
-      "Regression, classification, trees",
-      "Ensembles: Random Forest, XGBoost, LightGBM, CatBoost",
-      "SVM, clustering (K-means, DBSCAN), PCA",
-      "Tuning, cross-validation, SHAP",
-      "Time series: ARIMA/SARIMA, Prophet, walk-forward validation"
-     ],
-     "projects": [
-      "Housing Price Predictor",
-      "Loan Default Predictor",
-      "Customer Segmentation",
-      "Predictive Maintenance Classifier",
-      "Energy Consumption Forecasting"
-     ]
-    },
-    {
-     "name": "SQL, MongoDB & BI tools",
-     "weeks": "16–21",
-     "topics": [
-      "SQL: joins, CTEs, window functions, optimisation",
-      "MongoDB basics",
-      "Excel, Power BI, Tableau"
-     ],
-     "projects": [
-      "SQL Sales Aggregator",
-      "Campaign Report (Power BI)",
-      "Interactive Sales Dashboard (Tableau)"
-     ]
-    },
-    {
-     "name": "Deep learning & NLP essentials",
-     "weeks": "22–25",
-     "topics": [
-      "Neural networks, backpropagation",
-      "CNN basics",
-      "RNN/LSTM (now taught, since projects use it)",
-      "Embeddings, transformers, fine-tuning BERT"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
      ],
      "projects": [
       "Transformer Sentiment Pipeline",
@@ -520,14 +542,19 @@
      ]
     },
     {
-     "name": "Generative AI & RAG",
-     "weeks": "26–30",
+     "name": "Generative AI",
+     "weeks": "13–17",
      "topics": [
-      "Current model families (GPT, Claude, Gemini, Llama, Mistral) and choosing one",
-      "Prompting and structured outputs",
-      "Hugging Face, embeddings, vector databases",
-      "RAG and RAG evaluation (Ragas)",
-      "When to fine-tune (LoRA); Azure OpenAI and AWS Bedrock"
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Fundamental Generative Models: GAN And VAE",
+      "Stable Diffusion"
      ],
      "projects": [
       "HR Policy RAG Query Bot",
@@ -536,39 +563,99 @@
     },
     {
      "name": "Agentic AI",
-     "weeks": "31–34",
+     "weeks": "18",
      "topics": [
-      "Agent components: tools, memory, planning",
-      "LangGraph and CrewAI",
-      "MCP and A2A",
-      "Guardrails and human approval"
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Statistics & Machine Learning",
+     "weeks": "19–24",
+     "topics": [
+      "Introduction to Stats & Statistical Thinking",
+      "Probability Concepts",
+      "Population & Sampling Fundamentals",
+      "Statistics",
+      "Hypothesis Testing",
+      "Exploratory Data Analysis (EDA)",
+      "Regression Analysis - Supervised Learning",
+      "Classification Analysis - Supervised Learning",
+      "Unsupervised Learning Introduction - Clustering",
+      "Ensemble Learning Techniques (Bagging & Boosting)"
      ],
      "projects": [
-      "AI Data Analyst Agent (text-to-SQL)",
-      "LLM Toxicity & Guardrail Engine"
+      "Survey Correlation Study",
+      "KPI Statistical Analysis",
+      "Patient Data Insights",
+      "Housing Price Predictor",
+      "Loan Default Predictor",
+      "Customer Segmentation",
+      "Predictive Maintenance Classifier",
+      "Energy Consumption Forecasting"
      ]
     },
     {
-     "name": "Big data with PySpark",
-     "weeks": "35–36",
+     "name": "Advanced Machine Learning",
+     "weeks": "25–27",
      "topics": [
-      "Spark DataFrames and Spark SQL",
-      "Structured Streaming intro",
-      "Running Spark on Databricks"
+      "Text Preprocessing",
+      "Word Embeddings",
+      "Transformers & BERT",
+      "Sequence-to-Sequence Models",
+      "Text Classification",
+      "Topic Modeling",
+      "NLP Evaluation Metrics"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Data Analytics & Visualization Tools",
+     "weeks": "28–32",
+     "topics": [
+      "Analytics Essentials",
+      "Visualization & Advanced Analytics",
+      "Power BI Essentials",
+      "Visuals, Dashboards & DAX Analytics",
+      "Tableau Essentials & Data Preparation",
+      "Visual Analytics, Dashboards & Advanced Features"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Database Management: SQL & MongoDB",
+     "weeks": "33–36",
+     "topics": [
+      "SQL Fundamentals",
+      "Advanced SQL for Analytics",
+      "MongoDB Essentials",
+      "NoSQL with MongoDB"
+     ],
+     "projects": [
+      "SQL Sales Aggregator",
+      "Campaign Report (Power BI)",
+      "Interactive Sales Dashboard (Tableau)"
+     ]
+    },
+    {
+     "name": "Big Data Analytics",
+     "weeks": "37–39",
+     "topics": [
+      "Hadoop Fundamentals",
+      "Hadoop Ecosystem",
+      "Spark Fundamentals",
+      "Spark Ecosystem & Advanced Tools"
      ],
      "projects": [
       "Spark Data Pipeline"
-     ]
-    },
-    {
-     "name": "Capstones",
-     "weeks": "37–39",
-     "topics": [
-      "Two capstones: one classic ML, one GenAI"
-     ],
-     "projects": [
-      "Credit risk scoring with explainability",
-      "Enterprise document Q&A with evaluation"
      ]
     }
    ],
@@ -624,24 +711,46 @@
     "Applied AI / GenAI Engineer",
     "Domain AI Specialist"
    ],
-   "certificates": "IBM + Microsoft + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "certificates": "IBM + Microsoft Azure + AI CoLab project certification + IIT Patna certificate (Vishlesan I-Hub Foundation)",
    "modules": [
     {
-     "name": "Induction + Python for data science",
-     "weeks": "1–5",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "Core and advanced Python, OOP",
-      "NumPy, pandas, Matplotlib, Seaborn",
-      "Git basics and notebooks"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
      ],
      "projects": [
-      "Banking System Simulation",
-      "Retail Sales Data EDA"
+      "AI Data Analyst Agent (text-to-SQL)",
+      "LLM Toxicity & Guardrail Engine",
+      "Defect Detection Classifier",
+      "Medical Image Segmentation",
+      "2 AI CoLab project certificates"
      ]
     },
     {
+     "name": "Python for GenAI",
+     "weeks": "2–6",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
+     ],
+     "projects": []
+    },
+    {
      "name": "AI-assisted data work: Claude Code, Copilot & MCP",
-     "weeks": "6–7",
+     "weeks": "7",
      "topics": [
       "Claude Code for data pipelines, notebooks and refactoring analysis code",
       "GitHub Copilot in VS Code and Jupyter",
@@ -655,59 +764,15 @@
      ]
     },
     {
-     "name": "Statistics & EDA",
-     "weeks": "8–11",
+     "name": "Foundation for GenAI",
+     "weeks": "8–12",
      "topics": [
-      "Probability, distributions, sampling",
-      "Hypothesis testing (z, t, chi-square), A/B tests",
-      "EDA, outliers, five-point summary"
-     ],
-     "projects": [
-      "Survey Correlation Study",
-      "KPI Statistical Analysis",
-      "Patient Data Insights"
-     ]
-    },
-    {
-     "name": "Machine learning",
-     "weeks": "12–15",
-     "topics": [
-      "Regression, classification, trees",
-      "Ensembles: Random Forest, XGBoost, LightGBM, CatBoost",
-      "SVM, clustering (K-means, DBSCAN), PCA",
-      "Tuning, cross-validation, SHAP",
-      "Time series: ARIMA/SARIMA, Prophet, walk-forward validation"
-     ],
-     "projects": [
-      "Housing Price Predictor",
-      "Loan Default Predictor",
-      "Customer Segmentation",
-      "Predictive Maintenance Classifier",
-      "Energy Consumption Forecasting"
-     ]
-    },
-    {
-     "name": "SQL, MongoDB & BI tools",
-     "weeks": "16–21",
-     "topics": [
-      "SQL: joins, CTEs, window functions, optimisation",
-      "MongoDB basics",
-      "Excel, Power BI, Tableau"
-     ],
-     "projects": [
-      "SQL Sales Aggregator",
-      "Campaign Report (Power BI)",
-      "Interactive Sales Dashboard (Tableau)"
-     ]
-    },
-    {
-     "name": "Deep learning & NLP essentials",
-     "weeks": "22–25",
-     "topics": [
-      "Neural networks, backpropagation",
-      "CNN basics",
-      "RNN/LSTM (now taught, since projects use it)",
-      "Embeddings, transformers, fine-tuning BERT"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
      ],
      "projects": [
       "Transformer Sentiment Pipeline",
@@ -715,14 +780,19 @@
      ]
     },
     {
-     "name": "Generative AI & RAG",
-     "weeks": "26–30",
+     "name": "Generative AI",
+     "weeks": "13–20",
      "topics": [
-      "Current model families (GPT, Claude, Gemini, Llama, Mistral) and choosing one",
-      "Prompting and structured outputs",
-      "Hugging Face, embeddings, vector databases",
-      "RAG and RAG evaluation (Ragas)",
-      "When to fine-tune (LoRA); Azure OpenAI and AWS Bedrock"
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Fundamental Generative Models: GAN And VAE",
+      "Stable Diffusion"
      ],
      "projects": [
       "HR Policy RAG Query Bot",
@@ -731,53 +801,73 @@
     },
     {
      "name": "Agentic AI",
-     "weeks": "31–34",
+     "weeks": "21–24",
      "topics": [
-      "Agent components: tools, memory, planning",
-      "LangGraph and CrewAI",
-      "MCP and A2A",
-      "Guardrails and human approval"
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Statistics & Foundation of DS",
+     "weeks": "25–27",
+     "topics": [
+      "Introduction to Stats & Statistical Thinking",
+      "Probability Concepts",
+      "Population & Sampling Fundamentals",
+      "Statistics",
+      "Hypothesis Testing",
+      "Exploratory Data Analysis (EDA)",
+      "Regression Analysis - Supervised Learning",
+      "Classification Analysis - Supervised Learning",
+      "Unsupervised Learning Introduction - Clustering"
      ],
      "projects": [
-      "AI Data Analyst Agent (text-to-SQL)",
-      "LLM Toxicity & Guardrail Engine"
+      "Survey Correlation Study",
+      "KPI Statistical Analysis",
+      "Patient Data Insights"
      ]
     },
     {
-     "name": "Big data with PySpark",
-     "weeks": "35–36",
+     "name": "Advanced Data Science",
+     "weeks": "28–35",
      "topics": [
-      "Spark DataFrames and Spark SQL",
-      "Structured Streaming intro",
-      "Running Spark on Databricks"
+      "Advanced Clustering Techniques",
+      "Ensemble Learning Techniques (Bagging & Boosting)",
+      "Support Vector Machine (SVMs)",
+      "Model Optimization Strategies",
+      "Time Series Analysis",
+      "Classical Forecasting Methods",
+      "Advanced Forecasting",
+      "Text Preprocessing",
+      "Word Embeddings",
+      "Transformers & BERT"
      ],
      "projects": [
-      "Spark Data Pipeline"
+      "Banking System Simulation",
+      "Retail Sales Data EDA",
+      "Housing Price Predictor",
+      "Loan Default Predictor",
+      "Customer Segmentation",
+      "Predictive Maintenance Classifier",
+      "Energy Consumption Forecasting"
      ]
     },
     {
-     "name": "Computer vision",
-     "weeks": "37–40",
+     "name": "Deployment & MLOps",
+     "weeks": "36–38",
      "topics": [
-      "CNNs and transfer learning",
-      "Object detection (current YOLO versions)",
-      "Segmentation (U-Net)",
-      "Vision transformers"
-     ],
-     "projects": [
-      "Defect Detection Classifier",
-      "Medical Image Segmentation"
-     ]
-    },
-    {
-     "name": "MLOps & LLMOps",
-     "weeks": "41–45",
-     "topics": [
-      "FastAPI and Docker",
-      "MLflow, DVC, CI/CD for models",
-      "SageMaker / Azure ML",
-      "Drift monitoring (Evidently)",
-      "LLM tracing and eval gates (LangSmith, Langfuse)"
+      "Model Serving & Packaging",
+      "Cloud Deployment Essentials",
+      "Reproducible ML Workflow",
+      "Continuous Training, Deployment & Monitoring"
      ],
      "projects": [
       "Cloud Model Deployment",
@@ -786,28 +876,76 @@
      ]
     },
     {
-     "name": "Domain electives (choose 2)",
-     "weeks": "46–51",
+     "name": "Data Analytics & Visualization Tools",
+     "weeks": "39–42",
      "topics": [
-      "See specialisations"
+      "Analytics Essentials with Excel",
+      "Visualization & Advanced Analytics",
+      "Power BI Essentials",
+      "Visuals, Dashboards & DAX Analytics",
+      "Tableau Essentials & Data Preparation",
+      "Visual Analytics, Dashboards & Advanced Features"
      ],
      "projects": []
     },
     {
-     "name": "AI CoLab",
-     "weeks": "52–53",
+     "name": "Database Management: SQL & MongoDB",
+     "weeks": "43–47",
      "topics": [
-      "Startup project with code review"
+      "SQL Fundamentals",
+      "Advanced SQL for Analytics",
+      "MongoDB Essentials",
+      "NoSQL with MongoDB"
      ],
      "projects": [
-      "2 AI CoLab project certificates"
+      "SQL Sales Aggregator",
+      "Campaign Report (Power BI)",
+      "Interactive Sales Dashboard (Tableau)"
      ]
     },
     {
-     "name": "Capstones",
-     "weeks": "54–56",
+     "name": "Big Data Analytics",
+     "weeks": "48–50",
      "topics": [
-      "4 capstones across chosen domains"
+      "Hadoop Fundamentals",
+      "Hadoop Ecosystem",
+      "Spark Fundamentals",
+      "Spark Ecosystem & Advanced Tools"
+     ],
+     "projects": [
+      "Spark Data Pipeline"
+     ]
+    },
+    {
+     "name": "DSA (Optional)",
+     "weeks": "51–52",
+     "topics": [
+      "Core Concepts & Essential Data Structures",
+      "Trees, Graphs & Fundamental Algorithms",
+      "Problem-Solving Techniques & Developer Applications"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Project Management (Skills & Tools)",
+     "weeks": "53–54",
+     "topics": [
+      "Agile Foundations & Practices",
+      "Tools & Practical Project Execution"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Specialisations (choose any 2)",
+     "weeks": "55–56",
+     "topics": [
+      "Software Developers",
+      "Managers & Leaders",
+      "Cloud & DevOps",
+      "BFSI",
+      "Healthcare",
+      "Manufacturing & Supply Chain",
+      "E-commerce & Retail"
      ],
      "projects": []
     }
@@ -903,24 +1041,45 @@
     "AI Application Developer",
     "LLM / RAG Engineer"
    ],
-   "certificates": "IBM + Microsoft Azure AI Fundamentals",
+   "certificates": "IBM GenAI certificate",
    "modules": [
     {
-     "name": "Python for AI engineers",
-     "weeks": "1–2",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "Async Python, httpx, retries and rate limits",
-      "Pydantic and structured outputs",
-      "LLM SDKs and streaming",
-      "pytest, type hints"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
      ],
      "projects": [
-      "Bulk LLM Enrichment Engine"
+      "Bulk LLM Enrichment Engine",
+      "AI Data Analyst Agent",
+      "MCP Coding Assistant & Debugger",
+      "LangGraph Human-in-the-Loop Approval Workflow"
      ]
     },
     {
+     "name": "Python for GenAI",
+     "weeks": "2–5",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
+     ],
+     "projects": []
+    },
+    {
      "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
-     "weeks": "3",
+     "weeks": "6",
      "topics": [
       "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
       "GitHub Copilot in VS Code: completions, chat and agent mode",
@@ -934,27 +1093,33 @@
      ]
     },
     {
-     "name": "ML & transformer essentials",
-     "weeks": "4–5",
+     "name": "Foundation for GenAI",
+     "weeks": "7–9",
      "topics": [
-      "ML workflow and evaluation",
-      "Embeddings and attention",
-      "Transformers and tokenisation"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
      ],
      "projects": [
       "Sentiment Analysis Using BERT"
      ]
     },
     {
-     "name": "LLM engineering & RAG",
-     "weeks": "6–9",
+     "name": "Advanced Generative AI",
+     "weeks": "10–13",
      "topics": [
-      "Choosing among current model families",
-      "Prompt and context engineering",
-      "Vector DBs, chunking, hybrid search, reranking",
-      "RAG evaluation",
-      "When to fine-tune (LoRA/QLoRA)",
-      "Azure OpenAI and AWS Bedrock"
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Azure OpenAI"
      ],
      "projects": [
       "AI-Powered Sales Email Writer",
@@ -963,30 +1128,29 @@
      ]
     },
     {
-     "name": "Agentic AI",
-     "weeks": "10–13",
-     "topics": [
-      "Tool calling, memory, planning",
-      "LangGraph, CrewAI, AutoGen/AG2",
-      "Building MCP servers and clients",
-      "A2A for agent-to-agent communication",
-      "Human-in-the-loop approvals"
-     ],
-     "projects": [
-      "AI Data Analyst Agent",
-      "MCP Coding Assistant & Debugger",
-      "LangGraph Human-in-the-Loop Approval Workflow"
-     ]
-    },
-    {
-     "name": "LLMOps, evals & guardrails",
+     "name": "Agentic AI & AI Automation",
      "weeks": "14–16",
      "topics": [
-      "Tracing and eval sets (LangSmith, Langfuse)",
-      "Regression evals and eval gates",
-      "Guardrails (NeMo Guardrails, Llama Guard), prompt-injection defence",
-      "Serving with vLLM; Docker and Kubernetes basics",
-      "Cost and latency tuning"
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": []
+    },
+    {
+     "name": "LLMOps & Production Deployment",
+     "weeks": "17–19",
+     "topics": [
+      "LLM Lifecycle, Versioning & Deployment Basics",
+      "Containerization & Inference Serving",
+      "RAG & Agent Deployment Pipelines",
+      "Monitoring, Cost Optimization & Reliability"
      ],
      "projects": [
       "Production-Grade LLM App Deployment",
@@ -995,26 +1159,20 @@
      ]
     },
     {
-     "name": "Developer track: AI system design & backend for LLM apps",
-     "weeks": "17–19",
+     "name": "GenAI for Software Developers",
+     "weeks": "20–22",
      "topics": [
-      "Model gateways and routing",
-      "Semantic and prompt caching",
-      "Streaming and async APIs",
-      "Distributed RAG microservices"
+      "AI-Powered System Design Foundations",
+      "Production Architecture & Infrastructure Patterns",
+      "Backend Architecture for AI-Driven Applications",
+      "High-Performance API Engineering for LLM Services",
+      "Caching, Persistence & Storage for AI Microservices",
+      "Distributed RAG & AI Microservice Patterns"
      ],
      "projects": [
       "Multi-LLM API Gateway with Fallback",
       "Intelligent Prompt Caching Microservice"
      ]
-    },
-    {
-     "name": "Capstone",
-     "weeks": "20–22",
-     "topics": [
-      "Pick 1 developer capstone"
-     ],
-     "projects": []
     }
    ],
    "specialisations": [],
@@ -1055,19 +1213,42 @@
     "Backend Engineer",
     "AI-enabled Software Engineer"
    ],
-   "certificates": "IBM + Microsoft Azure AI Fundamentals + AI CoLab project certificate + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "certificates": "IBM + Microsoft Azure + AI CoLab project certification + IIT Patna certificate (Vishlesan I-Hub Foundation)",
    "modules": [
     {
-     "name": "Induction + engineering foundations",
-     "weeks": "1–2",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "Git workflow, SQL refresher, unit testing"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
      ],
      "projects": []
     },
     {
+     "name": "Python for GenAI",
+     "weeks": "2–7",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
+     ],
+     "projects": [
+      "8 projects from the GenAI developer core"
+     ]
+    },
+    {
      "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
-     "weeks": "3–4",
+     "weeks": "8–9",
      "topics": [
       "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
       "GitHub Copilot in VS Code: completions, chat and agent mode",
@@ -1081,15 +1262,76 @@
      ]
     },
     {
-     "name": "Data Structures & Algorithms (Java, C++ or Python)",
-     "weeks": "5–16",
+     "name": "Foundation for GenAI",
+     "weeks": "10–16",
      "topics": [
-      "Complexity, arrays, strings, hashing, two pointers, sliding window",
-      "Linked lists, stacks, queues",
-      "Trees, BST, heaps, tries",
-      "Graphs: BFS/DFS, shortest paths, MST, union-find",
-      "Recursion, backtracking, greedy, DP",
-      "Weekly timed contests and mock DSA screens"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Advanced Generative AI",
+     "weeks": "17–21",
+     "topics": [
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Fundamental Generative Models: GAN And VAE",
+      "Stable Diffusion"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Agentic AI & AI Automation",
+     "weeks": "22–26",
+     "topics": [
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": []
+    },
+    {
+     "name": "LLMOps & Production Deployment",
+     "weeks": "27–30",
+     "topics": [
+      "LLM Lifecycle, Versioning & Deployment Basics",
+      "Containerization & Inference Serving",
+      "RAG & Agent Deployment Pipelines",
+      "Monitoring, Cost Optimization & Reliability"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Data Structures & Algorithms",
+     "weeks": "31–37",
+     "topics": [
+      "Time and Space Complexity",
+      "Arrays",
+      "Linked Lists & Interview Problems",
+      "Stacks and Queues",
+      "Recursion and Backtracking",
+      "Searching Algorithms",
+      "Sorting Algorithms",
+      "Hashing",
+      "Mastering Trees for Problem Solving",
+      "Understanding and Implementing Tries"
      ],
      "projects": [
       "Text Autocomplete System (Trie)",
@@ -1098,14 +1340,19 @@
      ]
     },
     {
-     "name": "System design: LLD + HLD",
-     "weeks": "17–24",
+     "name": "System Design",
+     "weeks": "38–44",
      "topics": [
-      "OOP, SOLID, design patterns, UML",
-      "LLD case studies: parking lot, Splitwise, BookMyShow",
-      "HLD: scaling, caching, queues (Kafka), CAP, sharding",
-      "Database selection and schema design (now has its own content)",
-      "HLD case studies: URL shortener, Instagram feed, ride sharing, chat, payments"
+      "AI-Powered System Design Foundations",
+      "Fundamentals of Object-Oriented Programming (OOP)",
+      "SOLID Principles for Effective Design",
+      "Essential Design Patterns",
+      "UML Diagrams for Visual Representation",
+      "Designing Efficient Database Schemas",
+      "API Design and Implementation Basics",
+      "Multithreading and Concurrency Management",
+      "Basic Integration AI/ML in Software Design",
+      "Testing and Code Quality Best Practices"
      ],
      "projects": [
       "Instagram Feed System design",
@@ -1113,29 +1360,15 @@
      ]
     },
     {
-     "name": "GenAI core for developers",
-     "weeks": "25–38",
-     "topics": [
-      "Same five modules as GenAI for Software Developers (Python for AI engineers → LLMOps), compressed"
-     ],
-     "projects": [
-      "8 projects from the GenAI developer core"
-     ]
-    },
-    {
-     "name": "Electives (choose 2)",
-     "weeks": "39–44",
-     "topics": [
-      "See specialisations"
-     ],
-     "projects": []
-    },
-    {
-     "name": "Capstone + interview sprint",
+     "name": "Specialisations (choose any 2)",
      "weeks": "45–48",
      "topics": [
-      "Capstone",
-      "DSA, LLD, HLD and AI system-design mock interviews"
+      "LLM-Powered Software Engineering & Developer Copilots",
+      "Cloud, DevOps & LLM Infrastructure Engineering",
+      "Backend Engineering for LLM Applications & RAG Microservices",
+      "Distributed Systems & Microservices for AI Applications",
+      "Multi-Agent Systems, Workflow Automation & Enterprise Orchestration",
+      "GenAI & Agentic AI for Product Managers"
      ],
      "projects": []
     }
@@ -1176,6 +1409,11 @@
      "projects": [
       "Multi-Agent Document Intelligence Pipeline"
      ]
+    },
+    {
+     "name": "GenAI & Agentic AI for Product Managers",
+     "content": "AI product thinking, GenAI experiences, agentic product architecture, governance and success metrics",
+     "projects": []
     }
    ],
    "capstones": [
@@ -1214,16 +1452,35 @@
     "Applied AI Engineer",
     "AI Platform Engineer"
    ],
-   "certificates": "IBM + Microsoft Azure AI Fundamentals + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "certificates": "IBM + Microsoft Azure + AI CoLab project certification + IIT Patna certificate (Vishlesan I-Hub Foundation)",
    "modules": [
     {
-     "name": "Term 1 · GenAI foundation, no code",
-     "weeks": "1–2",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "How GenAI works, model families, limits",
-      "Prompting without code",
-      "No-code agents and when to move to code",
-      "AI use-case scoping and business case"
+      "Overview Of Forward-Deployed AI Engineer Role.",
+      "Career Path Mapping For A Forward-Deployed AI Engineer.",
+      "LinkedIn Profile Optimization For AI & Tech Hiring.",
+      "Using Python Colab And Cloud Sandbox For Labs.",
+      "Learning Workflow, Tools, And Program Onboarding."
+     ],
+     "projects": [
+      "Contract Document Extraction Pipeline",
+      "Bulk LLM Enrichment Engine"
+     ]
+    },
+    {
+     "name": "GenAI Foundation (No Code)",
+     "weeks": "2",
+     "topics": [
+      "Tokens, Embeddings, And Context",
+      "Model Families And Capabilities",
+      "Limitations And Failure Modes",
+      "Prompt Anatomy",
+      "Reasoning And Refinement",
+      "Workflow Automation Tools",
+      "Assistants And Custom Agents",
+      "AI Use-Case Scoping"
      ],
      "projects": [
       "Support Ticket Triage Assistant",
@@ -1232,7 +1489,7 @@
     },
     {
      "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
-     "weeks": "3–4",
+     "weeks": "3",
      "topics": [
       "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
       "GitHub Copilot in VS Code: completions, chat and agent mode",
@@ -1242,32 +1499,41 @@
      ],
      "projects": [
       "Ship a feature with Claude Code + Copilot as a reviewed pull request",
-      "Build an MCP server for a tool your team uses"
+      "Build an MCP server for a tool your team uses",
+      "AI Data Analyst Agent",
+      "MCP Coding Assistant & Debugger"
      ]
     },
     {
-     "name": "Term 1 · Python for AI",
-     "weeks": "5–9",
+     "name": "Python for AI",
+     "weeks": "4–8",
      "topics": [
-      "Core and advanced Python",
-      "Async, httpx, retries, rate limits",
-      "LLM SDKs, Pydantic structured outputs",
-      "mypy, pytest, ruff"
+      "Variables And Data Types",
+      "Control Flow And Loops",
+      "Functions",
+      "File Handling",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas",
+      "Matplotlib And Seaborn"
      ],
-     "projects": [
-      "Contract Document Extraction Pipeline",
-      "Bulk LLM Enrichment Engine"
-     ]
+     "projects": []
     },
     {
-     "name": "Term 1 · Software engineering for FDE",
-     "weeks": "10–13",
+     "name": "Software Engineering for FDE",
+     "weeks": "9–13",
      "topics": [
-      "Git in client repos",
-      "PostgreSQL, SQLAlchemy, pgvector",
-      "MongoDB, Redis, Neo4j, Elasticsearch",
-      "FastAPI, REST, WebSockets, gRPC",
-      "OAuth/SSO, RBAC, multi-tenancy, queues, Docker"
+      "Git And Engineering Workflow",
+      "Data Modelling",
+      "SQL Querying",
+      "Performance And Access",
+      "NoSQL And Search Stores",
+      "HTTP And REST Design",
+      "FastAPI",
+      "Auth And Access Control",
+      "Integration Patterns"
      ],
      "projects": [
       "Customer 360 Query Layer",
@@ -1277,34 +1543,46 @@
      ]
     },
     {
-     "name": "Term 2 · ML & transformer essentials",
-     "weeks": "14–15",
+     "name": "Foundation for AI",
+     "weeks": "14–17",
      "topics": [
-      "ML workflow, embeddings, attention, transformers"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
      ],
      "projects": []
     },
     {
-     "name": "Term 2 · LLM engineering",
-     "weeks": "16–20",
+     "name": "Generative AI & LLM Engineering",
+     "weeks": "18–22",
      "topics": [
-      "Model families, serving with vLLM/Ollama, quantisation, GPU sizing",
-      "Prompt and context engineering",
-      "Fine-tuning (LoRA/QLoRA) and when not to"
+      "LLM Internals For Builders",
+      "Use Cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "Vector Database",
+      "Langchain / Llama Index",
+      "Fine Tuning",
+      "Fundamental Generative Models: GAN And VAE",
+      "Stable Diffusion"
      ],
      "projects": [
       "Enterprise Document Assistant"
      ]
     },
     {
-     "name": "Term 2 · Advanced RAG & enterprise retrieval",
-     "weeks": "21–25",
+     "name": "Advanced RAG & Enterprise AI Systems",
+     "weeks": "23–25",
      "topics": [
-      "Layout-aware ingestion and chunking",
-      "Hybrid retrieval, reranking, query rewriting",
-      "GraphRAG, agentic and corrective RAG, text-to-SQL",
-      "Permissions, PII, data residency",
-      "RAG evaluation"
+      "Ingestion And Document Processing",
+      "Retrieval Engineering",
+      "Advanced RAG Architectures",
+      "Enterprise Retrieval Concerns",
+      "RAG Evaluation And Failure Analysis"
      ],
      "projects": [
       "Multi-Format Ingestion Pipeline",
@@ -1315,35 +1593,30 @@
      ]
     },
     {
-     "name": "Term 2 · Agentic AI engineering",
+     "name": "Agentic AI & Automation",
      "weeks": "26–30",
      "topics": [
-      "LangGraph, CrewAI, AutoGen/AG2",
-      "MCP servers and A2A",
-      "Guardrails and evals for agents"
-     ],
-     "projects": [
-      "AI Data Analyst Agent",
-      "MCP Coding Assistant & Debugger"
-     ]
-    },
-    {
-     "name": "Term 2 · Interview readiness sprint",
-     "weeks": "31",
-     "topics": [
-      "GenAI and agentic interview questions, take-home practice (fills the empty divider page)"
+      "Understanding Agentic AI And Autonomous Agents",
+      "Key Components Of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
      ],
      "projects": []
     },
     {
-     "name": "Term 3 · Cloud, LLMOps & AIOps",
-     "weeks": "32–36",
+     "name": "Cloud, Deployment, LLMOps & AIOps",
+     "weeks": "31–33",
      "topics": [
-      "Cloud foundations and IAM",
-      "Kubernetes, Helm, Terraform, GPU autoscaling",
-      "vLLM, Ray Serve, Triton",
-      "Eval-gated CI/CD and canary rollouts",
-      "AI platform patterns: inference gateway, model router, event-driven inference (absorbed from AI Engineering Master)"
+      "Cloud Foundations",
+      "Containers, Orchestration, And Delivery",
+      "Serving And Performance",
+      "LLMOps",
+      "AIOps And Platform Operations"
      ],
      "projects": [
       "Production AI Service Deployment",
@@ -1353,14 +1626,14 @@
      ]
     },
     {
-     "name": "Term 3 · AI system design & enterprise architecture",
-     "weeks": "37–39",
+     "name": "AI System Design & Enterprise Architecture",
+     "weeks": "34–35",
      "topics": [
-      "NFRs and capacity estimation",
-      "Reference architectures",
-      "ERP/CRM/ITSM integration, zero trust",
-      "DPDP Act, EU AI Act, build vs buy",
-      "C4, ADRs, TCO"
+      "AI System Design Framework",
+      "Reference Architectures",
+      "Enterprise Landscape Integration",
+      "Governance And Compliance",
+      "Architecture Deliverables"
      ],
      "projects": [
       "Enterprise AI Solution Design Document",
@@ -1368,13 +1641,13 @@
      ]
     },
     {
-     "name": "Term 3 · Client solution engineering",
-     "weeks": "40–43",
+     "name": "FDE / Client Solution Engineering",
+     "weeks": "36–38",
      "topics": [
-      "Discovery workshops and stakeholder mapping",
-      "Proposals and SOWs",
-      "Prototyping and demos in days",
-      "Delivery in client environments; adoption and handover"
+      "Discovery And Scoping",
+      "Prototyping And Demos",
+      "Delivery Inside Client Environments",
+      "Adoption, Enablement And Expansion"
      ],
      "projects": [
       "Client Discovery & Solution Brief",
@@ -1383,26 +1656,33 @@
      ]
     },
     {
-     "name": "Term 4 · FDE elective (choose 1)",
-     "weeks": "44–47",
+     "name": "Capstone Projects & Interview Readiness",
+     "weeks": "39–43",
      "topics": [
-      "See specialisations"
+      "Capstone Projects",
+      "Interview Readiness For GenAI & Agentic AI Roles"
      ],
      "projects": []
     },
     {
-     "name": "Term 4 · Capstone",
-     "weeks": "48–52",
+     "name": "FDE elective (choose one): Software & SaaS, Data & Analytics, or Cloud & Enterprise",
+     "weeks": "44–46",
      "topics": [
-      "One domain capstone, deployed and handed over"
+      "FDE · Software & SaaS: enterprise copilots, developer agents, support automation",
+      "FDE · Data & Analytics: natural-language analytics, AI data agents, BI copilots",
+      "FDE · Cloud & Enterprise: cloud modernisation, AI infrastructure, enterprise integrations"
      ],
      "projects": []
     },
     {
-     "name": "Optional · DSA & problem solving",
-     "weeks": "Self-paced, parallel",
+     "name": "DSA & Problem Solving (Optional)",
+     "weeks": "47–52",
      "topics": [
-      "For learners targeting big-tech interview loops"
+      "Foundations And Linear Structures",
+      "Stacks, Queues, And Linked Lists",
+      "Trees, Heaps And Tries",
+      "Graphs And Advanced Techniques",
+      "Interview Simulation"
      ],
      "projects": []
     }
@@ -1481,13 +1761,34 @@
     "Domain AI Specialist (BFSI, healthcare, retail, manufacturing)",
     "AI QA Engineer"
    ],
-   "certificates": "IBM + Microsoft Azure AI Fundamentals + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "certificates": "IBM + Microsoft Azure + AI CoLab project certification + IIT Patna certificate (Vishlesan I-Hub Foundation)",
    "modules": [
     {
-     "name": "Induction + Python for GenAI",
-     "weeks": "1–4",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "Python, pandas and APIs for GenAI work"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Python for GenAI",
+     "weeks": "2–6",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
      ],
      "projects": [
       "Retail Sales Data EDA"
@@ -1495,7 +1796,7 @@
     },
     {
      "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
-     "weeks": "5–6",
+     "weeks": "7–8",
      "topics": [
       "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
       "GitHub Copilot in VS Code: completions, chat and agent mode",
@@ -1509,10 +1810,15 @@
      ]
     },
     {
-     "name": "ML & transformer foundations",
-     "weeks": "7–9",
+     "name": "Foundation for GenAI",
+     "weeks": "9–12",
      "topics": [
-      "ML workflow, embeddings, attention, BERT"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
      ],
      "projects": [
       "Loan Approval Prediction",
@@ -1520,14 +1826,19 @@
      ]
     },
     {
-     "name": "LLM engineering & RAG",
-     "weeks": "10–16",
+     "name": "Advanced Generative AI",
+     "weeks": "13–20",
      "topics": [
-      "Model families and selection",
-      "Prompt and context engineering",
-      "Hugging Face, vector DBs, RAG, RAG evaluation",
-      "Fine-tuning, Azure OpenAI, AWS Bedrock",
-      "Image generation (one optional lab)"
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Fundamental Generative Models: GAN And VAE",
+      "Stable Diffusion"
      ],
      "projects": [
       "AI-Powered Sales Email Writer",
@@ -1536,13 +1847,18 @@
      ]
     },
     {
-     "name": "Agentic AI & automation",
-     "weeks": "17–22",
+     "name": "Agentic AI & Automation",
+     "weeks": "21–25",
      "topics": [
-      "LangGraph, CrewAI, AutoGen/AG2",
-      "MCP servers and A2A",
-      "No-code agents (n8n) for prototyping",
-      "Human-in-the-loop"
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
      ],
      "projects": [
       "AI Data Analyst Agent",
@@ -1551,10 +1867,13 @@
      ]
     },
     {
-     "name": "LLMOps & production",
-     "weeks": "23–26",
+     "name": "LLMOps & Production Deployment",
+     "weeks": "26–29",
      "topics": [
-      "Tracing, evals, deployment, monitoring, cost"
+      "LLM Lifecycle, Versioning & Deployment Basics",
+      "Containerization & Inference Serving",
+      "RAG & Agent Deployment Pipelines",
+      "Monitoring, Cost Optimization & Reliability"
      ],
      "projects": [
       "Production-Grade LLM App Deployment",
@@ -1562,38 +1881,38 @@
      ]
     },
     {
-     "name": "Responsible AI, guardrails & governance",
-     "weeks": "27–28",
+     "name": "Ethics, Guardrails & Responsible AI",
+     "weeks": "30–31",
      "topics": [
-      "NeMo Guardrails, Llama Guard, prompt-injection defence",
-      "DPDP Act and EU AI Act, named separately",
-      "Audit logs, model cards"
+      "Responsible AI Foundations & Risk Awareness",
+      "Safety Guardrails & Human-in-the-Loop Controls",
+      "Governance, Compliance & Audit Readiness"
      ],
      "projects": [
       "LLM Toxicity & Guardrail Engine"
      ]
     },
     {
-     "name": "Two specialisations",
-     "weeks": "29–34",
+     "name": "Specialisations (choose any 2)",
+     "weeks": "32–36",
      "topics": [
-      "See specialisations (choose 2)"
+      "Software Developers",
+      "Managers & Leaders",
+      "Cloud & DevOps",
+      "BFSI",
+      "Healthcare",
+      "Manufacturing & Supply Chain",
+      "E-commerce & Retail"
      ],
      "projects": []
     },
     {
-     "name": "AI CoLab",
-     "weeks": "35–36",
-     "topics": [
-      "Startup project"
-     ],
-     "projects": []
-    },
-    {
-     "name": "Capstones",
+     "name": "AI CoLab, BYOP & capstones",
      "weeks": "37–39",
      "topics": [
-      "2 capstones matched to the chosen specialisations"
+      "AI CoLab startup project",
+      "Bring your own project (BYOP)",
+      "Capstone projects"
      ],
      "projects": []
     }
@@ -1608,19 +1927,16 @@
      ]
     },
     {
+     "name": "Managers & Leaders",
+     "content": "GenAI for digital business transformation, AI-driven decisions and GenAI for project management (Agile, Jira)",
+     "projects": []
+    },
+    {
      "name": "Cloud & DevOps",
      "content": "AI for IaC and CI/CD, incident bots, K8s autoscaling agents, FinOps",
      "projects": [
       "Agentic Incident Response Bot",
       "AI-Driven Kubernetes Auto-Scaling Agent"
-     ]
-    },
-    {
-     "name": "QA & Test",
-     "content": "Test generation, bug triage, regression selection, self-healing tests",
-     "projects": [
-      "GenAI Test Case Generator",
-      "Agentic Regression Test Suite Selector"
      ]
     },
     {
@@ -1632,11 +1948,11 @@
      ]
     },
     {
-     "name": "Retail & E-commerce",
-     "content": "Catalog, pricing, returns, customer query agents",
+     "name": "Healthcare",
+     "content": "Clinical coding, drug safety, trials, compliance",
      "projects": [
-      "Visual Product Search & Description Generator",
-      "Agentic Customer Query Resolution"
+      "Agentic ICD/CPT Coding Assistant",
+      "FDA/EMA Compliance Checker"
      ]
     },
     {
@@ -1648,11 +1964,11 @@
      ]
     },
     {
-     "name": "Healthcare & Pharma",
-     "content": "Clinical coding, drug safety, trials, compliance",
+     "name": "E-commerce & Retail",
+     "content": "Catalog, pricing, returns, customer query agents",
      "projects": [
-      "Agentic ICD/CPT Coding Assistant",
-      "FDA/EMA Compliance Checker"
+      "Visual Product Search & Description Generator",
+      "Agentic Customer Query Resolution"
      ]
     }
    ],
@@ -1679,6 +1995,215 @@
    ]
   },
   {
+   "code": "AIE",
+   "name": "AI Engineer Master Certification Program",
+   "family": "GenAI & Agentic AI",
+   "tier": "Master",
+   "durationMonths": 9,
+   "totalWeeks": 39,
+   "whoFor": [
+    "Software developers with 1+ year who code daily and want to become AI Engineers",
+    "Backend and full-stack engineers moving into GenAI, RAG and agentic systems, through to production and system architecture"
+   ],
+   "notFor": [
+    "Non-coders (→ GenAI & Agentic AI Master, coding taught from scratch, or Applied AI Practitioner)",
+    "Developers who want client-facing AI delivery (→ Forward Deployed AI Engineer Master)",
+    "Developers who want a shorter 5-month path (→ GenAI & Agentic AI for Software Developers)"
+   ],
+   "entry": "1+ year as a developer, writing code regularly. No ML background needed.",
+   "targetRoles": [
+    "AI Engineer",
+    "GenAI Engineer",
+    "LLM / RAG Engineer",
+    "AI Platform Engineer"
+   ],
+   "certificates": "IBM + Microsoft Azure + AI CoLab project certification + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "modules": [
+    {
+     "name": "Induction & Orientation",
+     "weeks": "1",
+     "topics": [
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Python for GenAI",
+     "weeks": "2–6",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
+     ],
+     "projects": [
+      "Retail Sales Data EDA"
+     ]
+    },
+    {
+     "name": "AI-assisted engineering: Claude Code, GitHub Copilot & MCP",
+     "weeks": "7–8",
+     "topics": [
+      "Claude Code: plan mode, CLAUDE.md project memory, subagents, hooks, skills and plugins",
+      "GitHub Copilot in VS Code: completions, chat and agent mode",
+      "MCP servers in your IDE and in Claude: GitHub, Postgres, filesystem, Jira",
+      "Claude connectors for team context: Google Drive, Slack, Notion",
+      "Reviewing, testing and securing AI-written code; when not to trust it"
+     ],
+     "projects": [
+      "Ship a feature with Claude Code + Copilot as a reviewed pull request",
+      "Build an MCP server for a tool your team uses"
+     ]
+    },
+    {
+     "name": "Foundation for GenAI",
+     "weeks": "9–12",
+     "topics": [
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
+     ],
+     "projects": [
+      "Loan Approval Prediction",
+      "Sentiment Analysis Using BERT"
+     ]
+    },
+    {
+     "name": "Advanced Generative AI",
+     "weeks": "13–20",
+     "topics": [
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Fundamental Generative Models: GAN And VAE",
+      "Stable Defusion"
+     ],
+     "projects": [
+      "AI-Powered Sales Email Writer",
+      "HR Policy RAG Query Bot",
+      "Enterprise Document Assistant"
+     ]
+    },
+    {
+     "name": "Agentic AI & Automation",
+     "weeks": "21–25",
+     "topics": [
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": [
+      "AI Data Analyst Agent",
+      "Interoperable Multi-Agent System (MCP + A2A)",
+      "LangGraph HITL Approval Workflow"
+     ]
+    },
+    {
+     "name": "LLMOps, MLOps & Production Reliability",
+     "weeks": "26–29",
+     "topics": [
+      "LLM Lifecycle, Versioning & Deployment Basics",
+      "Containerization & Inference Serving",
+      "RAG & Agent Deployment Pipelines",
+      "Monitoring, Cost Optimization & Reliability"
+     ],
+     "projects": [
+      "Production-Grade LLM App Deployment",
+      "Agentic AI Monitoring & Cost Optimisation"
+     ]
+    },
+    {
+     "name": "AI System Architecture & Platform Engineering",
+     "weeks": "30–34",
+     "topics": [
+      "AI System Design Patterns",
+      "API & Microservice Design",
+      "Data Storage & State",
+      "Security & Governance",
+      "Platform Automation"
+     ],
+     "projects": [
+      "Enterprise AI Solution Design Document",
+      "AI Architecture Review & Remediation"
+     ]
+    },
+    {
+     "name": "Specialisation: GenAI & Agentic AI for Software Developers & SDE",
+     "weeks": "35–37",
+     "topics": [
+      "AI-Powered System Design Foundations",
+      "Production Architecture & Infrastructure Patterns",
+      "Backend Architecture for AI-Driven Applications",
+      "High-Performance API Engineering for LLM Services",
+      "Caching, Persistence & Storage for AI Microservices",
+      "Distributed RAG & AI Microservice Patterns"
+     ],
+     "projects": [
+      "Multi-LLM API Gateway with Fallback",
+      "High-Performance LLM API Service"
+     ]
+    },
+    {
+     "name": "AI CoLab, BYOP & capstones",
+     "weeks": "38–39",
+     "topics": [
+      "AI CoLab startup project",
+      "Bring your own project (BYOP)",
+      "Capstone projects"
+     ],
+     "projects": []
+    }
+   ],
+   "specialisations": [
+    {
+     "name": "GenAI & Agentic AI for Software Developers & SDE",
+     "content": "AI system design, gateways, caching, backend for LLM apps",
+     "projects": [
+      "Multi-LLM API Gateway with Fallback",
+      "High-Performance LLM API Service"
+     ]
+    }
+   ],
+   "capstones": [
+    "P04",
+    "P09",
+    "P22",
+    "P39",
+    "P41",
+    "P44",
+    "P54",
+    "P63",
+    "P68",
+    "P69",
+    "P70",
+    "P77"
+   ]
+  },
+  {
    "code": "GAI-CD",
    "name": "GenAI & Agentic AI for Cloud & DevOps",
    "family": "Cloud & DevOps",
@@ -1700,16 +2225,40 @@
    "certificates": "IBM GenAI certificate",
    "modules": [
     {
-     "name": "Python for AI in operations",
-     "weeks": "1–2",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "Python scripting, APIs, LLM SDKs"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
+     ],
+     "projects": [
+      "Agentic Incident Response & Runbook Bot",
+      "GenAI Kubernetes Operations Assistant"
+     ]
+    },
+    {
+     "name": "Python for GenAI",
+     "weeks": "2–5",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
      ],
      "projects": []
     },
     {
      "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
-     "weeks": "3",
+     "weeks": "6",
      "topics": [
       "Generating and reviewing Terraform, Ansible and Kubernetes manifests with Claude Code and Copilot",
       "MCP servers for AWS, Azure and Kubernetes",
@@ -1718,60 +2267,80 @@
      ],
      "projects": [
       "AI-generated Terraform module, reviewed and deployed through CI",
-      "Kubernetes troubleshooting assistant over MCP"
-     ]
-    },
-    {
-     "name": "GenAI & LLM foundations for engineers",
-     "weeks": "4–5",
-     "topics": [
-      "How LLMs work, prompting, structured outputs"
-     ],
-     "projects": []
-    },
-    {
-     "name": "RAG over runbooks, logs and docs",
-     "weeks": "6–8",
-     "topics": [
-      "Vector DBs, chunking logs and runbooks"
-     ],
-     "projects": [
-      "Runbook RAG Assistant"
-     ]
-    },
-    {
-     "name": "Agentic AI for operations",
-     "weeks": "9–11",
-     "topics": [
-      "LangGraph, CrewAI",
-      "MCP servers for Kubernetes and cloud APIs",
-      "Human approval for infra changes"
-     ],
-     "projects": [
-      "Agentic Incident Response & Runbook Bot",
-      "GenAI Kubernetes Operations Assistant"
-     ]
-    },
-    {
-     "name": "LLMOps & AI infrastructure",
-     "weeks": "12–15",
-     "topics": [
-      "vLLM and KServe on Kubernetes, GPU autoscaling",
-      "LLM observability (OpenTelemetry, Langfuse)",
-      "Cost and FinOps for AI"
-     ],
-     "projects": [
+      "Kubernetes troubleshooting assistant over MCP",
+      "Runbook RAG Assistant",
       "Scalable LLM Inference on Kubernetes",
       "AI Cost & Observability Dashboard"
      ]
     },
     {
-     "name": "GenAI for DevOps specialisation",
-     "weeks": "16–19",
+     "name": "Foundation for GenAI",
+     "weeks": "7–9",
      "topics": [
-      "AI for IaC and CI/CD",
-      "Log analytics and anomaly detection",
-      "Security drift and DR automation"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Advanced Generative AI",
+     "weeks": "10–13",
+     "topics": [
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Azure OpenAI"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Agentic AI & AI Automation",
+     "weeks": "14–16",
+     "topics": [
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": []
+    },
+    {
+     "name": "LLMOps & Production Deployment",
+     "weeks": "17–19",
+     "topics": [
+      "LLM Lifecycle, Versioning & Deployment Basics",
+      "Containerization & Inference Serving",
+      "RAG & Agent Deployment Pipelines",
+      "Monitoring, Cost Optimization & Reliability"
+     ],
+     "projects": []
+    },
+    {
+     "name": "GenAI Specialization for Cloud & DevOps Professionals",
+     "weeks": "20–22",
+     "topics": [
+      "Introduction to Generative AI in DevOps",
+      "Automating DevOps Workflows with Generative AI",
+      "AI-Powered Monitoring & Incident Resolution",
+      "Predictive Analytics and Resource Management",
+      "Generative AI for Container Orchestration",
+      "Predictive Analytics and Resource Management",
+      "Disaster Recovery and Security Automation with AI",
+      "Customizing GenAI Tools for Cloud and DevOps Needs"
      ],
      "projects": [
       "CI/CD Pipeline Optimisation Assistant",
@@ -1780,14 +2349,6 @@
       "AI-Driven Kubernetes Auto-Scaling Agent",
       "GenAI Cloud Cost Optimizer"
      ]
-    },
-    {
-     "name": "Capstone",
-     "weeks": "20–22",
-     "topics": [
-      "One ops capstone"
-     ],
-     "projects": []
     }
    ],
    "specialisations": [],
@@ -1828,21 +2389,34 @@
     "Cloud DBA / DBRE",
     "QA DevOps Engineer"
    ],
-   "certificates": "Microsoft Azure certification track + course completion certificate",
+   "certificates": "Microsoft Azure certificate",
    "modules": [
     {
-     "name": "Linux, networking & shell",
+     "name": "Cloud Basics & Linux Fundamentals",
      "weeks": "1–2",
      "topics": [
-      "Linux administration, permissions, processes",
-      "Networking basics, SSH",
-      "Bash scripting"
+      "Cloud computing basics",
+      "Linux fundamentals",
+      "Networking basics",
+      "Shell"
      ],
      "projects": []
     },
     {
-     "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
+     "name": "Python for Cloud",
      "weeks": "3",
+     "topics": [
+      "Python essentials",
+      "Automation scripts",
+      "Working with cloud APIs"
+     ],
+     "projects": [
+      "Azure landing setup with RBAC and networking"
+     ]
+    },
+    {
+     "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
+     "weeks": "4–5",
      "topics": [
       "Generating and reviewing Terraform, Ansible and Kubernetes manifests with Claude Code and Copilot",
       "MCP servers for AWS, Azure and Kubernetes",
@@ -1855,21 +2429,22 @@
      ]
     },
     {
-     "name": "Python & Bash automation",
-     "weeks": "4",
+     "name": "AWS Cloud Practitioner",
+     "weeks": "6",
      "topics": [
-      "Python for scripting",
-      "boto3 and Azure SDK"
+      "AWS core services",
+      "Cloud economics",
+      "Security basics"
      ],
      "projects": []
     },
     {
-     "name": "AWS: Cloud Practitioner → Solutions Architect Associate",
-     "weeks": "5–9",
+     "name": "AWS Solutions Architect",
+     "weeks": "7–9",
      "topics": [
-      "EC2, S3, IAM, VPC, RDS, Lambda, CloudWatch",
-      "HA, DR and migration",
-      "SAA exam prep"
+      "Designing on AWS",
+      "High availability",
+      "Associate and Professional level topics"
      ],
      "projects": [
       "Static Website Hosting with CDN",
@@ -1879,25 +2454,22 @@
      ]
     },
     {
-     "name": "Azure Administrator essentials",
-     "weeks": "10–11",
+     "name": "Microsoft Azure Proficiency (optional)",
+     "weeks": "10–12",
      "topics": [
-      "Subscriptions, RBAC, Entra ID",
-      "VNets, VMs, storage",
-      "AZ-900 / AZ-104 prep (now mandatory)"
+      "Azure core services",
+      "Azure administration"
      ],
-     "projects": [
-      "Azure landing setup with RBAC and networking"
-     ]
+     "projects": []
     },
     {
-     "name": "DevOps toolchain",
-     "weeks": "12–16",
+     "name": "DevOps Mastery: Infrastructure & Automation",
+     "weeks": "13–16",
      "topics": [
-      "Git, Jenkins, GitHub Actions",
-      "Docker, Kubernetes, Helm",
+      "Git and CI/CD",
+      "Docker and Kubernetes",
       "Terraform and Ansible",
-      "Prometheus, Grafana, ELK"
+      "Monitoring"
      ],
      "projects": [
       "Git-Centric CI Pipeline",
@@ -1907,18 +2479,24 @@
      ]
     },
     {
-     "name": "AIOps & GenAI for operations",
-     "weeks": "17",
+     "name": "MLOps",
+     "weeks": "17–20",
      "topics": [
-      "AI log analysis, anomaly detection, AI-assisted runbooks (replaces MLOps)"
+      "ML model deployment",
+      "Pipelines",
+      "Monitoring models in production"
      ],
      "projects": []
     },
     {
-     "name": "Role specialisation + 4 role capstones",
-     "weeks": "18–22",
+     "name": "Specialisation for your role",
+     "weeks": "21–22",
      "topics": [
-      "See specialisations (choose 1)"
+      "IT Support & ITOps",
+      "System Admin",
+      "Network",
+      "DBA",
+      "QA & Test"
      ],
      "projects": []
     }
@@ -2018,19 +2596,36 @@
     "SRE",
     "AI Infrastructure Engineer"
    ],
-   "certificates": "IBM + Microsoft Azure + 2 AI CoLab project certificates + IIT Patna certificate (Vishlesan I-Hub Foundation)",
+   "certificates": "IBM + Microsoft Azure + AI CoLab project certification + IIT Patna certificate (Vishlesan I-Hub Foundation)",
    "modules": [
     {
-     "name": "Linux, Python & Bash automation",
-     "weeks": "1–3",
+     "name": "Cloud Basics and Linux Fundamentals",
+     "weeks": "1–2",
      "topics": [
-      "Admin, scripting, boto3, Azure SDK"
+      "Linux Basics and System Administration",
+      "Practical Exercises and Assignments",
+      "Introduction to Cloud Computing (AWS, Azure, GCP)"
      ],
      "projects": []
     },
     {
+     "name": "Python Programming Essentials",
+     "weeks": "3–4",
+     "topics": [
+      "Python Basics & Fundamentals",
+      "Python Programming Foundations",
+      "Data Handling and Structures",
+      "Advanced Python Concepts",
+      "Python for Cloud and DevOps"
+     ],
+     "projects": [
+      "Git-Centric CI Pipeline",
+      "Complete GitOps Platform"
+     ]
+    },
+    {
      "name": "AI for infrastructure work: Claude Code, GitHub Copilot & MCP",
-     "weeks": "4–5",
+     "weeks": "5",
      "topics": [
       "Generating and reviewing Terraform, Ansible and Kubernetes manifests with Claude Code and Copilot",
       "MCP servers for AWS, Azure and Kubernetes",
@@ -2043,54 +2638,53 @@
      ]
     },
     {
-     "name": "AWS Solutions Architect Associate",
-     "weeks": "6–10",
+     "name": "AWS Cloud Practitioner",
+     "weeks": "6–7",
      "topics": [
-      "Compute, networking, storage, serverless, HA/DR"
+      "Cloud Computing and AWS Fundamentals",
+      "AWS Core Services Overview",
+      "AWS Security, Identity, and Access Management",
+      "Monitoring, Pricing, and Basic Operations"
+     ],
+     "projects": []
+    },
+    {
+     "name": "AWS Associate & Professional Solutions Architect",
+     "weeks": "8–10",
+     "topics": [
+      "AWS Compute and Networking Architecture",
+      "Storage and Database Architecture",
+      "Serverless and Advanced AWS Services",
+      "High Availability, DR, and Migration",
+      "Architecture Case Studies and Certification Preparation"
      ],
      "projects": [
       "Scalable Multi-Tier Application",
-      "Serverless Order Processing"
-     ]
-    },
-    {
-     "name": "Azure Administrator + Solutions Architect",
-     "weeks": "11–13",
-     "topics": [
-      "AZ-104 and AZ-305 prep (mandatory)"
-     ],
-     "projects": [
+      "Serverless Order Processing",
       "Azure hub-and-spoke landing zone"
      ]
     },
     {
-     "name": "DevOps toolchain & GitOps",
-     "weeks": "14–17",
+     "name": "Microsoft Azure Proficiency (Optional)",
+     "weeks": "11–14",
      "topics": [
-      "CI/CD, Docker, Terraform, Ansible, ArgoCD",
-      "Prometheus, Grafana, ELK"
+      "Azure Administration & Identity Management",
+      "Architecting Solutions on Azure",
+      "Advanced Azure Specializations",
+      "Certification Preparation for Azure"
      ],
-     "projects": [
-      "Git-Centric CI Pipeline",
-      "Complete GitOps Platform"
-     ]
+     "projects": []
     },
     {
-     "name": "Kubernetes & platform engineering",
-     "weeks": "18–20",
+     "name": "Cloud System Design & Distributed Architecture",
+     "weeks": "15–16",
      "topics": [
-      "CKA-aligned Kubernetes",
-      "Helm, operators, Backstage"
-     ],
-     "projects": [
-      "Enterprise Kubernetes Platform"
-     ]
-    },
-    {
-     "name": "Cloud system design & distributed architecture",
-     "weeks": "21–23",
-     "topics": [
-      "Capacity, caching, queues, multi-region"
+      "System Design Essentials",
+      "Distributed System Fundamentals",
+      "High Availability & Reliability Engineering",
+      "Cloud-Native Architecture Design",
+      "Data Architecture & Storage Solutions",
+      "Cost-Efficient & Secure Architecture"
      ],
      "projects": [
       "Ride-Sharing Platform Design",
@@ -2098,34 +2692,19 @@
      ]
     },
     {
-     "name": "DevSecOps & cloud security",
-     "weeks": "24–26",
+     "name": "DevOps Mastery – Infrastructure & Automation",
+     "weeks": "17–22",
      "topics": [
-      "SAST/SCA/SBOM, Vault, OPA, image signing",
-      "GuardDuty, Defender, zero trust, compliance"
-     ],
-     "projects": [
-      "Secure CI/CD with Scanning",
-      "Kubernetes Security Hardening"
-     ]
-    },
-    {
-     "name": "Multicloud & FinOps",
-     "weeks": "27–28",
-     "topics": [
-      "Portability, cross-cloud networking, Terraform/Pulumi, cost governance"
-     ],
-     "projects": [
-      "Multicloud App Deployment"
-     ]
-    },
-    {
-     "name": "AI for Cloud: AIOps, agentic ops & LLMOps infrastructure",
-     "weeks": "29–32",
-     "topics": [
-      "AI for IaC and incidents",
-      "Agents with MCP for cloud APIs (now real content)",
-      "Serving LLMs on Kubernetes, MLOps basics"
+      "Introduction to DevOps",
+      "Server and Application Virtualization",
+      "Version Control",
+      "Continuous Integration (CI)",
+      "Containerization and Modern Virtualization",
+      "Build and Release Management",
+      "Data Migration in DevOps and Multi-Cloud Environments",
+      "Continuous Delivery (CD) & Deployment Automation",
+      "Container Orchestration Basics",
+      "Continuous Monitoring"
      ],
      "projects": [
       "AI-Generated Terraform Engine",
@@ -2134,23 +2713,97 @@
      ]
     },
     {
-     "name": "Role specialisation (choose 1, full length)",
-     "weeks": "33–36",
+     "name": "DevSecOps & Cloud Security Engineering",
+     "weeks": "23–24",
      "topics": [
-      "Same six role tracks as the 5-month program"
+      "DevSecOps Foundations",
+      "Code & Pipeline Security",
+      "Infrastructure & Container Security",
+      "Cloud Platform Security",
+      "Zero Trust & Identity Management",
+      "Compliance, Governance & Continuity"
+     ],
+     "projects": [
+      "Enterprise Kubernetes Platform",
+      "Secure CI/CD with Scanning",
+      "Kubernetes Security Hardening"
+     ]
+    },
+    {
+     "name": "Multicloud Strategy & Architecture",
+     "weeks": "25–27",
+     "topics": [
+      "Multicloud Foundations",
+      "Multicloud Networking & Connectivity",
+      "Multicloud Identity, Governance & Policies",
+      "Multicloud Data & Application Mobility",
+      "Multicloud Operations & Automation",
+      "Multicloud Disaster Recovery & Resilience"
+     ],
+     "projects": [
+      "Multicloud App Deployment"
+     ]
+    },
+    {
+     "name": "MLOps Engineering",
+     "weeks": "28–31",
+     "topics": [
+      "Foundations of MLOps & Production ML Systems",
+      "Cloud & Kubernetes-Based ML Deployment and Scaling",
+      "Monitoring, Observability & Reliability for ML Systems",
+      "Model Governance, CI/CD & Production MLOps"
      ],
      "projects": []
     },
     {
-     "name": "AI CoLab + capstones",
-     "weeks": "37–39",
+     "name": "GenAI Essentials for Cloud & DevOps",
+     "weeks": "32–33",
      "topics": [
-      "2 capstones"
+      "Introduction to Generative AI in DevOps",
+      "Automating DevOps Workflows with Generative AI",
+      "AI-Powered Monitoring & Incident Resolution",
+      "Predictive Analytics and Resource Management",
+      "Generative AI for Container Orchestration",
+      "Cost Optimization and Budget Planning with AI",
+      "Disaster Recovery and Security Automation with AI",
+      "Customizing GenAI Tools for Cloud and DevOps Needs"
+     ],
+     "projects": []
+    },
+    {
+     "name": "Specialisations (choose any 2): IT & ITOps, System Admin, Network, DBA",
+     "weeks": "34–39",
+     "topics": [
+      "Cloud & DevOps for IT Support & IT Operations",
+      "Cloud & DevOps for System Administrators",
+      "Cloud & DevOps for Network Professionals",
+      "Cloud & DevOps for Database Administrators"
      ],
      "projects": []
     }
    ],
-   "specialisations": [],
+   "specialisations": [
+    {
+     "name": "IT Support & ITOps",
+     "content": "Cloud & DevOps for IT Support & ITOps",
+     "projects": []
+    },
+    {
+     "name": "System Admin",
+     "content": "Cloud & DevOps for System Admin",
+     "projects": []
+    },
+    {
+     "name": "Network",
+     "content": "Cloud & DevOps for Network",
+     "projects": []
+    },
+    {
+     "name": "DBA",
+     "content": "Cloud & DevOps for DBA",
+     "projects": []
+    }
+   ],
    "capstones": [
     "P11",
     "P15",
@@ -2166,8 +2819,8 @@
   },
   {
    "code": "AIL",
-   "name": "AI Leadership Program for Managers & Leaders",
-   "family": "AI for Business (no code)",
+   "name": "GenAI & Agentic AI Program for Managers & Leaders",
+   "family": "GenAI & Agentic AI",
    "tier": "Program",
    "durationMonths": 5,
    "totalWeeks": 22,
@@ -2177,35 +2830,57 @@
     "Business heads, founders and CXOs who must lead AI adoption"
    ],
    "notFor": [
-    "Individual contributors who want AI for their own tasks (→ Applied AI Practitioner)",
-    "Hands-on tech leads who want to build (→ GenAI & Agentic AI Master)"
+    "Individual contributors who only want AI tools for their own tasks (→ Applied AI Practitioner)",
+    "Hands-on engineers who want the full build depth with two specialisations (→ GenAI & Agentic AI Master)"
    ],
-   "entry": "2+ years of work experience, including any people, project or business responsibility. No coding.",
+   "entry": "2+ years of work experience, including any people, project or business responsibility. No coding background needed: Python is taught from scratch.",
    "targetRoles": [
     "AI Transformation Lead",
     "AI Product / Program Manager",
     "AI-enabled Engineering or Business Manager"
    ],
-   "certificates": "IBM + AI CoLab certificate",
+   "certificates": "IBM GenAI certificate",
    "modules": [
     {
-     "name": "AI literacy for leaders",
-     "weeks": "1–2",
+     "name": "Induction & Orientation",
+     "weeks": "1",
      "topics": [
-      "How LLMs and agents work",
-      "Capabilities, limits and cost",
-      "The model and vendor landscape"
+      "Overview Of AI, Generative AI, And Agentic AI",
+      "Career Paths And Role Mapping For AI Professionals",
+      "LinkedIn Profile Optimization For AI & Tech Hiring",
+      "Using Python Colab For Hands-On Learning",
+      "Learning Workflow, Tools, And Program Onboarding"
+     ],
+     "projects": [
+      "AI Risk Assessment & Mitigation Framework"
+     ]
+    },
+    {
+     "name": "Python for GenAI",
+     "weeks": "2–5",
+     "topics": [
+      "Core Python",
+      "Loops",
+      "Control Statements",
+      "Functions",
+      "Advanced Python",
+      "Regex",
+      "Exceptional Handling",
+      "OOPs",
+      "NumPy",
+      "Pandas"
      ],
      "projects": []
     },
     {
-     "name": "Personal AI productivity: Claude, Copilot & connectors",
-     "weeks": "3–5",
+     "name": "Claude, Claude Code & MCP for managers",
+     "weeks": "6–7",
      "topics": [
       "Microsoft 365 Copilot and Gemini for Workspace",
       "Claude with connectors: Gmail, Drive, Calendar, Slack, Notion",
       "Claude Projects and Skills for repeatable team work",
-      "A Claude Code demo: what your engineers can now build in a day",
+      "Claude Code: what your teams can build in a day, and how to brief it",
+      "MCP: connecting AI safely to your company tools and data",
       "Meeting intelligence"
      ],
      "projects": [
@@ -2213,36 +2888,73 @@
      ]
     },
     {
-     "name": "No-code agents & process automation",
-     "weeks": "6–8",
+     "name": "Foundation for GenAI",
+     "weeks": "8–10",
      "topics": [
-      "n8n, Make, Copilot Studio",
-      "MCP connectors",
-      "Designing human approval"
+      "ML Fundamentals",
+      "Regression Analysis",
+      "Classification Analysis",
+      "Deep Learning Fundamentals",
+      "NLP Fundamentals",
+      "Transformer – BERT Model"
      ],
-     "projects": [
-      "Agentic Workflow & Task Automation Blueprint"
-     ]
+     "projects": []
     },
     {
-     "name": "AI strategy, use-case discovery & ROI",
-     "weeks": "9–11",
+     "name": "Generative AI for Managers",
+     "weeks": "11–15",
      "topics": [
-      "Use-case canvas",
-      "Build vs buy, vendor evaluation",
-      "AI business case and ROI"
+      "Fundamentals of GenAI",
+      "Use cases",
+      "Prompt Engineering For Managers",
+      "LLM",
+      "Hugging Face",
+      "RAG (Retrieval Augmented Generation)",
+      "Langchain / Llama Index",
+      "Fine tuning",
+      "Azure OpenAI"
      ],
      "projects": [
       "AI Project Scope, Effort & ROI Assessment"
      ]
     },
     {
-     "name": "AI product & delivery management",
-     "weeks": "12–14",
+     "name": "Agentic AI",
+     "weeks": "16",
      "topics": [
-      "AI PRDs and success metrics",
-      "Evals for non-engineers",
-      "Agile delivery of AI projects (Scrum, Jira)"
+      "Understanding Agentic AI and Autonomous Agents",
+      "Key components of Agentic AI",
+      "AutoGen",
+      "CrewAI",
+      "LangGraph",
+      "MCP (Model Context Protocol) / ACP / A2A",
+      "No-Code/Low-Code AI Agent Basics",
+      "Ethics And Safety In Agentic AI",
+      "AWS Bedrock"
+     ],
+     "projects": [
+      "Agentic Workflow & Task Automation Blueprint"
+     ]
+    },
+    {
+     "name": "GenAI for Digital Business Transformation",
+     "weeks": "17–18",
+     "topics": [
+      "AI-driven Decision Making",
+      "GenAI in Sales and Marketing",
+      "GenAI Customer Service and Operations",
+      "GenAI in Data Analytics"
+     ],
+     "projects": [
+      "GenAI KPI Insights & Forecast Dashboard"
+     ]
+    },
+    {
+     "name": "GenAI for Project Management",
+     "weeks": "19–21",
+     "topics": [
+      "Agile Foundations & Practices",
+      "Tools & Practical Project Execution"
      ],
      "projects": [
       "GenAI Product Roadmap & Prioritization",
@@ -2250,39 +2962,13 @@
      ]
     },
     {
-     "name": "Data-driven decisions with AI",
-     "weeks": "15–16",
+     "name": "Capstone projects (pick any two)",
+     "weeks": "22",
      "topics": [
-      "Power BI Copilot, KPI insights, forecasting basics"
-     ],
-     "projects": [
-      "GenAI KPI Insights & Forecast Dashboard"
-     ]
-    },
-    {
-     "name": "AI governance, risk & responsible AI",
-     "weeks": "17–18",
-     "topics": [
-      "DPDP Act, EU AI Act, RBI/SEBI/IRDAI guidance",
-      "AI policies and risk registers"
-     ],
-     "projects": [
-      "AI Risk Assessment & Mitigation Framework"
-     ]
-    },
-    {
-     "name": "Leading AI transformation",
-     "weeks": "19",
-     "topics": [
-      "Change management, upskilling, org design"
-     ],
-     "projects": []
-    },
-    {
-     "name": "Capstone",
-     "weeks": "20–22",
-     "topics": [
-      "AI transformation plan for your own organisation, reviewed by a panel"
+      "Smart Hiring Tool for recruitment",
+      "Financial Report Generator using GenAI tools",
+      "Project Performance Dashboard",
+      "Employee Feedback Insights"
      ],
      "projects": []
     }
@@ -2747,7 +3433,7 @@
     "Interested in CI/CD and cloud, or in AI-driven testing?",
     "Which tools do you use?"
    ],
-   "note": "If the goal is AI testing, offer the GenAI & Agentic AI Master with the QA & Test specialisation.",
+   "note": "If the goal is AI testing, offer the GenAI & Agentic AI Master (AI-driven testing).",
    "fdePriority": true
   },
   {
@@ -3037,7 +3723,8 @@
    "programs": [
     "FDE-M",
     "GAI-M",
-    "GAI-SD"
+    "GAI-SD",
+    "AIE"
    ],
    "objective": "Let 10,000 branch staff get cited answers from policy, product and RBI circulars, each seeing only what their role allows.",
    "tools": [
@@ -3128,7 +3815,8 @@
    "programs": [
     "SDE-M",
     "GAI-SD",
-    "FDE-M"
+    "FDE-M",
+    "AIE"
    ],
    "objective": "Match millions of payment and settlement records and explain every mismatch.",
    "tools": [
@@ -3366,7 +4054,8 @@
     "GAI-M",
     "FDE-M",
     "GAI-SD",
-    "SDE-M"
+    "SDE-M",
+    "AIE"
    ],
    "objective": "Keep catalog data clean and recommend prices that respond to competitors and stock.",
    "tools": [
@@ -3674,7 +4363,8 @@
     "GAI-M",
     "FDE-M",
     "GAI-SD",
-    "SDE-M"
+    "SDE-M",
+    "AIE"
    ],
    "objective": "Help service technicians diagnose faults from sensor codes and service bulletins.",
    "tools": [
@@ -3711,7 +4401,8 @@
    "programs": [
     "SDE-M",
     "GAI-SD",
-    "CD-M"
+    "CD-M",
+    "AIE"
    ],
    "objective": "Design a ride-matching system that handles city-scale demand.",
    "tools": [
@@ -3765,7 +4456,8 @@
     "GAI-M",
     "FDE-M",
     "GAI-SD",
-    "SDE-M"
+    "SDE-M",
+    "AIE"
    ],
    "objective": "Recommend the next lesson for each learner based on progress and gaps.",
    "tools": [
@@ -3947,7 +4639,8 @@
     "GAI-M",
     "FDE-M",
     "GAI-SD",
-    "SDE-M"
+    "SDE-M",
+    "AIE"
    ],
    "objective": "Answer employee policy questions instantly with sources.",
    "tools": [
@@ -4104,7 +4797,8 @@
    "track": "Software Engineering",
    "programs": [
     "SDE-M",
-    "GAI-SD"
+    "GAI-SD",
+    "AIE"
    ],
    "objective": "Design a booking system that never double-books under heavy load.",
    "tools": [
@@ -4197,7 +4891,8 @@
     "GAI-M",
     "FDE-M",
     "GAI-SD",
-    "SDE-M"
+    "SDE-M",
+    "AIE"
    ],
    "objective": "Connect Claude to a tool your team uses that has no ready-made connector.",
    "tools": [
@@ -4216,7 +4911,8 @@
    "programs": [
     "FDE-M",
     "GAI-SD",
-    "SDE-M"
+    "SDE-M",
+    "AIE"
    ],
    "objective": "Add an in-product AI copilot that keeps every customer's data separate.",
    "tools": [
@@ -4235,7 +4931,8 @@
    "programs": [
     "SDE-M",
     "GAI-SD",
-    "FDE-M"
+    "FDE-M",
+    "AIE"
    ],
    "objective": "Speed up code review, test writing and migrations across a large codebase.",
    "tools": [
@@ -4365,7 +5062,8 @@
    "programs": [
     "SDE-M",
     "GAI-SD",
-    "FDE-M"
+    "FDE-M",
+    "AIE"
    ],
    "objective": "Give ops teams a live view of delays and AI explanations for each.",
    "tools": [
@@ -4414,10 +5112,6 @@
   {
    "old": "GenAI & Agentic AI Certification Program",
    "now": "Tech leads → GAI-M or GAI-SD · Freshers → DSG-C · Non-tech → AAP"
-  },
-  {
-   "old": "AI Engineer(ing) Master Program",
-   "now": "FDE-M; shorter path → GAI-SD"
   },
   {
    "old": "C&D for ITS & ITOps / SysAdmin / DBA / Network / QA",

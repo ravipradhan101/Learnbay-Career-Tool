@@ -102,6 +102,16 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
     submit()
   }
 
+  // Phones and touch screens get a short placeholder (no Shift+Enter there, and a long one wraps over four lines).
+  const [shortHint, setShortHint] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px), (pointer: coarse)')
+    const on = () => setShortHint(mq.matches)
+    on()
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+
   // The box grows with the text, up to about five lines.
   useEffect(() => {
     const el = inputRef.current
@@ -119,8 +129,8 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
             <span className="tc-who">
               <span className="tc-name"><b>{nameOf(who)}</b><span className="tc-badge">{COUNSELLOR_TITLE}</span></span>
               <span className="tc-status">
-                {rating && rating.count >= 10 && <span className="tc-rating"><b>★ {rating.avg.toFixed(2)}</b> ({rating.count.toLocaleString('en-IN')} ratings) · </span>}
-                Online · <u>View profile</u>
+                {rating && rating.count >= 10 && <span className="tc-rating"><b>★ {rating.avg.toFixed(2)}</b><span className="tc-rating-count"> ({rating.count.toLocaleString('en-IN')} ratings)</span> · </span>}
+                <span className="tc-online">Online · </span><u>View profile</u>
               </span>
             </span>
           </button>
@@ -198,7 +208,7 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
           id="tc-input" ref={inputRef} value={text} rows={1} onKeyDown={onKey} autoComplete="off"
           onChange={(e) => setText(asking ? e.target.value.replace(/\n/g, ' ') : e.target.value)}
           maxLength={asking?.maxLength ?? 600} inputMode={asking?.inputMode ?? 'text'}
-          placeholder={asking ? asking.placeholder : 'Or type your question… (Shift+Enter for a new line)'}
+          placeholder={asking ? asking.placeholder : shortHint ? 'Type your question…' : 'Or type your question… (Shift+Enter for a new line)'}
         />
         <button className="tc-send" aria-label="Send" disabled={!text.trim() || thinking}>
           {thinking ? <span className="spinner" /> : <Icon name="send" size="1.15rem" />}

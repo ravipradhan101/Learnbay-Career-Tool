@@ -36,6 +36,8 @@ export const CODE_TO_ID: Record<string, string> = {
   CD: 'cloud-devops-engineering',
   'CD-M': 'ai-cloud-devops-master',
   AIL: 'genai-agentic-ai-managers-leaders',
+  // Back in 2026-10 (the user: "part of our system, if demand they use it"): offered to coders who aim for AI Engineer.
+  AIE: 'ai-engineering-master',
   MCS: 'ms-cs-data-science-ai',
 }
 export const ID_TO_CODE: Record<string, string> = Object.fromEntries(Object.entries(CODE_TO_ID).map(([c, id]) => [id, c]))
@@ -62,8 +64,8 @@ export const MIN_YEARS: Record<string, number> = {
  * Master, GenAI for Software Developers and FDE are built for IT professionals and developers.
  */
 export const CODING: Record<string, 'no' | 'some' | 'yes'> = {
-  AAP: 'no', AIL: 'no', DABA: 'some', 'DSG-C': 'some', 'DSG-M': 'some', 'GAI-M': 'some', MCS: 'some',
-  CD: 'yes', 'CD-M': 'yes', 'GAI-CD': 'yes', 'GAI-SD': 'yes', 'SDE-M': 'yes', 'FDE-M': 'yes',
+  AAP: 'no', AIL: 'some', DABA: 'some', 'DSG-C': 'some', 'DSG-M': 'some', 'GAI-M': 'some', MCS: 'some',
+  CD: 'yes', 'CD-M': 'yes', 'GAI-CD': 'yes', 'GAI-SD': 'yes', 'SDE-M': 'yes', 'FDE-M': 'yes', AIE: 'yes',
 }
 export const FRESHER_CODES = ['AAP', 'DABA', 'DSG-C']
 

@@ -1,7 +1,7 @@
 import { getCurrentAdmin } from '@/lib/admin-auth'
 import { queryOne } from '@/lib/db'
 import type { Answers } from '@/lib/questions'
-import { buildReportEmail, toolReportPdf } from '@/lib/report-email'
+import { buildReportEmail, toolReportPdf, withCapstones } from '@/lib/report-email'
 import { renderHtml } from '@/lib/mailer'
 import { getTool } from '@/lib/tools-meta'
 import type { ToolResultMap } from '@/lib/tool-types'
@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     [id, meta.id],
   )
   if (!row) return new Response('Not found', { status: 404 })
-  const opts = { userId: id, to: '', name: firstName(row.name), meta, data: row.data, answers: row.answers }
+  const opts = await withCapstones({ userId: id, to: '', name: firstName(row.name), meta, data: row.data, answers: row.answers })
   // ?as=email shows the report email exactly as the learner received it (all values are HTML-escaped).
   if (new URL(request.url).searchParams.get('as') === 'email') {
     return new Response(renderHtml(buildReportEmail(opts)), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:" } })

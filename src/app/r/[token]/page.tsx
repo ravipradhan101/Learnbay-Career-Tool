@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { withCurriculum } from '@/lib/curriculum-phases'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Icon } from '@/components/Icon'
@@ -34,7 +35,7 @@ export default async function SharedPage({ params }: { params: Promise<{ token: 
         </div>
         {row.tool === 'skill-gap' && <SkillGapView r={row.data as SkillGapResult} shared />}
         {row.tool === 'salary' && <SalaryView r={row.data as SalaryResult} current={null} shared />}
-        {row.tool === 'roadmap' && <RoadmapView r={row.data as RoadmapResult} shared />}
+        {row.tool === 'roadmap' && <RoadmapView r={withCurriculum(row.data as RoadmapResult)} shared />}
         {/* The recommended program and Learnbay's approach, kept below the report so the report stays the focus. */}
         <ProgramFitCard fit={row.data as ProgramFit} />
         <LearnbayPitch toolId={row.tool} ids={row.tool === 'salary' ? ['placement', 'domain', 'projects', 'certification'] : row.tool === 'roadmap' ? ['mentors', 'hybrid', 'projects', 'placement'] : ['customisation', 'projects', 'domain', 'mentors']} />

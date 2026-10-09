@@ -10,14 +10,23 @@ import type { Answers } from './questions'
 import type { ToolMeta } from './tools-meta'
 import type { RoadmapResult, SalaryResult, SkillGapResult, ToolResultMap } from './tool-types'
 import { focusFor, moduleFor, weeksLabel } from './plan'
-import { industriesFor } from './projects'
+import { capstonesFor, type Capstone } from './capstones'
+import { withCurriculum } from './curriculum-phases'
 import { curriculumOf } from './roles'
 import { domainLabel, experienceLabel, roleLabel, targetRoleLabel } from './questions'
 
 // Emailed reports. People skim email: the body shows the headline number, key numbers, one mini chart,
 // the next 3 moves and two buttons. The attached PDF opens with the same visual summary page, then details.
 
-type Opts = { userId: string; to: string; name: string; meta: ToolMeta; data: ToolResultMap[ToolMeta['id']]; answers: Answers }
+type Opts = { userId: string; to: string; name: string; meta: ToolMeta; data: ToolResultMap[ToolMeta['id']]; answers: Answers; capstones?: Capstone[] }
+
+/** Adds the capstones that fit this learner (the PDF's plan section shows them). */
+export async function withCapstones<T extends Opts>(opts: T): Promise<T> {
+  const programId = (opts.data as { programId: string }).programId
+  const ideas = opts.meta.id === 'roadmap' ? (opts.data as ToolResultMap['roadmap']).projects : []
+  const data = opts.meta.id === 'roadmap' ? withCurriculum(opts.data as ToolResultMap['roadmap']) : opts.data
+  return { ...opts, data, capstones: await capstonesFor(programId, opts.answers, ideas) }
+}
 
 const USPS_FOR: Record<ToolMeta['id'], UspId[]> = {
   'skill-gap': ['customisation', 'projects', 'mentors'],
@@ -95,10 +104,6 @@ function planBlocks(opts: Opts, programId: string, programName: string): PdfBloc
   const about = [roleLabel(a), experienceLabel(a), domainLabel(a), targetRoleLabel(a) !== 'Not specified' ? `aiming for ${targetRoleLabel(a)}` : ''].filter((x) => x && x !== 'Not specified')
   const focus = focusFor(opts.meta.id, opts.data).slice(0, 4)
   const used = new Set<string>()
-  const industries = industriesFor(a)
-  const rank = (d: string | undefined) => { const i = d ? industries.indexOf(d) : -1; return i < 0 ? 99 : i }
-  const sorted = [...course.projects].sort((x, y) => rank(x.domain) - rank(y.domain))
-  const projects = rank(sorted[0]?.domain) < 99 ? sorted.slice(0, 2) : sorted.filter((x, i) => sorted.findIndex((y) => y.domain === x.domain) === i).slice(0, 2)
   return [
     { type: 'h', text: `Your plan with Learnbay: ${programName}` },
     ...(about.length ? [{ type: 'small', text: `About you: ${about.join(' · ')}` } as PdfBlock] : []),
@@ -108,8 +113,8 @@ function planBlocks(opts: Opts, programId: string, programName: string): PdfBloc
       return { type: 'bullet', text: `${i + 1}. ${f}${m ? `: learnt in "${m.name}"${/\d/.test(m.weeks) ? ` (${weeksLabel(m.weeks)})` : ''}` : ': covered in your plan with your Senior Counsellor'}` }
     }),
     ...(course.durationMonths ? [{ type: 'bullet', text: `Program length: ${course.durationMonths} months (${course.totalWeeks} weeks), ${course.moduleDetails.length} modules.` } as PdfBlock] : []),
-    ...(course.certifications[0] ? [{ type: 'bullet', text: `Certificates: ${course.certifications[0]}` } as PdfBlock] : []),
-    ...projects.map((x): PdfBlock => ({ type: 'bullet', text: `Capstone (${x.domain}): ${x.title}. ${x.objective} You'll achieve: ${x.outcome}` })),
+    ...(course.certifications.length ? [{ type: 'bullet', text: `Certificates: ${course.certifications.join(' · ')}` } as PdfBlock] : []),
+    ...(opts.capstones ?? []).map((x): PdfBlock => ({ type: 'bullet', text: `Capstone (${x.label.replace(/ · .*$/, '')}): ${x.title}. ${x.objective}${x.outcome ? ` You'll achieve: ${x.outcome}` : ''}` })),
   ]
 }
 
@@ -132,7 +137,7 @@ export function toolReportPdf(opts: Opts): Buffer {
     ...detailBlocks(opts.meta.id, opts.data),
     ...planBlocks(opts, p.id, p.name),
     { type: 'h', text: `How Learnbay helps you get there` },
-    ...(['customisation', 'projects', 'mentors', 'placement'] as const).map((id): PdfBlock => ({ type: 'bullet', text: `${USPS[id].title}: ${USPS[id].short}` })),
+    ...(['customisation', 'domain', 'projects', 'mentors', 'certification', 'placement'] as const).map((id): PdfBlock => ({ type: 'bullet', text: `${USPS[id].title}: ${USPS[id].short}` })),
     { type: 'bullet', text: `Program details: ${p.url}` },
     { type: 'small', text: `"${PUBLISHED_STORY.quote}" (${PUBLISHED_STORY.name}, ${PUBLISHED_STORY.role}, as published on ${PUBLISHED_STORY.source})` },
     { type: 'gap' },
@@ -228,5 +233,5 @@ ${kpiHtml}${miniChartHtml(opts.meta.id, opts.data)}${actionsHtml}${buttons}
 }
 
 export async function emailToolReport(opts: Opts) {
-  await sendMail(buildReportEmail(opts))
+  await sendMail(buildReportEmail(await withCapstones(opts)))
 }
