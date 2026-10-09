@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { SESSION_COOKIE } from '@/lib/auth'
 import { query } from '@/lib/db'
-import { clientIp, cleanText, isSameOrigin, jsonError, jsonOk, rateLimits, readJson, sha256 } from '@/lib/security'
+import { clientIp, cleanText, isSameOrigin, jsonError, jsonOk, localLimit, rateLimit, readJson, sha256 } from '@/lib/security'
 
 // Batched product-analytics events from the browser (see src/lib/analytics.ts).
 const TYPES = new Set(['page_view', 'page_leave', 'click', 'step_view', 'step_answer', 'step_back', 'action', 'error'])
@@ -32,7 +32,8 @@ function cleanProps(value: unknown): Record<string, string | number | boolean> {
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError(403, 'Invalid request origin.')
   // Over the limit, drop quietly: analytics must never show an error to a learner.
-  if (!(await rateLimits([[`an:ip:${clientIp(request)}`, 600, 3600], ['an:global', 60_000, 600]]))) return jsonOk()
+  // The global breaker is counted in memory per instance: a shared database row here would be the first bottleneck.
+  if (!localLimit('an:global', 20_000, 600) || !(await rateLimit(`an:ip:${clientIp(request)}`, 600, 3600))) return jsonOk()
   const body = await readJson<{ v?: unknown; s?: unknown; events?: unknown }>(request, 24_000)
   const visitor = typeof body?.v === 'string' && ID_RE.test(body.v) ? body.v : null
   const session = typeof body?.s === 'string' && ID_RE.test(body.s) ? body.s : null

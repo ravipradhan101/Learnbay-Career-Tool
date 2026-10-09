@@ -30,8 +30,9 @@ export const USPS: Record<UspId, Usp> = {
     icon: 'folder',
     title: 'Real projects, not simulations',
     short: 'Work on real problem statements from AI-driven companies through the AI Co-Lab.',
-    detail: 'Learnbay programs are project-based: projects in the modules, capstones drawn from real industry scenarios, and, in most programs, a real startup problem through the AI CoLab with a project certificate.',
-    points: ['Projects in every module, plus capstones', 'Real startup problems through the AI CoLab', 'AI CoLab project certificates for your portfolio'],
+    // "Bring your own project" confirmed by the Learnbay team (9 Oct 2026).
+    detail: 'Learnbay programs are project-based: projects in the modules, capstones drawn from real industry scenarios, and, in most programs, a real startup problem through the AI CoLab with a project certificate. Bring your own project: if you have a project from your own work or idea, you can bring it and the mentors guide you on it too.',
+    points: ['Projects in every module, plus capstones', 'Bring your own project: mentors guide you on it', 'Real startup problems through the AI CoLab', 'AI CoLab project certificates for your portfolio'],
   },
   mentors: {
     id: 'mentors',

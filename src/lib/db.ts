@@ -15,8 +15,10 @@ export function getPool(): Pool {
   if (!globalForPool.__navigatorPool) {
     const pool = new Pool({
       connectionString: normalizeDatabaseUrl(env.databaseUrl),
-      max: Math.max(2, Number(process.env.DB_POOL_MAX ?? '20') || 20),
-      idleTimeoutMillis: 30_000,
+      // Serverless: many small instances, each with a modest pool, and idle connections closed quickly (Neon's pooler
+      // multiplexes them, so the database never sees thousands of open connections).
+      max: Math.max(2, Number(process.env.DB_POOL_MAX ?? '10') || 10),
+      idleTimeoutMillis: 10_000,
       // Neon can take a few seconds to wake from idle; a short timeout turns that into a failed page load.
       connectionTimeoutMillis: 20_000,
       ssl: env.databaseSsl ? { rejectUnauthorized: env.databaseSslRejectUnauthorized } : undefined,

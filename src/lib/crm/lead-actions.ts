@@ -62,7 +62,7 @@ export async function createLead(me: StaffUser, b: Record<string, unknown>): Pro
   }
   const r = await claimCreatedLead(me, created.id, email, `${phoneCountry}${phone}`, toId)
   const ownerName = displayName(byId(dir).get(r.ownerId))
-  if (typeof b.note === 'string' && b.note.trim()) await query(`INSERT INTO lead_notes (user_id, author_id, body) VALUES ($1, $2, $3)`, [created.id, me.id, cleanText(b.note, 2000)])
+  if (typeof b.note === 'string' && b.note.trim()) await query(`INSERT INTO lead_notes (user_id, author_id, body) VALUES ($1, $2, $3)`, [created.id, me.id, cleanText(b.note, 2000, true)])
   return {
     ok: true,
     message: r.source === 'crm' ? `Lead saved. The CRM already lists ${ownerName} as this person’s owner, so it went to them.` : `Lead saved and given to ${r.ownerId === me.id ? 'you' : ownerName}.`,

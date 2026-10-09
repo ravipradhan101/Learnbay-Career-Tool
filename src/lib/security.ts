@@ -119,6 +119,28 @@ export async function rateLimit(key: string, limit: number, windowSeconds: numbe
   return (row?.count ?? 1) <= limit
 }
 
+/**
+ * A per-server-instance counter in memory (no database write). For high-volume, low-stakes circuit breakers such as
+ * analytics, where one shared database row would become a hot spot that every request queues on.
+ */
+const local = new Map<string, { start: number; count: number }>()
+export function localLimit(key: string, limit: number, windowSeconds: number): boolean {
+  const now = Date.now()
+  const cur = local.get(key)
+  if (!cur || now - cur.start > windowSeconds * 1000) { local.set(key, { start: now, count: 1 }); return true }
+  cur.count++
+  return cur.count <= limit
+}
+
+/** True when `key` has already been counted `limit` times in the current window (does not count this call). */
+export async function overLimit(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+  const row = await queryOne<{ count: number }>(
+    `SELECT count FROM rate_limits WHERE key = $1 AND window_start >= now() - make_interval(secs => $2)`,
+    [key.slice(0, 200), windowSeconds],
+  )
+  return (row?.count ?? 0) >= limit
+}
+
 /** Checks several limits; all must pass. Use with a per-identity key plus a global circuit breaker. */
 export async function rateLimits(checks: [key: string, limit: number, windowSeconds: number][]): Promise<boolean> {
   const results = await Promise.all(checks.map(([k, l, w]) => rateLimit(k, l, w)))
@@ -126,10 +148,12 @@ export async function rateLimits(checks: [key: string, limit: number, windowSeco
 }
 
 /** Strips control characters and angle brackets from free text and trims it to a max length. */
-export function cleanText(value: unknown, max: number): string {
+export function cleanText(value: unknown, max: number, multiline = false): string {
   if (typeof value !== 'string') return ''
   return value
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    // Single-line fields (names, subjects, roles) never carry line breaks: they could end up in email headers.
+    .replace(multiline ? /\r\n?/g : /[\r\n]+/g, multiline ? '\n' : ' ')
     .replace(/[<>]/g, '')
     .replace(/[ \t]+/g, ' ')
     .trim()

@@ -5,7 +5,7 @@ import { requireAdmin } from '@/lib/admin-auth'
 
 export const metadata: Metadata = { title: 'Leads' }
 
-const fmt = (d: Date | string) => new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+const fmt = (d: Date | string) => new Date(d).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requireAdmin()

@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Icon, type IconName } from '../Icon'
-import { Avatar, type WoodyMood } from './Avatar'
+import { Avatar, type BruceMood } from './Avatar'
 import { track } from '@/lib/analytics'
 import { postJson } from '@/lib/client'
 import { BOT_NAME, GUIDE_TITLE } from '@/lib/counsellors'
 
 export type GuideAction = { id: string; label: string; icon?: IconName; primary?: boolean }
-/** The feedback form Woody shows under his message. */
+/** The feedback form Bruce shows under his message. */
 export type RatingAsk = { counsellor: string; counsellorName: string; testTaken: boolean; threadId: string | null }
 export type GuideLine = { text: string; actions?: GuideAction[]; autoCloseMs?: number; rating?: RatingAsk }
 export type GuideHandle = {
   say: (line: GuideLine) => void
-  /** Shows the line and resolves with the action picked, or null if Woody is closed (X, Esc, outside click). */
+  /** Shows the line and resolves with the action picked, or null if Bruce is closed (X, Esc, outside click). */
   choose: (line: GuideLine) => Promise<string | null>
   /** Opens the feedback pop-up; resolves true when sent, false when skipped or closed. */
   askRating: (ask: RatingAsk, text: string) => Promise<boolean>
@@ -30,22 +30,24 @@ const setFlag = (key: string) => { try { window.sessionStorage.setItem(key, '1')
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /**
- * Woody, the guide for the whole studio (like a guide in a game): always floating in the corner with his face,
+ * Bruce, the guide for the whole studio (like a guide in a game): always floating in the corner with his face,
  * he pops up with a typed message when there is something worth knowing (before you leave, after a long pause),
  * and helps with anything when tapped.
  */
-export function LumiGuide({ first, who, hello, help, nudge, quiet, onAction, ref }: {
+export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, onAction, ref }: {
   first: string
   /** The learner (his hello and nudge happen once per visit per learner, even when several share a browser tab). */
   who: string
   /** His first hello this visit (e.g. offering the tour to someone new). */
   hello?: () => GuideLine
-  /** What Woody offers when tapped. */
+  /** What Bruce offers when tapped. */
   help: () => GuideLine
-  /** What Woody says when the learner seems to be leaving, or has gone quiet (null if there is nothing left worth doing). */
+  /** What Bruce says when the learner seems to be leaving, or has gone quiet (null if there is nothing left worth doing). */
   nudge: (why: 'back' | 'idle') => GuideLine | null
-  /** True while Woody must not nudge (e.g. during the tour, or before a new learner has answered the tour offer). */
+  /** True while Bruce must not nudge (e.g. during the tour, or before a new learner has answered the tour offer). */
   quiet?: () => boolean
+  /** True while the counsellor is still typing or working: his hello waits until they have finished. */
+  busy?: () => boolean
   onAction: (id: string) => void
   ref?: React.Ref<GuideHandle>
 }) {
@@ -81,7 +83,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, onAction, ref
     setTyping(false)
   }, [])
 
-  /** Woody "types" the line like the counsellors: typing dots for a moment, then the whole message at once. */
+  /** Bruce "types" the line like the counsellors: typing dots for a moment, then the whole message at once. */
   const say = useCallback(async (next: GuideLine) => {
     const id = ++run.current
     if (closeTimer.current) window.clearTimeout(closeTimer.current)
@@ -125,14 +127,21 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, onAction, ref
     return () => window.removeEventListener('keydown', onKey)
   }, [line, close])
 
-  // First visit this session: a short hello, so learners know he’s there.
+  // First visit this session: a short hello, so learners know he’s there. It waits until the counsellor has finished
+  // their opening (never a pop-up over a half-typed message), and gives up waiting after about 30 seconds.
+  const busyRef = useRef(busy)
+  busyRef.current = busy
   useEffect(() => {
     const seen = `${SEEN_KEY}:${who}`
     if (flag(seen)) return
-    const t = window.setTimeout(() => {
+    let tries = 0
+    let t = 0
+    const attempt = () => {
+      if ((busyRef.current?.() || lineRef.current) && tries++ < 28) { t = window.setTimeout(attempt, 1000); return }
       setFlag(seen)
       void say(helloRef.current?.() ?? { text: `Hi ${first}! I’m ${BOT_NAME}, your guide here. I’m always in the corner and in the menu, so tap me whenever you need help.` })
-    }, 2500)
+    }
+    t = window.setTimeout(attempt, 2500)
     return () => window.clearTimeout(t)
   }, [first, say, who])
 
@@ -155,7 +164,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, onAction, ref
     }
   }, [say, who])
 
-  // Leaving with the back button: one extra history entry catches it, and Woody asks once before they go.
+  // Leaving with the back button: one extra history entry catches it, and Bruce asks once before they go.
   // (Browsers don't allow a custom message when a tab is closed, so closing is left alone.)
   useEffect(() => {
     const armed = () => Boolean((window.history.state as { lumiGuard?: boolean } | null)?.lumiGuard)
@@ -223,7 +232,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, onAction, ref
         </div>
         </div>
       )}
-      <WoodyFace open={Boolean(line)} onOpen={() => (line ? close() : void say(help()))} />
+      <BruceFace open={Boolean(line)} onOpen={() => (line ? close() : void say(help()))} />
     </div>
   )
 }
@@ -233,12 +242,12 @@ const WAKE_UPS = ['I’m awake! I wasn’t sleeping… just resting my eyes.', '
 type Bubble = { text: string; ask?: boolean }
 
 /**
- * Woody in his corner. He sits there with his eyes open, and now and then dozes off. One tap: he asks what you need.
+ * Bruce in his corner. He sits there with his eyes open, and now and then dozes off. One tap: he asks what you need.
  * Several quick taps: he giggles. Drag and throw him: he flies, falls, says "Ouch!", then offers help; with no answer
  * in 5 seconds he goes back to his place. Tap him while he dozes: "I'm awake! I wasn't sleeping…", then he helps.
  */
-function WoodyFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
-  const [mood, setMood] = useState<WoodyMood>('idle')
+function BruceFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
+  const [mood, setMood] = useState<BruceMood>('idle')
   const [bubble, setBubble] = useState<Bubble | null>(null)
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null)
   const [returning, setReturning] = useState(false)
@@ -281,7 +290,7 @@ function WoodyFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
   // While his message box is open he is attentive, not asleep.
   useEffect(() => { if (open && moodRef.current === 'sleep') setMood('idle') }, [open])
 
-  const say = (text: string, m: WoodyMood, ms: number, then?: () => void) => {
+  const say = (text: string, m: BruceMood, ms: number, then?: () => void) => {
     setMood(m)
     setBubble({ text })
     if (ms) later(() => { setBubble(null); then?.() }, ms)
@@ -289,7 +298,7 @@ function WoodyFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
 
   /** One tap: help (waking him first if he dozed off, or after a fall). */
   const primary = () => {
-    track('action', 'woody_tap', { mood: moodRef.current })
+    track('action', 'bruce_tap', { mood: moodRef.current })
     if (moodRef.current === 'sleep') {
       say(WAKE_UPS[Math.floor(Math.random() * WAKE_UPS.length)], 'excited', 1800, () => { setMood('idle'); onOpen() })
       return
@@ -299,7 +308,7 @@ function WoodyFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
     onOpen()
   }
   const giggle = () => {
-    track('action', 'woody_giggle')
+    track('action', 'bruce_giggle')
     clearTimers()
     say(GIGGLES[Math.floor(Math.random() * GIGGLES.length)], 'playful', 1700, () => setMood(awayRef.current ? 'present' : 'idle'))
   }
@@ -316,7 +325,7 @@ function WoodyFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
 
   /** After a throw: "Ouch!", then back to being the guide; no answer in 5 seconds and he goes home. */
   const landed = () => {
-    track('action', 'woody_thrown')
+    track('action', 'bruce_thrown')
     awayRef.current = true
     const r = wrap.current?.getBoundingClientRect()
     setSayRight(Boolean(r && r.left + r.width / 2 < window.innerWidth / 2))
@@ -407,7 +416,7 @@ function WoodyFace({ open, onOpen }: { open: boolean; onOpen: () => void }) {
 
   const style = offset ? { transform: `translate(${offset.x}px, ${offset.y}px)`, transition: returning ? 'transform 0.7s cubic-bezier(.3,1.3,.5,1)' : 'none' } : undefined
   return (
-    <div ref={wrap} className={`rg-woody${offset ? ' free' : ''}`} style={style}>
+    <div ref={wrap} className={`rg-bruce${offset ? ' free' : ''}`} style={style}>
       {bubble && (
         <div className={`rg-say${sayRight ? ' right' : ''}`} role="status" aria-live="polite">
           <span>{bubble.text}</span>

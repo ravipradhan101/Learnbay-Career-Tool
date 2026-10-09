@@ -1,5 +1,5 @@
 import { query, queryOne } from '../db'
-import { jsonError, rateLimit, randomToken, sha256 } from '../security'
+import { clientIp, jsonError, rateLimit, randomToken, sha256 } from '../security'
 
 /**
  * API keys for developers connecting other tools (the main Sales CRM first). A key is shown once when created; only its
@@ -16,6 +16,8 @@ export function newApiKey(): { key: string; prefix: string; hash: string } {
 
 /** The calling key, or a JSON error response (401 / 403 / 429). */
 export async function apiAuth(request: Request, scope: ApiScope = 'read'): Promise<ApiKey | Response> {
+  // Per network, before any lookup: guessing keys costs nothing but time.
+  if (!(await rateLimit(`api:ip:${clientIp(request)}`, 1500, 3600))) return jsonError(429, 'Too many requests from this network.')
   const header = request.headers.get('authorization') ?? ''
   const m = /^Bearer\s+(lbk_[A-Za-z0-9_-]{20,80})$/.exec(header.trim())
   if (!m) return jsonError(401, 'Send your API key as: Authorization: Bearer lbk_…')

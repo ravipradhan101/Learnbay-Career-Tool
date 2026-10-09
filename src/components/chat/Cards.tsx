@@ -270,13 +270,17 @@ function GeneratingCard({ tool }: { tool: string }) {
 
 function ReportCardView({ card }: { card: ReportCard }) {
   const meta = getTool(card.tool)
-  const [mail, setMail] = useState<'idle' | 'busy' | string>('idle')
+  const [mail, setMail] = useState<'idle' | 'busy' | 'sent'>('idle')
+  const [mailNote, setMailNote] = useState('')
   const h = card.summary.headline
   async function email() {
     setMail('busy')
+    setMailNote('')
     const r = await postJson(`/api/tools/${card.tool}/email`, {})
     track(r.ok ? 'action' : 'error', 'report_email', { tool: card.tool, from: 'chat' })
-    setMail(r.ok ? String(r.data.message ?? 'Sent to your email') : r.error)
+    // Sent: the button says so. Failed: the reason shows, and the button can be tapped again.
+    setMail(r.ok ? 'sent' : 'idle')
+    setMailNote(r.ok ? String(r.data.message ?? 'Sent to your email') : r.error || 'Couldn’t send it just now. Please try again.')
   }
   return (
     <div className="tc-card tc-report">
@@ -301,10 +305,11 @@ function ReportCardView({ card }: { card: ReportCard }) {
       <ActionPlan tool={card.tool} actions={card.summary.actions} />
       <div className="tc-actions">
         <Link href={`/dashboard/${card.tool}/report`} className="tc-btn tc-btn-primary tc-btn-sm" scroll={false}>Open full report <Icon name="arrowRight" size="0.9rem" /></Link>
-        <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={email} disabled={mail !== 'idle' && mail !== 'busy' ? true : mail === 'busy'}>
-          {mail === 'busy' ? <span className="spinner" /> : <><Icon name="mail" size="0.9rem" /> {mail === 'idle' ? 'Email me the PDF' : mail}</>}
+        <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={email} disabled={mail !== 'idle'}>
+          {mail === 'busy' ? <span className="spinner" /> : <><Icon name={mail === 'sent' ? 'checkCircle' : 'mail'} size="0.9rem" /> {mail === 'sent' ? 'Sent to your email' : 'Email me the PDF'}</>}
         </button>
       </div>
+      {mailNote && <small className={mail === 'sent' ? 'tc-mail-note' : 'tc-error'} role="status">{mailNote}</small>}
     </div>
   )
 }
@@ -363,13 +368,13 @@ function EligRunner({ initial, onDone }: { initial: EligInProgress; onDone: Done
   const q = state.question
   const pct = Math.max(0, Math.min(100, (remaining / (q.seconds * 1000)) * 100))
   return (
-    <div className="tc-card tc-quiz" aria-live="polite">
+    <div className="tc-card tc-quiz">
       <div className="tc-quiz-top">
         <span className="tc-eyebrow">Question {state.index + 1} of {state.total} · {q.topic}</span>
-        <span className={`tc-timer ${secs <= 5 ? 'low' : ''}`} aria-label={`${secs} seconds left`}><Icon name="clock" size="0.85rem" /> {secs}s</span>
+        <span className={`tc-timer ${secs <= 5 ? 'low' : ''}`} aria-hidden="true"><Icon name="clock" size="0.85rem" /> {secs}s</span>
       </div>
       <div className="tc-quiz-bar" aria-hidden="true"><i style={{ width: `${pct}%` }} /></div>
-      <h3 className="tc-quiz-q">{q.text}</h3>
+      <h3 className="tc-quiz-q" aria-live="polite">{q.text}</h3>
       <div className="tc-quiz-options">
         {q.options.map((o, i) => (
           <button key={`${state.index}-${i}`} type="button" className="tc-option" disabled={busy} onClick={() => send(i)}>
@@ -438,13 +443,25 @@ function BookingCard({ live, onDone }: { live: boolean; onDone: Done }) {
   const [error, setError] = useState('')
   const [picking, setPicking] = useState(false)
   const load = useCallback(async () => {
+    setError('')
     const r = await getJson('/api/sessions')
     if (r.ok) setData({ booking: (r.data.booking as Booking | null) ?? null, days: (r.data.days as DaySlots[]) ?? [] })
-    else setError(r.error)
+    else setError(r.error || 'Please sign in again.')
   }, [])
   useEffect(() => { void load() }, [load])
 
-  if (error && !data) return <div className="tc-card"><p className="tc-error" role="alert">{error}</p></div>
+  // Couldn't load: try again, or move on (the chat never waits on a card that can't load).
+  if (error && !data) {
+    return (
+      <div className="tc-card">
+        <p className="tc-error" role="alert">{error}</p>
+        <div className="tc-actions-row">
+          <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => void load()}><Icon name="refresh" size="0.9rem" /> Try again</button>
+          {live && <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => onDone({ skipped: true })}>Skip for now</button>}
+        </div>
+      </div>
+    )
+  }
   if (!data) return <div className="tc-card tc-booking"><span className="spinner" /> Loading open slots…</div>
 
   const b = data.booking
@@ -495,6 +512,8 @@ function SlotPicker({ days, current, onBooked, onCancel }: { days: DaySlots[]; c
     setError('')
     const res = current ? await postJson('/api/sessions', { date, time }, 'PATCH') : await postJson('/api/sessions', { date, time, note })
     setBusy(false)
+    // Already booked (in another tab, say): show that booking instead of an error.
+    if (!res.ok && res.status === 409 && res.data.booking) return onBooked(res.data.booking as Booking)
     if (!res.ok) { track('error', current ? 'session_reschedule' : 'session_booking', { status: res.status }); return setError(res.error) }
     track('action', current ? 'session_rescheduled' : 'session_booked', { time, from: 'chat' })
     onBooked(res.data.booking as Booking)
@@ -591,7 +610,7 @@ function CallCard({ source, phone, by }: { source: 'button' | 'chat'; phone: str
     setState('busy')
     const r = await postJson('/api/call', { source })
     track(r.ok ? 'action' : 'error', 'call_requested', { source })
-    setState(r.ok ? String(r.data.message) : r.error)
+    setState(r.ok ? String(r.data.message) : r.error || 'Please sign in again to request a call.')
   }
   if (state === 'no') return <div className="tc-card tc-done tc-muted-done">No problem. Tap the phone icon at the top whenever you want a call.</div>
   if (state !== 'ask' && state !== 'busy') return <div className="tc-card tc-done"><Icon name="phone" size="1.1rem" /> {state}</div>
@@ -700,7 +719,7 @@ function SessionEndedCard() {
   )
 }
 
-// ---------- Woody finds a counsellor ----------
+// ---------- Bruce finds a counsellor ----------
 
 type Slide =
   | { kind: 'story'; name: string; photo?: string; from: string; to: string; company?: string; hike?: string }
@@ -897,10 +916,13 @@ function ProofCard() {
 function ProjectsCard({ interest, programId, items }: { interest: string; programId?: string; items?: ProjectItem[] }) {
   // From the project library (picked for this learner); older chats and empty libraries fall back to the program page.
   if (items?.length) {
+    const library = items.filter((p) => p.kind !== 'idea')
+    const ideas = items.filter((p) => p.kind === 'idea')
     return (
       <div className="tc-card tc-projects">
         <span className="tc-eyebrow">Projects you’ll build</span>
-        {items.map((p, n) => (
+        {library.some((p) => p.tailored) && <small className="tc-project-note">Written for your background</small>}
+        {library.map((p, n) => (
           <div key={p.title} className="tc-project">
             <span className="tc-project-n">{n + 1}</span>
             <div>
@@ -920,6 +942,23 @@ function ProjectsCard({ interest, programId, items }: { interest: string; progra
             </div>
           </div>
         ))}
+        {ideas.length > 0 && (
+          <>
+            <span className="tc-eyebrow tc-project-ideas">Bring your own project: ideas from your work</span>
+            {ideas.map((p) => (
+              <div key={p.title} className="tc-project idea">
+                <span className="tc-project-n"><Icon name="sparkles" size="0.8rem" /></span>
+                <div>
+                  <b>{p.title}</b>
+                  {p.objective && <small className="tc-project-desc"><em>Goal:</em> {p.objective}</small>}
+                  {p.outcome && <small className="tc-project-desc"><em>You’ll achieve:</em> {p.outcome}</small>}
+                  {p.tools.length > 0 && <span className="tc-project-meta"><small>{p.tools.join(' · ')}</small></span>}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+        <small className="tc-project-byop">Have a project from your own work? Bring it: your mentors guide you on it too.</small>
       </div>
     )
   }

@@ -107,7 +107,7 @@ export function sessionRemove(key: string) {
 }
 
 /**
- * Forgets the conversation with Woody kept in this tab (it only survives a refresh mid-way). Called when a new
+ * Forgets the conversation with Bruce kept in this tab (it only survives a refresh mid-way). Called when a new
  * journey starts, after sign-in hands the chat over to the counsellor, and on logout.
  * `keepHandover` keeps the copy the dashboard is about to pick up.
  */

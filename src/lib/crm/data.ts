@@ -30,7 +30,7 @@ export async function listLeads(me: StaffUser, f: LeadFilters): Promise<{ rows: 
   const scope = await scopeIds(me)
   const like = f.q ? `%${f.q.replace(/[%_\\]/g, (c) => `\\${c}`)}%` : ''
   const where = `${inScope(1)}
-    AND ($2 = '' OR u.name ILIKE $2 OR u.email ILIKE $2 OR u.phone ILIKE $2)
+    AND ($2 = '' OR (coalesce(u.name, '') || ' ' || u.email || ' ' || coalesce(u.phone, '')) ILIKE $2)
     AND ($3 = '' OR coalesce(lo.status, 'new') = $3)
     AND ($4 = '' OR lo.owner_id::text = $4)
     AND (NOT $5 OR lo.owner_id IS NULL)

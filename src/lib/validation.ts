@@ -69,6 +69,12 @@ export function sanitizeAnswers(input: unknown): Answers {
   set('timeline', pickOne(TIMELINES, a.timeline))
   set('eduLevel', pickOne(EDU_LEVELS, a.eduLevel))
   set('mathComfort', pickOne(MATH_COMFORT, a.mathComfort))
+  // Free text in their own words (kept short; never shown to anyone else as is).
+  const tools = cleanText(a.toolsUsed, 160)
+  if (tools) out.toolsUsed = tools
+  const problem = cleanText(a.workProblem, 240)
+  if (problem) out.workProblem = problem
+  if (a.deepDive === 'done' || a.deepDive === 'skipped') out.deepDive = a.deepDive
   return out
 }
 

@@ -292,9 +292,10 @@ const g = globalThis as unknown as { __eligPreparing?: Map<string, Promise<void>
  * Generates the learner's next attempt in the background (when they open the test page, and after each attempt),
  * so pressing Start is instant instead of waiting for the AI. Safe to call repeatedly.
  */
-export function prepareNextAttempt(userId: string, answers: Answers): void {
+/** Builds the next attempt's questions ahead of time. Returns the work, so a caller running after the response can wait for it. */
+export function prepareNextAttempt(userId: string, answers: Answers): Promise<void> {
   const busy = (g.__eligPreparing ??= new Map())
-  if (busy.has(userId) || !answers.interest) return
+  if (busy.has(userId) || !answers.interest) return busy.get(userId) ?? Promise.resolve()
   const job = (async () => {
     const set = await activeSetFor(answers.interest)
     if (!set) return
@@ -319,6 +320,7 @@ export function prepareNextAttempt(userId: string, answers: Answers): void {
     .catch((err) => console.error('[eligibility] prepare failed', (err as Error).message))
     .finally(() => busy.delete(userId))
   busy.set(userId, job)
+  return job
 }
 
 /** Starts the next attempt, using the questions prepared in the background when they match the current question set. */
@@ -417,7 +419,8 @@ async function afterCompletion(t: TestRow) {
   await query(`INSERT INTO lead_events (user_id, type, detail) VALUES ($1, 'eligibility_completed', $2)`, [t.user_id, JSON.stringify({ score: String(t.score), band: t.band ?? '', attempt: String(t.attempt) })])
   triggerFlows(t.user_id, 'eligibility_completed')
   emitLeadEvent('eligibility.completed', t.user_id, { track: t.track, attempt: t.attempt, score: t.score, band: t.band, correct: t.correct, total: t.total })
-  if (u.answers) prepareNextAttempt(t.user_id, u.answers)
+  // Awaited: this runs after the response (in background()), which only keeps the function alive for work it waits on.
+  if (u.answers) await prepareNextAttempt(t.user_id, u.answers)
   const band = bandFor(t.score ?? 0)
   const first = (u.name ?? '').trim().split(/\s+/)[0] || 'there'
   const program = (u.answers ? programForLearner(u.answers) : undefined) ?? programsForInterest(u.answers?.interest)[0] ?? getProgram(null)

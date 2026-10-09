@@ -35,11 +35,11 @@ export function catalogueIndex(): string {
 export function routingRules(): string {
   return `ENTRY RULES (Learnbay's own; apply them exactly, never soften or tighten them):
 - Freshers and students (0 years of work experience) can join ONLY the three fresher programs: ${nameOf('AAP')}, ${nameOf('DABA')} and ${nameOf('DSG-C')}. No work experience is needed for these.
-- Every other program needs at least 1 year of work experience (the engineering programs also need them to write code; newer coders get Python and backend pre-work).
+- Every other program needs at least 1 year of work experience. CODING: every AI & Data Science program teaches coding from scratch, so no coding background is needed (non-tech people and managers join them too). Cloud & DevOps programs need coding knowledge and IT experience. The SDE Master, GenAI for Software Developers and the Forward Deployed AI Engineer program are for IT professionals and developers (they teach the AI-era version of the software stack, not coding basics). Never tell someone they must already code for an AI or data science program.
 - ${nameOf('AIL')} needs 2+ years of work experience including any people, project or business responsibility. MBAs who joined straight into manager roles and people fast-tracked into management qualify. There is NO higher minimum: never say a leadership or manager program needs 8+, 10+ or any other number of years beyond 2.
 - Not a graduate (12th or diploma): only ${nameOf('AAP')} (a Senior Counsellor confirms the IIT Patna certificate for non-graduates; never promise it). Students still studying: ${nameOf('AAP')} now, then ${nameOf('DABA')} or ${nameOf('DSG-C')} after graduating.
 - ${nameOf('MCS')} is the only degree: it needs a bachelor's degree with 60%+ aggregate, for people who need a formal master's (promotion, HR policy, immigration).
-- Cloud & DevOps programs need IT experience: be upfront with non-IT people and point them to analytics instead.
+- Cloud & DevOps programs need IT experience and coding knowledge: be upfront with non-IT people and non-coders and point them to analytics or the GenAI & Agentic AI Master (coding taught from scratch) instead.
 ROUTING (the Lead–Course Map, in order):
 ${CATALOGUE.routing.map((r, i) => `${i + 1}. ${r.question} ${r.rule}`).join('\n')}
 Program codes used above: ${PROGRAMS.map((p) => `${p.code} = ${p.name}`).join('; ')}.`

@@ -2,6 +2,9 @@ import { leadFor, staffGuard } from '@/lib/crm/guard'
 import { leadInsights } from '@/lib/crm/insights'
 import { jsonError, jsonOk, rateLimit } from '@/lib/security'
 
+// Calls the AI or sends a batch of emails: allow time for it.
+export const maxDuration = 60
+
 /** The lead's intent score and its cached AI brief (no AI call). */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const me = await staffGuard(request, false)

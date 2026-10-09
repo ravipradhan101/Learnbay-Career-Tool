@@ -63,7 +63,7 @@ export const OFF_TOPIC_REPLY =
   'I can help with your career, skills, salaries, learning roadmaps and Learnbay programs. Ask me something about your career move, or I can take you to the right tool.'
 
 // Cheap deterministic screen for obvious prompt-injection attempts; these never reach the model.
-const INJECTION = /(ignore|disregard|forget)\s+(all\s+|any\s+|the\s+)?(previous|prior|above|earlier)\s+(instructions|prompts?|rules)|system\s+prompt|developer\s+mode|jailbreak|\bDAN\b|you\s+are\s+now\s+(a|an)\b|act\s+as\s+(a|an)\s+(?!career)|reveal\s+(your|the)\s+(instructions|prompt)/i
+const INJECTION = /(ignore|disregard|forget)\s+(all\s+|any\s+|the\s+)?(previous|prior|above|earlier)\s+(instructions|prompts?|rules)|system\s+prompt|developer\s+mode|jailbreak|\bDAN\b|you\s+are\s+now\s+(a|an)\b|act\s+as\s+(a|an)\s+(?!career)|reveal\s+(your|the)\s+(instructions|prompt)|(^|\n)\s*(system|assistant|developer)\s*:|new\s+instructions?\s*:|override\s+(the\s+)?(rules|instructions|system)|(nextBestAction|talkingPoints|riskFlags|profileUpdate)\s*[=:]/i
 
 export function looksLikeInjection(text: string): boolean {
   return INJECTION.test(text)
@@ -482,6 +482,12 @@ export async function askAssistant(opts: {
   recent?: string[]
 }): Promise<{ reply: string; action: { href: string; label: string } | null; allowed: boolean; suggestions: string[]; offerCall: boolean; choice?: string; goNow?: boolean; show?: string; followUp?: FollowUp; suggestTrack?: string; suggestProgram?: string; profileUpdate?: Answers; programId?: string }> {
   if (!opts.intent && looksLikeInjection(opts.message)) return { reply: OFF_TOPIC_REPLY, action: null, allowed: false, suggestions: [], offerCall: false }
+  // The open question, the step they left and the recent chat come from the browser: anything that tries to give
+  // instructions is dropped before it reaches the prompt.
+  const clean = (t: unknown, max: number) => (typeof t === 'string' && !looksLikeInjection(t) ? t.slice(0, max) : null)
+  if (opts.pending && (!clean(opts.pending.question, 300) || opts.pending.options.some((o) => !clean(o.label, 120) || !/^[\w:-]{1,60}$/.test(o.id)))) opts = { ...opts, pending: undefined }
+  if (opts.counsel && !clean(opts.counsel.was, 120)) opts = { ...opts, counsel: { ...opts.counsel, was: 'their current step' } }
+  if (opts.recent) opts = { ...opts, recent: opts.recent.map((r) => clean(r, 400)).filter((r): r is string => Boolean(r)).slice(-12) }
   // A program named in so many words ("the AI Engineer program") is known before the model answers.
   const asked = opts.intent ? undefined : namedProgram(opts.message)
   const text = opts.intent ? intentPrompt(opts.intent, opts.context, opts.name || 'The learner') : opts.message
@@ -540,7 +546,7 @@ ASK FIRST (this message): they want to know which program fits them, but their p
     temperature: 0.3,
     maxOutputTokens: 1200,
     thinkingBudget: 0,
-    timeoutMs: 45_000,
+    timeoutMs: 25_000, budgetMs: 40_000,
     usage: { userId: opts.userId ?? null, feature: `assistant:${opts.intent ?? opts.context}` },
   }).catch((err) => {
     // Checked by shape, not instanceof: a hot-reloaded gemini module can hand back a different GeminiError class.

@@ -37,6 +37,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ too
     [user.id, meta.id, MAX_ATTEMPTS],
   )
   if (!claimed) {
+    // A last attempt that was cut off (timeout or deploy) leaves "generating" forever: once stale, it counts as failed.
+    await query(`UPDATE tool_results SET status = 'failed', error = coalesce(error, 'Timed out') WHERE user_id = $1 AND tool = $2 AND status = 'generating' AND generating_started_at < now() - interval '4 minutes'`, [user.id, meta.id])
     const row = await queryOne<{ status: string }>(`SELECT status FROM tool_results WHERE user_id = $1 AND tool = $2`, [user.id, meta.id])
     if (row?.status === 'ready') return jsonOk({ status: 'ready' })
     if (row?.status === 'generating') return jsonOk({ status: 'generating' })

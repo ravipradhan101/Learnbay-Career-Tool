@@ -6,6 +6,21 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const MAX_ITEMS = 150
 const MAX_BYTES = 300_000
 
+const KINDS = new Set(['bot', 'event', 'user', 'divider', 'card'])
+
+/** Only the shapes the chat really saves: known kinds, text that is text, cards with a type. Anything else is dropped. */
+function cleanItem(raw: unknown): Record<string, unknown> | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const i = raw as Record<string, unknown>
+  if (typeof i.kind !== 'string' || !KINDS.has(i.kind)) return null
+  if (i.kind === 'card') {
+    const card = i.card as Record<string, unknown> | undefined
+    return card && typeof card === 'object' && typeof card.type === 'string' ? i : null
+  }
+  if (typeof i.text !== 'string') return null
+  return { ...i, text: i.text.slice(0, 6000) }
+}
+
 /** One saved chat (only the owner can read it). */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -30,10 +45,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (!UUID_RE.test(id)) return jsonError(404, 'Chat not found.')
   const user = await getCurrentUser()
   if (!user) return jsonError(401, 'Please sign in again.')
-  if (!(await rateLimit(`chat-save:${user.id}`, 240, 3600))) return jsonError(429, 'Saving too often.')
+  if (!(await rateLimit(`chat-save:${user.id}`, 900, 3600))) return jsonError(429, 'Saving too often.')
   const body = await readJson<{ items?: unknown; title?: unknown }>(request, MAX_BYTES + 5_000)
   if (!body || !Array.isArray(body.items)) return jsonError(400, 'Invalid chat.')
-  const items = body.items.filter((i) => i && typeof i === 'object' && typeof (i as { kind?: unknown }).kind === 'string').slice(-MAX_ITEMS)
+  const items = body.items.map(cleanItem).filter((i): i is Record<string, unknown> => i !== null).slice(-MAX_ITEMS)
   const json = JSON.stringify(items)
   if (json.length > MAX_BYTES) return jsonError(413, 'This chat is too long to save. Start a new chat.')
   const title = cleanText(body.title, 80) || null

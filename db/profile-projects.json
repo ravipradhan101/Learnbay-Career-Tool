@@ -1,0 +1,2189 @@
+{
+ "_about": "Projects written for each work profile (src/config/profiles.ts). level decides the programs: nocode = Applied AI Practitioner; lead = AI Leadership + Applied AI Practitioner; analytics = Data & Business Analytics + Data Science & GenAI Program; build = GenAI & Agentic AI Master; ml = Data Science & GenAI Master + MS CS + Data Science & GenAI Program; cloud = Cloud & DevOps Engineering (Network track) + AI-Powered Cloud & DevOps Master. Load with: npm run db:seed-profile-projects",
+ "profiles": {
+  "robotics-automation": [
+   {
+    "title": "AI Robot Path Optimisation Agent",
+    "objective": "Give the agent a part's process requirements and CAD or path data, and get back a path strategy with reachability issues, collision risks, speed and trajectory changes and cycle-time savings.",
+    "outcome": "An engineering assistant that turns hours of offline-programming trial and error into a ranked list of path improvements.",
+    "tools": [
+     "Python",
+     "LLM",
+     "Optimisation algorithms",
+     "Robot scripting APIs"
+    ],
+    "level": "build",
+    "industry": "Automotive & Mobility"
+   },
+   {
+    "title": "Robot Troubleshooting AI Agent",
+    "objective": "Enter a robot alarm, defect or line stoppage; the agent searches robot manuals, SOPs, past incidents and maintenance records.",
+    "outcome": "Likely cause, evidence, checks to perform, recommended fix and safety precautions in seconds, with the source pages cited.",
+    "tools": [
+     "RAG",
+     "LangGraph",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "AI Paint Defect Prediction",
+    "objective": "Use trajectory, speed, gun timing, paint parameters, air pressure, electrostatics and film-thickness history to predict where paint quality will fail.",
+    "outcome": "A model that flags high-risk zones and settings before the body reaches inspection, with recommended corrective actions.",
+    "tools": [
+     "Python",
+     "XGBoost",
+     "SHAP",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Automotive & Mobility"
+   },
+   {
+    "title": "Digital Manufacturing Copilot",
+    "objective": "Analyse robot cycle times, waiting time, conveyor synchronisation, gun-trigger timing and speeds to find where seconds are lost on the line.",
+    "outcome": "A copilot that names the bottleneck and the optimisation to try, with the throughput gain it would bring.",
+    "tools": [
+     "LangGraph",
+     "SQL tool",
+     "Pandas",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Multi-Agent Manufacturing Review System",
+    "objective": "Build simulation, robot-programming, quality, maintenance and optimisation agents that review a manufacturing process together.",
+    "outcome": "One engineering recommendation agreed by specialist agents, the way a cross-functional team would review a cell.",
+    "tools": [
+     "LangGraph",
+     "RAG",
+     "MCP",
+     "Python"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "MCP Bridge to Simulation and Line Data",
+    "objective": "Wrap an approved interface (simulation export, PLC/MES database or CSV logs) as an MCP server so an AI agent can query it safely.",
+    "outcome": "An agent that answers questions from real line data instead of chatting from memory, using only the interfaces you allow.",
+    "tools": [
+     "MCP SDK",
+     "Python",
+     "SQL",
+     "Claude"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "PLC Alarm Log Summariser",
+    "objective": "Turn a shift's PLC and robot alarm logs into a ranked list of recurring faults with probable causes.",
+    "outcome": "A daily handover that tells maintenance which three alarms cost the most downtime.",
+    "tools": [
+     "ChatGPT",
+     "Make",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Manufacturing"
+   }
+  ],
+  "mechanical-design": [
+   {
+    "title": "Design Standards Q&A Assistant",
+    "objective": "Answer design questions from your company's standards, material specs and past design reviews with the exact clause cited.",
+    "outcome": "New engineers get correct tolerances and material choices without hunting through PDFs.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Design Review Checklist Agent",
+    "objective": "Feed a design brief and bill of materials; the agent checks it against DFM/DFA rules and lists risks before review.",
+    "outcome": "Fewer late design changes because issues are caught before the first prototype.",
+    "tools": [
+     "LangGraph",
+     "Python",
+     "LLM",
+     "JSON output"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Simulation Result Surrogate Model",
+    "objective": "Train a model on past FEA/CFD runs to predict stress or temperature for new design parameters in seconds.",
+    "outcome": "Quick what-if answers that decide which designs deserve a full simulation.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "XGBoost",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Engineering Change Impact Analyser",
+    "objective": "Read an engineering change request and find affected parts, drawings, suppliers and tests from the PLM export.",
+    "outcome": "A complete impact list for every change, so nothing is missed downstream.",
+    "tools": [
+     "LangChain",
+     "SQL",
+     "LLM",
+     "Pandas"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Warranty Claim Root-Cause Explorer",
+    "objective": "Group warranty claims by failure text and part, and link them to design features.",
+    "outcome": "The few design features behind most warranty cost, ranked for the next design cycle.",
+    "tools": [
+     "Python",
+     "Embeddings",
+     "Clustering",
+     "Power BI"
+    ],
+    "level": "ml",
+    "industry": "Automotive & Mobility"
+   }
+  ],
+  "production-process": [
+   {
+    "title": "OEE Loss Copilot for Line Leaders",
+    "objective": "Ask in plain English why yesterday's OEE dropped; the agent queries production data and breaks losses into availability, performance and quality.",
+    "outcome": "Line leaders get the reason and the fix in the morning meeting, not after a week of Excel.",
+    "tools": [
+     "LangGraph",
+     "SQL tool",
+     "Pandas",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Process Parameter Optimiser",
+    "objective": "Model how temperature, speed, pressure and material batch affect yield, and suggest the best settings.",
+    "outcome": "A recommended operating window that raises first-pass yield.",
+    "tools": [
+     "Python",
+     "XGBoost",
+     "SHAP",
+     "Optuna"
+    ],
+    "level": "ml",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "SOP to Visual Work Instructions",
+    "objective": "Turn a text SOP into step-by-step illustrated instructions and a short training video for operators.",
+    "outcome": "Operators learn a new process in minutes, in their own language.",
+    "tools": [
+     "ChatGPT",
+     "Canva",
+     "Synthesia"
+    ],
+    "level": "nocode",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Production Plan vs Actual Dashboard",
+    "objective": "Compare daily plan with actual output, downtime and scrap by line and shift.",
+    "outcome": "One dashboard that shows which line is behind plan and why.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "DAX",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Kaizen Idea Assistant",
+    "objective": "Collect improvement ideas from the shop floor, cluster duplicates and estimate the saving of each.",
+    "outcome": "A ranked kaizen pipeline the plant head can act on weekly.",
+    "tools": [
+     "Google Forms",
+     "Claude",
+     "Make",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Manufacturing"
+   }
+  ],
+  "quality-engineer": [
+   {
+    "title": "8D Report Drafting Agent",
+    "objective": "Turn non-conformance notes, defect data and inspection photos into a structured 8D draft for review.",
+    "outcome": "Customer complaints answered with a complete 8D in hours instead of days.",
+    "tools": [
+     "LangChain",
+     "GPT-4o Vision",
+     "JSON output"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Visual Defect Inspection Model",
+    "objective": "Train a vision model to spot scratches, dents or missing parts on product images.",
+    "outcome": "Automated inspection that catches defects the eye misses at line speed.",
+    "tools": [
+     "Python",
+     "YOLO",
+     "OpenCV",
+     "PyTorch"
+    ],
+    "level": "ml",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "SPC Alert and Explanation Agent",
+    "objective": "Watch control-chart data, raise out-of-control alerts and explain the likely special cause from past cases.",
+    "outcome": "Quality teams react to drift before it becomes scrap.",
+    "tools": [
+     "Python",
+     "SciPy",
+     "LLM",
+     "LangGraph"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Supplier Quality Scorecard",
+    "objective": "Combine incoming inspection, rejections and delivery data into a supplier scorecard.",
+    "outcome": "A monthly view of which suppliers need audits or development.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Customer Complaint Classifier",
+    "objective": "Classify free-text complaints by defect type, severity and product line, and route them automatically.",
+    "outcome": "Faster complaint handling and a clean defect Pareto without manual tagging.",
+    "tools": [
+     "n8n",
+     "Claude",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Manufacturing"
+   }
+  ],
+  "maintenance-reliability": [
+   {
+    "title": "Predictive Maintenance from Sensor Data",
+    "objective": "Predict machine failures from vibration, temperature and current readings before the line stops.",
+    "outcome": "Planned repairs instead of breakdowns, with lead time to order parts.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "Featuretools",
+     "Power BI"
+    ],
+    "level": "ml",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Maintenance Manual RAG Assistant",
+    "objective": "Technicians ask how to fix a fault; the assistant answers from OEM manuals and past work orders.",
+    "outcome": "Junior technicians fix faults with the expertise of the most senior person on shift.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Work Order Triage Agent",
+    "objective": "Read breakdown requests, set priority and category, and suggest the right technician and spares.",
+    "outcome": "The maintenance planner's queue sorted automatically every morning.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "SQL",
+     "Python"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "MTBF and Downtime Pareto Dashboard",
+    "objective": "Compute MTBF, MTTR and downtime by machine from maintenance logs.",
+    "outcome": "The few machines that cause most downtime, ranked for the reliability plan.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Breakdown Report Mobile Form",
+    "objective": "Operators log breakdowns with a photo; an LLM writes a clean report and notifies maintenance.",
+    "outcome": "Every breakdown captured with the details needed to fix it.",
+    "tools": [
+     "Glide",
+     "ChatGPT",
+     "Make",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Manufacturing"
+   }
+  ],
+  "electrical-energy": [
+   {
+    "title": "Energy Consumption Anomaly Detector",
+    "objective": "Find unusual energy use by feeder, machine or building from meter data.",
+    "outcome": "Wasted energy and faulty equipment caught within a day.",
+    "tools": [
+     "Python",
+     "LSTM autoencoder",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Energy & Utilities"
+   },
+   {
+    "title": "Solar Generation Forecaster",
+    "objective": "Forecast solar output from weather and plant history for the next 48 hours.",
+    "outcome": "Better scheduling and fewer grid penalties.",
+    "tools": [
+     "Python",
+     "Prophet",
+     "XGBoost"
+    ],
+    "level": "ml",
+    "industry": "Energy & Utilities"
+   },
+   {
+    "title": "Grid Fault Diagnosis Assistant",
+    "objective": "Engineers describe a trip or fault; the agent checks relay logs, single-line diagrams and procedures.",
+    "outcome": "Probable cause and a safe restoration sequence, with references.",
+    "tools": [
+     "RAG",
+     "LangGraph",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Energy & Utilities"
+   },
+   {
+    "title": "Electrical Safety Permit Checker",
+    "objective": "Check permit-to-work forms against isolation and safety rules before approval.",
+    "outcome": "Unsafe or incomplete permits flagged before work starts.",
+    "tools": [
+     "LangChain",
+     "LLM",
+     "JSON output"
+    ],
+    "level": "build",
+    "industry": "Energy & Utilities"
+   },
+   {
+    "title": "Outage Update Writer",
+    "objective": "Turn outage logs into clear customer and management updates on a schedule.",
+    "outcome": "Consistent, accurate outage communication without extra effort.",
+    "tools": [
+     "Claude",
+     "Zapier",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Energy & Utilities"
+   }
+  ],
+  "electronics-hardware": [
+   {
+    "title": "Datasheet Q&A Assistant",
+    "objective": "Ask questions across component datasheets and app notes and get the exact parameter with the page cited.",
+    "outcome": "Hours of datasheet searching cut to seconds.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "PCB Defect Detection",
+    "objective": "Detect missing, shifted or solder-bridged components on PCB images.",
+    "outcome": "Automated optical inspection you built and can explain.",
+    "tools": [
+     "Python",
+     "YOLO",
+     "OpenCV"
+    ],
+    "level": "ml",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Test Log Failure Analyser",
+    "objective": "Cluster board test failures from test-station logs and suggest likely failing components.",
+    "outcome": "Faster debug and a yield report by failure mode.",
+    "tools": [
+     "Python",
+     "Embeddings",
+     "LLM",
+     "Pandas"
+    ],
+    "level": "build",
+    "industry": "Manufacturing"
+   },
+   {
+    "title": "Firmware Code Review Agent",
+    "objective": "Review embedded C changes for common bugs, memory issues and coding-standard violations.",
+    "outcome": "A first-pass review before a human reviewer looks.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "Git"
+    ],
+    "level": "build",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Component Obsolescence Tracker",
+    "objective": "Track bill-of-materials parts against lifecycle notices and suggest alternatives.",
+    "outcome": "No surprise end-of-life parts stopping production.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "LLM"
+    ],
+    "level": "analytics",
+    "industry": "Manufacturing"
+   }
+  ],
+  "civil-construction": [
+   {
+    "title": "Construction Progress Dashboard",
+    "objective": "Track planned vs actual progress, cost and material use across sites.",
+    "outcome": "Delays and cost overruns visible weekly, by site and contractor.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Real Estate & Construction"
+   },
+   {
+    "title": "Site Photo Safety Checker",
+    "objective": "Check site photos for missing helmets, harnesses and barricades.",
+    "outcome": "Safety lapses flagged daily with the photo as evidence.",
+    "tools": [
+     "Python",
+     "YOLO",
+     "OpenCV"
+    ],
+    "level": "ml",
+    "industry": "Real Estate & Construction"
+   },
+   {
+    "title": "Tender and Specification Q&A",
+    "objective": "Answer questions from tender documents, BOQs and specifications with the clause cited.",
+    "outcome": "Bids prepared faster with fewer missed requirements.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Real Estate & Construction"
+   },
+   {
+    "title": "Daily Progress Report Writer",
+    "objective": "Site engineers send notes and photos; AI writes the daily progress report.",
+    "outcome": "A clean DPR every evening without an hour of typing.",
+    "tools": [
+     "ChatGPT",
+     "Google Forms",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Real Estate & Construction"
+   },
+   {
+    "title": "Concrete Strength Predictor",
+    "objective": "Predict 28-day concrete strength from mix design and curing data.",
+    "outcome": "Fewer failed cubes and better mix decisions.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "XGBoost"
+    ],
+    "level": "ml",
+    "industry": "Real Estate & Construction"
+   }
+  ],
+  "automotive-mobility": [
+   {
+    "title": "Vehicle Diagnostics Assistant",
+    "objective": "Technicians enter fault codes and symptoms; the assistant searches service bulletins and repair history.",
+    "outcome": "Faster, first-time-right repairs at the workshop.",
+    "tools": [
+     "RAG",
+     "LangGraph",
+     "LLM",
+     "FastAPI"
+    ],
+    "level": "build",
+    "industry": "Automotive & Mobility"
+   },
+   {
+    "title": "Service Visit Predictor",
+    "objective": "Predict which customers are due or likely to churn from service history.",
+    "outcome": "Targeted reminders that bring customers back to the dealership.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "Power BI"
+    ],
+    "level": "ml",
+    "industry": "Automotive & Mobility"
+   },
+   {
+    "title": "EV Battery Health Analyser",
+    "objective": "Estimate battery health and range loss from charging and usage data.",
+    "outcome": "Early warnings for batteries that need attention.",
+    "tools": [
+     "Python",
+     "Pandas",
+     "LSTM"
+    ],
+    "level": "ml",
+    "industry": "Automotive & Mobility"
+   },
+   {
+    "title": "Dealer Sales Dashboard",
+    "objective": "Track enquiries, test drives, bookings and deliveries by model and dealer.",
+    "outcome": "Where the sales funnel leaks, by dealer, every week.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Automotive & Mobility"
+   },
+   {
+    "title": "Service Advisor Quote Assistant",
+    "objective": "Turn a job card into a clear customer estimate and message.",
+    "outcome": "Customers understand the work and approve faster.",
+    "tools": [
+     "ChatGPT",
+     "Make",
+     "WhatsApp Business"
+    ],
+    "level": "nocode",
+    "industry": "Automotive & Mobility"
+   }
+  ],
+  "telecom-network": [
+   {
+    "title": "Network Alarm Correlation Agent",
+    "objective": "Group thousands of NOC alarms into incidents and point to the probable root alarm.",
+    "outcome": "Engineers work on five incidents instead of five hundred alarms.",
+    "tools": [
+     "Python",
+     "Embeddings",
+     "LangGraph",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Telecom"
+   },
+   {
+    "title": "Telecom Churn Predictor",
+    "objective": "Predict which subscribers will leave from usage, complaints and billing data.",
+    "outcome": "Retention offers aimed at the customers most likely to leave.",
+    "tools": [
+     "Python",
+     "XGBoost",
+     "SHAP"
+    ],
+    "level": "ml",
+    "industry": "Telecom"
+   },
+   {
+    "title": "Network Runbook RAG Assistant",
+    "objective": "Answer how-to-fix questions from runbooks, MOPs and past tickets.",
+    "outcome": "Faster resolution with the right procedure every time.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB"
+    ],
+    "level": "build",
+    "industry": "Telecom"
+   },
+   {
+    "title": "Site KPI Dashboard",
+    "objective": "Track drop rate, availability and throughput by site and region.",
+    "outcome": "Underperforming sites found before customers complain.",
+    "tools": [
+     "SQL",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "Telecom"
+   },
+   {
+    "title": "Outage Customer Update Assistant",
+    "objective": "Turn NOC incident notes into customer-friendly updates.",
+    "outcome": "Clear, consistent updates during outages.",
+    "tools": [
+     "Claude",
+     "Zapier",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Telecom"
+   },
+   {
+    "title": "Network Config Backup and Drift Pipeline",
+    "objective": "Back up router and switch configs to Git on a schedule and alert when a device drifts from its approved config.",
+    "outcome": "Every change traceable, and unapproved changes caught the same day.",
+    "tools": [
+     "Ansible",
+     "Git",
+     "Jenkins",
+     "Python"
+    ],
+    "level": "cloud",
+    "industry": "Telecom"
+   },
+   {
+    "title": "Network Monitoring on the Cloud",
+    "objective": "Collect device metrics into Prometheus on a cloud VM and build Grafana dashboards with alerts for link and CPU issues.",
+    "outcome": "A monitoring stack you built and run, the way NOC teams work on cloud.",
+    "tools": [
+     "Prometheus",
+     "Grafana",
+     "AWS EC2",
+     "Terraform"
+    ],
+    "level": "cloud",
+    "industry": "Telecom"
+   }
+  ],
+  "pharma-qa-regulatory": [
+   {
+    "title": "Deviation and CAPA Assistant",
+    "objective": "Draft deviation reports and CAPA plans from investigation notes, citing the relevant SOPs.",
+    "outcome": "Complete, inspection-ready deviations in a fraction of the time.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM",
+     "JSON output"
+    ],
+    "level": "build",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Batch Record Review Agent",
+    "objective": "Check batch manufacturing records for missing entries, out-of-limit values and signatures.",
+    "outcome": "Faster batch release with fewer review errors.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "Python"
+    ],
+    "level": "build",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Regulatory Guideline Q&A",
+    "objective": "Answer questions from GMP, ICH and regulator guidelines with the exact section.",
+    "outcome": "QA teams find the right requirement in seconds.",
+    "tools": [
+     "RAG",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Out-of-Specification Trend Model",
+    "objective": "Find which materials, equipment or steps drive OOS results.",
+    "outcome": "Root causes of repeat OOS backed by data.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "SHAP"
+    ],
+    "level": "ml",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "SOP Training Quiz Generator",
+    "objective": "Generate quizzes from new SOPs and track who has been trained.",
+    "outcome": "Training records ready for audits.",
+    "tools": [
+     "Claude",
+     "Google Forms",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Pharma & Life Sciences"
+   }
+  ],
+  "clinical-healthcare": [
+   {
+    "title": "Discharge Summary Drafter",
+    "objective": "Draft discharge summaries from case notes for the doctor to check and sign.",
+    "outcome": "Doctors spend less time typing and more time with patients.",
+    "tools": [
+     "Claude",
+     "Google Docs",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Healthcare"
+   },
+   {
+    "title": "Patient Readmission Risk Model",
+    "objective": "Predict 30-day readmission risk from admission and discharge data.",
+    "outcome": "Follow-up calls focused on the patients most at risk.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "SHAP"
+    ],
+    "level": "ml",
+    "industry": "Healthcare"
+   },
+   {
+    "title": "Clinical Guideline Assistant",
+    "objective": "Answer clinical questions from hospital protocols and guidelines with references.",
+    "outcome": "Consistent care based on your own hospital's protocols.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Healthcare"
+   },
+   {
+    "title": "OPD Wait-Time Dashboard",
+    "objective": "Track patient flow, waiting time and doctor utilisation by department.",
+    "outcome": "Bottlenecks in the OPD visible and fixable.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Healthcare"
+   },
+   {
+    "title": "Patient Query WhatsApp Assistant",
+    "objective": "Answer appointment, report and visiting-hour questions automatically, handing medical questions to staff.",
+    "outcome": "Front desk calls drop; patients get answers at any hour.",
+    "tools": [
+     "ChatGPT",
+     "WhatsApp Business",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Healthcare"
+   }
+  ],
+  "research-lab": [
+   {
+    "title": "Literature Review Agent",
+    "objective": "Search papers on a topic, extract methods and results, and build a comparison table.",
+    "outcome": "A literature review in hours with every claim linked to its source.",
+    "tools": [
+     "LangGraph",
+     "Semantic Scholar API",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Experiment Result Predictor",
+    "objective": "Model past experiments to predict outcomes and suggest the next best experiment.",
+    "outcome": "Fewer wasted lab runs.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "Bayesian optimisation"
+    ],
+    "level": "ml",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Lab Notebook Q&A",
+    "objective": "Ask questions across years of lab notebooks and reports.",
+    "outcome": "Past results found instead of repeated.",
+    "tools": [
+     "RAG",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Instrument Data Pipeline",
+    "objective": "Clean and combine instrument exports into one analysis-ready dataset.",
+    "outcome": "Analysis in minutes instead of a day of copy-paste.",
+    "tools": [
+     "Python",
+     "Pandas",
+     "SQL"
+    ],
+    "level": "analytics",
+    "industry": "Pharma & Life Sciences"
+   },
+   {
+    "title": "Grant and Report Writing Assistant",
+    "objective": "Draft grant sections and progress reports from your results and notes.",
+    "outcome": "Faster, clearer writing you edit rather than start from blank.",
+    "tools": [
+     "Claude",
+     "Google Docs"
+    ],
+    "level": "nocode",
+    "industry": "Education & EdTech"
+   }
+  ],
+  "chartered-accountant": [
+   {
+    "title": "GST Reconciliation Assistant",
+    "objective": "Match purchase registers with GSTR-2B and explain every mismatch.",
+    "outcome": "Monthly reconciliation done in an hour, with a clear follow-up list.",
+    "tools": [
+     "Excel",
+     "ChatGPT",
+     "Power Query"
+    ],
+    "level": "nocode",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Audit Sampling and Anomaly Finder",
+    "objective": "Flag unusual journal entries (round amounts, weekend postings, odd vendors) for audit sampling.",
+    "outcome": "Audit time spent on the transactions that matter.",
+    "tools": [
+     "Python",
+     "Isolation Forest",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Financial Statement Analysis Dashboard",
+    "objective": "Build ratio, trend and variance analysis from trial balances.",
+    "outcome": "Board-ready financial insights in one dashboard.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Tax Law Q&A Assistant",
+    "objective": "Answer income-tax and GST questions from Acts, circulars and notifications with sections cited.",
+    "outcome": "Faster, referenced answers for clients and juniors.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Legal & Compliance"
+   },
+   {
+    "title": "Invoice Data Extraction Agent",
+    "objective": "Read invoices and bills, extract fields and post them to the ledger format.",
+    "outcome": "Data entry cut by most of the effort, with checks for duplicates.",
+    "tools": [
+     "LangGraph",
+     "Vision LLM",
+     "Python",
+     "JSON output"
+    ],
+    "level": "build",
+    "industry": "Banking & BFSI"
+   }
+  ],
+  "banking-credit-risk": [
+   {
+    "title": "Credit Default Risk Model",
+    "objective": "Predict loan default from applicant, bureau and repayment data.",
+    "outcome": "A scorecard that explains each decision.",
+    "tools": [
+     "Python",
+     "XGBoost",
+     "SHAP"
+    ],
+    "level": "ml",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Credit Memo Drafting Agent",
+    "objective": "Draft a credit appraisal memo from financials, bureau reports and visit notes.",
+    "outcome": "Underwriters review a complete memo instead of writing one.",
+    "tools": [
+     "LangGraph",
+     "RAG",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "KYC and AML Alert Triage",
+    "objective": "Summarise AML alerts with customer history and suggest close or escalate.",
+    "outcome": "Investigators clear alerts faster with consistent reasoning.",
+    "tools": [
+     "LangChain",
+     "LLM",
+     "SQL"
+    ],
+    "level": "build",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Branch Performance Dashboard",
+    "objective": "Track deposits, loans, NPAs and cross-sell by branch and RM.",
+    "outcome": "Which branches need attention, every week.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Customer Query Assistant for Branch Staff",
+    "objective": "Answer product and process questions from circulars and product notes.",
+    "outcome": "Staff answer customers correctly the first time.",
+    "tools": [
+     "ChatGPT",
+     "Notion AI",
+     "Google Drive"
+    ],
+    "level": "nocode",
+    "industry": "Banking & BFSI"
+   }
+  ],
+  "insurance": [
+   {
+    "title": "Claims Fraud Detector",
+    "objective": "Flag suspicious claims from claim history, provider patterns and documents.",
+    "outcome": "Investigators focus on the claims most likely to be fraud.",
+    "tools": [
+     "Python",
+     "Isolation Forest",
+     "XGBoost"
+    ],
+    "level": "ml",
+    "industry": "Insurance"
+   },
+   {
+    "title": "Policy Wording Q&A",
+    "objective": "Answer coverage questions from policy wordings with the exact clause.",
+    "outcome": "Faster, consistent answers for customers and agents.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Insurance"
+   },
+   {
+    "title": "Claim Document Intake Agent",
+    "objective": "Read claim forms, bills and reports, check completeness and extract fields.",
+    "outcome": "Incomplete claims caught on day one.",
+    "tools": [
+     "LangGraph",
+     "Vision LLM",
+     "JSON output"
+    ],
+    "level": "build",
+    "industry": "Insurance"
+   },
+   {
+    "title": "Renewal and Lapse Dashboard",
+    "objective": "Track renewals, lapses and persistency by product and channel.",
+    "outcome": "Where policies are lost, and when to act.",
+    "tools": [
+     "SQL",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "Insurance"
+   },
+   {
+    "title": "Agent Sales Pitch Generator",
+    "objective": "Create need-based policy pitches from a customer's life stage and goals.",
+    "outcome": "Agents pitch the right policy with clear reasons.",
+    "tools": [
+     "ChatGPT",
+     "Canva",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Insurance"
+   }
+  ],
+  "sales-bd": [
+   {
+    "title": "Lead Research and Outreach Assistant",
+    "objective": "Research a prospect company and draft a personalised first email and call opener.",
+    "outcome": "More meetings booked from the same number of leads.",
+    "tools": [
+     "ChatGPT",
+     "Perplexity",
+     "Make",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Sales Call Notes to CRM",
+    "objective": "Turn call notes or recordings into CRM updates, next steps and a follow-up email.",
+    "outcome": "Clean CRM data without end-of-day typing.",
+    "tools": [
+     "Otter",
+     "Claude",
+     "Zapier"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Sales Funnel Dashboard",
+    "objective": "Track leads, conversion and revenue by stage, rep and region.",
+    "outcome": "Where deals get stuck, visible weekly.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Win Probability Model",
+    "objective": "Predict which open deals will close from deal history.",
+    "outcome": "Forecasts managers can trust.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "SHAP"
+    ],
+    "level": "ml",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Proposal Drafting Agent",
+    "objective": "Draft proposals from the requirement, past proposals and case studies.",
+    "outcome": "Proposals out in hours, not days.",
+    "tools": [
+     "RAG",
+     "LangGraph",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "IT Services & SaaS"
+   }
+  ],
+  "marketing-digital": [
+   {
+    "title": "Campaign Content Studio",
+    "objective": "Generate on-brand ad copy, visuals and variants for a campaign from one brief.",
+    "outcome": "A full campaign set in an afternoon.",
+    "tools": [
+     "ChatGPT",
+     "Canva",
+     "Midjourney"
+    ],
+    "level": "nocode",
+    "industry": "Marketing & Advertising"
+   },
+   {
+    "title": "SEO Content Brief Generator",
+    "objective": "Build content briefs from keyword data and competitor pages.",
+    "outcome": "Writers get briefs that rank, every time.",
+    "tools": [
+     "Claude",
+     "Google Sheets",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Marketing & Advertising"
+   },
+   {
+    "title": "Marketing Attribution Dashboard",
+    "objective": "Combine ad spend, leads and revenue by channel to find what really works.",
+    "outcome": "Budget moved to the channels that bring customers.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Google Analytics"
+    ],
+    "level": "analytics",
+    "industry": "Marketing & Advertising"
+   },
+   {
+    "title": "Customer Segmentation",
+    "objective": "Group customers by behaviour and value for targeted campaigns.",
+    "outcome": "Campaigns aimed at segments with a clear message each.",
+    "tools": [
+     "Python",
+     "K-Means",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Retail & E-commerce"
+   },
+   {
+    "title": "Social Listening Agent",
+    "objective": "Track brand mentions, summarise sentiment and flag issues daily.",
+    "outcome": "The team hears about problems before they trend.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "APIs"
+    ],
+    "level": "build",
+    "industry": "Marketing & Advertising"
+   }
+  ],
+  "hr-recruitment": [
+   {
+    "title": "Resume Screening Assistant",
+    "objective": "Score resumes against a job description and explain each score.",
+    "outcome": "Shortlists in minutes with consistent, explainable criteria.",
+    "tools": [
+     "ChatGPT",
+     "Google Sheets",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "HR & People"
+   },
+   {
+    "title": "HR Policy Chatbot",
+    "objective": "Answer employee questions on leave, benefits and policies from the HR handbook.",
+    "outcome": "HR inbox drops; employees get instant answers.",
+    "tools": [
+     "Claude",
+     "Notion AI",
+     "Slack"
+    ],
+    "level": "nocode",
+    "industry": "HR & People"
+   },
+   {
+    "title": "Attrition Risk Model",
+    "objective": "Predict which employees are likely to leave from HR data.",
+    "outcome": "Retention conversations before resignations.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "SHAP"
+    ],
+    "level": "ml",
+    "industry": "HR & People"
+   },
+   {
+    "title": "Hiring Funnel Dashboard",
+    "objective": "Track time-to-hire, source quality and offer acceptance by role.",
+    "outcome": "Where hiring slows down, and which sources work.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "HR & People"
+   },
+   {
+    "title": "Interview Question Generator",
+    "objective": "Create role-specific interview questions and scoring rubrics.",
+    "outcome": "Structured, fair interviews across panels.",
+    "tools": [
+     "ChatGPT",
+     "Google Docs"
+    ],
+    "level": "nocode",
+    "industry": "HR & People"
+   }
+  ],
+  "supply-chain": [
+   {
+    "title": "Demand Forecasting Model",
+    "objective": "Forecast SKU demand by week from sales history, seasonality and promotions.",
+    "outcome": "Less stock-out and less excess inventory.",
+    "tools": [
+     "Python",
+     "Prophet",
+     "XGBoost"
+    ],
+    "level": "ml",
+    "industry": "Supply Chain & Logistics"
+   },
+   {
+    "title": "Inventory Health Dashboard",
+    "objective": "Track stock cover, ageing and slow movers by warehouse.",
+    "outcome": "Dead stock found before it becomes a write-off.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Supply Chain & Logistics"
+   },
+   {
+    "title": "Purchase Order Exception Agent",
+    "objective": "Check POs and invoices for price, quantity and delivery mismatches and draft supplier emails.",
+    "outcome": "Exceptions handled daily, not at month end.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "SQL"
+    ],
+    "level": "build",
+    "industry": "Supply Chain & Logistics"
+   },
+   {
+    "title": "Shipment Delay Predictor",
+    "objective": "Predict late shipments from carrier, route and history.",
+    "outcome": "Customers warned early; alternate plans ready.",
+    "tools": [
+     "Python",
+     "scikit-learn",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Supply Chain & Logistics"
+   },
+   {
+    "title": "Supplier Email Triage",
+    "objective": "Sort supplier emails by topic and urgency and draft replies.",
+    "outcome": "Procurement inbox under control.",
+    "tools": [
+     "n8n",
+     "Claude",
+     "Gmail"
+    ],
+    "level": "nocode",
+    "industry": "Supply Chain & Logistics"
+   }
+  ],
+  "retail-ecommerce-ops": [
+   {
+    "title": "Product Listing Factory",
+    "objective": "Create titles, descriptions and images for hundreds of SKUs from a spreadsheet.",
+    "outcome": "Catalogue live in days, on-brand and searchable.",
+    "tools": [
+     "Claude",
+     "Google Sheets",
+     "Canva"
+    ],
+    "level": "nocode",
+    "industry": "Retail & E-commerce"
+   },
+   {
+    "title": "Store Sales and Margin Dashboard",
+    "objective": "Track sales, margin and stock by store, category and day.",
+    "outcome": "Category managers see what sells and what doesn't, daily.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Retail & E-commerce"
+   },
+   {
+    "title": "Product Recommendation Engine",
+    "objective": "Recommend products from purchase history and browsing.",
+    "outcome": "Higher basket size from relevant suggestions.",
+    "tools": [
+     "Python",
+     "Implicit",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Retail & E-commerce"
+   },
+   {
+    "title": "Customer Review Insights Agent",
+    "objective": "Summarise reviews by product and theme and flag quality issues.",
+    "outcome": "Product fixes driven by what customers actually say.",
+    "tools": [
+     "LangChain",
+     "LLM",
+     "Python"
+    ],
+    "level": "build",
+    "industry": "Retail & E-commerce"
+   },
+   {
+    "title": "Price Monitoring Assistant",
+    "objective": "Track competitor prices and suggest price moves within margin rules.",
+    "outcome": "Competitive prices without losing margin.",
+    "tools": [
+     "Python",
+     "LangGraph",
+     "SQL"
+    ],
+    "level": "build",
+    "industry": "Retail & E-commerce"
+   }
+  ],
+  "customer-support": [
+   {
+    "title": "Support Reply Assistant",
+    "objective": "Draft replies to tickets from the knowledge base for agents to send.",
+    "outcome": "Faster, consistent replies with the right policy.",
+    "tools": [
+     "ChatGPT",
+     "Zendesk",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Ticket Classification and Routing",
+    "objective": "Classify tickets by issue and urgency and route them to the right team.",
+    "outcome": "No more tickets waiting in the wrong queue.",
+    "tools": [
+     "n8n",
+     "Claude",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Support KPI Dashboard",
+    "objective": "Track first response, resolution time and CSAT by agent and issue.",
+    "outcome": "Coaching focused on what actually slows resolution.",
+    "tools": [
+     "SQL",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Customer Support RAG Agent",
+    "objective": "Answer customer questions from manuals and FAQs and hand off when unsure.",
+    "outcome": "Most routine questions answered instantly, 24/7.",
+    "tools": [
+     "RAG",
+     "LangGraph",
+     "Vector DB"
+    ],
+    "level": "build",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Call Transcript Quality Review",
+    "objective": "Score call transcripts against a quality checklist and give coaching tips.",
+    "outcome": "Every call reviewed, not a 2% sample.",
+    "tools": [
+     "Claude",
+     "Google Sheets",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   }
+  ],
+  "operations-admin": [
+   {
+    "title": "Meeting Notes to Action Tracker",
+    "objective": "Turn meeting recordings into decisions, owners and deadlines in a tracker.",
+    "outcome": "Nothing agreed in a meeting gets lost.",
+    "tools": [
+     "Otter",
+     "ChatGPT",
+     "Notion"
+    ],
+    "level": "nocode",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Expense and Invoice Checker",
+    "objective": "Check expense claims against policy and flag exceptions.",
+    "outcome": "Faster approvals with fewer policy breaches.",
+    "tools": [
+     "Claude",
+     "Google Sheets",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Banking & BFSI"
+   },
+   {
+    "title": "Operations KPI Dashboard",
+    "objective": "Bring daily operations numbers from several sheets into one dashboard.",
+    "outcome": "One view of the business every morning.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Email Inbox Triage Agent",
+    "objective": "Sort a shared inbox by request type and draft replies for approval.",
+    "outcome": "Shared inbox cleared daily.",
+    "tools": [
+     "n8n",
+     "ChatGPT",
+     "Gmail"
+    ],
+    "level": "nocode",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Process Document Assistant",
+    "objective": "Answer how-do-I questions from internal process documents.",
+    "outcome": "Fewer repeat questions to the operations team.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Cross-industry leadership"
+   }
+  ],
+  "legal-compliance": [
+   {
+    "title": "Contract Clause Reviewer",
+    "objective": "Compare a contract with your standard clauses and flag risky changes.",
+    "outcome": "First-pass contract review in minutes.",
+    "tools": [
+     "Claude",
+     "Google Docs"
+    ],
+    "level": "nocode",
+    "industry": "Legal & Compliance"
+   },
+   {
+    "title": "Legal Research Assistant",
+    "objective": "Answer legal questions from Acts, rules and judgments with citations.",
+    "outcome": "Research time cut, every answer referenced.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB"
+    ],
+    "level": "build",
+    "industry": "Legal & Compliance"
+   },
+   {
+    "title": "Compliance Calendar Tracker",
+    "objective": "Track filing deadlines and send reminders with what is needed.",
+    "outcome": "No missed statutory deadlines.",
+    "tools": [
+     "Make",
+     "Google Sheets",
+     "ChatGPT"
+    ],
+    "level": "nocode",
+    "industry": "Legal & Compliance"
+   },
+   {
+    "title": "Regulatory Change Monitor",
+    "objective": "Summarise new circulars and say which policies they affect.",
+    "outcome": "Compliance teams act on changes the week they come out.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "RSS"
+    ],
+    "level": "build",
+    "industry": "Legal & Compliance"
+   },
+   {
+    "title": "AI Governance Policy Draft",
+    "objective": "Draft an AI usage and risk policy for your organisation.",
+    "outcome": "A ready-to-review AI policy based on recognised frameworks.",
+    "tools": [
+     "Claude",
+     "Google Docs"
+    ],
+    "level": "lead",
+    "industry": "Legal & Compliance"
+   },
+   {
+    "title": "Contract and Litigation Dashboard",
+    "objective": "Track contracts by renewal date, value and risk, and cases by stage, court and next hearing.",
+    "outcome": "No missed renewal or hearing, and a clear view of legal exposure.",
+    "tools": [
+     "Excel",
+     "Power BI",
+     "SQL"
+    ],
+    "level": "analytics",
+    "industry": "Legal & Compliance"
+   }
+  ],
+  "teacher-trainer": [
+   {
+    "title": "Lesson Plan and Worksheet Builder",
+    "objective": "Create lesson plans, worksheets and answer keys for a topic and grade.",
+    "outcome": "A week of teaching material in an hour.",
+    "tools": [
+     "ChatGPT",
+     "Canva",
+     "Google Docs"
+    ],
+    "level": "nocode",
+    "industry": "Education & EdTech"
+   },
+   {
+    "title": "Auto Quiz and Grading Flow",
+    "objective": "Generate quizzes, collect answers and grade them with feedback.",
+    "outcome": "Instant feedback for every student.",
+    "tools": [
+     "Google Forms",
+     "Claude",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Education & EdTech"
+   },
+   {
+    "title": "Student Performance Dashboard",
+    "objective": "Track marks, attendance and progress by student and subject.",
+    "outcome": "Students who need help found early.",
+    "tools": [
+     "Excel",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "Education & EdTech"
+   },
+   {
+    "title": "AI Course Video Creator",
+    "objective": "Turn notes into short explainer videos with an AI presenter.",
+    "outcome": "A video course without a studio.",
+    "tools": [
+     "Synthesia",
+     "ChatGPT",
+     "Canva"
+    ],
+    "level": "nocode",
+    "industry": "Education & EdTech"
+   },
+   {
+    "title": "Course Tutor Chatbot",
+    "objective": "Answer student questions from your own course material.",
+    "outcome": "Students get help at any hour, from your content.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Education & EdTech"
+   }
+  ],
+  "content-media": [
+   {
+    "title": "Content Repurposing Engine",
+    "objective": "Turn one article or video into posts, a newsletter and short clips.",
+    "outcome": "Five pieces of content from one.",
+    "tools": [
+     "ChatGPT",
+     "Descript",
+     "Canva"
+    ],
+    "level": "nocode",
+    "industry": "Media & Entertainment"
+   },
+   {
+    "title": "Podcast Production with AI",
+    "objective": "Script, voice, edit and caption a short podcast series.",
+    "outcome": "A publish-ready series with AI doing the heavy lifting.",
+    "tools": [
+     "ChatGPT",
+     "ElevenLabs",
+     "Descript"
+    ],
+    "level": "nocode",
+    "industry": "Media & Entertainment"
+   },
+   {
+    "title": "Content Performance Dashboard",
+    "objective": "Track views, engagement and conversions by topic and format.",
+    "outcome": "Know which topics and formats grow the audience.",
+    "tools": [
+     "Excel",
+     "Power BI",
+     "Google Analytics"
+    ],
+    "level": "analytics",
+    "industry": "Media & Entertainment"
+   },
+   {
+    "title": "Fact-Check and Source Assistant",
+    "objective": "Check claims in a draft against sources and flag what needs a citation.",
+    "outcome": "Fewer corrections after publishing.",
+    "tools": [
+     "Perplexity",
+     "Claude"
+    ],
+    "level": "nocode",
+    "industry": "Media & Entertainment"
+   },
+   {
+    "title": "News Summary Agent",
+    "objective": "Collect news on a beat daily and write a briefing with links.",
+    "outcome": "A daily briefing written automatically.",
+    "tools": [
+     "LangGraph",
+     "LLM",
+     "RSS"
+    ],
+    "level": "build",
+    "industry": "Media & Entertainment"
+   }
+  ],
+  "designer-creative": [
+   {
+    "title": "Brand Asset Generator",
+    "objective": "Generate on-brand social, ad and banner variants from brand guidelines.",
+    "outcome": "Dozens of variants from one design system.",
+    "tools": [
+     "Midjourney",
+     "Canva",
+     "Figma"
+    ],
+    "level": "nocode",
+    "industry": "Marketing & Advertising"
+   },
+   {
+    "title": "UX Research Synthesiser",
+    "objective": "Turn interview notes into themes, personas and opportunity areas.",
+    "outcome": "Research synthesis in hours, not weeks.",
+    "tools": [
+     "Claude",
+     "FigJam",
+     "Dovetail"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "AI Prototype in a Day",
+    "objective": "Design and build a clickable prototype of an AI feature with no-code tools.",
+    "outcome": "A working AI prototype to show stakeholders.",
+    "tools": [
+     "Figma",
+     "Lovable",
+     "ChatGPT"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Design Feedback Assistant",
+    "objective": "Review screens against accessibility and usability checklists.",
+    "outcome": "Issues fixed before the design review.",
+    "tools": [
+     "Claude",
+     "Figma"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Video Ad Production with AI",
+    "objective": "Create a short video ad from script to final cut with AI tools.",
+    "outcome": "A finished ad without a production crew.",
+    "tools": [
+     "Runway",
+     "ElevenLabs",
+     "CapCut"
+    ],
+    "level": "nocode",
+    "industry": "Marketing & Advertising"
+   }
+  ],
+  "project-program-manager": [
+   {
+    "title": "AI Project Status Reporter",
+    "objective": "Turn Jira or tracker updates into a weekly status report with risks.",
+    "outcome": "Status reports written for you, every week.",
+    "tools": [
+     "ChatGPT",
+     "Jira",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "IT Services & SaaS"
+   },
+   {
+    "title": "Risk and Issue Log Assistant",
+    "objective": "Spot risks in meeting notes and updates and keep the RAID log current.",
+    "outcome": "Risks raised before they become issues.",
+    "tools": [
+     "Claude",
+     "Google Sheets",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "AI Use-Case Business Case",
+    "objective": "Build a business case with ROI, risks and a rollout plan for an AI use case in your org.",
+    "outcome": "A decision-ready AI proposal for leadership.",
+    "tools": [
+     "Claude",
+     "Excel",
+     "Gamma"
+    ],
+    "level": "lead",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Portfolio Dashboard",
+    "objective": "Track budget, schedule and health across projects.",
+    "outcome": "One view of every project's health.",
+    "tools": [
+     "Power BI",
+     "Excel",
+     "SQL"
+    ],
+    "level": "analytics",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "AI Delivery Plan for a Team",
+    "objective": "Plan how your team adopts AI tools: pilots, training, metrics and governance.",
+    "outcome": "A 90-day AI adoption plan you can run.",
+    "tools": [
+     "Claude",
+     "Notion",
+     "Miro"
+    ],
+    "level": "lead",
+    "industry": "Cross-industry leadership"
+   }
+  ],
+  "consultant-strategy": [
+   {
+    "title": "Market Research Agent",
+    "objective": "Research a market, competitors and trends and build a cited briefing.",
+    "outcome": "A first-cut market study in a day.",
+    "tools": [
+     "Perplexity",
+     "Claude",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Client Deck Builder",
+    "objective": "Turn analysis and notes into a structured client presentation.",
+    "outcome": "Decks drafted in an hour, refined by you.",
+    "tools": [
+     "ChatGPT",
+     "Gamma",
+     "PowerPoint"
+    ],
+    "level": "nocode",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "AI Maturity Assessment",
+    "objective": "Assess a client's AI readiness across data, people, process and governance.",
+    "outcome": "A scored assessment and roadmap you can sell as a service.",
+    "tools": [
+     "Claude",
+     "Excel",
+     "Miro"
+    ],
+    "level": "lead",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Benchmarking Dashboard",
+    "objective": "Compare a client's KPIs with industry benchmarks.",
+    "outcome": "Clear gaps that anchor your recommendations.",
+    "tools": [
+     "Excel",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Interview Synthesis Assistant",
+    "objective": "Turn stakeholder interviews into themes, quotes and priorities.",
+    "outcome": "Synthesis that took a week done in hours.",
+    "tools": [
+     "Claude",
+     "Otter"
+    ],
+    "level": "nocode",
+    "industry": "Cross-industry leadership"
+   }
+  ],
+  "founder-business-owner": [
+   {
+    "title": "AI Strategy for Your Business",
+    "objective": "Find the three highest-value AI use cases in your business with cost, ROI and risk.",
+    "outcome": "An AI plan you can start next month.",
+    "tools": [
+     "Claude",
+     "Excel",
+     "Miro"
+    ],
+    "level": "lead",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Customer Enquiry Assistant",
+    "objective": "Answer customer enquiries on WhatsApp and the website from your product details.",
+    "outcome": "Enquiries answered at any hour, leads captured.",
+    "tools": [
+     "ChatGPT",
+     "WhatsApp Business",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Retail & E-commerce"
+   },
+   {
+    "title": "Business Dashboard from Your Books",
+    "objective": "Turn sales and accounts data into a weekly business dashboard.",
+    "outcome": "Know your numbers every Monday.",
+    "tools": [
+     "Excel",
+     "Power BI",
+     "Tally export"
+    ],
+    "level": "analytics",
+    "industry": "Cross-industry leadership"
+   },
+   {
+    "title": "Marketing on Autopilot",
+    "objective": "Plan and create a month of social posts and offers with AI.",
+    "outcome": "Consistent marketing without an agency.",
+    "tools": [
+     "ChatGPT",
+     "Canva",
+     "Buffer"
+    ],
+    "level": "nocode",
+    "industry": "Marketing & Advertising"
+   },
+   {
+    "title": "AI Governance and Data Policy",
+    "objective": "Set simple rules for how your team uses AI and customer data.",
+    "outcome": "Safe AI use from day one.",
+    "tools": [
+     "Claude",
+     "Google Docs"
+    ],
+    "level": "lead",
+    "industry": "Legal & Compliance"
+   }
+  ],
+  "aviation": [
+   {
+    "title": "Flight Delay Predictor",
+    "objective": "Predict delays from schedule, weather and turnaround data.",
+    "outcome": "Earlier recovery plans and better passenger updates.",
+    "tools": [
+     "Python",
+     "XGBoost",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Aircraft Maintenance Manual Assistant",
+    "objective": "Answer maintenance questions from AMM and service bulletins with references.",
+    "outcome": "Engineers find the right procedure faster.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "Vector DB"
+    ],
+    "level": "build",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Crew Briefing Generator",
+    "objective": "Build a pre-flight briefing from weather, NOTAMs and the flight plan.",
+    "outcome": "A clear briefing in minutes.",
+    "tools": [
+     "ChatGPT",
+     "Make",
+     "Google Docs"
+    ],
+    "level": "nocode",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "On-Time Performance Dashboard",
+    "objective": "Track on-time performance, delay causes and turnaround by station.",
+    "outcome": "The stations and causes behind most delays.",
+    "tools": [
+     "SQL",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Safety Report Classifier",
+    "objective": "Classify safety and incident reports by type and severity and spot trends.",
+    "outcome": "Safety trends seen early.",
+    "tools": [
+     "n8n",
+     "Claude",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Travel & Hospitality"
+   }
+  ],
+  "hospitality-travel": [
+   {
+    "title": "Guest Review Insights",
+    "objective": "Summarise guest reviews by theme and property and suggest fixes.",
+    "outcome": "Ratings improve because you fix what guests mention.",
+    "tools": [
+     "ChatGPT",
+     "Google Sheets",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Itinerary Planner Assistant",
+    "objective": "Create personalised itineraries from a traveller's budget and interests.",
+    "outcome": "Custom itineraries in minutes.",
+    "tools": [
+     "Claude",
+     "Google Maps",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Occupancy and Revenue Dashboard",
+    "objective": "Track occupancy, ADR and RevPAR by property and season.",
+    "outcome": "Pricing and staffing decisions backed by data.",
+    "tools": [
+     "SQL",
+     "Power BI",
+     "Excel"
+    ],
+    "level": "analytics",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Demand-Based Price Recommender",
+    "objective": "Recommend room prices from bookings, events and competitor rates.",
+    "outcome": "Higher revenue on busy days, fuller rooms on slow ones.",
+    "tools": [
+     "Python",
+     "XGBoost",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Travel & Hospitality"
+   },
+   {
+    "title": "Guest Concierge Chatbot",
+    "objective": "Answer guest questions about the hotel and the city 24/7.",
+    "outcome": "Front desk freed for service that needs a person.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Travel & Hospitality"
+   }
+  ],
+  "government-public": [
+   {
+    "title": "Citizen Query Assistant",
+    "objective": "Answer citizen questions on schemes and services from official documents.",
+    "outcome": "Correct answers in the citizen's language, any time.",
+    "tools": [
+     "RAG",
+     "LangChain",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Public Sector"
+   },
+   {
+    "title": "File Noting Summariser",
+    "objective": "Summarise long files and notings into a one-page brief with decisions needed.",
+    "outcome": "Officers decide faster with the key facts in front of them.",
+    "tools": [
+     "Claude",
+     "Google Docs"
+    ],
+    "level": "nocode",
+    "industry": "Public Sector"
+   },
+   {
+    "title": "Scheme Performance Dashboard",
+    "objective": "Track scheme coverage, spending and outcomes by district.",
+    "outcome": "Where a scheme works and where it doesn't.",
+    "tools": [
+     "Excel",
+     "Power BI"
+    ],
+    "level": "analytics",
+    "industry": "Public Sector"
+   },
+   {
+    "title": "Grievance Classifier",
+    "objective": "Classify public grievances by department and urgency and route them.",
+    "outcome": "Grievances reach the right desk on day one.",
+    "tools": [
+     "n8n",
+     "ChatGPT",
+     "Google Sheets"
+    ],
+    "level": "nocode",
+    "industry": "Public Sector"
+   },
+   {
+    "title": "RTI Reply Drafter",
+    "objective": "Draft RTI replies from the question and the available records.",
+    "outcome": "Timely, consistent replies within the deadline.",
+    "tools": [
+     "Claude",
+     "Google Docs",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Public Sector"
+   }
+  ],
+  "agriculture": [
+   {
+    "title": "Crop Disease Detector",
+    "objective": "Identify crop diseases from leaf photos and suggest treatment.",
+    "outcome": "Farmers act early, before losses spread.",
+    "tools": [
+     "Python",
+     "TensorFlow",
+     "OpenCV"
+    ],
+    "level": "ml",
+    "industry": "Agriculture"
+   },
+   {
+    "title": "Yield and Price Forecaster",
+    "objective": "Forecast yield and mandi prices from weather and history.",
+    "outcome": "Better decisions on what to sow and when to sell.",
+    "tools": [
+     "Python",
+     "Prophet",
+     "Pandas"
+    ],
+    "level": "ml",
+    "industry": "Agriculture"
+   },
+   {
+    "title": "Farmer Advisory WhatsApp Bot",
+    "objective": "Answer farmers' questions in their language from agri advisories.",
+    "outcome": "Expert advice reaches farmers instantly.",
+    "tools": [
+     "ChatGPT",
+     "WhatsApp Business",
+     "Make"
+    ],
+    "level": "nocode",
+    "industry": "Agriculture"
+   },
+   {
+    "title": "Procurement and Collection Dashboard",
+    "objective": "Track procurement, quality and payments by village and collection centre.",
+    "outcome": "Operations visible end to end.",
+    "tools": [
+     "Excel",
+     "Power BI",
+     "SQL"
+    ],
+    "level": "analytics",
+    "industry": "Agriculture"
+   },
+   {
+    "title": "Agri Scheme Eligibility Agent",
+    "objective": "Tell a farmer which schemes they qualify for and what to submit.",
+    "outcome": "More farmers get the benefits they are entitled to.",
+    "tools": [
+     "RAG",
+     "LangGraph",
+     "LLM"
+    ],
+    "level": "build",
+    "industry": "Agriculture"
+   }
+  ]
+ }
+}

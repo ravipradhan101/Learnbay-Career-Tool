@@ -55,10 +55,15 @@ export function catalogueProgram(idOrCode: string | null | undefined): Catalogue
 export const MIN_YEARS: Record<string, number> = {
   AAP: 0, DABA: 0, 'DSG-C': 0, 'DSG-M': 1, 'GAI-SD': 1, 'SDE-M': 1, 'FDE-M': 1, 'GAI-M': 1, 'GAI-CD': 1, CD: 1, 'CD-M': 1, AIL: 2, MCS: 0,
 }
-/** How much coding a program expects: none (no-code), optional (taught from scratch), yes (they must code). */
+/**
+ * How much coding a program expects: none (no-code), optional (taught from scratch), yes (they must code).
+ * Learnbay's rule: the AI & Data Science programs teach coding from scratch, so no coding background is needed
+ * (non-tech people and managers join them too). Cloud & DevOps need coding knowledge (and IT experience). The SDE
+ * Master, GenAI for Software Developers and FDE are built for IT professionals and developers.
+ */
 export const CODING: Record<string, 'no' | 'some' | 'yes'> = {
-  AAP: 'no', AIL: 'no', DABA: 'some', 'DSG-C': 'some', MCS: 'some', CD: 'some', 'CD-M': 'some',
-  'DSG-M': 'yes', 'GAI-SD': 'yes', 'SDE-M': 'yes', 'FDE-M': 'yes', 'GAI-M': 'yes', 'GAI-CD': 'yes',
+  AAP: 'no', AIL: 'no', DABA: 'some', 'DSG-C': 'some', 'DSG-M': 'some', 'GAI-M': 'some', MCS: 'some',
+  CD: 'yes', 'CD-M': 'yes', 'GAI-CD': 'yes', 'GAI-SD': 'yes', 'SDE-M': 'yes', 'FDE-M': 'yes',
 }
 export const FRESHER_CODES = ['AAP', 'DABA', 'DSG-C']
 

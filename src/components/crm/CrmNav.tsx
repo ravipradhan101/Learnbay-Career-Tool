@@ -38,6 +38,11 @@ export function CrmNav({ isAdmin }: { isAdmin: boolean }) {
     return () => { alive = false; clearInterval(t) }
   }, [])
 
+  // On small screens the tabs scroll: keep the current one in view (not hidden under the edge fade).
+  useEffect(() => {
+    document.querySelector<HTMLElement>('.admin-tabs a[aria-current="page"]')?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [pathname])
+
   const tabs = isAdmin ? [...TABS, { href: '/admin/crm/developers', label: 'Developers' }, { href: '/admin', label: 'Admin reports ↗' }] : TABS
   return (
     <div className="row between" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>

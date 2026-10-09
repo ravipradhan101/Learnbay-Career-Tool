@@ -38,7 +38,7 @@ export function LeadInsights({ leadId, initial }: { leadId: string; initial: { i
       <div className="crm-panel-head">
         <h2 id="insights-h">Lead intelligence</h2>
         <div className="crm-panel-tools">
-          {s.generatedAt && <span className="crm-faint">Updated {new Date(s.generatedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</span>}
+          {s.generatedAt && <span className="crm-faint">Updated {new Date(s.generatedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })}</span>}
           <button type="button" className="crm-btn ghost" onClick={() => build(true)} disabled={busy}>{busy ? 'Reading their activity…' : 'Refresh'}</button>
         </div>
       </div>

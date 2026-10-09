@@ -7,7 +7,7 @@ import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const stars = (v: unknown) => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 5 ? n : null }
 
-/** Woody's feedback pop-up: 1-5 stars for the counsellor, optionally for the eligibility test, and a suggestion. */
+/** Bruce's feedback pop-up: 1-5 stars for the counsellor, optionally for the eligibility test, and a suggestion. */
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError(403, 'Invalid request origin.')
   const user = await getCurrentUser()
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     userId: user.id, threadId, counsellor, rating,
     testRating: tookTest ? testRating : null,
     comment: cleanText(body?.comment, 300) || null,
-    suggestion: cleanText(body?.suggestion, 1000) || null,
+    suggestion: cleanText(body?.suggestion, 1000, true) || null,
   })
   return jsonOk({ rating: await ratingOf(counsellor) })
 }

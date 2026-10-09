@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/auth'
 import { query } from '@/lib/db'
-import { cleanText, clientIp, isSameOrigin, jsonError, jsonOk, rateLimits, readJson } from '@/lib/security'
+import { cleanText, clientIp, isSameOrigin, jsonError, jsonOk, localLimit, rateLimit, readJson } from '@/lib/security'
 
 // Engagement signals used for lead scoring. Only known event types are stored.
 const TYPES = new Set([
@@ -10,7 +10,7 @@ const TYPES = new Set([
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError(403, 'Invalid request origin.')
-  if (!(await rateLimits([[`events:ip:${clientIp(request)}`, 120, 3600], ['events:global', 20000, 600]]))) return jsonOk()
+  if (!localLimit('events:global', 8_000, 600) || !(await rateLimit(`events:ip:${clientIp(request)}`, 120, 3600))) return jsonOk()
   const body = await readJson<{ type?: unknown; detail?: unknown }>(request, 2_000)
   const type = typeof body?.type === 'string' && TYPES.has(body.type) ? body.type : null
   if (!type) return jsonError(400, 'Unknown event.')

@@ -1,5 +1,7 @@
 import { PageHead } from '@/components/admin/parts'
 import { ProjectLibrary, type AdminProject } from '@/components/admin/ProjectLibrary'
+import { ProjectIdeas, type IdeaRow } from '@/components/admin/ProjectIdeas'
+import { profileLabel } from '@/config/profiles'
 import { PROGRAMS } from '@/config/programs'
 import { requireAdmin } from '@/lib/admin-auth'
 import { query } from '@/lib/db'
@@ -15,13 +17,17 @@ export default async function ProjectsPage() {
   const projects = await query<AdminProject>(
     `SELECT id, title, description, tools, kind, module, domain, programs, source, source_ref, status FROM projects ORDER BY title`,
   )
+  const ideas = await query<Omit<IdeaRow, 'program' | 'created_at'> & { program_id: string; created_at: Date }>(
+    `SELECT id, title, objective, outcome, tools, program_id, profiles, industry, learner_brief, seen, created_at FROM project_ideas WHERE status = 'pending' ORDER BY seen DESC, created_at DESC LIMIT 100`,
+  )
   const programs = PROGRAMS.map((p) => ({
     id: p.id, name: p.name,
     track: p.id === 'forward-deployed-ai-engineer' ? 'FDE' : p.id.includes('data') || p.id.includes('analytics') ? 'Data' : TRACK_OF[p.interests[0]] ?? 'AI',
   })).sort((a, b) => a.track.localeCompare(b.track) || a.name.localeCompare(b.name))
   return (
     <>
-      <PageHead title="Projects" sub="The projects learners see in the chat. Each showing picks 4 for the learner's program and industry, keeping 1–2 they've seen and adding new ones." />
+      <PageHead title="Projects" sub="The projects learners see in the chat. Each showing picks 4 for the learner's program, work profile and industry, rewritten for their background, keeping 1–2 they've seen and adding new ones." />
+      <ProjectIdeas ideas={ideas.map(({ program_id, created_at, ...i }) => ({ ...i, program: PROGRAMS.find((p) => p.id === program_id)?.name ?? program_id, profiles: i.profiles.map(profileLabel), created_at: created_at.toISOString() }))} />
       <ProjectLibrary projects={projects} programs={programs} domains={await domainLabels()} />
     </>
   )

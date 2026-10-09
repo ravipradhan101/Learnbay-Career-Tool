@@ -114,7 +114,7 @@ p.crm-faint { margin: 0; }
 .crm-intent-pill.warm, .crm-intent-score.warm { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
 .crm-intent-pill.cold, .crm-intent-score.cold { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
 
-.crm-jump { position: sticky; top: 6.4rem; z-index: 5; display: flex; gap: 0.25rem; overflow-x: auto; scrollbar-width: none; padding: 0.3rem; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 2rem; }
+.crm-jump { position: sticky; top: 6.4rem; z-index: 5; display: flex; gap: 0.25rem; overflow-x: auto; scrollbar-width: none; padding: 0.3rem; background: #fff; box-shadow: 0 4px 12px -8px rgba(15, 23, 42, 0.25); border: 1px solid var(--line); border-radius: 2rem; }
 .crm-jump a { white-space: nowrap; padding: 0.35rem 0.8rem; border-radius: 2rem; font-size: 0.82rem; font-weight: 600; color: var(--muted); text-decoration: none; }
 .crm-jump a:hover { background: var(--line-2); color: var(--ink); }
 .crm-lead [id] { scroll-margin-top: 9.5rem; }
@@ -241,3 +241,10 @@ p.crm-faint { margin: 0; }
 .crm-report-box .crm-report { border: 0; }
 .crm-questions { display: flex; flex-direction: column; gap: 0.7rem; padding: 0.85rem; border-top: 1px dashed var(--line); background: #fafbff; border-radius: 0 0 var(--radius) var(--radius); }
 .crm-questions .field { display: flex; flex-direction: column; gap: 0.25rem; }
+
+/* Tabs that scroll on small screens fade at the edge, so it's clear there is more. */
+@media (max-width: 760px) {
+  .crm-shell .admin-tabs { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); padding-right: 1.5rem; }
+  .crm-shell .crm-bell:not(.due):not(.late) span:last-child { display: none; }
+  .crm-shell .crm-bell { padding: 0.4rem 0.6rem; }
+}

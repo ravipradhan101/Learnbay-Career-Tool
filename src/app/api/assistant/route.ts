@@ -12,7 +12,8 @@ import { trackOf, type Answers } from '@/lib/questions'
 import { skillFamily } from '@/lib/skills'
 import { projectTitles } from '@/lib/projects'
 import { defaultTargetRole, programForLearner } from '@/lib/segments'
-import { whenLabel } from '@/lib/sessions'
+import { eligibility } from '@/lib/lead-match'
+import { istDate, whenLabel } from '@/lib/sessions'
 import { hiringCompanies } from '@/lib/hiring'
 
 export const maxDuration = 60
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
   if (!(await rateLimit(`assist:user:${user.id}`, 15, 60))) return jsonError(429, 'You’re typing faster than I can read! Give me a few seconds, then send that again.')
   if (intent && !(await rateLimit(`assist:intent:${user.id}`, 12, 24 * 3600))) return jsonOk({ reply: '', suggestions: [], action: null, allowed: true, skipped: true })
 
-  const [answers, results, counsellor, booking, companies] = await Promise.all([
+  let [answers, results, counsellor, booking, companies] = await Promise.all([
     getAnswers(user.id), getReadyResults(user.id), counsellorOf(user.id),
     queryOne<{ d: string; t: string }>(
       `SELECT to_char(preferred_date, 'YYYY-MM-DD') AS d, preferred_time AS t FROM counsellor_requests
@@ -67,6 +68,12 @@ export async function POST(request: Request) {
         ORDER BY created_at DESC LIMIT 1`, [user.id]),
     hiringCompanies().catch(() => []),
   ])
+  // A call booked for earlier today that is over an hour past has happened (or was missed): it isn't "upcoming".
+  if (booking && booking.d === istDate()) {
+    const [h, m] = booking.t.split(':').map(Number)
+    const ist = new Date(Date.now() + 330 * 60_000)
+    if (h * 60 + (m || 0) + 60 < ist.getUTCHours() * 60 + ist.getUTCMinutes()) booking = null
+  }
   // Tool chats only see that tool's result; the advisor sees everything.
   const isTool = context === 'skill-gap' || context === 'salary' || context === 'roadmap'
   const scoped: Partial<ToolResultMap> = isTool ? { [context]: results[context as keyof ToolResultMap] } : results
@@ -85,8 +92,8 @@ export async function POST(request: Request) {
   const ask = () => askAssistant({ context, signedIn: true, userId: user.id, name: firstName(user.name), answers: answers ?? undefined, results: scoped, history, message: message ?? '', intent, counsellor: getCounsellor(counsellor).name, pending: pending?.options.length ? pending : undefined, counsel, projectTitles: projectTitlesList, booked: booking ? whenLabel(booking.d, booking.t) : null, companies, recent })
   let out
   try {
-    // One more try before giving up: the model occasionally returns an unusable answer.
-    out = await ask().catch((err) => { console.error('[assistant] retrying after', (err as Error).message); return ask() })
+    // The AI call retries once by itself (inside its time budget); a second round here would outlive the route.
+    out = await ask()
   } catch (err) {
     console.error('[assistant] failed', (err as Error).message)
     // The counsellor is never "busy": an opening line is simply skipped (the chat carries on by itself), and a
@@ -104,7 +111,10 @@ export async function POST(request: Request) {
   if (out.profileUpdate && answers) {
     const prev = answers
     const next: Answers = { ...prev, ...out.profileUpdate }
-    delete next.program
+    // The program they chose stays unless what changed is who they are (role, coding, track, a map answer) or it no
+    // longer fits them. A remark like "I earn 12 LPA" never resets their program or reports.
+    const u = out.profileUpdate
+    if (next.program && (u.interest || u.role || u.programmer || u.mapAnswers || u.experience || !eligibility(next.program, next).ok)) delete next.program
     // A map answer that moves them into another track's program (QA → "DevOps, not AI testing"): the track follows.
     if (out.profileUpdate.mapAnswers && !out.profileUpdate.interest) {
       const program = programForLearner(next)
@@ -118,7 +128,12 @@ export async function POST(request: Request) {
     if (out.profileUpdate.interest || out.profileUpdate.role || out.profileUpdate.programmer || (out.profileUpdate.mapAnswers && programForLearner(next)?.id !== programForLearner(prev)?.id)) next.targetRole = defaultTargetRole({ ...next, targetRole: undefined }) ?? prev.targetRole
     // Reports follow the program: a new track, kind of program, or program (e.g. a map answer that moves them) rebuilds them.
     const reportsReset = next.interest !== prev.interest || skillFamily(next) !== skillFamily(prev) || programForLearner(next)?.id !== programForLearner(prev)?.id
-    await query(`UPDATE assessments SET answers = $2, updated_at = now() WHERE user_id = $1`, [user.id, JSON.stringify(next)])
+    // Only what changed is written (merged into the saved answers), so a profile saved during the AI call isn't lost.
+    const patch: Answers = { ...out.profileUpdate, ...(next.targetRole !== prev.targetRole ? { targetRole: next.targetRole } : {}), ...(next.interest !== prev.interest ? { interest: next.interest } : {}) }
+    await query(
+      `UPDATE assessments SET answers = (answers || $2::jsonb) - (CASE WHEN $3 THEN 'program' ELSE '' END), updated_at = now() WHERE user_id = $1`,
+      [user.id, JSON.stringify(patch), prev.program !== undefined && next.program === undefined],
+    )
     if (reportsReset) await query(`UPDATE tool_results SET status = 'pending', attempts = 0, error = NULL, updated_at = now() WHERE user_id = $1 AND status IN ('ready', 'failed')`, [user.id])
     updated = { answers: next, reportsReset }
   }

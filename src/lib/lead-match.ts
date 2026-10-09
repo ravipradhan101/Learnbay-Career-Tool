@@ -47,17 +47,23 @@ const RE = {
   dev: /\b(developer|programmer|software|full ?stack|backend|back-end|frontend|front-end|sde|web dev|mobile dev|android|ios dev)\b/i,
   qa: /\b(qa|tester|testing|test engineer|automation test|sdet)\b/i,
   cloud: /\b(devops|sre|site reliability|cloud|platform engineer|kubernetes)\b/i,
-  infra: /\b(network|noc|bss|oss|telecom engineer|system admin|sysadmin|system engineer|systems engineer|server|it support|it ops|itops|helpdesk|help desk|desktop support|technical support|tech support|infrastructure|infra|dba|database admin|linux|windows admin|storage|data ?cent(er|re)|security analyst|soc analyst|it engineer|it executive|it admin)\b/i,
+  infra: /\b(network|noc|bss|oss|telecom engineer|rf engineer|rf optimi[sz]ation|ran engineer|transmission engineer|system admin|sysadmin|system engineer|systems engineer|server|it support|it ops|itops|helpdesk|help desk|desktop support|technical support|tech support|infrastructure|infra|dba|database admin|linux|windows admin|storage|data ?cent(er|re)|security analyst|soc analyst|it engineer|it executive|it admin)\b/i,
   data: /\b(data analyst|data scientist|data engineer|ml engineer|machine learning|bi analyst|bi developer|business intelligence|mis|reporting analyst|analytics)\b/i,
   manager: /\b(manager|lead|head|director|architect|vp|vice president|cxo|cto|ceo|coo|founder|co-founder|owner|partner)\b/i,
   creative: /\b(design|designer|market|marketing|content|video|editor|social media|copywrit|brand|creative|animator)\b/i,
   founder: /\b(founder|co-founder|owner|ceo|cxo|director|business head|entrepreneur)\b/i,
+  // Engineers outside IT (shop floor, plant, hardware): technical people in their industry, not "non-tech".
+  engineer: /\b(robot(?!ic process)\w*|(?<!(test|marketing|email|sales|business process|robotic process) )automation|plc|scada|dcs|cnc|hmi|mechatronics?|embedded|firmware|instrumentation|offline program\w*|olp|process simulat\w*|simulation engineer|virtual commissioning|cad|cae|cfd|fea|r ?& ?d|design engineer|process engineer|production engineer|manufacturing engineer|quality engineer|maintenance engineer|reliability engineer|industrial engineer|mechanical engineer|electrical engineer|electronics engineer|chemical engineer|civil engineer|structural engineer|vlsi|semiconductor|iot|scientist|researcher|research associate|phd|(marine|aerospace|aeronautical|automobile|petroleum|mining|metallurg\w*|textile|biomedical|environmental|agricultural|instrumentation|production|process|plant|piping|hvac|safety|project) engineer)\b/i,
 }
+/** "Programmer" in an industrial role (robot, PLC, CNC, offline programming) is not a software developer. */
+const INDUSTRIAL_CODE = /\b(robot(?!ic process)\w*|plc|cnc|scada|ladder|offline program\w*|olp|nc program\w*)\b/i
 
 export type Facts = {
   years?: number; coder: boolean; codesDaily: boolean; role: string; text: string
   dev: boolean; qa: boolean; cloudRole: boolean; infra: boolean; dataRole: boolean; manager: boolean; creative: boolean
   founder: boolean; nonTechRole: boolean; it: boolean; domainIndustry: boolean; leading: boolean; wantsFde: boolean
+  /** An engineer outside IT (robotics, automation, process, design...): technical, building AI in their industry. */
+  engineer: boolean
 }
 
 export function factsOf(a: Answers): Facts {
@@ -65,22 +71,25 @@ export function factsOf(a: Answers): Facts {
   const text = role === 'other' ? (a.roleOther ?? '').toLowerCase() : ''
   const typed = (re: RegExp) => Boolean(text) && re.test(text)
   // Their own "I don't write code" outranks a developer title (a support or analyst job with that title).
-  const dev = (role === 'software-engineer' || typed(RE.dev)) && a.programmer !== 'no'
+  const dev = (role === 'software-engineer' || (typed(RE.dev) && !typed(INDUSTRIAL_CODE))) && a.programmer !== 'no'
   const qa = role === 'qa-engineer' || typed(RE.qa)
   const cloudRole = role === 'devops-cloud' || typed(RE.cloud)
   // A typed role that manages ("Network Operations Manager") is a manager first: the map sends managers to leadership.
   const infra = INFRA_ROLES.has(role) || (typed(RE.infra) && !typed(NOT_IT) && !typed(RE.manager))
   const dataRole = role === 'data-analyst' || role === 'data-excel' || typed(RE.data)
   const manager = MANAGER_ROLES.has(role) || (typed(RE.manager) && !dev && !qa)
-  const creative = CREATIVE_ROLES.has(role) || typed(RE.creative)
+  // "Design engineer", "process design engineer": an engineer, not a creative.
+  const engineerText = typed(RE.engineer) && !typed(/\bmarketing\b/i)
+  const creative = CREATIVE_ROLES.has(role) || (typed(RE.creative) && !(engineerText && /\bengineer/.test(text)))
   const founder = typed(RE.founder) || (role === 'consultant' && (yearsOf(a) ?? 0) >= 10)
   // IT experience is what Cloud & DevOps needs (not coding): any developer, QA, cloud, infra or data role.
   const it = dev || qa || cloudRole || infra || role === 'data-analyst' || typed(RE.data) || (role === 'other' && a.domain === 'it-services' && !typed(NOT_IT) && !creative)
-  // A role they typed that isn't IT counts as non-tech, unless they write code (then it's a technical role in their field).
-  const nonTechRole = NONTECH_ROLES.includes(role) || role === 'business-non-tech' || (role === 'other' && !it && a.programmer !== 'yes' && !inferredProgrammer(a))
+  const engineer = engineerText && !dev && !qa && !cloudRole && !infra && !creative && !typed(RE.manager)
+  // A role they typed that isn't IT counts as non-tech, unless they write code or are an engineer in their field.
+  const nonTechRole = NONTECH_ROLES.includes(role) || role === 'business-non-tech' || (role === 'other' && !it && !engineer && a.programmer !== 'yes' && !inferredProgrammer(a))
   return {
     years: yearsOf(a), coder: codes(a), codesDaily: a.programmer === 'yes' || inferredProgrammer(a) === 'yes', role, text,
-    dev, qa, cloudRole, infra, dataRole, manager, creative, founder, nonTechRole, it,
+    dev, qa, cloudRole, infra, dataRole, manager, creative, founder, nonTechRole, it, engineer,
     domainIndustry: DOMAIN_INDUSTRIES.has(a.domain ?? ''), leading: manager || LEADING.has(a.probe ?? ''),
     wantsFde: a.interest === 'fde' || a.targetRole === 'fde' || a.targetRole === 'solutions-engineer',
   }
@@ -170,7 +179,12 @@ export function scorePersonas(a: Answers): PersonaScore[] {
     if (f.founder || (f.nonTechRole && (y ?? 0) >= 10 && LEADING.has(a.probe ?? ''))) add('biz-leader', 60, 'Business leader, founder or senior consultant')
     // Domain specialists and the undecided
     if (f.domainIndustry && !f.dev && !f.qa && !f.cloudRole && !f.infra && !f.dataRole && !f.manager && !f.creative) {
-      add('domain-pro', f.coder ? 55 : 25, 'Specialist in their industry')
+      add('domain-pro', f.coder || f.engineer ? 55 : 25, 'Specialist in their industry')
+    }
+    // Engineers outside IT (robotics, automation, process, design): build AI in their own field, coding taught from scratch.
+    if (f.engineer && !f.manager) {
+      add('domain-pro', f.domainIndustry ? 15 : 60, f.domainIndustry ? 'Engineer in their industry' : 'Engineer in their field')
+      if (a.interest === 'ai' || a.interest === 'data-science') add('domain-pro', 10, 'Wants to build AI in their field')
     }
     if (f.coder && (f.it || f.domainIndustry)) add('undecided-tech', 30, 'Tech professional who wants AI')
     if (a.goal === 'explore') add('undecided-tech', 10, 'Exploring where AI fits')
@@ -255,8 +269,13 @@ function orderFor(persona: string, a: Answers, f: Facts): string[] {
     case 'infra-ops': return !f.infra && f.dev && (f.years ?? 0) >= 6 ? first('CD-M', 'CD') : base
     // "If they still code and want to build, offer the GenAI & Agentic AI Master."
     case 'tech-manager': return (ans === 'hands-on' || a.probe === 'hands-on') && f.coder ? first('GAI-M', 'AIL') : base
-    // "If they don't code, route them to DABA (domain analytics track) or AAP."
-    case 'domain-pro': return f.coder ? base : ['DABA', 'AAP']
+    // Coding is taught from scratch in the AI programs: engineers and people who want to build AI in their industry get
+    // the GenAI & Agentic AI Master with their domain specialisation. "Apply AI in my function" → the no-code path; a
+    // non-coder who hasn't said yet → the map's domain analytics track (DABA) or AAP, with the master as the third option.
+    case 'domain-pro':
+      if (ans === 'apply') return ['AAP', 'DABA', 'GAI-M']
+      if (ans === 'build' || f.coder || f.engineer) return [...base, 'AAP']
+      return ['DABA', 'AAP', 'GAI-M']
     case 'undecided-tech':
       if (ans === 'data-science') return ['DSG-M', 'GAI-M', 'GAI-SD']
       if (ans === 'sde') return ['SDE-M', 'GAI-SD', 'GAI-M']
@@ -304,6 +323,9 @@ export function pathFor(a: Answers): LeadPath {
     if (e.ok) now.push(code)
     else later.push({ code, reason: e.reason ?? '' })
   }
+  // IT people who want cloud but don't code yet: Cloud & DevOps needs coding, so the GenAI & Agentic AI Master (coding
+  // taught from scratch, with a Cloud & DevOps specialisation) comes first, and Cloud & DevOps opens once they code.
+  if (!now.length && f.it && years1(f) && later.some((l) => ['CD', 'CD-M', 'GAI-CD'].includes(l.code)) && eligibility(CODE_TO_ID['GAI-M'], a).ok) now.push('GAI-M')
   // Nothing in their lead type is open yet: the fresher/no-code start that is (never an empty plan).
   if (!now.length) {
     const open = ['AAP', 'DABA', 'DSG-C'].find((c) => eligibility(CODE_TO_ID[c], a).ok) ?? 'AAP'
@@ -329,6 +351,10 @@ export function pathFor(a: Answers): LeadPath {
   const second = ranked.find((p) => p.id !== top.id)?.score ?? 0
   const match = Math.max(60, Math.min(98, 60 + Math.round((top.score - second) / 2) + (top.score >= 80 ? 15 : top.score >= 55 ? 8 : 0)))
   return { persona: top, match, ranked, options, why: options[0].code === persona.primary ? persona.why : REORDER_WHY[options[0].code] ?? `${options[0].name}: ${catalogueWho(options[0].code)}`, note: persona.note }
+}
+
+function years1(f: Facts) {
+  return (f.years ?? 1) >= 1
 }
 
 export type Route = { code: string; persona: string; why: string }

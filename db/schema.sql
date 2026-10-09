@@ -761,3 +761,71 @@ CREATE TABLE IF NOT EXISTS tool_result_history (
   replaced_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS tool_result_history_user_idx ON tool_result_history(user_id, tool, replaced_at DESC);
+
+-- v24: projects that fit each learner. Work profiles (src/config/profiles.ts) tag projects written for them; AI
+-- rewrites a learner's projects in their own context (cached); AI-proposed project ideas wait for an admin to approve
+-- them into the library, so the library grows where real learners need it.
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS profiles text[] NOT NULL DEFAULT '{}';
+CREATE INDEX IF NOT EXISTS projects_profiles_idx ON projects USING gin (profiles);
+CREATE TABLE IF NOT EXISTS project_tailoring (
+  user_id      uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  project_id   uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  context_hash text NOT NULL,
+  objective    text NOT NULL,
+  outcome      text,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, project_id)
+);
+CREATE TABLE IF NOT EXISTS project_ideas (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title         text NOT NULL,
+  objective     text NOT NULL,
+  outcome       text,
+  tools         text[] NOT NULL DEFAULT '{}',
+  program_id    text NOT NULL,
+  profiles      text[] NOT NULL DEFAULT '{}',
+  industry      text,
+  learner_brief text,
+  status        text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  seen          int NOT NULL DEFAULT 1,
+  project_id    uuid REFERENCES projects(id) ON DELETE SET NULL,
+  decided_by    uuid REFERENCES admin_users(id) ON DELETE SET NULL,
+  decided_at    timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  last_seen_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS project_ideas_title_idx ON project_ideas (lower(title), program_id);
+CREATE INDEX IF NOT EXISTS project_ideas_status_idx ON project_ideas (status, seen DESC);
+CREATE TABLE IF NOT EXISTS project_idea_learners (
+  idea_id    uuid NOT NULL REFERENCES project_ideas(id) ON DELETE CASCADE,
+  user_id    uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (idea_id, user_id)
+);
+
+-- v25: hardening. A sign-up for an email that already exists is held here and applied only after the code proves the
+-- email is theirs (nobody can overwrite someone else's name, phone or answers). Plus indexes for growth.
+CREATE TABLE IF NOT EXISTS pending_signups (
+  email         text PRIMARY KEY CHECK (email = lower(email)),
+  name          text,
+  phone_country text,
+  phone         text,
+  answers       jsonb NOT NULL DEFAULT '{}',
+  source        jsonb NOT NULL DEFAULT '{}',
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS users_created_idx ON users (created_at DESC);
+CREATE INDEX IF NOT EXISTS users_search_trgm ON users USING gin ((coalesce(name, '') || ' ' || email || ' ' || coalesce(phone, '')) gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS rate_limits_window_idx ON rate_limits (window_start);
+CREATE INDEX IF NOT EXISTS lead_events_type_idx ON lead_events (type, created_at);
+CREATE INDEX IF NOT EXISTS lead_assignments_to_idx ON lead_assignments (to_id, created_at);
+CREATE INDEX IF NOT EXISTS lead_tasks_done_by_idx ON lead_tasks (completed_by, completed_at) WHERE status = 'done';
+CREATE INDEX IF NOT EXISTS lead_tasks_missed_idx ON lead_tasks (owner_id, missed_at) WHERE missed_at IS NOT NULL;
+CREATE INDEX IF NOT EXISTS lead_owners_status_idx ON lead_owners (status, owner_id);
+CREATE INDEX IF NOT EXISTS lead_activities_user_action_idx ON lead_activities (user_id, action);
+CREATE INDEX IF NOT EXISTS tool_results_ready_idx ON tool_results (updated_at) WHERE status = 'ready';
+CREATE INDEX IF NOT EXISTS assessments_updated_idx ON assessments (updated_at);
+CREATE INDEX IF NOT EXISTS counsellor_requests_created_idx ON counsellor_requests (created_at);
+CREATE INDEX IF NOT EXISTS project_idea_learners_user_idx ON project_idea_learners (user_id, created_at);
+CREATE INDEX IF NOT EXISTS webhook_deliveries_created_idx ON webhook_deliveries (created_at);

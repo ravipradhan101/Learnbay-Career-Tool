@@ -9,7 +9,7 @@ type Endpoint = { id: string; url: string; description: string | null; events: s
 type Delivery = { id: string; endpoint: string; event: string; status: number | null; ok: boolean; duration_ms: number | null; created_at: string }
 type Event = { id: string; label: string }
 
-const when = (d: string | null) => (d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '—')
+const when = (d: string | null) => (d ? new Date(d).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' }) : '—')
 
 /** Shown once after creating a key or secret, with a copy button. */
 function Secret({ label, value, onDone }: { label: string; value: string; onDone: () => void }) {

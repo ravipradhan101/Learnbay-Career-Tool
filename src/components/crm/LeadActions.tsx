@@ -67,7 +67,7 @@ export function ReportsPanel({ leadId, reports, answers, titles }: { leadId: str
               <div>
                 <b>{r.name}</b>
                 <div className="small muted">
-                  {ready ? `Ready${r.builtBy ? ` · built by ${r.builtBy}` : ''}${r.updatedAt ? ` · ${new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}${r.versions ? ` · ${r.versions} earlier version${r.versions === 1 ? '' : 's'} kept` : ''}`
+                  {ready ? `Ready${r.builtBy ? ` · built by ${r.builtBy}` : ''}${r.updatedAt ? ` · ${new Date(r.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })}` : ''}${r.versions ? ` · ${r.versions} earlier version${r.versions === 1 ? '' : 's'} kept` : ''}`
                     : r.status === 'generating' ? 'Being built…' : r.status === 'failed' ? 'Failed last time' : 'Not built yet'}
                 </div>
               </div>

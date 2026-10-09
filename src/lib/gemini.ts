@@ -15,6 +15,11 @@ type GenerateOptions = {
   maxOutputTokens?: number
   thinkingBudget?: number
   timeoutMs?: number
+  /**
+   * The whole time this call may take, retries included (default: twice the timeout). A retry only starts when it can
+   * still finish inside it, so a request never outlives its route's maxDuration.
+   */
+  budgetMs?: number
   /** Who and which feature to bill the tokens to (analytics). */
   usage?: UsageTag
 }
@@ -134,7 +139,7 @@ async function callOnce(opts: GenerateOptions): Promise<string> {
 // Caps simultaneous Gemini calls per server instance so a spike of thousands of users queues briefly
 // instead of tripping Gemini's per-minute quota. Tune GEMINI_MAX_CONCURRENCY to your Gemini tier.
 const MAX_CONCURRENT = Math.max(1, Number(process.env.GEMINI_MAX_CONCURRENCY ?? '40') || 40)
-const MAX_QUEUE_WAIT_MS = 60_000
+const MAX_QUEUE_WAIT_MS = 8_000
 let active = 0
 const waiting: (() => void)[] = []
 
@@ -155,16 +160,23 @@ function releaseSlot() {
   waiting.shift()?.()
 }
 
-/** Calls Gemini through the concurrency gate; retries transient errors (429, 5xx, timeouts) twice with backoff. */
+/**
+ * Calls Gemini through the concurrency gate; retries a transient error (429, 5xx, timeout) once, after a short pause,
+ * when the retry can still finish inside the call's time budget.
+ */
 export async function generateText(opts: GenerateOptions): Promise<string> {
+  const started = Date.now()
+  const timeout = opts.timeoutMs ?? 60_000
+  const budget = opts.budgetMs ?? timeout * 2
   await acquireSlot()
   try {
     for (let attempt = 0; ; attempt++) {
       try {
         return await callOnce(opts)
       } catch (err) {
-        if (!(err instanceof GeminiError) || !err.retryable || attempt >= 2) throw err
-        await new Promise((r) => setTimeout(r, attempt === 0 ? 1500 : 4000 + Math.random() * 2000))
+        const pause = 1500 + Math.random() * 1000
+        if (!(err instanceof GeminiError) || !err.retryable || attempt >= 1 || Date.now() - started + pause + timeout > budget) throw err
+        await new Promise((r) => setTimeout(r, pause))
       }
     }
   } finally {

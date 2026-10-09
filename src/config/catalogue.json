@@ -416,10 +416,10 @@
    "whoFor": [
     "CS, IT, engineering, maths or statistics graduates starting in data science",
     "Analysts (Excel/SQL/BI) moving into data science and ML",
-    "Working professionals comfortable with maths and willing to code"
+    "Working professionals comfortable with maths (coding is taught from scratch)"
    ],
    "notFor": [
-    "Non-tech people with no interest in coding (→ DABA or Applied AI Practitioner)",
+    "People who only want analyst roles with Excel, SQL and BI (→ DABA) or AI tools in their current job (→ Applied AI Practitioner)",
     "Working developers who only want GenAI (→ GenAI for Software Developers)"
    ],
    "entry": "No work experience required. Graduate with 12th-level maths. Prior coding helps but isn't required; self-paced Python pre-work is provided.",
@@ -617,7 +617,7 @@
     "Freshers (→ Data Science & GenAI Program)",
     "Developers who want SDE/product-company roles (→ SDE Master)"
    ],
-   "entry": "1+ year of work experience. Comfortable with maths; coding experience preferred.",
+   "entry": "1+ year of work experience. Comfortable with maths. No coding background needed: Python is taught from scratch.",
    "targetRoles": [
     "Data Scientist",
     "ML Engineer",
@@ -894,7 +894,7 @@
     "QA automation engineers who write code"
    ],
    "notFor": [
-    "Non-coders (→ Applied AI Practitioner)",
+    "Non-coders (→ GenAI & Agentic AI Master, coding taught from scratch, or Applied AI Practitioner)",
     "Developers whose main gap is DSA and system design (→ SDE Master)"
    ],
    "entry": "1+ year as a developer (or in a coding role). No ML background needed.",
@@ -1046,7 +1046,8 @@
    ],
    "notFor": [
     "Developers who only want AI skills (→ GenAI for Software Developers)",
-    "Experienced engineers moving into client-facing AI roles (→ Forward Deployed AI Engineer)"
+    "Experienced engineers moving into client-facing AI roles (→ Forward Deployed AI Engineer)",
+    "Non-coders (→ GenAI & Agentic AI Master, coding taught from scratch)"
    ],
    "entry": "1+ year as a working developer.",
    "targetRoles": [
@@ -1204,7 +1205,7 @@
     "Cloud/DevOps engineers who code and want AI delivery roles"
    ],
    "notFor": [
-    "Freshers and non-coders"
+    "Freshers, non-coders and people outside IT (→ GenAI & Agentic AI Master, coding taught from scratch)"
    ],
    "entry": "1+ year in a tech role, and writes code. Newer coders get Python and backend pre-work.",
    "targetRoles": [
@@ -1465,15 +1466,15 @@
    "durationMonths": 9,
    "totalWeeks": 39,
    "whoFor": [
-    "Tech professionals with 1+ year who code (developers, QA, data, cloud) and want GenAI plus a domain or role specialisation",
-    "Domain professionals in BFSI, healthcare, manufacturing or retail who are comfortable coding",
-    "Tech professionals who want AI but haven't picked a role yet"
+    "Tech professionals with 1+ year (developers, QA, data, cloud) who want GenAI plus a domain or role specialisation",
+    "Domain professionals and engineers in BFSI, healthcare, manufacturing or retail who want to build AI in their industry (coding is taught from scratch)",
+    "Professionals who want to build AI systems and agents but haven't picked a role yet"
    ],
    "notFor": [
-    "Non-coders (→ Applied AI Practitioner or AI Leadership Program)",
+    "People who only want to use AI tools in their current job without building anything (→ Applied AI Practitioner or AI Leadership Program)",
     "Developers who only need one developer track in 5 months (→ GenAI for Software Developers)"
    ],
-   "entry": "1+ year in a tech role. Self-paced Python pre-work for weak coders.",
+   "entry": "1+ year of work experience, in tech or in a domain (BFSI, healthcare, manufacturing, retail and more). No coding background needed: Python is taught from scratch.",
    "targetRoles": [
     "GenAI Engineer",
     "Agentic AI Engineer",
@@ -1815,9 +1816,10 @@
    "notFor": [
     "Freshers and students",
     "Non-IT professionals",
-    "Engineers already working in cloud/DevOps (→ GenAI for Cloud & DevOps or the Master)"
+    "Engineers already working in cloud/DevOps (→ GenAI for Cloud & DevOps or the Master)",
+    "Non-coders (→ GenAI & Agentic AI Master, coding taught from scratch, or Data & Business Analytics)"
    ],
-   "entry": "1+ year in an IT role. QA track: Selenium, Playwright, Cypress or Pytest experience.",
+   "entry": "1+ year in an IT role, with coding knowledge (scripting in Python or Bash, or a programming language). QA track: Selenium, Playwright, Cypress or Pytest experience.",
    "targetRoles": [
     "Cloud Engineer",
     "DevOps Engineer",
@@ -2005,9 +2007,10 @@
    ],
    "notFor": [
     "Freshers and non-IT professionals",
-    "People who only need one role move in 5 months (→ Cloud & DevOps Engineering role track)"
+    "People who only need one role move in 5 months (→ Cloud & DevOps Engineering role track)",
+    "Non-coders"
    ],
-   "entry": "1+ year in IT, with Linux comfort.",
+   "entry": "1+ year in IT, with coding knowledge and Linux comfort.",
    "targetRoles": [
     "Cloud Architect",
     "Platform Engineer",
@@ -2880,7 +2883,7 @@
    "id": "domain-pro",
    "group": "Domain specialists",
    "name": "Domain professional in BFSI, healthcare, manufacturing or retail",
-   "signals": "Analyst, risk, ops or product person; comfortable with some code",
+   "signals": "Analyst, risk, ops, product or engineering person in their industry (e.g. robotics, automation, process engineering); coding is taught from scratch",
    "pains": [
     "Wants AI roles inside their industry",
     "Generic courses ignore their domain"

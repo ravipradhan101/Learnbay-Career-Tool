@@ -1,6 +1,6 @@
 'use client'
 
-// The conversation engine behind the chat (Woody the guide, then the counsellor). Flows are plain async scripts ("say this, then ask that"):
+// The conversation engine behind the chat (Bruce the guide, then the counsellor). Flows are plain async scripts ("say this, then ask that"):
 //   await bot.say('What do you do today?'); const role = await bot.choose(ROLES)
 // Starting another flow (e.g. a click in the left panel) cancels the running one cleanly.
 
@@ -14,7 +14,8 @@ import type { ReportCard } from '@/lib/report-card'
 import type { ToolId } from '@/lib/tools-meta'
 
 /** A project picked from the library for this learner (kept in the card so a reopened chat shows the same ones). */
-export type ProjectItem = { title: string; description: string; tools: string[]; kind: string; domain: string | null; domainLabel?: string | null; objective?: string | null; outcome?: string | null; industry?: string | null }
+/** A project on the projects card. kind 'idea' = a "bring your own project" idea for this learner; tailored = rewritten for them. */
+export type ProjectItem = { title: string; description: string; tools: string[]; kind: string; domain: string | null; domainLabel?: string | null; objective?: string | null; outcome?: string | null; industry?: string | null; tailored?: boolean }
 
 export type Choice = {
   id: string; label: string; hint?: string; icon?: IconName
@@ -293,7 +294,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
   const flowActive = useRef(0)
   const conversationId = useRef<string | null>(null)
   const reduced = useRef(false)
-  // Who is talking now (Woody or the allocated counsellor); every message remembers who said it.
+  // Who is talking now (Bruce or the allocated counsellor); every message remembers who said it.
   const [who, setWho] = useState(speaker)
   const whoRef = useRef(speaker)
   whoRef.current = who
@@ -303,10 +304,22 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
   const itemsRef = useRef<Item[]>([])
   // The latest unsaved state of the chat; switching chats sends it straight away instead of dropping it.
   const unsaved = useRef<{ id: string; body: string } | null>(null)
+  // The last body the server accepted (an unchanged chat, e.g. only typing dots, is not sent again).
+  const lastSent = useRef('')
+  // A thread whose saved history failed to load: never saved over, so its history isn't lost.
+  const loadFailed = useRef<string | null>(null)
   const flush = () => {
     const p = unsaved.current
     unsaved.current = null
-    if (p) fetch(`/api/chats/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: p.body, keepalive: true }).catch(() => {})
+    if (!p || p.body === lastSent.current || loadFailed.current === p.id) return
+    // Browsers refuse keepalive requests over 64 KB: long chats are sent as normal requests.
+    fetch(`/api/chats/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: p.body, keepalive: p.body.length < 60_000 })
+      .then((r) => {
+        if (r.ok) lastSent.current = p.body
+        // Not saved (busy or offline): keep it for the next save instead of dropping it.
+        else if (r.status === 429 || r.status >= 500) unsaved.current ??= p
+      })
+      .catch(() => { unsaved.current ??= p })
   }
   itemsRef.current = items
 
@@ -325,6 +338,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
       conversationId.current = threadId
       getJson(`/api/chats/${threadId}`).then((r) => {
         if (cancelled) return
+        loadFailed.current = r.ok || r.status === 404 ? null : threadId
         const saved = r.ok ? ((r.data.thread as { items?: Item[] } | undefined)?.items ?? []) : []
         setItems(saved.filter((i) => i.kind !== 'typing' && !(i.kind === 'card' && i.live)))
         setLoadedKey(threadId)
@@ -401,7 +415,7 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
     const lines: string[] = []
     for (const i of itemsRef.current.slice(-18)) {
       if (i.kind === 'user') lines.push(`Learner: ${i.text}`)
-      else if (i.kind === 'bot') lines.push(`${i.by === 'bot' ? 'Woody' : 'Counsellor'}: ${i.text}`)
+      else if (i.kind === 'bot') lines.push(`${i.by === 'bot' ? 'Bruce' : 'Counsellor'}: ${i.text}`)
       else if (i.kind === 'card') lines.push(`[On screen: ${cardLabel(i.card)}]`)
       else if (i.kind === 'divider') lines.push(`--- ${i.text} ---`)
     }

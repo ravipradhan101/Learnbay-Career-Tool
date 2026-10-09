@@ -1,4 +1,4 @@
-// Who the learner is, from what Woody collected (experience × background, with "do you code?" as a modifier),
+// Who the learner is, from what Bruce collected (experience × background, with "do you code?" as a modifier),
 // and what the counsellor asks each kind of learner. See the Counsellor Conversation Playbook.
 
 import { PROGRAMS, getProgram, programFor, resolveProgramId, type Program } from '@/config/programs'
@@ -31,7 +31,7 @@ export function segmentOf(a: Answers): Segment {
   return 'mid'
 }
 
-/** Freshers only (asked by Woody): where they are in their studies. */
+/** Freshers only (asked by Bruce): where they are in their studies. */
 export const STUDY_STAGES: Option[] = [
   { id: 'final-year', label: 'Final year student' },
   { id: 'job-hunting', label: 'Graduated, looking for my first job' },

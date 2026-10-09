@@ -30,7 +30,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   }
   const { rows, total } = await listLeads(me, f)
   // Missing or old intent scores are worked out after the page is sent; they show on the next load.
-  background('crm:scores', () => refreshScores(rows))
+  background('crm:scores', () => refreshScores(rows, 8))
   const people = byId(dir)
   const assignable = dir.filter((s) => assignableIds(me, dir).has(s.id)).map((s) => ({ id: s.id, label: s.id === me.id ? `Me (${s.name ?? s.email})` : `${s.name ?? s.email} · ${s.role.toUpperCase()}` }))
   const qs = (patch: Record<string, string | number>) => {

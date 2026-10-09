@@ -1,6 +1,6 @@
 'use client'
 
-// What Woody (the guide) and the counsellor say and ask, step by step. Scripted parts cost nothing and never go
+// What Bruce (the guide) and the counsellor say and ask, step by step. Scripted parts cost nothing and never go
 // off-script; the counsellor's own words (from the model) come in where something personal is needed.
 //
 // The counsellor's first conversation follows a consultative sales flow:
@@ -34,7 +34,7 @@ import { DIFFICULTIES_FOR, PROBES, STUDY_STAGES, defaultTargetRole, eligibility,
 export const GUEST_ITEMS_KEY = 'lcn_chat_v2:guest'
 export const GUEST_ANSWERS_KEY = 'lcn_chat_guest_answers_v2'
 const GUEST_NAME_KEY = 'lcn_chat_guest_name'
-/** The conversation with Woody, handed over to the signed-in chat so the story continues. */
+/** The conversation with Bruce, handed over to the signed-in chat so the story continues. */
 export const ADOPT_KEY = 'lcn_chat_adopt'
 /** A question typed before sign-up; the counsellor answers it right after. */
 export const PENDING_Q_KEY = 'lcn_chat_pending_q'
@@ -70,7 +70,7 @@ const DIFFICULTY_ICONS: Record<string, IconName> = { roadmap: 'route', time: 'cl
 const lower = (s: string | undefined) => (!s ? '' : s.length > 1 && s[1] === s[1].toUpperCase() && /[A-Z]/.test(s[1]) ? s : s.charAt(0).toLowerCase() + s.slice(1))
 const firstOf = (name: string) => name.trim().split(/\s+/)[0] ?? ''
 
-// ================= Before sign-up: Woody, the guide =================
+// ================= Before sign-up: Bruce, the guide =================
 
 export type GuestCtx = {
   signedIn: { name: string; email: string; phoneCountry: string; phone: string } | null
@@ -105,7 +105,7 @@ const GOAL_REPLY: Record<string, string> = {
   explore: 'Good place to start. We’ll show you where you fit, with no pressure.',
 }
 
-/** Woody: name, goal, industry and experience, then sign-up, then he finds the right counsellor. */
+/** Bruce: name, goal, industry and experience, then sign-up, then he finds the right counsellor. */
 export async function guestFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
   captureSource()
   const a: Answers = { ...(storageGet<Answers>(GUEST_ANSWERS_KEY) ?? {}), ...ctx.initial }
@@ -120,7 +120,7 @@ export async function guestFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
   let name = ctx.signedIn?.name || storageGet<string>(GUEST_NAME_KEY) || ''
 
   if (ctx.fresh) {
-    await bot.say(`Hi, I’m Woody, your guide at Learnbay.${t ? ` Great choice: the ${t.label} (${t.hint}).` : ''}`)
+    await bot.say(`Hi, I’m Bruce, your guide at Learnbay.${t ? ` Great choice: the ${t.label} (${t.hint}).` : ''}`)
   }
   if (!name) {
     step('name')
@@ -201,7 +201,7 @@ export async function guestFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
   await findCounsellor(bot, a.interest ?? 'ai')
   storageRemove(GUEST_ANSWERS_KEY)
   storageRemove(GUEST_NAME_KEY)
-  // Woody's chat stays behind: the counsellor starts a clean conversation, knowing everything from the profile.
+  // Bruce's chat stays behind: the counsellor starts a clean conversation, knowing everything from the profile.
   try { window.sessionStorage.removeItem(GUEST_ITEMS_KEY); window.sessionStorage.removeItem(ADOPT_KEY) } catch { /* ignore */ }
   const dest = saved.redirect ?? '/dashboard'
   window.location.href = dest === '/dashboard' && a.interest ? `/dashboard?track=${a.interest}` : dest
@@ -272,7 +272,7 @@ export type StudioCtx = {
   switchProgram: (programId: string) => Promise<boolean>
   /** The chat being shown (reviews are one per chat). */
   threadId: () => string | null
-  /** Woody's feedback pop-up (counsellor, eligibility test, suggestions); skipped if already given. */
+  /** Bruce's feedback pop-up (counsellor, eligibility test, suggestions); skipped if already given. */
   askRating: (why: 'end' | 'milestones' | 'leaving') => Promise<void>
 }
 
@@ -372,15 +372,15 @@ export async function counsellorFirstFlow(bot: Bot, ctx: StudioCtx): Promise<voi
   if (started) {
     await bot.say(introduced && !a.trigger ? `Now let’s get to know you a little better, ${ctx.first}, so your plan fits exactly.` : `Welcome back, ${ctx.first}. Let’s pick up where we left off.`)
   } else {
-    // Introduce themselves, then open with a personal read of the profile Woody collected.
+    // Introduce themselves, then open with a personal read of the profile Bruce collected.
     await bot.say(`Hi ${ctx.first}, I’m ${me.name}, a senior career counsellor at Learnbay.${t ? ` I specialise in the ${t.label} and guide people moving into roles like ${t.roles.slice(0, 2).join(' and ')}.` : ''}`)
-    await bot.say(`I’ve gone through what you shared with Woody${exp ? `: ${exp === 'Fresher' ? 'just starting out' : `${exp} of experience`}` : ''}${dom ? ` in ${lower(dom)}` : ''}${goal ? `, aiming to ${lower(goal).replace(/\bmy\b/g, 'your')}` : ''}. Here’s my first read.`)
+    await bot.say(`I’ve gone through what you shared with Bruce${exp ? `: ${exp === 'Fresher' ? 'just starting out' : `${exp} of experience`}` : ''}${dom ? ` in ${lower(dom)}` : ''}${goal ? `, aiming to ${lower(goal).replace(/\bmy\b/g, 'your')}` : ''}. Here’s my first read.`)
     await bot.ai({ intent: 'analysis', context: 'advisor' })
   }
   const q = storageGet<string>(PENDING_Q_KEY)
   if (q) {
     storageRemove(PENDING_Q_KEY)
-    await bot.say('First, you asked Woody something. Let me answer that.', { quick: true })
+    await bot.say('First, you asked Bruce something. Let me answer that.', { quick: true })
     ctx.userSays(q)
     await bot.ai({ message: q, context: 'advisor' })
   }
@@ -480,7 +480,17 @@ async function buildReport(bot: Bot, ctx: StudioCtx, tool: ToolId, alreadyRunnin
     if (!res.ok) {
       bot.remove(gen)
       track('error', 'tool_generate_failed', { tool, status: res.status })
-      await bot.say(res.data.exhausted ? `${res.error}` : `I couldn’t build your ${meta.name} just now. ${res.error}`)
+      await bot.say(res.error || `I couldn’t build your ${meta.name} just now.`)
+      // Never a dead end: try again (unless it's used up its tries), or talk to a person.
+      const c = await bot.choose([
+        ...(res.data.exhausted || res.status === 400 ? [] : [{ id: 'retry', label: 'Try again', icon: 'refresh' as IconName }]),
+        ctx.done.sessions ? { id: 'call', label: 'Call me instead', icon: 'phone' as IconName } : { id: '/dashboard/sessions', label: 'Talk to a Senior Counsellor', icon: 'calendar' as IconName },
+        { id: 'menu', label: 'Something else', icon: 'grid' as IconName },
+      ], { style: 'chips' })
+      if (c.id === 'retry') { await bot.wait(1500); return buildReport(bot, ctx, tool, false) }
+      if (c.id === 'call') { ctx.call('chat'); return null }
+      if (c.id === 'menu') { await homeFlow(bot, ctx, 'menu'); return null }
+      ctx.go(c.id)
       return null
     }
     status = String(res.data.status)
@@ -561,8 +571,9 @@ async function askMapQuestion(bot: Bot, ctx: StudioCtx, keep: (patch: Answers) =
   const persona = pathFor(ctx.answers).persona.id
   const q = MAP_QUESTIONS[persona]
   if (!q || ctx.answers.mapAnswers?.[q.id]) return
-  // Questions that only matter for people who code (hands-on or managerial, build models or apply AI) are skipped for non-coders.
-  if ((persona === 'tech-manager' || persona === 'domain-pro') && ctx.answers.programmer === 'no') return
+  // "Hands-on or managerial" only matters for people who code. "Build or apply AI" is asked to everyone in their industry:
+  // coding is taught from scratch, so a non-coder can still choose to build.
+  if (persona === 'tech-manager' && ctx.answers.programmer === 'no') return
   await bot.say(q.question)
   const c = await bot.choose(q.options.map((o) => ({ ...o, icon: 'arrowRight' as IconName })), { style: 'chips' })
   await keep({ mapAnswers: { ...(ctx.answers.mapAnswers ?? {}), [q.id]: c.id } })
@@ -679,6 +690,8 @@ export async function toolFlow(bot: Bot, ctx: StudioCtx, tool: ToolId, sales = f
       }
       track('step_answer', `${tool}:${key}`)
     }
+    // Skill gap and roadmap start from their real work: two optional questions, asked once, in their own words.
+    if ((tool === 'skill-gap' || tool === 'roadmap') && !ctx.answers.deepDive && !patch.deepDive) await askDeepDive(bot, patch)
     // High earners: the salary advice depends on the kind of company they're in.
     const ctc = patch.ctc ?? ctx.answers.ctc
     if (tool === 'salary' && ctc === 'gt50' && !ctx.answers.companyType) {
@@ -697,6 +710,19 @@ export async function toolFlow(bot: Bot, ctx: StudioCtx, tool: ToolId, sales = f
   bot.card({ type: 'usp', ids: USPS_FOR[tool], lead: 'How Learnbay helps with this' })
   if (await offerConnectNow(bot, ctx, tool)) return
   return eligibilityPush(bot, ctx, tool, false)
+}
+
+/** Tools they use and a problem they'd like AI to solve: optional, so the plan and projects start from their real work. */
+async function askDeepDive(bot: Bot, patch: Answers) {
+  await bot.say('Two optional questions so your plan starts from your real work, not a generic one.')
+  const go = await bot.choose([{ id: 'go', label: 'Sure', icon: 'arrowRight' }, { id: 'skip', label: 'Skip these', icon: 'clock' }], { style: 'chips' })
+  if (go.id === 'skip') { patch.deepDive = 'skipped'; track('action', 'deep_dive', { value: 'skipped' }); return }
+  await bot.say('Which tools or software do you use most days at work?')
+  patch.toolsUsed = (await bot.ask({ placeholder: 'e.g. Excel, SAP, Tally, RobotStudio, Jira', label: 'Tools you use', maxLength: 160 })).replace(/[<>]/g, '').trim().slice(0, 160) || undefined
+  await bot.say('And one problem at work you’d love AI to solve?')
+  patch.workProblem = (await bot.ask({ placeholder: 'e.g. finding why paint defects happen, faster', label: 'A problem for AI', maxLength: 240 })).replace(/[<>]/g, '').trim().slice(0, 240) || undefined
+  patch.deepDive = 'done'
+  track('action', 'deep_dive', { value: 'done' })
 }
 
 /** "Is this transition realistic for you? Yes.": what they already have, what the program adds, the role it leads to. */
@@ -888,14 +914,14 @@ export async function eligibilityFlow(bot: Bot, ctx: StudioCtx, resumed = false)
 }
 
 /**
- * Right after a booking, Woody (the guide) steps in for one message to introduce the Senior Counsellors: the people who
+ * Right after a booking, Bruce (the guide) steps in for one message to introduce the Senior Counsellors: the people who
  * answer every question, lock the plan, and check and apply any discount or scholarship the learner's profile
  * qualifies for. Then the counsellor carries on. Never a promise of a discount, only that it will be checked.
  */
 async function lumiIntroducesCounsellors(bot: Bot, ctx: StudioCtx, when: string, video: boolean) {
   const counsellor = ctx.counsellor().id
   bot.speakAs('bot')
-  await bot.say(`Hi ${ctx.first}, Woody here. You’re in very good hands: on your ${video ? 'video call' : 'call'} (${when} IST), a Learnbay Senior Career Counsellor will answer every question you have, lock in the right plan for you, and check which discounts or scholarships your profile qualifies for, and apply them for you. Jot down anything you want to ask before then, so nothing gets missed.`)
+  await bot.say(`Hi ${ctx.first}, Bruce here. You’re in very good hands: on your ${video ? 'video call' : 'call'} (${when} IST), a Learnbay Senior Career Counsellor will answer every question you have, lock in the right plan for you, and check which discounts or scholarships your profile qualifies for, and apply them for you. Jot down anything you want to ask before then, so nothing gets missed.`)
   bot.speakAs(counsellor)
 }
 
@@ -982,7 +1008,9 @@ export async function sessionsFlow(bot: Bot, ctx: StudioCtx, resumed = false) {
     if (how.id !== 'phone') return meetFlow(bot, ctx, 'sessions', how.id === 'now', true)
   }
   await bot.say(`In about 30 minutes, a Learnbay Senior Career Counsellor goes through your results, the right program for your background, and fees or EMI if you want. It’s free. Pick a time today or tomorrow (${CALL_HOURS}).`)
-  const booked = await bot.live<{ when: string }>({ type: 'booking' })
+  const booked = await bot.live<{ when?: string; skipped?: boolean }>({ type: 'booking' })
+  // The slots couldn't load and they moved on: no booking, back to the menu.
+  if (!booked.when) { await bot.say('No problem. You can book any time from the menu, or tap Call me for a call back.'); return homeFlow(bot, ctx, 'menu') }
   ctx.latestSession = { preferred_date: null, preferred_time: null, status: 'new' }
   ctx.markDone('sessions')
   await bot.say(`Done! Your call is booked for ${booked.when} (IST). A Senior Counsellor will call you on your registered number, and the confirmation is in your email.`)

@@ -66,7 +66,9 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
               Signed up {fmtDate(u.created_at)}{u.email_verified_at ? ' · email verified' : ' · email not verified'} · last seen {fmtDate(u.last_login_at)}
               {external && <> · Main CRM: {external.existed ? `already there (matched by ${external.matched_by})` : 'new record'}{external.crm_id ? ` #${external.crm_id}` : ''}</>}
             </p>
-            <p className="crm-owner">Owner: <Chain chain={d.chain} />{u.source && <span className="crm-faint"> · {SOURCE_LABEL[u.source] ?? u.source} {fmtDate(u.assigned_at)}</span>}</p>
+            <p className="crm-owner">Owner: <Chain chain={d.chain} />{u.owner_id
+              ? u.source && <span className="crm-faint"> · {SOURCE_LABEL[u.source] ?? u.source} {fmtDate(u.assigned_at)}</span>
+              : <span className="crm-faint"> · waiting for the next available ISM</span>}</p>
           </div>
         </div>
         <div className="crm-hero-side">
@@ -174,6 +176,7 @@ function ProfileView({ answers: a }: { answers: Answers }) {
     ['Industry', domainLabel(a)], ['Company type', labelOf(COMPANY_TYPES, a.companyType)], ['Interested in', interestLabel(a)], ['Goal', goalLabel(a)],
     ['Target role', targetRoleLabel(a)], ['Skills', a.skills?.length ? a.skills.map((x) => labelOf(SKILLS, x) ?? x).join(', ') : undefined],
     ['Current CTC', labelOf(CTC_BANDS, a.ctc)], ['City', labelOf(CITIES, a.city)], ['Hours a week', labelOf(WEEKLY_HOURS, a.weeklyHours)], ['Timeline', labelOf(TIMELINES, a.timeline)],
+    ['Tools they use', a.toolsUsed], ['Problem they want AI to solve', a.workProblem],
   ]
   return (
     <dl className="crm-facts">

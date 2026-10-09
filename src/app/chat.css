@@ -441,7 +441,7 @@
   .tg-top .logo-text small { display: none; }
   .tg-login { height: 32px; padding: 0 13px; font-size: 0.82rem; }
   .tg-main { padding: 0; max-width: none; }
-  .tg-main .tc { height: calc(100dvh - 56px); min-height: 0; border-radius: 20px 20px 0 0; border: none; box-shadow: 0 -1px 0 var(--tc-line); }
+  .tg-main .tc { height: calc(100dvh - 57px); min-height: 0; border-radius: 20px 20px 0 0; border: none; box-shadow: 0 -1px 0 var(--tc-line); }
   .tc-header { padding: 10px 12px 10px 14px; gap: 10px; }
   .tc-badge { font-size: 0.62rem; padding: 1px 7px; }
   .tc-body { padding: 14px 12px 8px; }
@@ -692,6 +692,10 @@
 .tc-project-n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 0.72rem; font-weight: 700; background: var(--tc-indigo-50); color: var(--tc-indigo); }
 .tc-project b { display: block; font-size: 0.86rem; font-weight: 600; }
 .tc-project small { display: block; font-size: 0.76rem; color: var(--tc-muted); }
+.tc-project-note { font-size: 0.74rem; color: var(--tc-indigo); font-weight: 600; margin-top: -4px; }
+.tc-project-ideas { margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--tc-line, #e2e8f0); }
+.tc-project.idea .tc-project-n { background: #fff7ed; color: #c2410c; }
+.tc-project-byop { font-size: 0.76rem; color: var(--tc-muted); padding: 7px 9px; border-radius: 8px; background: var(--tc-soft); }
 @media (max-width: 640px) {
   .tc-level-row { grid-template-columns: 1fr; gap: 5px; }
 }
@@ -811,7 +815,7 @@
 .sp-logos { justify-content: flex-start; gap: 10px 16px; margin: 12px 0; opacity: 0.9; }
 .tc-proof-logos { justify-content: flex-start; gap: 10px 20px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
 
-/* ---------- Landing, tracks, Woody: same style ---------- */
+/* ---------- Landing, tracks, Bruce: same style ---------- */
 .lp { background: #fff; }
 .lp-top { border-bottom: 1px solid #eef0f3; max-width: none; padding: 16px 32px; }
 .lp-login, .tg-login { height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid #e5e7eb; font-weight: 500; font-size: 0.92rem; box-shadow: none; }
@@ -956,7 +960,7 @@
 .tc-call svg { color: #fff !important; }
 @media (max-width: 480px) { .tc-call-label { display: none; } .tc-call { padding: 0 11px !important; } }
 
-/* ---------- Woody, the floating guide ---------- */
+/* ---------- Bruce, the floating guide ---------- */
 .rg { position: fixed; right: 22px; bottom: 96px; z-index: 60; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: none; }
 .rg > * { pointer-events: auto; }
 .rg-face { position: relative; border: none; background: none; padding: 0; cursor: pointer; border-radius: 50%; animation: rg-float 3.2s ease-in-out infinite; }
@@ -1007,10 +1011,10 @@
 .sp-call { background: #16a34a !important; color: #fff !important; border: none !important; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25); }
 .sp-call:hover { background: #15803d !important; }
 .sp-call svg { color: #fff !important; }
-/* Where Woody floats over the chat (narrower screens), the newest message scrolls clear of her. */
+/* Where Bruce floats over the chat (narrower screens), the newest message scrolls clear of her. */
 @media (max-width: 1280px) { .ts-main .tc-body { padding-bottom: 70px !important; } }
 
-/* ---------- Woody's feedback pop-up ---------- */
+/* ---------- Bruce's feedback pop-up ---------- */
 .rg-form { display: grid; gap: 10px; margin-top: 10px; }
 .rg-stars-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.84rem; color: #334155; }
 .rg-stars { display: flex; gap: 2px; flex: none; }
@@ -1024,7 +1028,7 @@
 .rg-form-actions { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
 .rg-act:disabled { opacity: 0.55; cursor: not-allowed; }
 .rg-error { margin: 0; color: #b91c1c; font-size: 0.8rem; }
-/* ---------- v10: Woody easy to spot; "more options" as a clear button ---------- */
+/* ---------- v10: Bruce easy to spot; "more options" as a clear button ---------- */
 .rg-tag { opacity: 1 !important; right: 70px; background: #fff; color: #3730a3; border: 1px solid #c7d2fe; box-shadow: 0 6px 16px rgba(67, 56, 202, 0.18); font-size: 0.8rem; padding: 6px 12px; }
 .rg-open .rg-tag { opacity: 0 !important; }
 .rg-ring { position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(67, 56, 202, 0.45); animation: rg-pulse 2.4s ease-out infinite; pointer-events: none; }
@@ -1087,7 +1091,7 @@
 .tc-roles-note { margin: 0; display: flex; gap: 6px; align-items: flex-start; font-size: 0.84rem; color: #166534; background: #ecfdf3; padding: 8px 10px; border-radius: 10px; }
 .tc-roles-note svg { flex: none; margin-top: 2px; }
 
-/* ---------- v13: Woody's pop-ups in the centre; Woody in the sidebar ---------- */
+/* ---------- v13: Bruce's pop-ups in the centre; Bruce in the sidebar ---------- */
 .rg-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(15, 23, 42, 0.42); display: grid; place-items: center; padding: 16px; animation: rg-fade 0.18s ease-out; pointer-events: auto; }
 @keyframes rg-fade { from { opacity: 0; } to { opacity: 1; } }
 .rg-overlay .rg-bubble { position: relative; width: min(440px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; border-radius: 22px !important; padding: 20px 20px 18px !important; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28) !important; }
@@ -1173,13 +1177,13 @@
 .lp-get:hover .lp-get-icon { transform: scale(1.08); background: #4338ca; color: #fff; }
 @media (prefers-reduced-motion: reduce) { .lp-get, .lp-get:hover, .lp-get:hover .lp-get-icon { transition: none; transform: none; } }
 
-/* ---------- Woody: typing dots in her pop-up ---------- */
+/* ---------- Bruce: typing dots in her pop-up ---------- */
 .rg-dots { display: inline-flex; gap: 4px; padding: 6px 2px; }
 .rg-dots i { width: 7px; height: 7px; border-radius: 50%; background: #a5b4fc; animation: tc-dot 1.1s infinite ease-in-out; }
 .rg-dots i:nth-child(2) { animation-delay: 0.15s; }
 .rg-dots i:nth-child(3) { animation-delay: 0.3s; }
 
-/* ---------- Woody's guided tour ---------- */
+/* ---------- Bruce's guided tour ---------- */
 .lt { position: fixed; inset: 0; z-index: 120; }
 .lt-block { position: absolute; inset: 0; }
 .lt-dim { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.55); }
@@ -1199,7 +1203,7 @@
 .lt-actions .rg-act { justify-content: center; }
 @media (prefers-reduced-motion: reduce) { .lt-spot, .lt-card { transition: none; animation: none; } }
 
-/* ---------- Right pane: at-a-glance plan (no scrolling; room left for Woody at the bottom) ---------- */
+/* ---------- Right pane: at-a-glance plan (no scrolling; room left for Bruce at the bottom) ---------- */
 .ts-right .sp2 { padding-bottom: 118px; }
 .sp2 { gap: 14px !important; }
 .sp2-me { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #eef0f3; border-radius: 18px; background: #fff; }
@@ -1380,7 +1384,7 @@
 .lp-get:hover .lp-get-icon { background: var(--brand-grad) !important; color: #fff !important; }
 .lp-get-icon svg { stroke: currentColor; }
 
-/* Woody and the tour pick up the brand */
+/* Bruce and the tour pick up the brand */
 .rg-face .tanya-avatar { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #c4b5fd, 0 12px 28px rgba(109, 40, 217, 0.35) !important; }
 .rg-ring { border-color: rgba(109, 40, 217, 0.45) !important; }
 .rg-tag { color: var(--brand) !important; border-color: #ddd6fe !important; }
@@ -1400,10 +1404,10 @@
 .sp2-program-actions { flex-direction: column; align-items: stretch; gap: 6px; }
 .sp2-program-actions .tc-btn { justify-content: center; white-space: nowrap; width: 100%; }
 .sp2-program-actions .sp2-link { align-self: center; }
-/* Woody: the label shows on hover only (it used to sit on top of the plan tiles) */
+/* Bruce: the label shows on hover only (it used to sit on top of the plan tiles) */
 .rg-tag { opacity: 0 !important; }
 .rg-face:hover .rg-tag, .rg-face:focus-visible .rg-tag { opacity: 1 !important; }
-/* With the right pane on screen, Woody sits in the bottom-right corner, below the pane's content */
+/* With the right pane on screen, Bruce sits in the bottom-right corner, below the pane's content */
 @media (min-width: 1281px) {
   .rg { bottom: 18px; right: 18px; }
   .ts-right .sp2 { padding-bottom: 92px; }
@@ -1519,7 +1523,7 @@
 .tc-card { border-radius: 20px !important; border-color: rgba(99, 102, 241, 0.14) !important; box-shadow: 0 14px 34px -26px rgba(55, 48, 163, 0.55) !important; }
 .tc-eyebrow { color: #7c3aed !important; letter-spacing: 0.08em !important; }
 
-/* Woody as a mascot: a gentle bob where she floats. */
+/* Bruce as a mascot: a gentle bob where she floats. */
 @keyframes lumi-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
 .rg-face .lumi-mascot, .ts-lumi .lumi-mascot { animation: lumi-bob 3.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .rg-face .lumi-mascot, .ts-lumi .lumi-mascot { animation: none; } }
@@ -1577,7 +1581,7 @@
 .tc-path-body small { font-size: 0.8rem; color: #475569; line-height: 1.4; }
 .tc-path-note { display: inline-flex; align-items: center; gap: 5px; color: #92400e !important; }
 
-/* Options (Woody and counsellors): hovering any option gives it the highlighted look (tinted background, filled icon);
+/* Options (Bruce and counsellors): hovering any option gives it the highlighted look (tinted background, filled icon);
    while the pointer is over the list, the default highlighted first option steps back to the plain look. */
 .tc-choice:hover, .tc-choice:focus-visible {
   border-color: rgba(124, 58, 237, 0.35) !important;
@@ -1594,7 +1598,7 @@
 .tc-choice-icon { transition: background 0.15s ease, color 0.15s ease; }
 .tc-chip:hover { border-color: rgba(124, 58, 237, 0.4) !important; background: linear-gradient(135deg, #f5f3ff, #fdf2f8) !important; }
 
-/* Woody v2: a sleek little robot with gestures. Parts animate in their own box. */
+/* Bruce v2: a sleek little robot with gestures. Parts animate in their own box. */
 .lumi-v2 .lumi-bot, .lumi-v2 .lumi-hand, .lumi-v2 .lumi-eye, .lumi-v2 .lumi-look, .lumi-v2 .lumi-light { transform-box: fill-box; transform-origin: center; }
 .lumi-v2 .lumi-bot { animation: lumi2-float 3.6s ease-in-out infinite; }
 .lumi-v2 .lumi-eye { animation: lumi2-blink 4.6s infinite; }
@@ -1619,7 +1623,7 @@
 /* The old bob on the wrapper would double the float. */
 .rg-face .lumi-v2, .ts-lumi .lumi-v2 { animation: none !important; }
 
-/* Woody the firefly: hovers, flutters, glows, blinks, glances, sways her antennae and waves a leg.
+/* Bruce the firefly: hovers, flutters, glows, blinks, glances, sways her antennae and waves a leg.
    Hover (her or the card she sits in): happy eyes, a little twirl and a brighter glow. */
 .lumi-fly .lumi-bot, .lumi-fly .lumi-wing, .lumi-fly .lumi-eye, .lumi-fly .lumi-look, .lumi-fly .lumi-light, .lumi-fly .lumi-tail,
 .lumi-fly .lumi-hand, .lumi-fly .lumi-antennae, .lumi-fly .lumi-tip, .lumi-fly .lumi-spark { transform-box: fill-box; transform-origin: center; }
@@ -1658,7 +1662,7 @@
 }
 .rg-face .lumi-fly, .ts-lumi .lumi-fly { animation: none !important; }
 
-/* Woody the octopus: bobs as if in water, wiggles her tentacles, waves, blinks, glances, swings her tassel, blows bubbles.
+/* Bruce the octopus: bobs as if in water, wiggles her tentacles, waves, blinks, glances, swings her tassel, blows bubbles.
    Hover (her or the card she sits in): happy eyes and a little twirl. */
 .lumi-octo .lumi-bot, .lumi-octo .lumi-arm, .lumi-octo .lumi-hand, .lumi-octo .lumi-eye, .lumi-octo .lumi-look,
 .lumi-octo .lumi-tassel, .lumi-octo .lumi-cap, .lumi-octo .lumi-bubble { transform-box: fill-box; transform-origin: center; }
@@ -1693,7 +1697,7 @@
 }
 .rg-face .lumi-octo, .ts-lumi .lumi-octo { animation: none !important; }
 
-/* Woody the hamster: squishy bounce, flapping arms, blinks, glances, twitching ears and whiskers.
+/* Bruce the hamster: squishy bounce, flapping arms, blinks, glances, twitching ears and whiskers.
    Hover (her or the card she sits in): a happy hop with squinty eyes and arms up. */
 .lumi-ham .lumi-bot, .lumi-ham .lumi-hand, .lumi-ham .lumi-arm-l, .lumi-ham .lumi-arm-r, .lumi-ham .lumi-eye, .lumi-ham .lumi-look,
 .lumi-ham .lumi-ear, .lumi-ham .lumi-whiskers { transform-box: fill-box; transform-origin: center; }
@@ -1735,49 +1739,49 @@
 @keyframes tree-perk { 0%, 100% { transform: scale(1) rotate(0deg) } 50% { transform: scale(1.18) rotate(-4deg) } }
 @media (prefers-reduced-motion: reduce) { .lumi-tree .lumi-sprout { animation: none !important; } }
 
-/* Woody, the guide: each mood moves in its own way. Parts animate in their own box. */
-.woody .woody-bot, .woody .woody-eye, .woody .woody-sprouts, .woody .woody-wave, .woody .woody-arms-up, .woody .woody-arms-out,
-.woody .woody-present, .woody .woody-glint, .woody .woody-zzz, .woody .woody-stars, .woody .woody-head { transform-box: fill-box; transform-origin: center; }
-.woody .woody-bot { transform-origin: 50% 100%; animation: woody-bob 3.2s ease-in-out infinite; }
-.woody .woody-eye { animation: lumi2-blink 4.6s infinite; }
-.woody .woody-sprouts { transform-origin: 50% 100%; animation: woody-sway 3.4s ease-in-out infinite; }
-.woody .woody-wave { transform-origin: 0% 100%; animation: woody-wave 2.6s ease-in-out infinite; }
-.woody-excited .woody-bot { animation: woody-jump 0.8s ease-in-out infinite; }
-.woody-excited .woody-arms-up { animation: woody-cheer 0.4s ease-in-out infinite alternate; }
-.woody-thinking .woody-head { transform-origin: 50% 100%; animation: woody-tilt 3s ease-in-out infinite; }
-.woody-playful .woody-bot { animation: woody-wiggle 0.5s ease-in-out infinite; }
-.woody-present .woody-present { transform-origin: 0% 50%; animation: woody-offer 1.8s ease-in-out infinite; }
-.woody-present .woody-glint { animation: woody-glint 1.2s ease-in-out infinite; }
-.woody-sleep .woody-bot { animation: woody-breathe 3.6s ease-in-out infinite; }
-.woody-sleep .woody-zzz { animation: woody-zzz 2.4s ease-in-out infinite; }
-.woody-ouch .woody-bot { animation: woody-shake 0.35s ease-in-out 3; }
-.woody-ouch .woody-stars { animation: woody-spin 1.2s linear infinite; }
-.woody-innocent .woody-bot { animation: woody-sway-slow 4s ease-in-out infinite; }
-@keyframes woody-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.2px) } }
-@keyframes woody-sway { 0%, 100% { transform: rotate(-5deg) } 50% { transform: rotate(5deg) } }
-@keyframes woody-sway-slow { 0%, 100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
-@keyframes woody-wave { 0%, 45%, 100% { transform: rotate(0deg) } 55% { transform: rotate(-22deg) } 65% { transform: rotate(10deg) } 75% { transform: rotate(-18deg) } 85% { transform: rotate(4deg) } }
-@keyframes woody-jump { 0%, 100% { transform: translateY(0) scale(1.02, 0.98) } 50% { transform: translateY(-3px) scale(0.98, 1.02) } }
-@keyframes woody-cheer { from { transform: translateY(0) } to { transform: translateY(-1.4px) } }
-@keyframes woody-tilt { 0%, 100% { transform: rotate(0deg) } 50% { transform: rotate(-5deg) } }
-@keyframes woody-wiggle { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
-@keyframes woody-offer { 0%, 100% { transform: translateX(0) } 50% { transform: translateX(1.2px) } }
-@keyframes woody-glint { 0%, 100% { opacity: 0.5; transform: scale(0.8) rotate(0deg) } 50% { opacity: 1; transform: scale(1.15) rotate(45deg) } }
-@keyframes woody-breathe { 0%, 100% { transform: scale(1, 1) } 50% { transform: scale(1.015, 0.985) } }
-@keyframes woody-zzz { 0% { opacity: 0; transform: translate(0, 2px) } 40% { opacity: 1 } 100% { opacity: 0; transform: translate(2px, -3px) } }
-@keyframes woody-shake { 0%, 100% { transform: translateX(0) } 25% { transform: translateX(-1.5px) rotate(-3deg) } 75% { transform: translateX(1.5px) rotate(3deg) } }
-@keyframes woody-spin { to { transform: rotate(360deg) } }
+/* Bruce, the guide: each mood moves in its own way. Parts animate in their own box. */
+.bruce .bruce-bot, .bruce .bruce-eye, .bruce .bruce-sprouts, .bruce .bruce-wave, .bruce .bruce-arms-up, .bruce .bruce-arms-out,
+.bruce .bruce-present, .bruce .bruce-glint, .bruce .bruce-zzz, .bruce .bruce-stars, .bruce .bruce-head { transform-box: fill-box; transform-origin: center; }
+.bruce .bruce-bot { transform-origin: 50% 100%; animation: bruce-bob 3.2s ease-in-out infinite; }
+.bruce .bruce-eye { animation: lumi2-blink 4.6s infinite; }
+.bruce .bruce-sprouts { transform-origin: 50% 100%; animation: bruce-sway 3.4s ease-in-out infinite; }
+.bruce .bruce-wave { transform-origin: 0% 100%; animation: bruce-wave 2.6s ease-in-out infinite; }
+.bruce-excited .bruce-bot { animation: bruce-jump 0.8s ease-in-out infinite; }
+.bruce-excited .bruce-arms-up { animation: bruce-cheer 0.4s ease-in-out infinite alternate; }
+.bruce-thinking .bruce-head { transform-origin: 50% 100%; animation: bruce-tilt 3s ease-in-out infinite; }
+.bruce-playful .bruce-bot { animation: bruce-wiggle 0.5s ease-in-out infinite; }
+.bruce-present .bruce-present { transform-origin: 0% 50%; animation: bruce-offer 1.8s ease-in-out infinite; }
+.bruce-present .bruce-glint { animation: bruce-glint 1.2s ease-in-out infinite; }
+.bruce-sleep .bruce-bot { animation: bruce-breathe 3.6s ease-in-out infinite; }
+.bruce-sleep .bruce-zzz { animation: bruce-zzz 2.4s ease-in-out infinite; }
+.bruce-ouch .bruce-bot { animation: bruce-shake 0.35s ease-in-out 3; }
+.bruce-ouch .bruce-stars { animation: bruce-spin 1.2s linear infinite; }
+.bruce-innocent .bruce-bot { animation: bruce-sway-slow 4s ease-in-out infinite; }
+@keyframes bruce-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.2px) } }
+@keyframes bruce-sway { 0%, 100% { transform: rotate(-5deg) } 50% { transform: rotate(5deg) } }
+@keyframes bruce-sway-slow { 0%, 100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
+@keyframes bruce-wave { 0%, 45%, 100% { transform: rotate(0deg) } 55% { transform: rotate(-22deg) } 65% { transform: rotate(10deg) } 75% { transform: rotate(-18deg) } 85% { transform: rotate(4deg) } }
+@keyframes bruce-jump { 0%, 100% { transform: translateY(0) scale(1.02, 0.98) } 50% { transform: translateY(-3px) scale(0.98, 1.02) } }
+@keyframes bruce-cheer { from { transform: translateY(0) } to { transform: translateY(-1.4px) } }
+@keyframes bruce-tilt { 0%, 100% { transform: rotate(0deg) } 50% { transform: rotate(-5deg) } }
+@keyframes bruce-wiggle { 0%, 100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
+@keyframes bruce-offer { 0%, 100% { transform: translateX(0) } 50% { transform: translateX(1.2px) } }
+@keyframes bruce-glint { 0%, 100% { opacity: 0.5; transform: scale(0.8) rotate(0deg) } 50% { opacity: 1; transform: scale(1.15) rotate(45deg) } }
+@keyframes bruce-breathe { 0%, 100% { transform: scale(1, 1) } 50% { transform: scale(1.015, 0.985) } }
+@keyframes bruce-zzz { 0% { opacity: 0; transform: translate(0, 2px) } 40% { opacity: 1 } 100% { opacity: 0; transform: translate(2px, -3px) } }
+@keyframes bruce-shake { 0%, 100% { transform: translateX(0) } 25% { transform: translateX(-1.5px) rotate(-3deg) } 75% { transform: translateX(1.5px) rotate(3deg) } }
+@keyframes bruce-spin { to { transform: rotate(360deg) } }
 @media (prefers-reduced-motion: reduce) {
-  .woody .woody-bot, .woody .woody-eye, .woody .woody-sprouts, .woody .woody-wave, .woody .woody-arms-up, .woody .woody-arms-out,
-  .woody .woody-present, .woody .woody-glint, .woody .woody-zzz, .woody .woody-stars, .woody .woody-head { animation: none !important; }
+  .bruce .bruce-bot, .bruce .bruce-eye, .bruce .bruce-sprouts, .bruce .bruce-wave, .bruce .bruce-arms-up, .bruce .bruce-arms-out,
+  .bruce .bruce-present, .bruce .bruce-glint, .bruce .bruce-zzz, .bruce .bruce-stars, .bruce .bruce-head { animation: none !important; }
 }
-.rg-face .woody, .ts-lumi .woody { animation: none !important; }
+.rg-face .bruce, .ts-lumi .bruce { animation: none !important; }
 
-/* Woody in his corner: a draggable, throwable guide with a small speech bubble. */
-.rg-woody { position: relative; display: flex; align-items: flex-end; justify-content: flex-end; will-change: transform; }
-.rg-woody .rg-face { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
-.rg-woody .rg-face:active { cursor: grabbing; }
-.rg-woody.free .rg-face { animation: none; }
+/* Bruce in his corner: a draggable, throwable guide with a small speech bubble. */
+.rg-bruce { position: relative; display: flex; align-items: flex-end; justify-content: flex-end; will-change: transform; }
+.rg-bruce .rg-face { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.rg-bruce .rg-face:active { cursor: grabbing; }
+.rg-bruce.free .rg-face { animation: none; }
 .rg-say { position: absolute; right: calc(100% + 10px); bottom: 34px; width: max-content; max-width: min(240px, calc(100vw - 110px)); background: #fff; color: #1e1b4b;
   border: 1px solid #e0e7ff; border-radius: 16px 16px 4px 16px; box-shadow: 0 12px 28px -10px rgba(30, 27, 75, 0.35); padding: 9px 12px; font-size: 0.86rem; line-height: 1.4;
   display: grid; gap: 8px; animation: rg-say-in 0.22s ease-out; }
@@ -1789,3 +1793,5 @@
 @media (prefers-reduced-motion: reduce) { .rg-say { animation: none; } }
 @media (max-width: 760px) { .rg-say { bottom: 28px; } }
 .rg-say.right { right: auto; left: calc(100% + 10px); border-radius: 16px 16px 16px 4px; }
+.tc-actions-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tc-mail-note { display: block; margin-top: 6px; font-size: 0.78rem; color: #15803d; }

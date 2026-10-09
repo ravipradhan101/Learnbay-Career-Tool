@@ -81,6 +81,16 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
   const [tools, setTools] = useState(data.tools)
   const [answers, setAnswers] = useState<Answers>({ ...data.answers })
   const [drawer, setDrawer] = useState<'left' | 'right' | null>(null)
+  // Drawers behave like dialogs: focus moves in, Escape closes, and focus returns to what opened them.
+  const drawerClose = useRef<HTMLButtonElement | null>(null)
+  useEffect(() => {
+    if (!drawer) return
+    const opener = document.activeElement as HTMLElement | null
+    drawerClose.current?.focus()
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawer(null) }
+    window.addEventListener('keydown', onKey)
+    return () => { window.removeEventListener('keydown', onKey); opener?.focus?.() }
+  }, [drawer])
   const [ratings, setRatings] = useState(data.counsellorRatings)
   const guide = useRef<GuideHandle>(null)
   const askRatingRef = useRef<(why: 'end' | 'milestones' | 'leaving') => Promise<void>>(async () => {})
@@ -229,7 +239,11 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     },
     projects: async (programId?: string) => {
       const r = await getJson(`/api/projects${programId ? `?program=${encodeURIComponent(programId)}` : ''}`)
-      return r.ok ? ((r.data.projects as ProjectItem[] | undefined) ?? []) : []
+      if (!r.ok) return []
+      // Library projects (rewritten for them), then any "bring your own project" ideas for their unusual profile.
+      const ideas = ((r.data.ideas as { title: string; objective: string; outcome: string | null; tools: string[]; industry: string | null }[] | undefined) ?? [])
+        .map((i): ProjectItem => ({ title: i.title, description: i.objective, objective: i.objective, outcome: i.outcome, tools: i.tools, industry: i.industry, kind: 'idea', domain: null }))
+      return [...((r.data.projects as ProjectItem[] | undefined) ?? []), ...ideas]
     },
     switchProgram: async (program: string) => {
       const before = answersRef.current
@@ -322,6 +336,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
 
   // Counselling (the learner went off the script): what was set aside, and how many counselling turns so far.
   const counselRound = useRef(0)
+  const sendGen = useRef(0)
   const setAside = useRef<{ was: string; resumeLabel: string }>({ was: 'the chat', resumeLabel: 'Show me my next steps' })
 
   /** What the learner was doing when they typed, in words for the counsellor and for the "continue" option. */
@@ -376,12 +391,15 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     const answerable = prompt ? prompt.choices.filter((c) => !c.id.startsWith('c-say-')) : []
     // The options they didn't pick go away while the counsellor reads the message; they return only if still relevant.
     chat.stash()
+    // A reply that arrives after they moved on (another section, or a newer message) must not answer the new question.
+    const gen = ++sendGen.current
     void chat.ai({
       message: text,
       context,
       pending: prompt && answerable.length ? { question: prompt.question ?? '', options: answerable.map((c) => ({ id: c.id, label: c.label })) } : undefined,
       counsel: { was, round: counselRound.current++ },
     }).then((r) => {
+      if (gen !== sendGen.current || topicRef.current !== topic) return
       if (r.failed) { chat.unstash(); return }
       ctx.showCard(r.show, r.programId)
       const found = prompt && r.choice ? prompt.choices.find((c) => c.id === r.choice) : undefined
@@ -419,7 +437,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     body: () => `Come back to your Career Studio, ${data.first}: your plan is right where you left it.`,
   })
 
-  // ---------- Woody, the guide ----------
+  // ---------- Bruce, the guide ----------
   const guideHelp = (): GuideLine => ({
     text: `What can I help you with, ${data.first}?`,
     actions: [
@@ -432,7 +450,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     ].slice(0, 6),
   })
 
-  // ---------- Woody's tour: offered on the first visit, and any time from his menu ----------
+  // ---------- Bruce's tour: offered on the first visit, and any time from his menu ----------
   const tourKey = `lcn_tour:${data.userId}`
   const tourSeen = () => { try { return window.localStorage.getItem(tourKey) === '1' } catch { return true } }
   const markTour = () => { try { window.localStorage.setItem(tourKey, '1') } catch { /* ignore */ } }
@@ -450,11 +468,11 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
   ]
   const startTour = () => { markTour(); guide.current?.close(); setDrawer(null); setTouring(true) }
   const guideHello = (): GuideLine => {
-    if (tourSeen()) return { text: `Hi ${data.first}! I’m Woody, your guide here. I’m always in the corner, so tap me whenever you need help.` }
+    if (tourSeen()) return { text: `Hi ${data.first}! I’m Bruce, your guide here. I’m always in the corner, so tap me whenever you need help.` }
     // Offered once: whatever they choose (or if they close it), it isn't offered again; "Show me around" is in my menu.
     markTour()
     return {
-        text: `Hi ${data.first}! I’m Woody, your guide in the Career Studio. Want a 30-second tour of where everything is: your reports, readiness score, the free counselling call and more?`,
+        text: `Hi ${data.first}! I’m Bruce, your guide in the Career Studio. Want a 30-second tour of where everything is: your reports, readiness score, the free counselling call and more?`,
         actions: [{ id: 'tour', label: 'Take the quick tour', icon: 'target', primary: true }, { id: 'tour-skip', label: 'I’ll explore on my own' }],
       }
   }
@@ -483,7 +501,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     if (!lines.length) return null
     return { text: `Leaving already, ${data.first}? ${lines.join(' ')}`, actions: [...actions, { id: 'later', label: 'I’ll come back later' }] }
   }
-  // ---------- feedback: asked by Woody after a few tasks, or at the end (never after a single task) ----------
+  // ---------- feedback: asked by Bruce after a few tasks, or at the end (never after a single task) ----------
   const tasksDone = [done['skill-gap'], done.salary, done.roadmap, done.eligibility, done.sessions].filter(Boolean).length
   const ratedKey = `lcn_rated:${data.userId}:${who.id}`
   const alreadyRated = () => { try { return window.localStorage.getItem(ratedKey) === '1' } catch { return false } }
@@ -496,7 +514,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     const sent = await guide.current.askRating({ counsellor: who.id, counsellorName: who.name, testTaken: done.eligibility, threadId }, text)
     if (sent) { try { window.localStorage.setItem(ratedKey, '1') } catch { /* ignore */ } }
   }
-  // After a few tasks, once per visit, Woody asks (a short pause first, so it never interrupts a step).
+  // After a few tasks, once per visit, Bruce asks (a short pause first, so it never interrupts a step).
   useEffect(() => {
     if (tasksDone < 3) return
     try { if (window.sessionStorage.getItem(`lcn_rating_asked:${data.userId}`) === '1') return } catch { return }
@@ -535,7 +553,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     setDrawer(null)
     ctx.go(id)
   }
-  /** Log out: Woody says goodbye, and logging out happens only when the learner taps his Log out button. */
+  /** Log out: Bruce says goodbye, and logging out happens only when the learner taps his Log out button. */
   const confirmLogout = async () => {
     if (!guide.current) return true
     const canRate = !alreadyRated() && tasksDone > 0
@@ -572,7 +590,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
       <div className="ts-foot">
         <button type="button" className="ts-lumi" onClick={() => { setDrawer(null); guide.current?.say(guideHelp()) }}>
           <Avatar who="bot" size={40} online />
-          <span><b>Woody · your guide</b><small>Ask me anything</small></span>
+          <span><b>Bruce · your guide</b><small>Ask me anything</small></span>
           <Icon name="message" size="1rem" />
         </button>
         <div className="ts-foot-row">
@@ -618,7 +636,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
               profile={(id, close) => (
                 <CounsellorProfile id={id} interest={answers.interest} rating={ratings[id] ?? null} booked={done.sessions} onCall={() => ctx.call('button')} onClose={close} />
               )}
-              headerRight={<button type="button" className="tc-newchat" onClick={() => void newChat()}><Icon name="plus" size="1rem" /> <span>New chat</span></button>}
+              headerRight={<button type="button" className="tc-newchat" aria-label="Start a new chat" title="Start a new chat" onClick={() => void newChat()}><Icon name="plus" size="1rem" /> <span>New chat</span></button>}
             />
           </main>
           <aside className="ts-right" aria-label="Your plan" data-tour="plan">{right}</aside>
@@ -628,12 +646,12 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
         <>
           <div className="ts-backdrop" onClick={() => setDrawer(null)} />
           <aside className={`ts-drawer ${drawer === 'right' ? 'right' : ''}`} role="dialog" aria-modal="true" aria-label={drawer === 'right' ? 'Your plan' : 'Menu'}>
-            <div className="ts-drawer-top">{drawer === 'left' ? <Logo href="/dashboard" /> : <b>Your plan</b>}<button type="button" className="ts-menu-btn" aria-label="Close" onClick={() => setDrawer(null)}><Icon name="x" /></button></div>
+            <div className="ts-drawer-top">{drawer === 'left' ? <Logo href="/dashboard" /> : <b>Your plan</b>}<button ref={drawerClose} type="button" className="ts-menu-btn" aria-label="Close" onClick={() => setDrawer(null)}><Icon name="x" /></button></div>
             {drawer === 'left' ? left : right}
           </aside>
         </>
       )}
-      <LumiGuide ref={guide} first={data.first} who={data.userId} hello={guideHello} help={guideHelp} nudge={guideNudge} quiet={() => touring} onAction={onGuide} />
+      <LumiGuide ref={guide} first={data.first} who={data.userId} hello={guideHello} help={guideHelp} nudge={guideNudge} quiet={() => touring} busy={() => chat.busy()} onAction={onGuide} />
       {touring && (
         <LumiTour
           steps={tourSteps}

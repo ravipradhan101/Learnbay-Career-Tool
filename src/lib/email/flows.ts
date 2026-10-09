@@ -102,8 +102,9 @@ async function enrol(userId: string, trigger: TriggerId) {
      RETURNING (next_run_at <= now() + interval '1 minute')::int AS due`,
     [userId, trigger],
   )
-  // Welcome-style emails (no delay) go out right away instead of waiting for the next run.
-  if (rows.some((r) => r.due)) await processDueEmails()
+  // Welcome-style emails (no delay) go out right away for this learner only (other learners' emails wait for the worker,
+  // so a sign-up never sends anyone else's queue).
+  if (rows.some((r) => r.due)) await processDueEmails(5, userId)
 }
 
 // ---------- The worker ----------
@@ -202,7 +203,7 @@ async function processOne(e: Claimed, flows: Map<string, { flow: FlowRow; steps:
 const g = globalThis as unknown as { __emailRunning?: boolean }
 
 /** Sends everything that is due. Safe to run from several servers at once (rows are claimed with SKIP LOCKED). */
-export async function processDueEmails(limit = MAX_PER_TICK): Promise<{ sent: number; skipped: number; failed: number; waiting: number }> {
+export async function processDueEmails(limit = MAX_PER_TICK, onlyUser: string | null = null): Promise<{ sent: number; skipped: number; failed: number; waiting: number }> {
   const stats = { sent: 0, skipped: 0, failed: 0, waiting: 0 }
   if (g.__emailRunning) return stats
   g.__emailRunning = true
@@ -213,10 +214,11 @@ export async function processDueEmails(limit = MAX_PER_TICK): Promise<{ sent: nu
           SELECT e.id FROM email_enrollments e JOIN email_flows f ON f.id = e.flow_id
            WHERE e.status = 'active' AND f.status = 'active' AND e.next_run_at <= now()
              AND (e.locked_until IS NULL OR e.locked_until < now())
+             AND ($2::uuid IS NULL OR e.user_id = $2::uuid)
            ORDER BY e.next_run_at LIMIT $1
            FOR UPDATE OF e SKIP LOCKED)
        RETURNING id, flow_id, user_id, last_position, next_run_at`,
-      [limit],
+      [limit, onlyUser],
     )
     const flows = new Map<string, { flow: FlowRow; steps: StepRow[] }>()
     for (const e of claimed) {

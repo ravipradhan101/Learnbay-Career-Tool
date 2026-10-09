@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { randomInt } from 'node:crypto'
 import { env } from './env'
 import { query, queryOne } from './db'
-import { clientIp, hmac, randomToken, rateLimits, safeEqualHex, sha256 } from './security'
+import { clientIp, hmac, overLimit, randomToken, rateLimit, rateLimits, safeEqualHex, sha256 } from './security'
 import { sendOtpEmail } from './mailer'
 import { crmNewLead } from './crm/hooks'
 
@@ -12,6 +12,8 @@ export const SESSION_COOKIE = 'lcn_session'
 const SESSION_DAYS = 30
 const OTP_MINUTES = 10
 const OTP_MAX_ATTEMPTS = 5
+/** Wrong codes allowed per email per day, across all its codes. */
+const OTP_DAILY_FAILURES = 15
 
 export type User = {
   id: string
@@ -99,8 +101,12 @@ export type OtpRequestResult = { ok: true } | { ok: false; status: number; error
 export async function issueOtp(email: string, ip: string): Promise<OtpRequestResult> {
   const ok = await rateLimits([
     [`otp:email:${email}`, 5, 15 * 60],
+    [`otp:email:day:${email}`, 12, 24 * 60 * 60], // nobody's inbox can be flooded with codes
     [`otp:ip:${ip}`, 30, 60 * 60],
     ['otp:global', 3000, 10 * 60], // circuit breaker against mass email sending
+    // Stay under the mailbox's daily sending quota (Gmail Workspace allows about 2,000 a day): if the mailbox gets
+    // blocked, nobody can log in at all. Raise this once login codes go through a dedicated email provider.
+    ['otp:global:day', Number(process.env.OTP_DAILY_CAP ?? 1500), 24 * 60 * 60],
   ])
   if (!ok) return { ok: false, status: 429, error: 'Too many code requests. Please wait a few minutes and try again.' }
 
@@ -123,6 +129,8 @@ export async function issueOtp(email: string, ip: string): Promise<OtpRequestRes
 
 export async function verifyOtp(email: string, code: string): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!/^\d{6}$/.test(code)) return { ok: false, error: 'Enter the 6-digit code from your email.' }
+  // Across all codes for this email: at most 15 wrong guesses a day, so codes can't be ground down by requesting new ones.
+  if (await overLimit(`otpfail:${email}`, OTP_DAILY_FAILURES, 86_400)) return { ok: false, error: 'Too many wrong codes today. Please try again tomorrow, or contact Learnbay support.' }
   const row = await queryOne<{ id: number; code_hash: string; attempts: number }>(
     `SELECT id, code_hash, attempts FROM otp_codes
       WHERE email = $1 AND consumed_at IS NULL AND expires_at > now()
@@ -136,6 +144,7 @@ export async function verifyOtp(email: string, code: string): Promise<{ ok: true
   }
   if (!safeEqualHex(row.code_hash, hmac(`${email}:${code}`))) {
     await query(`UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1`, [row.id])
+    await rateLimit(`otpfail:${email}`, OTP_DAILY_FAILURES, 86_400)
     const left = OTP_MAX_ATTEMPTS - row.attempts - 1
     return { ok: false, error: left > 0 ? `That code is not right. ${left} attempt${left === 1 ? '' : 's'} left.` : 'Too many wrong attempts. Request a new code.' }
   }

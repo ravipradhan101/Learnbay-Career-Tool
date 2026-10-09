@@ -46,27 +46,34 @@ export async function POST(request: Request) {
   if (!current) {
     // New learner: the lead (contact + answers) is saved straight away, but the account only opens after the
     // learner proves the email is theirs with a 6-digit code (sent by /api/auth/request-otp).
-    // An unverified account (someone who never entered their code) is refreshed with the latest details;
-    // a verified account is never touched without its code.
+    // An email that already exists is never changed here (anyone could type someone else's email): what they sent is
+    // held in pending_signups and applied by /api/auth/verify-otp once the code proves the email is theirs.
+    const source = JSON.stringify(sanitizeSource(body.source))
     const saved = await queryOne<{ id: string }>(
       `WITH u AS (
          INSERT INTO users (email, name, phone_country, phone, consent, consent_at, source)
          VALUES ($1, $2, $3, $4, true, now(), $5)
-         ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, phone_country = EXCLUDED.phone_country, phone = EXCLUDED.phone,
-                consent = true, consent_at = now(), updated_at = now()
-          WHERE users.email_verified_at IS NULL
+         ON CONFLICT (email) DO NOTHING
          RETURNING id
        ), a AS (
          INSERT INTO assessments (user_id, answers) SELECT id, $6 FROM u
-         ON CONFLICT (user_id) DO UPDATE SET answers = EXCLUDED.answers, updated_at = now()
+         ON CONFLICT (user_id) DO NOTHING
          RETURNING user_id
        )
        SELECT id FROM u`,
-      [contact.email, contact.name, contact.phoneCountry, contact.phone, JSON.stringify(sanitizeSource(body.source)), JSON.stringify(answers)],
+      [contact.email, contact.name, contact.phoneCountry, contact.phone, source, JSON.stringify(answers)],
     )
-    // saved = null means a verified account already owns this email.
     if (saved) crmNewLead(saved.id)
-    return jsonOk({ needsOtp: true, email: contact.email, existing: !saved })
+    else {
+      await queryOne(
+        `INSERT INTO pending_signups (email, name, phone_country, phone, answers, source) VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, phone_country = EXCLUDED.phone_country, phone = EXCLUDED.phone,
+           answers = EXCLUDED.answers, source = EXCLUDED.source, created_at = now()`,
+        [contact.email, contact.name, contact.phoneCountry, contact.phone, JSON.stringify(answers), source],
+      )
+    }
+    // The same answer either way, so nobody can tell from it whether an email has an account.
+    return jsonOk({ needsOtp: true, email: contact.email })
   }
 
   // Signed-in learner finishing onboarding (e.g. logged in first): fill in what is missing.

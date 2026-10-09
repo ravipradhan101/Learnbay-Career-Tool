@@ -63,6 +63,7 @@ function buildChunks(): Chunk[] {
   policy('placement', 'Placement and career support', `${USPS.placement.title}: ${USPS.placement.detail} Placement support is mock interviews, resume build-up and interview calls when the learner is ready. Learnbay never guarantees a job, a salary or a hike.`)
   policy('calls', 'Calls with a Senior Counsellor', 'Learnbay’s human Senior Career Counsellors call between 10 AM and 8 PM IST. A "call me" request is answered at the earliest available time, within 1 working day. A booked call can be for today or tomorrow and can be rescheduled from the Talk to a Senior Counsellor page.')
   policy('eligibility-test', 'Eligibility test', 'The eligibility test is 10 quick questions (no maths) that check readiness for a Learnbay program, with up to 3 attempts. It shows where the learner would start.')
+  policy('byop', 'Bring your own project', 'Bring your own project (BYOP): learners can bring a project from their own work or their own idea, and Learnbay mentors guide them on it as part of the program, alongside the module projects and capstones. It works best when the project uses the tools the program teaches. Coding is taught from scratch in the AI & Data Science programs, so no coding background is needed to start.')
   policy('live', 'How classes run', `${CURRICULUM_EDGE.join(' ')} ${USPS.mentors.title}: ${USPS.mentors.detail}`)
   for (const u of Object.values(USPS)) out.push({ id: `strength:${u.id}`, kind: 'strength', programs: [], title: u.title, text: `${u.title}: ${u.detail}` })
   for (const c of COMPARISON) out.push({ id: `strength:compare:${c.area}`, kind: 'strength', programs: [], title: `Compared with typical programs: ${c.area}`, text: `${c.area}: typical programs = ${c.others}; Learnbay = ${c.learnbay}` })
@@ -83,6 +84,8 @@ const SYN: [RegExp, string][] = [
   [/analytics|analyst/g, ' analytics analyst '],
   [/syllabus|curriculum|modules?|topics/g, ' module topics syllabus '],
   [/capstone|projects?/g, ' project capstone '],
+  [/\bbyop\b|own project|my project|bring (my|your|our) own|my (work|company) (problem|use case)/g, ' byop bring own project '],
+  [/(know|learn|need|require\w*) (to )?(code|coding|programming)|coding background|can'?t code|don'?t code|non[- ]?coder/g, ' coding taught scratch entry '],
   [/certificat\w*|certified/g, ' certificates certificate '],
   [/placement|job support|interview calls?|career support/g, ' placement interview resume '],
   [/fees?|cost|price|emi|discount|scholarship|afford/g, ' fees emi scholarship discount '],

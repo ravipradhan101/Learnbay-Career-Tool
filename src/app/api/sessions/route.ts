@@ -24,7 +24,16 @@ async function activeBooking(userId: string): Promise<Booking | null> {
       ORDER BY created_at DESC LIMIT 1`,
     [userId, istDate()],
   )
-  return r ? { id: r.id, date: r.preferred_date, time: r.preferred_time, when: whenLabel(r.preferred_date, r.preferred_time), status: r.status, rescheduled: r.rescheduled } : null
+  if (!r || slotPassed(r.preferred_date, r.preferred_time)) return null
+  return { id: r.id, date: r.preferred_date, time: r.preferred_time, when: whenLabel(r.preferred_date, r.preferred_time), status: r.status, rescheduled: r.rescheduled }
+}
+
+/** True once a booked slot today is more than an hour past (the call has happened, or was missed). */
+function slotPassed(date: string, time: string): boolean {
+  if (date !== istDate()) return false
+  const [h, m] = time.split(':').map(Number)
+  const ist = new Date(Date.now() + 330 * 60_000)
+  return Number.isFinite(h) && h * 60 + (m || 0) + 60 < ist.getUTCHours() * 60 + ist.getUTCMinutes()
 }
 
 /** Today and tomorrow, each slot with how many places are left (full or past slots are not open). */
@@ -100,8 +109,16 @@ export async function POST(request: Request) {
   const body = await readJson<{ date?: unknown; time?: unknown; note?: unknown }>(request, 4_000)
   const slot = await checkSlot(body)
   if ('error' in slot) return jsonError(400, slot.error)
-  const note = cleanText(body?.note, 500)
+  const note = cleanText(body?.note, 500, true)
   const created = await transaction(async (client) => {
+    // One booking per learner, even with two tabs booking at the same moment.
+    await client.query(`SELECT pg_advisory_xact_lock(hashtext('booking:' || $1))`, [user.id])
+    const again = await client.query<{ d: string; t: string }>(
+      `SELECT to_char(preferred_date, 'YYYY-MM-DD') AS d, preferred_time AS t FROM counsellor_requests
+        WHERE user_id = $1 AND status <> 'closed' AND preferred_date >= $2::date AND preferred_time IS NOT NULL`,
+      [user.id, istDate()],
+    )
+    if (again.rows.some((r) => !slotPassed(r.d, r.t))) return 'duplicate' as const
     if (!(await slotHasRoom(client, slot.date, slot.time))) return null
     const r = await client.query<{ id: string }>(
       `INSERT INTO counsellor_requests (user_id, session_type, preferred_date, preferred_time, preferred_slot, note)
@@ -110,6 +127,10 @@ export async function POST(request: Request) {
     )
     return r.rows[0] ?? null
   })
+  if (created === 'duplicate') {
+    const booking = await activeBooking(user.id)
+    return jsonError(409, booking ? `Your call is already booked for ${booking.when}.` : 'Your call is already booked.', { booking })
+  }
   if (!created) return jsonError(409, 'That slot just filled up. Please pick another time.')
   triggerFlows(user.id, 'session_booked')
   emitLeadEvent('call.booked', user.id, { date: slot.date, time: slot.time, ...(note ? { note } : {}) })

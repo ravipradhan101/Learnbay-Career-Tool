@@ -111,7 +111,7 @@ export async function acquisitionFunnel(since: Date): Promise<FunnelStep[]> {
     { label: 'Visited any page', count: n(r?.visitors) },
     { label: 'Saw the landing page', count: n(r?.landing), note: 'Some visitors arrive on /start or /login directly' },
     { label: 'Saw the track picker', count: n(r?.tracks) },
-    { label: 'Started chatting with Woody', count: n(r?.started) },
+    { label: 'Started chatting with Bruce', count: n(r?.started) },
     { label: 'Answered: career goal', count: n(r?.goal) },
     { label: 'Answered: industry / background', count: n(r?.domain) },
     { label: 'Answered: experience', count: n(r?.experience) },

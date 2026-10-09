@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 const TABS = [
   { href: '/admin', label: 'Overview' },
@@ -23,6 +24,10 @@ const TABS = [
 /** Report tabs; the selected date range carries across tabs. */
 export function AdminNav() {
   const pathname = usePathname()
+  // On small screens the tabs scroll: keep the current one in view.
+  useEffect(() => {
+    document.querySelector<HTMLElement>('.admin-tabs a[aria-current="page"]')?.scrollIntoView({ inline: 'center', block: 'nearest' })
+  }, [pathname])
   const range = useSearchParams().get('range')
   return (
     <nav className="admin-tabs" aria-label="Reports">

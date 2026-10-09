@@ -138,7 +138,7 @@ export function toolReportPdf(opts: Opts): Buffer {
     { type: 'gap' },
     { type: 'small', text: `AI-generated guidance by Learnbay Career Studio.${opts.meta.id === 'salary' ? ' Salary figures are indicative market ranges, not offers or guarantees.' : ' Timelines depend on the hours you put in; they are estimates, not guarantees.'}` },
   ]
-  const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+  const date = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' })
   return buildPdf({ title: opts.meta.name, subtitle: `Prepared for ${opts.name}  ·  ${date}`, blocks, footer: 'Learnbay Career Studio' })
 }
 

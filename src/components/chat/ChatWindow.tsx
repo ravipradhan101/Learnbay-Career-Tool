@@ -16,7 +16,7 @@ export const nameOf = (who: string) => (who === 'bot' ? BOT_NAME : getCounsellor
 export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, profile, rating }: {
   chat: ChatApi
   onSend: (text: string) => void
-  /** Omitted before login (with Woody): no call button. */
+  /** Omitted before login (with Bruce): no call button. */
   onCall?: () => void
   headerRight?: React.ReactNode
   footer?: React.ReactNode
@@ -78,7 +78,8 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
   function submit(e?: React.FormEvent) {
     e?.preventDefault()
     const value = text.trim()
-    if (!value) return
+    // While the counsellor is still answering, Enter waits (like the Send button): no double sends.
+    if (!value || thinking) return
     setText('')
     onSend(value.slice(0, asking?.maxLength ?? 600))
   }
@@ -151,6 +152,8 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
       <div className="tc-body-wrap">
       <div className="tc-body" ref={bodyRef} aria-live="polite" onScroll={onScroll}>
         {items.map((item, i) => <Row key={item.id} item={item} prev={items[i - 1]} next={items[i + 1]} chat={chat} onLink={onLink} onWho={openProfile} />)}
+        {/* Never an empty box while the chat loads or the first line is on its way: typing dots from the first moment. */}
+        {!items.length && <Row item={{ id: 'loading', kind: 'typing', by: who } as Item} chat={chat} onLink={onLink} onWho={openProfile} />}
 
         {more.length > 0 && !asking && (
           <div className="tc-more" aria-label="Read more of this answer">

@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto'
+import { lookup } from 'node:dns/promises'
 import { isIP } from 'node:net'
 import { background } from '../background'
 import { query, queryOne } from '../db'
@@ -42,6 +43,21 @@ export const eventsFrom = (v: unknown): string[] => (Array.isArray(v) ? [...new 
 
 const TIMEOUT_MS = 8_000
 
+/** Loopback, private, link-local, carrier-grade NAT, unique-local, NAT64 and other non-public addresses. */
+export function isPrivateIp(ip: string): boolean {
+  const v = isIP(ip)
+  if (v === 4) {
+    const [a, b] = ip.split('.').map(Number)
+    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224
+  }
+  if (v === 6) {
+    const h = ip.toLowerCase()
+    if (h.startsWith('::ffff:')) return isPrivateIp(h.slice(7)) || !isIP(h.slice(7))
+    return h === '::' || h === '::1' || /^(fc|fd|fe[89ab]|fec|fed|fee|fef|ff)/.test(h) || h.startsWith('64:ff9b') || h.startsWith('100::') || h.startsWith('2001:db8') || /^::[0-9a-f]/.test(h)
+  }
+  return true
+}
+
 /** Only public https addresses: no localhost, no private or link-local IPs (the server must not be pointed inwards). */
 export function webhookUrlProblem(raw: unknown): string | null {
   if (typeof raw !== 'string' || raw.length > 500) return 'Enter the endpoint URL.'
@@ -49,15 +65,27 @@ export function webhookUrlProblem(raw: unknown): string | null {
   try { u = new URL(raw.trim()) } catch { return 'That is not a valid URL.' }
   if (u.protocol !== 'https:') return 'The URL must start with https://'
   if (u.username || u.password) return 'Put credentials in the receiver, not in the URL.'
+  if (u.port && u.port !== '443') return 'Use the standard https port (443).'
   const host = u.hostname.replace(/^\[|\]$/g, '').toLowerCase()
   if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal')) return 'Use a public address.'
-  if (isIP(host)) {
-    const v4 = host.split('.').map(Number)
-    const privateV4 = isIP(host) === 4 && (v4[0] === 10 || v4[0] === 127 || v4[0] === 0 || (v4[0] === 169 && v4[1] === 254) || (v4[0] === 172 && v4[1] >= 16 && v4[1] <= 31) || (v4[0] === 192 && v4[1] === 168) || (v4[0] === 100 && v4[1] >= 64 && v4[1] <= 127))
-    const privateV6 = isIP(host) === 6 && (host === '::1' || host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80') || host.startsWith('::ffff:'))
-    if (privateV4 || privateV6) return 'Use a public address.'
-  }
+  if (isIP(host) && isPrivateIp(host)) return 'Use a public address.'
   return null
+}
+
+/**
+ * Checked again at send time, after DNS: a public-looking name that resolves to a private address (e.g. 127.0.0.1.nip.io)
+ * is refused.
+ */
+async function resolvesPublic(raw: string): Promise<boolean> {
+  if (webhookUrlProblem(raw)) return false
+  const host = new URL(raw).hostname.replace(/^\[|\]$/g, '')
+  if (isIP(host)) return !isPrivateIp(host)
+  try {
+    const all = await lookup(host, { all: true, verbatim: true })
+    return all.length > 0 && all.every((a) => !isPrivateIp(a.address))
+  } catch {
+    return false
+  }
 }
 
 export const newWebhookSecret = () => `whsec_${randomToken(24)}`
@@ -113,13 +141,15 @@ export async function deliver(ep: Endpoint, event: string, payload: Record<strin
   const started = Date.now()
   let r: DeliveryResult
   try {
+    if (!(await resolvesPublic(ep.url))) throw new Error('The address does not resolve to a public server.')
     const res = await fetch(ep.url, {
       method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(TIMEOUT_MS),
       headers: { 'Content-Type': 'application/json', 'User-Agent': 'Learnbay-Pseudo-CRM/1', 'X-Learnbay-Event': event, 'X-Learnbay-Delivery': String(payload.id ?? ''), 'X-Learnbay-Signature': sign(ep.secret, body) },
       body,
     })
-    const text = (await res.text().catch(() => '')).slice(0, 500)
-    r = { ok: res.status >= 200 && res.status < 300, status: res.status, durationMs: Date.now() - started, response: text }
+    // The receiver's body is never kept or shown (it could be used to read pages from inside other networks).
+    await res.body?.cancel().catch(() => {})
+    r = { ok: res.status >= 200 && res.status < 300, status: res.status, durationMs: Date.now() - started, response: res.status >= 300 && res.status < 400 ? 'Redirects are not followed.' : '' }
   } catch (err) {
     r = { ok: false, status: null, durationMs: Date.now() - started, response: (err as Error).message.slice(0, 300) }
   }
@@ -132,7 +162,7 @@ export async function deliver(ep: Endpoint, event: string, payload: Record<strin
 
 async function deliverToEnv(event: string, payload: Record<string, unknown>) {
   const url = process.env.CRM_WEBHOOK_URL
-  if (!url || webhookUrlProblem(url)) return
+  if (!url || !(await resolvesPublic(url))) return
   const body = JSON.stringify(payload)
   const key = process.env.CRM_API_KEY
   const secret = process.env.CRM_WEBHOOK_SECRET

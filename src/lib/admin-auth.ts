@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { randomBytes, randomInt, scrypt as scryptCb, timingSafeEqual } from 'node:crypto'
 import { env } from './env'
 import { query, queryOne, transaction } from './db'
-import { hmac, randomToken, rateLimits, safeEqualHex, sha256 } from './security'
+import { hmac, overLimit, randomToken, rateLimit, rateLimits, safeEqualHex, sha256 } from './security'
 import { sendAdminCodeEmail } from './mailer'
 
 /**
@@ -86,21 +86,17 @@ export async function adminLogin(email: string, password: string, ip: string): P
   if (!(await rateLimits([[`adminlogin:ip:${ip}`, 20, 900], [`adminlogin:email:${email}`, 20, 900]]))) {
     return { ok: false, status: 429, error: 'Too many attempts. Please wait 15 minutes.' }
   }
+  // Lockout is per email AND network: someone guessing from elsewhere can't lock the real person out, and every failure
+  // (unknown email, no password yet, locked, wrong password) gets the same answer, so emails can't be probed.
+  const lockKey = `adminfail:${email}:${ip}`
+  if (await overLimit(lockKey, LOCK_AFTER_FAILURES, LOCK_MINUTES * 60)) {
+    return { ok: false, status: 429, error: `Too many failed attempts. Wait ${LOCK_MINUTES} minutes, or use “Set or reset password” below.` }
+  }
   const admin = await findAdmin(email)
   const matches = await verifyPassword(password, admin?.password_hash ?? null)
-  if (!admin) return { ok: false, status: 401, error: WRONG_PASSWORD }
-  if (admin.locked_until && admin.locked_until > new Date()) {
-    return { ok: false, status: 423, error: 'This account is locked for 15 minutes after repeated failed attempts. Reset the password to unlock it now.' }
-  }
-  if (!admin.password_hash) return { ok: false, status: 401, error: 'No password is set for this account yet. Use “Set or reset password” below.' }
-  if (!matches) {
-    await query(
-      `UPDATE admin_users SET failed_attempts = failed_attempts + 1,
-              locked_until = CASE WHEN failed_attempts + 1 >= $2 THEN now() + make_interval(mins => $3) ELSE locked_until END
-        WHERE id = $1`,
-      [admin.id, LOCK_AFTER_FAILURES, LOCK_MINUTES],
-    )
-    return { ok: false, status: 401, error: WRONG_PASSWORD }
+  if (!admin || !admin.password_hash || !matches) {
+    await rateLimit(lockKey, LOCK_AFTER_FAILURES, LOCK_MINUTES * 60)
+    return { ok: false, status: 401, error: `${WRONG_PASSWORD} First time here? Use “Set or reset password” below.` }
   }
   if (!admin.active) return { ok: false, status: 403, error: 'This account has been deactivated. Please ask your manager or the admin.' }
   await query(`UPDATE admin_users SET failed_attempts = 0, locked_until = NULL, last_login_at = now() WHERE id = $1`, [admin.id])
@@ -131,8 +127,10 @@ export async function resetAdminPassword(email: string, code: string, password: 
   if (problem) return { ok: false, status: 400, error: problem }
   const invalid: Result = { ok: false, status: 400, error: 'That code is incorrect or has expired. Request a new one.' }
   if (!/^\d{6}$/.test(code)) return invalid
+  // At most 10 wrong codes a day per account, across all its codes (codes can't be ground down by requesting new ones).
+  if (await overLimit(`admincodefail:${email}`, 10, 86_400)) return { ok: false, status: 429, error: 'Too many wrong codes today. Please try again tomorrow.' }
   const admin = await findAdmin(email)
-  if (!admin || !admin.active) return invalid
+  if (!admin || !admin.active) { await rateLimit(`admincodefail:${email}`, 10, 86_400); return invalid }
   const hash = await hashPassword(password)
   const done = await transaction(async (db) => {
     const row = (await db.query<{ id: string; code_hash: string; attempts: number }>(
@@ -150,7 +148,7 @@ export async function resetAdminPassword(email: string, code: string, password: 
     await db.query(`DELETE FROM admin_sessions WHERE admin_id = $1`, [admin.id])
     return true
   })
-  if (!done) return invalid
+  if (!done) { await rateLimit(`admincodefail:${email}`, 10, 86_400); return invalid }
   await startAdminSession(admin.id)
   return { ok: true }
 }

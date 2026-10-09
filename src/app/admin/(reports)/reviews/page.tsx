@@ -19,7 +19,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHead title="Reviews & suggestions" sub={`${range.label}. What learners said in Woody's feedback pop-up (asked after a few steps, or when they leave).`} range={range.key} base="/admin/reviews" />
+      <PageHead title="Reviews & suggestions" sub={`${range.label}. What learners said in Bruce's feedback pop-up (asked after a few steps, or when they leave).`} range={range.key} base="/admin/reviews" />
       {demoRatingsOn() && (
         <div className="card demo-banner" role="note">
           <b>Demo ratings are ON (prototype data).</b> Learners see starting ratings for each counsellor ({Object.entries(DEMO_RATINGS).map(([id, r]) => `${getCounsellor(id).name} ${r.avg} from ${fmtInt(r.count)}`).join(' · ')}), blended with real reviews. Set <code>DEMO_RATINGS=false</code> in the environment before real learners use the app; the figures below are real reviews only.

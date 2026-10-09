@@ -84,10 +84,10 @@ const DEFS: Def[] = [
   {
     code: 'GAI-M', interests: ['ai'],
     url: 'https://www.learnbay.co/genai-and-agentic-ai-master-program',
-    summary: 'The broad GenAI master for tech professionals: Python for GenAI, Claude Code and MCP, ML and transformers, LLMs and RAG, agentic AI, LLMOps and responsible AI, then two specialisations you pick after the core.',
-    features: ['For tech professionals with 1+ year', 'Pick 2 of 7 specialisations: Developers, Cloud & DevOps, QA & Test, BFSI, Retail, Manufacturing, Healthcare', 'IBM, Microsoft, IIT Patna and 2 AI CoLab certificates'],
+    summary: 'The broad GenAI master for tech and domain professionals (Python taught from scratch): Python for GenAI, Claude Code and MCP, ML and transformers, LLMs and RAG, agentic AI, LLMOps and responsible AI, then two specialisations you pick after the core.',
+    features: ['For tech and domain professionals with 1+ year; no coding background needed', 'Pick 2 of 7 specialisations: Developers, Cloud & DevOps, QA & Test, BFSI, Retail, Manufacturing, Healthcare', 'IBM, Microsoft, IIT Patna and 2 AI CoLab certificates'],
     focusAreas: ['LLM engineering & RAG', 'Agentic AI & automation', 'LLMOps', 'Responsible AI', 'Role or domain specialisations'],
-    bestFor: 'Tech professionals who code (developers, QA, data, cloud) and domain professionals who want GenAI plus a role or industry specialisation',
+    bestFor: 'Tech professionals (developers, QA, data, cloud) and domain professionals or engineers who want to build GenAI and agents with a role or industry specialisation; coding is taught from scratch',
   },
   {
     code: 'GAI-CD', interests: ['cloud-devops', 'ai'],

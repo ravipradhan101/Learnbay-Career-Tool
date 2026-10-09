@@ -1,7 +1,7 @@
 import { programForLearner, routeFor } from './segments'
 import { personaById } from '@/config/catalogue'
 import { ALL_PROBES, ALL_TRIGGERS, PROBES, SEGMENT_LABEL, STUDY_STAGES, segmentOf } from './segments'
-import { PROGRAMS, programsForInterest } from '@/config/programs'
+import { PROGRAMS, programsForInterest, resolveProgramId } from '@/config/programs'
 import { PROGRAM_DETAILS } from '@/config/program-details'
 import { RESOURCES } from '@/config/resources'
 import { generateJson } from './gemini'
@@ -27,6 +27,8 @@ export function describeLearner(a: Answers): string {
     ...(a.learning ? [`Already learning: ${labelOf(LEARNING_SOURCES, a.learning)}`] : []),
     ...(a.difficulty ? [`Biggest difficulty so far: ${labelOf(DIFFICULTIES, a.difficulty)}`] : []),
     `Current role: ${roleLabel(a)}`,
+    ...(a.toolsUsed ? [`Tools they use most days (their own words): ${a.toolsUsed}`] : []),
+    ...(a.workProblem ? [`A problem at work they would like AI to solve (their own words): ${a.workProblem}`] : []),
     `Experience: ${experienceLabel(a)}`,
     `Codes at work: ${labelOf(PROGRAMMER, a.programmer) ?? 'Not answered'}`,
     `Interested in: ${interestLabel(a)}`,
@@ -37,7 +39,7 @@ export function describeLearner(a: Answers): string {
     `Weekly learning time: ${labelOf(WEEKLY_HOURS, a.weeklyHours) ?? 'Not answered'}`,
     `Timeline: ${labelOf(TIMELINES, a.timeline) ?? 'Not answered'}`,
     ...(a.companyType ? [`Company type: ${labelOf(COMPANY_TYPES, a.companyType)}`] : []),
-    ...(a.program ? [`Program they chose with their counsellor: ${PROGRAMS.find((p) => p.id === a.program)?.name ?? a.program}`] : []),
+    ...(a.program ? [`Program they chose with their counsellor: ${PROGRAMS.find((p) => p.id === resolveProgramId(a.program))?.name ?? 'a Learnbay program'}`] : []),
   ].join('\n')
 }
 
@@ -47,6 +49,7 @@ Rules:
 - Be honest and practical. Never promise jobs, salaries or outcomes.
 - Do not invent statistics, surveys, company names, people or testimonials.
 - Recommend exactly one Learnbay program, only from the catalog provided, choosing the best fit for their interest and background.
+- When they told us the tools they use or a problem they want AI to solve, start from them: name the bridge from their tools to the new skills, and use their problem in the plan's projects. Their own experience is a strength to build on, never something to restart from zero.
 - Keep every string concise; UI space is limited.`
 
 function programCatalog(a: Answers): string {
@@ -428,7 +431,7 @@ export async function generateTool(tool: ToolId, answers: Answers, name: string,
     temperature: 0.5,
     maxOutputTokens: 16_000,
     thinkingBudget: 1024,
-    timeoutMs: 150_000,
+    timeoutMs: 120_000, budgetMs: 170_000,
     usage: { userId, feature: tool },
   })
   return sanitize(tool, raw, answers)
@@ -462,7 +465,7 @@ export async function analyzeResume(pdfBase64: string, context: string, userId: 
     temperature: 0.3,
     maxOutputTokens: 8192,
     thinkingBudget: 1024,
-    timeoutMs: 120_000,
+    timeoutMs: 120_000, budgetMs: 170_000,
     usage: { userId, feature: 'resume-review' },
   }))
   const result: ResumeAnalysis = {

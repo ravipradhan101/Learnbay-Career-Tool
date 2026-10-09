@@ -4,7 +4,7 @@ export type Option = { id: string; label: string; hint?: string; keywords?: stri
 
 // ---------- Onboarding (asked in the chat before contact details) ----------
 
-/** Career goal (asked by Woody). Shapes how the counsellor talks to them and what they pitch. */
+/** Career goal (asked by Bruce). Shapes how the counsellor talks to them and what they pitch. */
 export const GOALS: Option[] = [
   { id: 'switch', label: 'Switch to a better tech role' },
   { id: 'upskill', label: 'Grow faster in my current role' },
@@ -22,7 +22,7 @@ export const GOALS: Option[] = [
 export const TRACKS: (Option & { interest: string; programId: string; roles: string[]; bestFor: string; path: string; icon: 'sparkles' | 'briefcase' | 'cloud' })[] = [
   {
     id: 'ai', interest: 'ai', programId: 'genai-agentic-ai-master', icon: 'sparkles', label: 'AI & Data Science track', hint: 'AI, GenAI, data science and analytics',
-    bestFor: 'Freshers, non-coders, analysts, developers and managers who want AI or data in their career', roles: ['AI Engineer', 'Data Scientist', 'Data Analyst', 'AI-powered version of your role'],
+    bestFor: 'Freshers, non-coders, engineers, analysts, developers and managers who want AI or data in their career (coding taught from scratch)', roles: ['AI Engineer', 'Data Scientist', 'Data Analyst', 'AI-powered version of your role'],
     path: 'Your counsellor matches you to the right AI, data or no-code program for your background',
   },
   {
@@ -32,7 +32,7 @@ export const TRACKS: (Option & { interest: string; programId: string; roles: str
   },
   {
     id: 'cloud-devops', interest: 'cloud-devops', programId: 'cloud-devops-engineering', icon: 'cloud', label: 'Cloud & DevOps track', hint: 'AI-powered cloud and DevOps',
-    bestFor: 'IT professionals (1+ year): sysadmin, support, network, DBA, QA, developers and DevOps', roles: ['Cloud Engineer', 'DevOps / SRE Engineer', 'MLOps Engineer'],
+    bestFor: 'IT professionals (1+ year) who can code or script: sysadmin, support, network, DBA, QA, developers and DevOps', roles: ['Cloud Engineer', 'DevOps / SRE Engineer', 'MLOps Engineer'],
     path: 'A role track matched to your current IT job',
   },
 ]
@@ -44,7 +44,7 @@ export const TRACKS: (Option & { interest: string; programId: string; roles: str
  */
 export const TRACK_TARGET: Record<string, string> = { fde: 'fde', 'cloud-devops': 'cloud-engineer' }
 
-/** Industry or domain the learner comes from (asked by Woody). */
+/** Industry or domain the learner comes from (asked by Bruce). */
 /** `keywords`: what people type for that industry (typed answers only; never shown). Anything else becomes "Other" with their words. */
 export const DOMAINS: Option[] = [
   { id: 'it-services', label: 'IT services / consulting', keywords: ['it services', 'it company', 'consulting', 'consultancy', 'outsourcing', 'service based', 'service company', 'infosys', 'tcs', 'wipro', 'accenture', 'cognizant', 'capgemini', 'hcl', 'tech mahindra'] },
@@ -307,12 +307,12 @@ export const COUNTRY_CODES: { code: string; label: string; flag: string; digits:
 ]
 
 export type Answers = {
-  // onboarding (Woody)
+  // onboarding (Bruce)
   goal?: string
   domain?: string
   /** Their own industry, typed when it isn't in the list (domain = 'other'). */
   domainOther?: string
-  /** Freshers: final year, job hunting, or working outside tech (asked by Woody). */
+  /** Freshers: final year, job hunting, or working outside tech (asked by Bruce). */
   studyStage?: string
   // first conversation with the counsellor
   /** "What made you start looking at this now?" (their own reason: the only source of urgency). */
@@ -343,6 +343,13 @@ export type Answers = {
   // eligibility test
   eduLevel?: string
   mathComfort?: string
+  // deep-dive (asked before the skill gap or roadmap; their own words, used to tailor reports and projects)
+  /** Tools or software they use most days ("RobotStudio, Process Simulate, Excel"). */
+  toolsUsed?: string
+  /** One problem at work they'd love AI to solve. */
+  workProblem?: string
+  /** The two deep-dive questions were answered or skipped (so they are asked once). */
+  deepDive?: string
 }
 
 export type ToolQuestionKey = 'targetRole' | 'skills' | 'ctc' | 'city' | 'weeklyHours' | 'timeline'

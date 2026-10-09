@@ -93,7 +93,18 @@ export function MeetCard({ mode, source, live, onDone }: { mode: 'now' | 'pick';
     })
   }, [book, live, load, mode, onDone])
 
-  if (error && !data) return <div className="tc-card"><p className="tc-error" role="alert">{error}</p></div>
+  // Couldn't load: try again, or let the chat move on (it never waits on a card that can't load).
+  if (error && !data) {
+    return (
+      <div className="tc-card">
+        <p className="tc-error" role="alert">{error || 'Couldn’t load the times just now.'}</p>
+        <div className="tc-actions-row">
+          <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => { setError(''); void load() }}><Icon name="refresh" size="0.9rem" /> Try again</button>
+          {live && <button type="button" className="tc-btn tc-btn-ghost tc-btn-sm" onClick={() => onDone({ unavailable: true })}>Skip for now</button>}
+        </div>
+      </div>
+    )
+  }
   if (!data || (busy && !picking)) return <div className="tc-card tc-booking"><span className="spinner" /> {mode === 'now' ? 'Finding a free expert for you…' : 'Loading open times…'}</div>
   if (data.meeting) return <Booked m={data.meeting} />
   if (!data.enabled) return <div className="tc-card"><p className="small">Video calls with our experts open soon. Meanwhile, a free phone call with a Senior Counsellor is one tap away.</p></div>
