@@ -10,6 +10,9 @@ import type { Answers } from '@/lib/questions'
 
 export const LOGIN_EVENT = 'lcn:chat-login'
 
+/** "wrong email", "change my email id", "I entered an incorrect mail", "not my email", "update email"… */
+const CHANGE_EMAIL = /\b(wrong|incorrect|mistake|typo|change|update|edit|correct|different|another|other|not my|fix)\b.*\b(e-?mail|mail|id)\b|\b(e-?mail|mail)\b.*\b(wrong|incorrect|mistake|typo|change|not mine)\b/i
+
 /** Bruce, the guide: a few questions, sign-up with an email code, then he finds the right counsellor. */
 export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestCtx['signedIn']; initial: Answers; track: string | null; mode: 'start' | 'login' }) {
   const chat = useChat({ storageKey: GUEST_ITEMS_KEY, signedIn: false, speaker: 'bot' })
@@ -31,6 +34,17 @@ export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestC
 
   function onSend(text: string) {
     if (chat.answer(text)) return
+    // Waiting for the email code: "wrong email" or a different address typed here means they want to change the email.
+    const otp = chat.items.findLast((i) => i.kind === 'card' && i.live && i.card.type === 'otp')
+    if (otp) {
+      const typedEmail = text.match(/[^\s@]+@[^\s@]+\.[a-z]{2,}/i)?.[0]
+      chat.userSays(text)
+      if (typedEmail || CHANGE_EMAIL.test(text)) { chat.cardDone(otp.id, { changeEmail: true, email: typedEmail }); return }
+      chat.note(/^\s*\d{4,8}\s*$/.test(text)
+        ? 'Please type the code in the box above and tap the button.'
+        : 'Enter the 6-digit code from your email in the box above. Typed the wrong email? Tap “Change email” or just type the correct one here.')
+      return
+    }
     const prompt = chat.prompt
     // A typed answer: one of the options ("5" → 3–5 years, "fintech" → Banking), or their own words where the
     // question takes them ("Logistics" → Other: Logistics).

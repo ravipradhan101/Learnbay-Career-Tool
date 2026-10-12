@@ -186,16 +186,25 @@ export async function guestFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
 
   step('contact')
   await bot.say(ctx.signedIn ? 'Just confirm your details and I’ll find your counsellor.' : 'Where should we send your plan? I’ll email you a quick code to keep your account safe.')
-  const saved = await bot.live<{ email?: string; existing?: boolean; redirect?: string; contact?: object }>({ type: 'contact', answers: a, prefill: ctx.signedIn ?? { name, email: '', phoneCountry: '+91', phone: '' } })
+  type Saved = { email?: string; existing?: boolean; redirect?: string; contact?: { name: string; phoneCountry: string; phone: string } }
+  let saved = await bot.live<Saved>({ type: 'contact', answers: a, prefill: ctx.signedIn ?? { name, email: '', phoneCountry: '+91', phone: '' } })
   let returning = false
-  if (saved.email) {
+  while (saved.email) {
     await bot.say(saved.existing ? `Welcome back, ${first}! Enter the code I just emailed you.` : `I sent a 6-digit code to ${saved.email}.`)
-    const v = await bot.live<{ onboarded: boolean }>({ type: 'otp', email: saved.email, existing: Boolean(saved.existing) })
+    const v = await bot.live<{ onboarded?: boolean; changeEmail?: boolean; email?: string }>({ type: 'otp', email: saved.email, existing: Boolean(saved.existing) })
+    if (v.changeEmail) {
+      // Typed the wrong email: correct it (name and phone stay filled in) and a new code goes to the right inbox.
+      await bot.say('No problem. Type your correct email below and I’ll send a new code there.', { quick: true })
+      const c = saved.contact
+      saved = await bot.live<Saved>({ type: 'contact', answers: a, replaces: saved.email, prefill: { name: c?.name ?? name, email: v.email ?? '', phoneCountry: c?.phoneCountry || '+91', phone: c?.phone ?? '' } })
+      continue
+    }
     if (saved.existing || !v.onboarded) {
       // An account that already exists keeps its saved profile and reports; today's answers only fill gaps.
       await postJson('/api/onboarding', { answers: a, contact: saved.contact })
     }
     returning = Boolean(saved.existing && v.onboarded)
+    break
   }
   await bot.say(returning ? `You’re in, ${first}! Your reports are all saved. Let me find the right counsellor for you…` : `You’re verified, ${first}. Let me find the best counsellor for you…`, { quick: true })
   await findCounsellor(bot, a.interest ?? 'ai')
@@ -220,13 +229,17 @@ async function findCounsellor(bot: Bot, interest: string) {
 export async function loginFlow(bot: Bot, ctx: GuestCtx): Promise<void> {
   track('step_view', 'login:chat')
   await bot.say('Welcome back! Enter the email you signed up with and I’ll send you a login code.')
-  const r = await bot.live<{ email?: string; fresh?: boolean }>({ type: 'login' })
-  if (r.fresh || !r.email) {
-    await bot.say('No problem, let’s get you started.')
-    return guestFlow(bot, { ...ctx, fresh: false })
-  }
-  await bot.say(`I sent a 6-digit code to ${r.email}. Can’t find it? Check Promotions or Spam.`)
-  const v = await bot.live<{ onboarded: boolean }>({ type: 'otp', email: r.email, existing: true })
+  let v: { onboarded?: boolean; changeEmail?: boolean }
+  do {
+    const r = await bot.live<{ email?: string; fresh?: boolean }>({ type: 'login' })
+    if (r.fresh || !r.email) {
+      await bot.say('No problem, let’s get you started.')
+      return guestFlow(bot, { ...ctx, fresh: false })
+    }
+    await bot.say(`I sent a 6-digit code to ${r.email}. Can’t find it? Check Promotions or Spam.`)
+    v = await bot.live<{ onboarded?: boolean; changeEmail?: boolean }>({ type: 'otp', email: r.email, existing: true })
+    if (v.changeEmail) await bot.say('No problem. Enter the email you signed up with and I’ll send a new code.', { quick: true })
+  } while (v.changeEmail)
   if (v.onboarded) {
     await bot.say('You’re in! Your reports are all saved. Let me find the right counsellor for you…', { quick: true })
     await findCounsellor(bot, ctx.initial.interest ?? ctx.track ?? 'ai')

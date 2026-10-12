@@ -30,7 +30,8 @@ export type EligCompleted = Extract<TestState, { status: 'completed' }>
 export type Card =
   | { type: 'readiness' }
   | { type: 'preparing'; steps: string[] }
-  | { type: 'contact'; answers: Answers; prefill: { name: string; email: string; phoneCountry: string; phone: string } | null }
+  /** `replaces`: the email typed before, being corrected (the email box stays editable; the old sign-up is dropped). */
+  | { type: 'contact'; answers: Answers; prefill: { name: string; email: string; phoneCountry: string; phone: string } | null; replaces?: string }
   | { type: 'otp'; email: string; existing: boolean }
   | { type: 'intro'; tool: ToolId }
   | { type: 'generating'; tool: ToolId }

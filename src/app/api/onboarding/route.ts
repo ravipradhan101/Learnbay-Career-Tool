@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/auth'
 import { queryOne, transaction } from '@/lib/db'
-import { cleanText, clientIp, isSameOrigin, jsonError, jsonOk, rateLimits, readJson } from '@/lib/security'
+import { cleanText, clientIp, isSameOrigin, jsonError, jsonOk, normalizeEmail, rateLimits, readJson } from '@/lib/security'
 import { mergeAnswers, sanitizeAnswers, validateContact } from '@/lib/validation'
 import { getTool } from '@/lib/tools-meta'
 import type { Answers } from '@/lib/questions'
@@ -29,7 +29,7 @@ function landing(next: unknown): string {
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError(403, 'Invalid request origin.')
   if (!(await rateLimits([['onboard:global', 5000, 600]]))) return jsonError(429, 'We’re very busy right now. Please try again in a few minutes.')
-  const body = await readJson<{ answers?: unknown; contact?: unknown; source?: unknown; next?: unknown }>(request)
+  const body = await readJson<{ answers?: unknown; contact?: unknown; source?: unknown; next?: unknown; replaces?: unknown }>(request)
   if (!body) return jsonError(400, 'Invalid request.')
 
   const answers = sanitizeAnswers(body.answers)
@@ -57,6 +57,18 @@ export async function POST(request: Request) {
     // 3. A real, reachable inbox: no temporary inboxes, test domains, typos or unusual domain endings.
     const problem = await emailProblem(contact.email)
     if (problem) return jsonError(400, problem, { field: 'email' })
+    // The learner typed the wrong email and is fixing it before the code step: the sign-up they never confirmed goes,
+    // so it is not left behind as a lead nobody can reach and does not count against their phone number. Only an
+    // unconfirmed sign-up from the last hour with this same phone number, so nobody can remove someone else's account.
+    const replaces = normalizeEmail(body.replaces)
+    if (replaces && replaces !== contact.email) {
+      await queryOne(
+        `DELETE FROM users WHERE email = $1 AND phone = $2 AND phone_country = $3 AND email_verified_at IS NULL AND last_login_at IS NULL
+           AND created_at > now() - interval '1 hour'`,
+        [replaces, contact.phone, contact.phoneCountry],
+      )
+      await queryOne(`DELETE FROM pending_signups WHERE email = $1 AND phone = $2 AND phone_country = $3`, [replaces, contact.phone, contact.phoneCountry])
+    }
     // 4. One phone number, at most 3 accounts in 30 days.
     const others = await queryOne<{ n: number }>(
       `SELECT count(DISTINCT email)::int AS n FROM (

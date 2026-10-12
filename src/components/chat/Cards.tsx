@@ -39,7 +39,7 @@ export function CardView({ card, live, onDone }: { card: Card; live: boolean; on
   switch (card.type) {
     case 'readiness': return <ReadinessCard />
     case 'preparing': return <PreparingCard steps={card.steps} />
-    case 'contact': return <ContactCard answers={card.answers} prefill={card.prefill} live={live} onDone={onDone} />
+    case 'contact': return <ContactCard answers={card.answers} prefill={card.prefill} replaces={card.replaces} live={live} onDone={onDone} />
     case 'otp': return <OtpCard email={card.email} existing={card.existing} live={live} onDone={onDone} />
     case 'intro': return <IntroCard tool={card.tool} />
     case 'generating': return <GeneratingCard tool={card.tool} />
@@ -122,12 +122,14 @@ function PreparingCard({ steps }: { steps: string[] }) {
 
 const SOURCE_KEY = 'lcn_source'
 
-function ContactCard({ answers, prefill, live, onDone }: { answers: object; prefill: { name: string; email: string; phoneCountry: string; phone: string } | null; live: boolean; onDone: Done }) {
+function ContactCard({ answers, prefill, replaces, live, onDone }: { answers: object; prefill: { name: string; email: string; phoneCountry: string; phone: string } | null; replaces?: string; live: boolean; onDone: Done }) {
+  // Signed in: the email is the account's own and can't be edited. Correcting a mistyped email: it is the one thing to change.
+  const lockEmail = Boolean(prefill?.email) && !replaces
   const [name, setName] = useState(prefill?.name ?? '')
   const [email, setEmail] = useState(prefill?.email ?? '')
   const [cc, setCc] = useState(prefill?.phoneCountry || '+91')
   const [phone, setPhone] = useState(prefill?.phone ?? '')
-  const [consent, setConsent] = useState(false)
+  const [consent, setConsent] = useState(Boolean(replaces))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
@@ -140,6 +142,7 @@ function ContactCard({ answers, prefill, live, onDone }: { answers: object; pref
     const digits = phone.replace(/[\s-]/g, '')
     if (name.trim().length < 2) return setError('Please enter your full name.')
     if (!/\S+@\S+\.\S+/.test(email)) return setError('Please enter a valid email address.')
+    if (replaces && email.trim().toLowerCase() === replaces.toLowerCase()) return setError('That’s the same email as before. Please type the correct one.')
     if (!isValidPhone(cc, digits)) return setError('Please enter a valid phone number.')
     if (!consent) return setError('Please tick the box so I can send you your results.')
     setBusy(true)
@@ -147,7 +150,7 @@ function ContactCard({ answers, prefill, live, onDone }: { answers: object; pref
     let source: Record<string, string> = {}
     try { source = JSON.parse(window.sessionStorage.getItem(SOURCE_KEY) ?? '{}') } catch { /* ignore */ }
     const contact = { name, email, phoneCountry: cc, phone: digits, consent: true }
-    const res = await postJson('/api/onboarding', { answers, contact: { ...contact, website, tookMs: Date.now() - shownAt.current }, source })
+    const res = await postJson('/api/onboarding', { answers, contact: { ...contact, website, tookMs: Date.now() - shownAt.current }, source, replaces })
     if (!res.ok) { setBusy(false); track('error', 'contact:server', { status: res.status }); return setError(res.error) }
     if (res.data.needsOtp) {
       const r = await postJson('/api/auth/request-otp', { email: String(res.data.email) })
@@ -169,13 +172,13 @@ function ContactCard({ answers, prefill, live, onDone }: { answers: object; pref
     <form className="tc-card tc-form" onSubmit={submit} noValidate>
       <div className="tc-field">
         <label htmlFor="tc-name">Your name</label>
-        <input id="tc-name" autoComplete="name" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rahul Kumar" autoFocus />
+        <input id="tc-name" autoComplete="name" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rahul Kumar" autoFocus={!replaces} />
       </div>
       <div className="tc-field">
-        <label htmlFor="tc-email">Email</label>
-        <input id="tc-email" type="email" inputMode="email" autoComplete="email" maxLength={254} value={email} readOnly={Boolean(prefill?.email)} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        <label htmlFor="tc-email">{replaces ? 'Your correct email' : 'Email'}</label>
+        <input id="tc-email" type="email" inputMode="email" autoComplete="email" maxLength={254} value={email} readOnly={lockEmail} autoFocus={Boolean(replaces)} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         {/* A typo in a big provider's name ("gmial.com"): one tap fixes it. */}
-        {!prefill?.email && /@[^@\s]+\.[a-z]{2,}$/i.test(email) && suggestEmail(email.trim()) && (
+        {!lockEmail && /@[^@\s]+\.[a-z]{2,}$/i.test(email) && suggestEmail(email.trim()) && (
           <button type="button" className="tc-email-fix" onClick={() => setEmail(suggestEmail(email.trim())!)}>Did you mean <b>{suggestEmail(email.trim())}</b>?</button>
         )}
       </div>
@@ -204,6 +207,7 @@ function OtpCard({ email, existing, live, onDone }: { email: string; existing: b
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [ok, setOk] = useState(false)
+  const [changed, setChanged] = useState(false)
 
   async function verify(e: React.FormEvent) {
     e.preventDefault()
@@ -222,8 +226,16 @@ function OtpCard({ email, existing, live, onDone }: { email: string; existing: b
     if (r.ok) setInfo('New code sent.')
     else setError(r.error)
   }
+  /** Typed the wrong email: back to the details, with the email box ready to correct. */
+  function changeEmail() {
+    track('action', 'otp_change_email')
+    setChanged(true)
+    onDone({ changeEmail: true })
+  }
 
-  if (!live || ok) return <div className="tc-card tc-done"><Icon name="checkCircle" size="1.1rem" /> Email confirmed</div>
+  if (ok) return <div className="tc-card tc-done"><Icon name="checkCircle" size="1.1rem" /> Email confirmed</div>
+  // Closed without a code: the learner changed the email (the link here, or typed in the chat).
+  if (changed || !live) return <div className="tc-card tc-done tc-done-muted"><Icon name="mail" size="1.1rem" /> Email changed from {email}</div>
   return (
     <form className="tc-card tc-form" onSubmit={verify} noValidate>
       <div className="tc-field">
@@ -234,6 +246,7 @@ function OtpCard({ email, existing, live, onDone }: { email: string; existing: b
       {info && <p className="tc-fine" role="status">{info}</p>}
       <button className="tc-btn tc-btn-primary" disabled={busy || code.length !== 6}>{busy ? <span className="spinner" /> : <>{existing ? 'Log in' : 'Confirm & meet your counsellor'} <Icon name="arrowRight" size="1rem" /></>}</button>
       <p className="tc-fine">Can&apos;t find it? Check Promotions or Spam. <button type="button" className="tc-link" onClick={resend}>Resend code</button></p>
+      <p className="tc-fine">Wrong email? <button type="button" className="tc-link" onClick={changeEmail}>Change email</button></p>
     </form>
   )
 }
