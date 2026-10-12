@@ -5,7 +5,9 @@ export const SESSION_SHORT = 'counselling call'
 export const SESSION_TYPE_ID = 'mentor'
 
 /** Senior Counsellors call between 10 AM and 8 PM IST; each slot is an hour, so the last one starts at 7 PM. */
-export const SESSION_TIMES = ['10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM'] as const
+/** Calls are 20 minutes long, every 30 minutes from 10:00 AM to 7:30 PM IST (the last one ends by 7:50 PM). */
+export const CALL_MINUTES = 20
+export const SESSION_TIMES = ['10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM'] as const
 export type SessionTime = (typeof SESSION_TIMES)[number]
 /** How many learners can book the same slot; after that it shows as full. */
 export const SLOT_CAPACITY = 10
@@ -37,6 +39,17 @@ export function slotMinutes(time: string): number {
   if (!m) return -1
   const h = (Number(m[1]) % 12) + (m[3] === 'PM' ? 12 : 0)
   return h * 60 + Number(m[2])
+}
+
+/**
+ * A booked call is over once its slot today is more than an hour past (it has happened, or was missed). Times are the
+ * 12-hour slot labels ("7:00 PM"): read with slotMinutes, never by splitting on ":" (that read 7 PM as 7 AM and hid
+ * evening bookings made the same day).
+ */
+export function slotPassed(date: string, time: string, now = new Date()): boolean {
+  if (date !== istDate(0, now)) return false
+  const t = slotMinutes(time)
+  return t >= 0 && t + 60 < istMinutes(now)
 }
 
 /** A slot today needs at least an hour's notice, so a counsellor can prepare. */

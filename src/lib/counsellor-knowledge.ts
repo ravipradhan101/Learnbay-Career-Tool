@@ -17,7 +17,7 @@ const nameOf = (code: string | null | undefined) => (code ? getProgram(PROGRAMS.
 export function catalogueBrief(): string {
   return PROGRAMS.map((p) => {
     const c = catalogueProgram(p.code)!
-    const length = c.durationMonths ? `${c.durationMonths} months (${c.totalWeeks} weeks)` : 'duration confirmed by a Senior Counsellor'
+    const length = c.durationMonths ? `job-ready in about ${p.jobReady} (program length ${c.durationMonths} months, ${c.totalWeeks} weeks)` : `job-ready in about ${p.jobReady}; degree duration confirmed by a Senior Counsellor`
     const specs = c.specialisations.length ? ` Specialisations / tracks: ${c.specialisations.map((s) => s.name).join(', ')}.` : ''
     return `- ${p.id} = ${c.name} [${c.family}; ${length}; ${CODING_TEXT[p.coding]}]. For: ${c.whoFor.join('; ')}. Not for: ${c.notFor.join('; ')}. Entry: ${c.entry} Leads to: ${c.targetRoles.join(', ')}. Certificates: ${c.certificates}.${specs}`
   }).join('\n')
@@ -27,7 +27,7 @@ export function catalogueBrief(): string {
 export function catalogueIndex(): string {
   return PROGRAMS.map((p) => {
     const c = catalogueProgram(p.code)!
-    return `- ${p.id} = ${c.name} [${c.family}; ${c.durationMonths ? `${c.durationMonths} months` : 'degree'}; ${CODING_TEXT[p.coding]}]. Entry: ${c.entry}`
+    return `- ${p.id} = ${c.name} [${c.family}; ${c.durationMonths ? `job-ready in about ${p.jobReady}, program ${c.durationMonths} months` : 'degree'}; ${CODING_TEXT[p.coding]}]. Entry: ${c.entry}`
   }).join('\n')
 }
 
@@ -67,7 +67,13 @@ export function learnerRoute(a: Answers): string {
   const e = eligibility(program.id, a)
   const track = program.code === 'CD' || program.code === 'CD-M' ? ` Their Cloud & DevOps role track: ${cloudTrackFor(a.role).track}.` : ''
   const label = { recommend: 'Recommended', next: 'Next best', more: 'One more option' } as const
-  const options = path.options.map((o) => `${label[o.kind]}: ${o.name} (${o.fit}/10)${o.later ? ` — not open yet: ${o.later}` : ''}${o.confirm ? ` — confirm: ${o.confirm}` : ''}`)
+  const line = (o: (typeof path.options)[number]) => `${label[o.kind]}: ${o.name} (${o.fit}/10)${o.later ? ` — not open yet: ${o.later}` : ''}${o.confirm ? ` — confirm: ${o.confirm}` : ''}`
+  const shown = path.options.slice(0, path.show)
+  const backups = path.options.slice(path.show)
+  const options = [
+    `The learner sees ${shown.length === 1 ? 'ONE program' : 'TWO programs'}: ${shown.map(line).join('; ')}`,
+    ...(backups.length ? [`Backups (for you only; never list them, never offer them unless the learner cannot join the recommended program, explicitly asks for other options, or names one): ${backups.map(line).join('; ')}`] : []),
+  ]
   // Programs close to what they want that the entry rules don't open to them yet, with the reason, so they are never pitched.
   const near = new Set([...path.options.map((o) => o.code), ...PROGRAMS.filter((p) => a.interest && p.interests.includes(a.interest)).map((p) => p.code)])
   const closed = PROGRAMS.filter((p) => p.code !== program.code && near.has(p.code) && !path.options.some((o) => o.code === p.code)).map((p) => ({ p, e: eligibility(p.id, a) })).filter((x) => !x.e.ok)
@@ -84,7 +90,7 @@ export function learnerRoute(a: Answers): string {
 - Lead type: "${path.persona.name}" (${path.match}% match: ${path.persona.reasons.join('; ') || 'from their profile'}).
 - ${options.join('\n- ')}
 - The program you recommend is ${program.name}. Why: ${path.why}${track}${e.confirm ? ` Not yet confirmed by their profile: ${program.name} ${e.confirm}. When eligibility comes up, state that rule and ask or say it gets confirmed (eligibility test or Senior Counsellor); never say they "definitely" qualify.` : ''}
-- When they ask which program fits, what they'll learn, what they'll build, how long it is or whether they're eligible, answer about ${program.name}: its syllabus, projects and entry rule are the ones below. Never present another program as their fit, and never describe one program's syllabus or projects under another's name. Mention the Next best or One more option only as that (with its reason), and a "not open yet" one only with when it opens.${closed.length ? `
+- When they ask which program fits, what they'll learn, what they'll build, how long it is or whether they're eligible, answer about ${program.name}: its syllabus, projects and entry rule are the ones below. Never present another program as their fit, and never describe one program's syllabus or projects under another's name. Recommend only ${program.name}${path.show > 1 && shown[1] ? ` (and ${shown[1].name} as the other option they see: ${shown[1].why})` : ''}: one clear recommendation, never a list of programs. A backup is mentioned only in the cases above, and a "not open yet" one only with when it opens.${closed.length ? `
 - They cannot join these yet (never recommend them; if asked, explain kindly): ${closed.map((x) => `${x.p.name}: ${x.e.reason}`).join('; ')}.` : ''}
 - Their target role is where they are heading; it does not change the program you recommend now.${mapLine}${(() => {
     const picked = trackOf(a.interest)

@@ -60,7 +60,7 @@ function chartBlocks(tool: ToolMeta['id'], data: ToolResultMap[ToolMeta['id']], 
   const totalWeeks = Math.max(4, Math.round(r.durationMonths * 4.3))
   const per = totalWeeks / Math.max(1, r.phases.length)
   return [
-    { type: 'h', text: `Your ${r.durationMonths}-month plan at a glance` },
+    { type: 'h', text: 'Your plan at a glance' },
     { type: 'timeline', total: totalWeeks, unit: 'Week', rows: r.phases.map((p, i) => {
       const [a, b] = weekRange(p.weeks, [Math.round(i * per) + 1, Math.round((i + 1) * per)])
       return { label: p.title, from: a, to: Math.min(b, totalWeeks), note: p.weeks }
@@ -174,7 +174,7 @@ ${marker !== undefined ? `<div style="position:absolute;left:${Math.min(99, mark
   } else {
     const r = data as RoadmapResult
     const totalWeeks = Math.max(4, Math.round(r.durationMonths * 4.3))
-    title = `Your ${r.durationMonths}-month plan`
+    title = 'Your plan, phase by phase'
     rows = r.phases.map((p, i) => {
       const [, b] = weekRange(p.weeks, [1, totalWeeks])
       return row(`${i + 1}. ${p.title}`, (Math.min(b, totalWeeks) / totalWeeks) * 100, p.weeks, ['#4338ca', '#f97316', '#16a34a', '#7c3aed'][i % 4])
@@ -187,7 +187,6 @@ ${marker !== undefined ? `<div style="position:absolute;left:${Math.min(99, mark
 export function buildReportEmail(opts: Opts): Mail {
   const s = summaryFor(opts.meta.id, opts.data, currentCtcRange(opts.answers))
   const pdf = toolReportPdf(opts)
-  const reportUrl = learnerUrl(opts.userId, opts.meta.route)
   const sessionUrl = learnerUrl(opts.userId, '/dashboard/sessions')
   const program = getProgram((opts.data as { programId: string }).programId)
 
@@ -201,8 +200,8 @@ ${k.sub ? `<div style="font-size:11px;color:#64748b">${escapeHtml(k.sub)}</div>`
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;background:${i === s.actions.length - 1 ? '#fff7ed' : '#eef2ff'};border-radius:10px"><tr>
 <td width="34" valign="top" style="padding:12px 0 12px 12px"><div style="width:22px;height:22px;border-radius:50%;background:${i === s.actions.length - 1 ? '#f97316' : '#4338ca'};color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:22px">${i + 1}</div></td>
 <td style="padding:12px 12px 12px 8px"><div style="font-size:14px;font-weight:700;color:#0f172a">${escapeHtml(a.title)}</div>${a.detail ? `<div style="font-size:13px;color:#475569;line-height:1.5;margin-top:2px">${escapeHtml(a.detail)}</div>` : ''}</td></tr></table>`).join('')}`
+  // The full report is the attached PDF, so the one button is the next step: booking the free call.
   const buttons = `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0 6px"><tr>
-<td style="padding:0 8px 8px 0"><a href="${escapeHtml(reportUrl)}" style="display:inline-block;background:#4338ca;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Open my full report</a></td>
 <td style="padding:0 0 8px"><a href="${escapeHtml(sessionUrl)}" style="display:inline-block;background:#f97316;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Book a free counselling call</a></td>
 </tr></table>`
   const bodyHtml = `
@@ -217,7 +216,7 @@ ${kpiHtml}${miniChartHtml(opts.meta.id, opts.data)}${actionsHtml}${buttons}
     `${s.headline.value} ${s.headline.label.replace(/^\/100 /, 'out of 100, ')}. ${s.headline.note}`,
     '', ...s.kpis.map((k) => `${k.label}: ${k.value}${k.sub ? ` (${k.sub})` : ''}`),
     '', `Your next ${s.actions.length} moves:`, ...s.actions.map((a, i) => `${i + 1}. ${a.title}${a.detail ? ` - ${a.detail}` : ''}`),
-    '', `Open my full report: ${reportUrl}`, `Book a free counselling call: ${sessionUrl}`, '', 'Your full report is attached as a PDF.',
+    '', 'Your full report is attached as a PDF.', `Book a free counselling call: ${sessionUrl}`,
   ].join('\n')
 
   return {

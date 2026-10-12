@@ -215,6 +215,8 @@ export type LeadPath = {
   match: number
   ranked: PersonaScore[]
   options: PathOption[]
+  /** How many of the options the learner sees (1; 2 for experienced non-programmers). The rest are for staff and context. */
+  show: number
   /** The map's reason for the recommendation. */
   why: string
   /** The map's note for this lead type, if any (counsellor guidance, never shown as is). */
@@ -298,6 +300,20 @@ const REORDER_WHY: Record<string, string> = {
   AIL: 'Leads people or AI work: GenAI and agentic AI for managers, business transformation and AI project delivery (Python taught from scratch).',
   AAP: 'No-code AI with a function track for their work.',
 }
+/** They clearly want data science: ML models, deeper data science, or data science as their 12-month goal (map answers). */
+export function wantsDataScience(a: Answers): boolean {
+  const m = a.mapAnswers ?? {}
+  return a.interest === 'data-science' || m['analyst-focus'] === 'models' || m['datapro-focus'] === 'ds-depth' || m['twelve-months'] === 'data-science'
+}
+/** They clearly want an analyst / analytics role (map answers). */
+function wantsAnalytics(a: Answers): boolean {
+  const m = a.mapAnswers ?? {}
+  return a.interest === 'analytics' || m['nontech-goal'] === 'switch' || m['open-analytics'] === 'yes' || m['creative-goal'] === 'switch'
+}
+const NOCODE_WHY = 'With your experience, the Applied AI Practitioner Program gets AI working in your job fastest, with no coding needed.'
+const NOCODE_SECOND_WHY = 'If you want to build AI systems yourself: coding is taught from scratch.'
+/** Why an experienced learner gets the GenAI & Agentic AI Master before a data science course (routing rule 3). */
+const EXPERIENCED_WHY = 'With your experience, the GenAI & Agentic AI Master helps you most: GenAI, RAG, agents and production AI applied to your work, without the long ML and deep-learning track of a data science course (which stays an option).'
 const catalogueWho = (code: string) => CATALOGUE.programs.find((p) => p.code === code)?.whoFor[0] ?? ''
 
 const FIT: Record<PathKind, number> = { recommend: 9, next: 8, more: 7 }
@@ -314,6 +330,25 @@ export function pathFor(a: Answers): LeadPath {
   let order = orderFor(top.id, a, f)
   // Routing rule 1: a tech professional who asks about FDE hears about the FDE Master first (if they code at all).
   if (f.wantsFde && persona.fdePriority && f.coder && (f.years ?? 1) >= 1) order = ['FDE-M', ...order.filter((c) => c !== 'FDE-M')]
+  // Routing rule 3 (Learnbay, 12 Oct 2026): anyone with work experience is not sent to a data science or analytics course
+  // first unless they clearly ask for it. Data science only when they say they want ML models / deeper data science;
+  // otherwise the GenAI & Agentic AI Master (no long ML/DL track). Non-programmers who would have started on analytics
+  // get the Applied AI Practitioner Program (no code), with the GenAI & Agentic AI Master (coding from scratch) beside it.
+  let routed: 'genai' | 'nocode' | 'aap' | null = null
+  const gaiOpen = !avoid.has('GAI-M') && eligibility(CODE_TO_ID['GAI-M'], a).ok
+  if ((f.years ?? 0) >= 1) {
+    if (['DSG-C', 'DSG-M'].includes(order[0])) {
+      if (wantsDataScience(a)) order = [order[0], 'GAI-M', ...order.slice(1).filter((c) => c !== 'GAI-M')]
+      else if (gaiOpen) { order = ['GAI-M', ...order.filter((c) => c !== 'GAI-M')]; routed = 'genai' }
+    } else if (order[0] === 'DABA' && !wantsAnalytics(a)) {
+      // (Lead types the map never sends to the Applied AI Practitioner Program, e.g. industry professionals, get the
+      // GenAI & Agentic AI Master instead.)
+      if (!f.coder && !avoid.has('AAP')) { order = ['AAP', 'GAI-M', ...order.filter((c) => c !== 'AAP' && c !== 'GAI-M')]; routed = 'nocode' }
+      else if (gaiOpen) { order = ['GAI-M', ...order.filter((c) => c !== 'GAI-M')]; routed = 'genai' }
+      // Lead types the map never sends to the GenAI & Agentic AI Master (e.g. creative roles): the AI Practitioner Program.
+      else if (!avoid.has('AAP')) { order = ['AAP', ...order.filter((c) => c !== 'AAP')]; routed = 'aap' }
+    }
+  }
   // Routing rule 2: a developer who codes daily and aims for the AI Engineer role also hears about the AI Engineer
   // Master, right after their main recommendation (it never replaces it).
   if (f.wantsAie && f.codesDaily && (f.years ?? 1) >= 1 && !avoid.has('AIE')) order = [order[0], 'AIE', ...order.slice(1).filter((c) => c !== 'AIE')]
@@ -347,14 +382,18 @@ export function pathFor(a: Answers): LeadPath {
       code: x.code, programId: id, name: program.name, kind,
       // The match with their lead type sets the top score; each later option sits one below.
       fit: Math.max(5, Math.min(10, FIT[kind] + (i === 0 && top.score >= 80 ? 1 : 0) - (e.confirm ? 1 : 0) - (reason ? 2 : 0))),
-      why: i === 0 ? persona.why : KIND_WHY[kind],
+      why: i === 0 ? (routed === 'genai' && x.code === 'GAI-M' ? EXPERIENCED_WHY : (routed === 'nocode' || routed === 'aap') && x.code === 'AAP' ? NOCODE_WHY : persona.why)
+        : routed === 'nocode' && i === 1 && x.code === 'GAI-M' ? NOCODE_SECOND_WHY : KIND_WHY[kind],
       ...(reason ? { later: reason } : {}),
       ...(e.confirm ? { confirm: e.confirm } : {}),
     }
   })
   const second = ranked.find((p) => p.id !== top.id)?.score ?? 0
   const match = Math.max(60, Math.min(98, 60 + Math.round((top.score - second) / 2) + (top.score >= 80 ? 15 : top.score >= 55 ? 8 : 0)))
-  return { persona: top, match, ranked, options, why: options[0].code === persona.primary ? persona.why : REORDER_WHY[options[0].code] ?? `${options[0].name}: ${catalogueWho(options[0].code)}`, note: persona.note }
+  // Learners see one program; experienced non-programmers see two (no-code, or coding from scratch). The rest stays
+  // in the background for the counsellor's context and the CRM.
+  const show = routed === 'nocode' && options[1]?.code === 'GAI-M' && !options[1].later ? 2 : 1
+  return { persona: top, match, ranked, options, show, why: routed === 'genai' && options[0].code === 'GAI-M' ? EXPERIENCED_WHY : (routed === 'nocode' || routed === 'aap') && options[0].code === 'AAP' ? NOCODE_WHY : options[0].code === persona.primary ? persona.why : REORDER_WHY[options[0].code] ?? `${options[0].name}: ${catalogueWho(options[0].code)}`, note: persona.note }
 }
 
 function years1(f: Facts) {
@@ -369,7 +408,8 @@ export function routeFor(a: Answers): Route {
   return { code: p.options[0].code, persona: p.persona.id, why: p.why }
 }
 
-/** What the learner sees on their path card: the lead type they match and their three programs, in plain words. */
+/** What the learner sees on their path card: the lead type they match and their program (two for experienced
+ * non-programmers), in plain words. Never three: the backups stay with the counsellor and the CRM. */
 export type PathCardData = {
   persona: string; match: number; reasons: string[]
   options: { programId: string; name: string; kind: PathKind; fit: number; why: string; note?: string; later: boolean }[]
@@ -400,7 +440,7 @@ export function pathCard(a: Answers): PathCardData {
   const p = pathFor(a)
   return {
     persona: p.persona.name, match: p.match, reasons: p.persona.reasons.slice(0, 3),
-    options: p.options.map((o) => ({ programId: o.programId, name: o.name, kind: o.kind, fit: o.fit, why: o.why, note: plainNote(o), later: Boolean(o.later) })),
+    options: p.options.slice(0, p.show).map((o) => ({ programId: o.programId, name: o.name, kind: o.kind, fit: o.fit, why: o.why, note: plainNote(o), later: Boolean(o.later) })),
   }
 }
 

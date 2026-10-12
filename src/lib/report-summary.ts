@@ -80,10 +80,12 @@ export function salarySummary(r: SalaryResult, current: { minLpa: number; maxLpa
 }
 
 export function roadmapSummary(r: RoadmapResult): ReportSummary {
+  const ready = getProgram(r.programId).jobReady
   return {
-    headline: { value: `${r.durationMonths}`, label: `months to ${r.targetRole}`, note: firstSentence(r.summary) },
+    headline: { value: ready.replace(/ months$/, ''), label: `months to job-ready as ${r.targetRole}`, note: firstSentence(r.summary) },
     kpis: [
-      { label: 'Time to job-ready', value: `${r.durationMonths} months`, tone: 'primary' },
+      // Time to job-ready is the highlight (it is not the program's length, which appears only in the program details).
+      { label: 'Time to job-ready', value: ready, tone: 'primary' },
       { label: 'Weekly effort', value: r.weeklyHours.replace(/\/\s*week/i, '').trim() || r.weeklyHours, sub: 'per week', tone: 'accent' },
       { label: 'Phases', value: `${r.phases.length}`, sub: 'each ends with a milestone', tone: 'success' },
       { label: 'Portfolio projects', value: `${r.projects.length}`, sub: 'to show employers', tone: 'warning' },

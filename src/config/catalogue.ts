@@ -69,5 +69,16 @@ export const CODING: Record<string, 'no' | 'some' | 'yes'> = {
 }
 export const FRESHER_CODES = ['AAP', 'DABA', 'DSG-C']
 
+/**
+ * Time to job-ready, which is not the program's length (Learnbay, 2026-10-12): the Forward Deployed AI Engineer Master
+ * 9 months, the Applied AI Practitioner Program 3 months, every other program 5–6 months.
+ */
+const JOB_READY: Record<string, [number, number]> = { 'FDE-M': [9, 9], AAP: [3, 3] }
+export const jobReadyRange = (code: string): [number, number] => JOB_READY[code] ?? [5, 6]
+export function jobReadyLabel(code: string): string {
+  const [a, b] = jobReadyRange(code)
+  return a === b ? `${a} months` : `${a}–${b} months`
+}
+
 export const projectById = (id: string) => CATALOGUE.projects.find((p) => p.id === id)
 export const personaById = (id: string) => CATALOGUE.personas.find((p) => p.id === id)

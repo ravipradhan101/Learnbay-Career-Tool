@@ -8,7 +8,7 @@
 // - Facts: for the questions learners ask most (duration, fees, eligibility, certificates, syllabus, projects, fit,
 //   placement support, refunds) the exact answer is computed from the data, so the AI words it but never invents it.
 
-import { CATALOGUE, CODE_TO_ID, ID_TO_CODE, catalogueProgram, projectById } from '@/config/catalogue'
+import { CATALOGUE, CODE_TO_ID, ID_TO_CODE, catalogueProgram, jobReadyLabel, projectById } from '@/config/catalogue'
 import { CURRICULUM_EDGE } from '@/config/curriculum'
 import { REFUND_POLICY } from '@/config/policies'
 import { PROGRAMS, getProgram } from '@/config/programs'
@@ -30,7 +30,7 @@ function buildChunks(): Chunk[] {
     const coding = prog.coding === 'no' ? 'No coding.' : prog.coding === 'some' ? 'Coding is taught from scratch; no prior coding needed.' : 'For people who already write code.'
     out.push({
       id: `program:${p.code}`, kind: 'program', programs: [id], title: p.name,
-      text: `${p.name} (${p.family}). ${p.durationMonths ? `Runs ${p.durationMonths} months (${p.totalWeeks} weeks).` : 'A degree program; duration confirmed by a Senior Counsellor.'} ${coding} Who it is for: ${p.whoFor.join('; ')}. Not for: ${p.notFor.join('; ')}. Entry: ${p.entry} Roles it leads to: ${p.targetRoles.join(', ')}. Certificates: ${p.certificates}.${p.specialisations.length ? ` Specialisations / tracks: ${p.specialisations.map((s) => s.name).join(', ')}.` : ''}`,
+      text: `${p.name} (${p.family}). ${p.durationMonths ? `Runs ${p.durationMonths} months (${p.totalWeeks} weeks); learners are job-ready in about ${jobReadyLabel(p.code)}.` : 'A degree program; duration confirmed by a Senior Counsellor.'} ${coding} Who it is for: ${p.whoFor.join('; ')}. Not for: ${p.notFor.join('; ')}. Entry: ${p.entry} Roles it leads to: ${p.targetRoles.join(', ')}. Certificates: ${p.certificates}.${p.specialisations.length ? ` Specialisations / tracks: ${p.specialisations.map((s) => s.name).join(', ')}.` : ''}`,
     })
     for (const m of p.modules) {
       out.push({
@@ -221,7 +221,7 @@ export function factsFor(message: string, a: Answers | undefined, programId: str
   }
   if (!p || !prog) return none
   if (intent === 'duration') {
-    const line = p.durationMonths ? `The ${p.name} runs ${p.durationMonths} months (${p.totalWeeks} weeks).` : `The ${p.name}'s duration is confirmed by a Senior Counsellor.`
+    const line = p.durationMonths ? `The ${p.name} runs ${p.durationMonths} months (${p.totalWeeks} weeks), and learners are job-ready in about ${jobReadyLabel(p.code)}.` : `The ${p.name}'s duration is confirmed by a Senior Counsellor.`
     return { intent, programId, facts: [line, 'Batch dates and weekly class timings are confirmed by a Senior Counsellor.'], fallback: { reply: `${line} Your batch dates and weekly class timings are confirmed with a Senior Counsellor on a free call.`, points: [], next: '', route: null, show: null } }
   }
   if (intent === 'certificates') {
@@ -254,8 +254,8 @@ export function factsFor(message: string, a: Answers | undefined, programId: str
     const kind = { recommend: 'Recommended', next: 'Next best', more: 'One more option' } as const
     return {
       intent, programId,
-      facts: [`Their lead type: ${path.persona.name} (${path.match}% match).`, ...path.options.map((o) => `${kind[o.kind]}: ${o.name} (${o.fit}/10)${o.later ? `, not open yet (${o.later})` : ''}.`), `Recommend ${getProgram(programId!).name}; never present another program as their fit.`],
-      fallback: { reply: `From everything you’ve told me, the ${prog.name} fits you best. ${path.why}`, points: path.options.slice(1, 3).filter((o) => !o.later).map((o) => ({ title: kind[o.kind], detail: `${o.name}, ${o.fit}/10.` })), next: 'Take the eligibility test', route: '/dashboard/eligibility', show: 'program' },
+      facts: [`Their lead type: ${path.persona.name} (${path.match}% match).`, ...path.options.slice(0, path.show).map((o) => `${kind[o.kind]}: ${o.name} (${o.fit}/10)${o.later ? `, not open yet (${o.later})` : ''}.`), `Recommend ${getProgram(programId!).name}${path.show > 1 ? ' (and the second program above as the other option)' : ''}; never list other programs or present another program as their fit.`],
+      fallback: { reply: `From everything you’ve told me, the ${prog.name} fits you best. ${path.why}`, points: path.options.slice(1, path.show).filter((o) => !o.later).map((o) => ({ title: kind[o.kind], detail: `${o.name}: ${o.why}` })), next: 'Take the eligibility test', route: '/dashboard/eligibility', show: 'program' },
     }
   }
   return none

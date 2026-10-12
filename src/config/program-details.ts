@@ -15,6 +15,8 @@ export type ProgramDetail = {
   notFor: string[]
   durationMonths: number | null
   totalWeeks: number | null
+  /** Time to job-ready ("5–6 months"), not the program's length. */
+  jobReady: string
 }
 
 /** Specialisations that are industries (the rest are roles or functions). */
@@ -45,6 +47,7 @@ export const PROGRAM_DETAILS: Record<string, ProgramDetail> = Object.fromEntries
     notFor: c.notFor,
     durationMonths: c.durationMonths,
     totalWeeks: c.totalWeeks,
+    jobReady: p.jobReady,
   }
   return [p.id, detail]
 }))

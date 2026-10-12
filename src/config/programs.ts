@@ -3,7 +3,7 @@
 // programs from this list. Program ids are the ones the app has always used, so saved choices and links keep working;
 // retired programs resolve to the program that replaced them (RETIRED_IDS).
 
-import { CODE_TO_ID, CODING, MIN_YEARS, catalogueProgram } from './catalogue'
+import { CODE_TO_ID, CODING, MIN_YEARS, catalogueProgram, jobReadyLabel } from './catalogue'
 
 export type Program = {
   id: string
@@ -17,12 +17,14 @@ export type Program = {
   focusAreas: string[]
   bestFor: string
   durationMonths: number | null
+  /** Time to job-ready ("5–6 months"), not the program's length. */
+  jobReady: string
   /** Years of work experience needed to join (0 = open to freshers). */
   minYears: number
   coding: 'no' | 'some' | 'yes'
 }
 
-type Def = Omit<Program, 'id' | 'name' | 'durationMonths' | 'minYears' | 'coding'>
+type Def = Omit<Program, 'id' | 'name' | 'durationMonths' | 'jobReady' | 'minYears' | 'coding'>
 
 const DEFS: Def[] = [
   {
@@ -141,7 +143,7 @@ const DEFS: Def[] = [
 
 export const PROGRAMS: Program[] = DEFS.map((d) => {
   const c = catalogueProgram(d.code)!
-  return { ...d, id: CODE_TO_ID[d.code], name: c.name, durationMonths: c.durationMonths, minYears: MIN_YEARS[d.code] ?? 1, coding: CODING[d.code] ?? 'some' }
+  return { ...d, id: CODE_TO_ID[d.code], name: c.name, durationMonths: c.durationMonths, jobReady: jobReadyLabel(d.code), minYears: MIN_YEARS[d.code] ?? 1, coding: CODING[d.code] ?? 'some' }
 })
 
 /** Programs that were retired or merged (2026 catalogue) → the program that replaced them. */

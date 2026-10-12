@@ -13,7 +13,7 @@ import { skillFamily } from '@/lib/skills'
 import { projectTitles } from '@/lib/projects'
 import { defaultTargetRole, programForLearner } from '@/lib/segments'
 import { eligibility } from '@/lib/lead-match'
-import { istDate, whenLabel } from '@/lib/sessions'
+import { slotPassed, whenLabel } from '@/lib/sessions'
 import { hiringCompanies } from '@/lib/hiring'
 
 export const maxDuration = 60
@@ -69,11 +69,7 @@ export async function POST(request: Request) {
     hiringCompanies().catch(() => []),
   ])
   // A call booked for earlier today that is over an hour past has happened (or was missed): it isn't "upcoming".
-  if (booking && booking.d === istDate()) {
-    const [h, m] = booking.t.split(':').map(Number)
-    const ist = new Date(Date.now() + 330 * 60_000)
-    if (h * 60 + (m || 0) + 60 < ist.getUTCHours() * 60 + ist.getUTCMinutes()) booking = null
-  }
+  if (booking && slotPassed(booking.d, booking.t)) booking = null
   // Tool chats only see that tool's result; the advisor sees everything.
   const isTool = context === 'skill-gap' || context === 'salary' || context === 'roadmap'
   const scoped: Partial<ToolResultMap> = isTool ? { [context]: results[context as keyof ToolResultMap] } : results

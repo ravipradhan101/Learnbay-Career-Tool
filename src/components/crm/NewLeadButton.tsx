@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Msg, useAction } from './useAction'
+import { CountryPicker } from '../CountryPicker'
 
 type Opt = { id: string; label: string }
 
@@ -10,7 +11,7 @@ type Opt = { id: string; label: string }
  * New lead form. "Give to" only lists people the server will accept: an ISM only themselves; an associate themselves
  * and their ISMs; a manager themselves, their associates and ISMs; the admin anyone.
  */
-export function NewLeadButton({ assignable, countries }: { assignable: Opt[]; countries: { code: string; label: string }[] }) {
+export function NewLeadButton({ assignable }: { assignable: Opt[]; countries?: { code: string; label: string }[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [f, setF] = useState({ name: '', email: '', phoneCountry: '+91', phone: '', assignTo: assignable[0]?.id ?? '', note: '' })
@@ -35,7 +36,7 @@ export function NewLeadButton({ assignable, countries }: { assignable: Opt[]; co
             <div className="field">
               <label className="label" htmlFor="nl-phone">Phone</label>
               <div className="row" style={{ flexWrap: 'nowrap', gap: '0.5rem' }}>
-                <select className="select" style={{ width: '7rem' }} aria-label="Country code" value={f.phoneCountry} onChange={set('phoneCountry')}>{countries.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}</select>
+                <div style={{ width: '7.5rem', flex: 'none' }}><CountryPicker value={f.phoneCountry} onChange={(code) => setF({ ...f, phoneCountry: code })} /></div>
                 <input id="nl-phone" className="input" inputMode="tel" required maxLength={15} value={f.phone} onChange={set('phone')} />
               </div>
             </div>

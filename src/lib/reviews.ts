@@ -6,9 +6,11 @@ export type Rating = { avg: number; count: number }
  * DEMO DATA for the stakeholder prototype: starting ratings per counsellor, blended with real learner reviews.
  * Switch off with DEMO_RATINGS=false before real learners use the app (Admin → Reviews shows a banner while it's on).
  */
+// (Kshitij 958 → 959 on 12 Oct 2026: the one real rating, 3 stars, was removed with all test accounts; the user asked
+// to keep every counsellor's shown rating and count exactly as it was.)
 export const DEMO_RATINGS: Record<string, Rating> = {
   tanya: { avg: 4.82, count: 3126 }, siya: { avg: 4.76, count: 2481 }, mangesh: { avg: 4.68, count: 1893 }, elanor: { avg: 4.91, count: 4637 },
-  kshitij: { avg: 4.57, count: 958 }, riya: { avg: 4.87, count: 3712 }, imran: { avg: 4.73, count: 2214 },
+  kshitij: { avg: 4.57, count: 959 }, riya: { avg: 4.87, count: 3712 }, imran: { avg: 4.73, count: 2214 },
 }
 export const demoRatingsOn = () => process.env.DEMO_RATINGS !== 'false'
 

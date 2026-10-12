@@ -1,5 +1,7 @@
 // Question and option definitions shared by the browser (onboarding, tool questions) and the server (validation).
 
+import { COUNTRIES } from '@/config/countries'
+
 export type Option = { id: string; label: string; hint?: string; keywords?: string[] }
 
 // ---------- Onboarding (asked in the chat before contact details) ----------
@@ -295,16 +297,8 @@ export const MATH_COMFORT: Option[] = [
   { id: 'low', label: 'Not comfortable yet', hint: 'I would need to start from basics' },
 ]
 
-export const COUNTRY_CODES: { code: string; label: string; flag: string; digits: [number, number] }[] = [
-  { code: '+91', label: 'India', flag: '🇮🇳', digits: [10, 10] },
-  { code: '+971', label: 'UAE', flag: '🇦🇪', digits: [8, 9] },
-  { code: '+1', label: 'USA / Canada', flag: '🇺🇸', digits: [10, 10] },
-  { code: '+44', label: 'United Kingdom', flag: '🇬🇧', digits: [9, 10] },
-  { code: '+65', label: 'Singapore', flag: '🇸🇬', digits: [8, 8] },
-  { code: '+61', label: 'Australia', flag: '🇦🇺', digits: [9, 9] },
-  { code: '+966', label: 'Saudi Arabia', flag: '🇸🇦', digits: [9, 9] },
-  { code: '+974', label: 'Qatar', flag: '🇶🇦', digits: [8, 8] },
-]
+/** Every country (config/countries): India and the most common first, then A–Z. */
+export const COUNTRY_CODES = COUNTRIES
 
 export type Answers = {
   // onboarding (Bruce)

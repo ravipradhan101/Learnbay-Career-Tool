@@ -219,13 +219,13 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
       {!shared && extras && (
         <OutcomePath
           goal={`${r.targetRole}, with a portfolio to prove it`} targetRole={r.targetRole} programId={r.programId} industry={extras.industry}
-          goalNote={`Your ${r.durationMonths}-month plan at ${r.weeklyHours}, phase by phase, each ending with a milestone you can show.`}
+          goalNote={`Job-ready in about ${getProgram(r.programId).jobReady} at ${r.weeklyHours}, phase by phase, each phase ending with a milestone you can show.`}
           eligibilityDone={extras.eligibilityDone} hasSession={extras.hasSession}
         />
       )}
       {!shared && <ActionPlan tool="roadmap" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
 
-      <ChartCard title={`Your ${r.durationMonths}-month plan at a glance`} sub={`${r.weeklyHours} · each phase ends with a milestone you can show`}>
+      <ChartCard title="Your plan at a glance" sub={`Job-ready in about ${getProgram(r.programId).jobReady} · ${r.weeklyHours} · each phase ends with a milestone you can show`}>
         <PhaseTimeline phases={r.phases} months={r.durationMonths} />
         {(r.monthlyCheckpoints?.length ?? 0) > 0 && (
           <div className="checkpoint-dots">

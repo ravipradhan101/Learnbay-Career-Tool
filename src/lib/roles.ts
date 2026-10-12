@@ -68,6 +68,7 @@ export function curriculumOf(programId: string) {
     roles: d?.roles ?? [],
     durationMonths: d?.durationMonths ?? null,
     totalWeeks: d?.totalWeeks ?? null,
+    jobReady: d?.jobReady ?? null,
   }
 }
 

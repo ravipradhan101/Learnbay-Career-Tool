@@ -1007,7 +1007,7 @@ export async function sessionsFlow(bot: Bot, ctx: StudioCtx, resumed = false) {
     ])
     if (how.id !== 'phone') return meetFlow(bot, ctx, 'sessions', how.id === 'now', true)
   }
-  await bot.say(`In about 30 minutes, a Learnbay Senior Career Counsellor goes through your results, the right program for your background, and fees or EMI if you want. It’s free. Pick a time today or tomorrow (${CALL_HOURS}).`)
+  await bot.say(`In a free 20-minute call, a Learnbay Senior Career Counsellor goes through your results, the right program for your background, and fees or EMI if you want. Pick a time today or tomorrow (${CALL_HOURS}).`)
   const booked = await bot.live<{ when?: string; skipped?: boolean }>({ type: 'booking' })
   // The slots couldn't load and they moved on: no booking, back to the menu.
   if (!booked.when) { await bot.say('No problem. You can book any time from the menu, or tap Call me for a call back.'); return homeFlow(bot, ctx, 'menu') }

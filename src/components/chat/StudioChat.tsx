@@ -514,13 +514,7 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
     const sent = await guide.current.askRating({ counsellor: who.id, counsellorName: who.name, testTaken: done.eligibility, threadId }, text)
     if (sent) { try { window.localStorage.setItem(ratedKey, '1') } catch { /* ignore */ } }
   }
-  // After a few tasks, once per visit, Bruce asks (a short pause first, so it never interrupts a step).
-  useEffect(() => {
-    if (tasksDone < 3) return
-    try { if (window.sessionStorage.getItem(`lcn_rating_asked:${data.userId}`) === '1') return } catch { return }
-    const t = window.setTimeout(() => { void askRatingRef.current('milestones') }, 8000)
-    return () => window.clearTimeout(t)
-  }, [tasksDone])
+  // (Bruce no longer asks for a rating on his own after a few tasks: only when the learner logs out or leaves.)
 
   const onGuide = (id: string) => {
     if (id === 'tour') { startTour(); return }

@@ -11,6 +11,7 @@ import { recordCrmMatch } from './connector'
 import { leadInsights } from './insights'
 import { isLeadStatus, statusLabel } from './roles'
 import { emitLeadEvent } from './webhooks'
+import { emailProblem } from '../email-check'
 
 /**
  * The data behind /api/v1: find, read, list and add leads for tools outside this app. The golden rule matches the
@@ -165,6 +166,9 @@ export async function apiUpsertLead(key: ApiKey, b: Record<string, unknown>): Pr
   }
 
   if (!email) return { status: 404, body: { error: 'No lead has this phone. Send an email too to create one.' } }
+  // A new lead needs a real, reachable inbox (no test or temporary emails).
+  const emailIssue = await emailProblem(email)
+  if (emailIssue) return { status: 400, body: { error: `email is not accepted: ${emailIssue}` } }
   const created = await queryOne<{ id: string; inserted: boolean }>(
     `INSERT INTO users (email, name, phone_country, phone, source) VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email RETURNING id, (xmax = 0) AS inserted`,

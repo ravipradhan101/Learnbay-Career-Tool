@@ -5,6 +5,7 @@ import { mergeAnswers, sanitizeAnswers, validateContact } from '@/lib/validation
 import { getTool } from '@/lib/tools-meta'
 import type { Answers } from '@/lib/questions'
 import { crmNewLead } from '@/lib/crm/hooks'
+import { emailProblem } from '@/lib/email-check'
 
 const SOURCE_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'referrer', 'landing'] as const
 
@@ -27,9 +28,7 @@ function landing(next: unknown): string {
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return jsonError(403, 'Invalid request origin.')
-  if (!(await rateLimits([[`onboard:ip:${clientIp(request)}`, 60, 3600], ['onboard:global', 5000, 600]]))) {
-    return jsonError(429, 'Too many sign-ups from this network. Please try again later.')
-  }
+  if (!(await rateLimits([['onboard:global', 5000, 600]]))) return jsonError(429, 'We’re very busy right now. Please try again in a few minutes.')
   const body = await readJson<{ answers?: unknown; contact?: unknown; source?: unknown; next?: unknown }>(request)
   if (!body) return jsonError(400, 'Invalid request.')
 
@@ -42,6 +41,32 @@ export async function POST(request: Request) {
   if (current) contactInput.email = current.email
   const { contact, error } = validateContact(contactInput)
   if (!contact) return jsonError(400, error ?? 'Please check your details.')
+  // New sign-ups only (the call after the code is verified is the same person): rules against bulk and fake sign-ups.
+  if (!current) {
+    // 1. A hidden field people never see, and a form filled faster than a person can type: a script, not a learner.
+    const raw = body.contact as Record<string, unknown> | undefined
+    const tookMs = Number(raw?.tookMs)
+    if ((typeof raw?.website === 'string' && raw.website.trim()) || !Number.isFinite(tookMs) || tookMs < 1500) {
+      return jsonError(400, 'Something went wrong. Please try again.')
+    }
+    // 2. Per network: 20 an hour and 60 a day (a classroom on one Wi-Fi still fits).
+    const ip = clientIp(request)
+    if (!(await rateLimits([[`onboard:ip:${ip}`, 20, 3600], [`onboard:ip:day:${ip}`, 60, 86_400]]))) {
+      return jsonError(429, 'Too many sign-ups from this network. Please try again later.')
+    }
+    // 3. A real, reachable inbox: no temporary inboxes, test domains, typos or unusual domain endings.
+    const problem = await emailProblem(contact.email)
+    if (problem) return jsonError(400, problem, { field: 'email' })
+    // 4. One phone number, at most 3 accounts in 30 days.
+    const others = await queryOne<{ n: number }>(
+      `SELECT count(DISTINCT email)::int AS n FROM (
+         SELECT email FROM users WHERE phone = $1 AND phone_country = $2 AND created_at > now() - interval '30 days'
+         UNION SELECT email FROM pending_signups WHERE phone = $1 AND phone_country = $2 AND created_at > now() - interval '30 days'
+       ) x WHERE email <> $3`,
+      [contact.phone, contact.phoneCountry, contact.email],
+    )
+    if ((others?.n ?? 0) >= 3) return jsonError(400, 'This phone number is already linked to other accounts. Please log in with your existing email, or use your own number.', { field: 'phone' })
+  }
 
   if (!current) {
     // New learner: the lead (contact + answers) is saved straight away, but the account only opens after the

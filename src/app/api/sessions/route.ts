@@ -5,12 +5,13 @@ import { triggerFlows } from '@/lib/email/flows'
 import { sendSessionEmails } from '@/lib/mailer'
 import { experienceLabel, interestLabel, roleLabel, type Answers } from '@/lib/questions'
 import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
+import { background } from '@/lib/background'
 import { emitLeadEvent } from '@/lib/crm/webhooks'
 import {
-  BOOKING_DAYS, SESSION_SHORT, SESSION_TIMES, SESSION_TYPE_ID, SLOT_CAPACITY, istDate, slotOpen, whenLabel, type Booking, type DaySlots,
+  BOOKING_DAYS, SESSION_SHORT, SESSION_TIMES, SESSION_TYPE_ID, SLOT_CAPACITY, istDate, slotOpen, slotPassed, whenLabel, type Booking, type DaySlots,
 } from '@/lib/sessions'
 
-// Free calls with a Senior Career Counsellor: today or tomorrow only, one hour slots from 10 AM to 7 PM IST,
+// Free calls with a Senior Career Counsellor: today or tomorrow only, 20-minute calls every 30 minutes from 10 AM to 7:30 PM IST,
 // at most SLOT_CAPACITY learners per slot. A learner has one active booking, which they can reschedule (not cancel).
 
 type Row = { id: string; preferred_date: string; preferred_time: string; status: string; rescheduled: number }
@@ -28,13 +29,6 @@ async function activeBooking(userId: string): Promise<Booking | null> {
   return { id: r.id, date: r.preferred_date, time: r.preferred_time, when: whenLabel(r.preferred_date, r.preferred_time), status: r.status, rescheduled: r.rescheduled }
 }
 
-/** True once a booked slot today is more than an hour past (the call has happened, or was missed). */
-function slotPassed(date: string, time: string): boolean {
-  if (date !== istDate()) return false
-  const [h, m] = time.split(':').map(Number)
-  const ist = new Date(Date.now() + 330 * 60_000)
-  return Number.isFinite(h) && h * 60 + (m || 0) + 60 < ist.getUTCHours() * 60 + ist.getUTCMinutes()
-}
 
 /** Today and tomorrow, each slot with how many places are left (full or past slots are not open). */
 async function availability(excludeId?: string): Promise<DaySlots[]> {
@@ -135,11 +129,8 @@ export async function POST(request: Request) {
   triggerFlows(user.id, 'session_booked')
   emitLeadEvent('call.booked', user.id, { date: slot.date, time: slot.time, ...(note ? { note } : {}) })
   const when = whenLabel(slot.date, slot.time)
-  try {
-    await sendSessionEmails({ learner: { id: user.id, name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note, summary: await profileSummary(user.id) })
-  } catch (err) {
-    console.error('[sessions] email failed', (err as Error).message)
-  }
+  // The confirmation emails go out after the reply, so the learner sees "booked" at once (sending took ~7 s).
+  background('sessions email', async () => sendSessionEmails({ learner: { id: user.id, name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note, summary: await profileSummary(user.id) }))
   const booking = await activeBooking(user.id)
   return jsonOk({ id: created?.id, when, booking, message: `Booked for ${when}. A Senior Counsellor will call you then.` })
 }
@@ -166,10 +157,6 @@ export async function PATCH(request: Request) {
   })
   if (!moved) return jsonError(409, 'That slot just filled up. Please pick another time.')
   const when = whenLabel(slot.date, slot.time)
-  try {
-    await sendSessionEmails({ learner: { id: user.id, name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note: '', summary: await profileSummary(user.id), rescheduledFrom: existing.when })
-  } catch (err) {
-    console.error('[sessions] reschedule email failed', (err as Error).message)
-  }
+  background('sessions reschedule email', async () => sendSessionEmails({ learner: { id: user.id, name: user.name ?? user.email, email: user.email, phone: `${user.phone_country ?? ''} ${user.phone}`.trim() }, type: SESSION_SHORT, when, note: '', summary: await profileSummary(user.id), rescheduledFrom: existing.when }))
   return jsonOk({ booking: await activeBooking(user.id), when, message: `Moved to ${when}. A Senior Counsellor will call you then.` })
 }

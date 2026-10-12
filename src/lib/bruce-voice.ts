@@ -116,10 +116,12 @@ export function speak(text: string, onTalk?: (talking: boolean) => void, force =
       synth.speak(u)
     })
   }
-  // Some browsers load their voices a moment after the page.
+  // Some browsers load their voices a moment after the page: wait for them (or 600 ms), and speak only ONCE — the
+  // "voices ready" event and the fallback timer used to both fire and say the first line twice.
   if (synth.getVoices().length) run()
   else {
-    const once = () => { synth.removeEventListener('voiceschanged', once); run() }
+    let done = false
+    const once = () => { if (done) return; done = true; synth.removeEventListener('voiceschanged', once); run() }
     synth.addEventListener('voiceschanged', once)
     window.setTimeout(once, 600)
   }

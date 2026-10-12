@@ -17,6 +17,7 @@ import { assignableIds, byId, displayName, staffDirectory } from './scope'
 import { isLeadStatus, isOutcome, outcomeLabel, statusLabel } from './roles'
 import { bookByStaff, cancelMeeting, closeMeetingFromTask, setMeetingLink } from '../meet/meetings'
 import { cleanMeetUrl } from '../meet/google'
+import { emailProblem } from '../email-check'
 
 export type Result = { ok: true; message: string; data?: Record<string, unknown> } | { ok: false; status: number; error: string; data?: Record<string, unknown> }
 const fail = (error: string, status = 400, data?: Record<string, unknown>): Result => ({ ok: false, status, error, data })
@@ -30,6 +31,9 @@ export async function createLead(me: StaffUser, b: Record<string, unknown>): Pro
   if (name.length < 2 || !/[\p{L}]/u.test(name)) return fail('Enter the lead’s full name.')
   const email = normalizeEmail(b.email)
   if (!email) return fail('Enter a valid email address.')
+  // No lead with a test, temporary or unreachable email, even when staff add it (Learnbay, 12 Oct 2026).
+  const emailIssue = await emailProblem(email)
+  if (emailIssue) return fail(emailIssue)
   const phoneCountry = typeof b.phoneCountry === 'string' ? b.phoneCountry : '+91'
   const phone = typeof b.phone === 'string' ? b.phone.replace(/[\s-]/g, '') : ''
   if (!isValidPhone(phoneCountry, phone)) return fail('Enter a valid phone number.')

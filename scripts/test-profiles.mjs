@@ -12,7 +12,7 @@ process.removeAllListeners('warning')
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const out = mkdtempSync(path.join(tmpdir(), 'lb-profiles-'))
 copyFileSync(path.join(root, 'src/config/catalogue.json'), path.join(out, 'catalogue.json'))
-const files = [['config/catalogue.ts', 'catalogue'], ['config/programs.ts', 'programs'], ['lib/questions.ts', 'questions'], ['config/map-questions.ts', 'map-questions'], ['lib/lead-match.ts', 'lead-match'], ['config/profiles.ts', 'profiles']]
+const files = [['config/countries.ts', 'countries'], ['config/catalogue.ts', 'catalogue'], ['config/programs.ts', 'programs'], ['lib/questions.ts', 'questions'], ['config/map-questions.ts', 'map-questions'], ['lib/lead-match.ts', 'lead-match'], ['config/profiles.ts', 'profiles']]
 for (const [src, name] of files) {
   let code = stripTypeScriptTypes(readFileSync(path.join(root, 'src', src), 'utf8'), { mode: 'strip' })
   code = code.replace(/from '(?:@\/config\/|@\/lib\/|\.\/)([a-z-]+)'/g, (m, n) => `from './${n}.mjs'`)
@@ -85,7 +85,8 @@ const CASES = [
   ['Non-graduate freelancer', { experience: '1-2', role: 'other', roleOther: 'Freelance video editor', eduLevel: 'diploma', programmer: 'no', interest: 'ai' }, ['AAP'], 'content-media'],
   ['Final-year mechanical student', { experience: '0', studyStage: 'final-year', roleOther: 'Mechanical engineering student', programmer: 'some', interest: 'ai' }, ['AAP'], null],
   ['Fresher B.Com', { experience: '0', studyStage: 'job-hunting', programmer: 'no', interest: 'analytics' }, ['DABA', 'AAP'], null],
-  ['Career-break HR returnee', { experience: '3-5', role: 'hr', programmer: 'no', interest: 'ai', trigger: 'career-break' }, ['DABA', 'DSG-C'], 'hr-recruitment'],
+  // Experienced non-programmers get the Applied AI Practitioner Program first (Learnbay, 12 Oct 2026).
+  ['Career-break HR returnee', { experience: '3-5', role: 'hr', programmer: 'no', interest: 'ai', trigger: 'career-break' }, ['AAP'], 'hr-recruitment'],
   ['Manufacturing plant head', w('15+', 'Plant Head', 'manufacturing', 'no'), ['AIL'], null],
   ['Data analyst who codes daily (map: data pro → FDE first)', { experience: '6-9', role: 'data-analyst', programmer: 'yes', interest: 'ai' }, ['FDE-M', 'DSG-M', 'GAI-M'], null],
 ]

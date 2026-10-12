@@ -31,8 +31,6 @@ export type GuideHandle = {
 
 const SEEN_KEY = 'lcn_lumi_hi'
 const NUDGED_KEY = 'lcn_lumi_nudged'
-const IDLE_KEY = 'lcn_lumi_idle'
-const IDLE_MS = 120_000
 
 /** Where his answers can take the learner (from /api/guide). */
 const GO_ACTION: Record<string, GuideAction> = {
@@ -47,8 +45,9 @@ const GO_ACTION: Record<string, GuideAction> = {
   '/dashboard/profile': { id: '/dashboard/profile', label: 'Open my profile', icon: 'user' },
 }
 
-const flag = (key: string) => { try { return window.sessionStorage.getItem(key) === '1' } catch { return false } }
-const setFlag = (key: string) => { try { window.sessionStorage.setItem(key, '1') } catch { /* ignore */ } }
+// Once per learner on this device (not once per visit): Bruce never repeats a hello or a "leaving already?".
+const flag = (key: string) => { try { return window.localStorage.getItem(key) === '1' } catch { return false } }
+const setFlag = (key: string) => { try { window.localStorage.setItem(key, '1') } catch { /* ignore */ } }
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /**
@@ -86,6 +85,9 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
   const [gameMood, setGameMood] = useState<BruceMood | null>(null)
   const run = useRef(0)
   const closeTimer = useRef<number | null>(null)
+  // Set once the learner clicks, types or focuses anything in the pop-up: from then on it only closes when they close it.
+  const engaged = useRef(false)
+  const engage = () => { engaged.current = true; if (closeTimer.current) { window.clearTimeout(closeTimer.current); closeTimer.current = null } }
   const ratingDone = useRef<((sent: boolean) => void) | null>(null)
   const choiceDone = useRef<((id: string | null) => void) | null>(null)
   // Read at the moment of the nudge (the chat re-renders often; the listeners must not restart each time).
@@ -150,7 +152,8 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
     setShown(next.text)
     setTyping(false)
     speak(next.text, (t) => { if (id === run.current) setTalking(t) })
-    if (next.autoCloseMs) closeTimer.current = window.setTimeout(() => { if (id === run.current) close() }, next.autoCloseMs)
+    engaged.current = false
+    if (next.autoCloseMs) closeTimer.current = window.setTimeout(() => { if (id === run.current && !engaged.current) close() }, next.autoCloseMs)
   }, [close])
 
   const askRating = useCallback((ask: RatingAsk, text: string) => new Promise<boolean>((resolve) => {
@@ -226,7 +229,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
   /** His menu always ends with a little fun. */
   const withFun = (l: GuideLine): GuideLine => ({ ...l, actions: [...(l.actions ?? []), { id: 'bruce-games', label: 'Play a quick brain game', icon: 'bulb' }, { id: 'bruce-dance', label: `Make ${BOT_NAME} dance`, icon: 'music' }] })
 
-  // First visit this session: a short hello, so learners know he’s there. It waits until the counsellor has finished
+  // First visit ever (per learner, on this device): a short hello, so learners know he’s there. It waits until the counsellor has finished
   // their opening (never a pop-up over a half-typed message), and gives up waiting after about 30 seconds.
   const busyRef = useRef(busy)
   busyRef.current = busy
@@ -236,7 +239,11 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
     let tries = 0
     let t = 0
     const attempt = () => {
-      if ((busyRef.current?.() || lineRef.current) && tries++ < 28) { t = window.setTimeout(attempt, 1000); return }
+      // Never while the learner is typing (in the chat or anywhere else on the page).
+      const el = document.activeElement as HTMLInputElement | HTMLTextAreaElement | null
+      const typing = Boolean(el && /^(TEXTAREA|INPUT)$/.test(el.tagName) && el.value)
+      if ((busyRef.current?.() || lineRef.current || typing) && tries++ < 28) { t = window.setTimeout(attempt, 1000); return }
+      if (typing) return
       setFlag(seen)
       void say(helloRef.current?.() ?? { text: `Hi ${first}! I’m ${BOT_NAME}, your guide here. I’m always in the corner and in the menu, so tap me whenever you need help.` })
     }
@@ -244,28 +251,14 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
     return () => window.clearTimeout(t)
   }, [first, say, who])
 
-  // After a long pause: "are you still there?" (once per visit, never over another message or the tour).
-  useEffect(() => {
-    const fire = () => {
-      const key = `${IDLE_KEY}:${who}`
-      if (flag(key) || lineRef.current || quietRef.current?.()) return
-      const n = nudgeRef.current('idle')
-      if (!n) return
-      setFlag(key)
-      void say(n)
-    }
-    let idle = window.setTimeout(fire, IDLE_MS)
-    const active = () => { window.clearTimeout(idle); idle = window.setTimeout(fire, IDLE_MS) }
-    for (const ev of ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const) window.addEventListener(ev, active, { passive: true })
-    return () => {
-      window.clearTimeout(idle)
-      for (const ev of ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const) window.removeEventListener(ev, active)
-    }
-  }, [say, who])
+  // (No "are you still there?" after a pause: Bruce never pops up on his own beyond the first hello.)
 
-  // Leaving with the back button: one extra history entry catches it, and Bruce asks once before they go.
+  // Leaving with the back button: one extra history entry catches it, and Bruce asks once (ever, per learner) before
+  // they go; after that the back button simply works.
   // (Browsers don't allow a custom message when a tab is closed, so closing is left alone.)
   useEffect(() => {
+    // Already asked once: no extra history entry at all, so Back is the browser's own Back.
+    if (flag(`${NUDGED_KEY}:${who}`)) return
     const armed = () => Boolean((window.history.state as { lumiGuard?: boolean } | null)?.lumiGuard)
     const arm = () => {
       const st = (window.history.state ?? {}) as Record<string, unknown>
@@ -295,7 +288,8 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
     <div className={`rg ${line ? 'rg-open' : ''}`}>
       {line && (
         <div className="rg-overlay" onClick={close}>
-        <div className={`rg-bubble${line.game ? ' rg-game' : ''}`} role="dialog" aria-modal="true" aria-label={`${BOT_NAME}, your guide`} onClick={(e) => e.stopPropagation()}>
+        <div className={`rg-bubble${line.game ? ' rg-game' : ''}`} role="dialog" aria-modal="true" aria-label={`${BOT_NAME}, your guide`} onClick={(e) => e.stopPropagation()}
+          onPointerDown={engage} onFocusCapture={engage} onKeyDown={engage} onInputCapture={engage}>
           <button type="button" className="rg-x" aria-label="Close" onClick={close}><Icon name="x" size="1.1rem" /></button>
           {canSpeak() && (
             <div className="rg-voice-wrap">

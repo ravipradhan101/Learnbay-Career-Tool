@@ -3,7 +3,7 @@
 // catalogue's "fixes that apply to every brochure"). A failed answer is rewritten once by the AI with the reasons;
 // if it still fails, the exact answer computed from the data is used instead (lib/knowledge factsFor).
 
-import { CATALOGUE, CODE_TO_ID, catalogueProgram } from '@/config/catalogue'
+import { CATALOGUE, CODE_TO_ID, catalogueProgram, jobReadyLabel, jobReadyRange } from '@/config/catalogue'
 import { getProgram } from '@/config/programs'
 import { eligibility } from './lead-match'
 import type { Answers } from './questions'
@@ -81,7 +81,14 @@ export function checkAnswer(text: string, opts: { focus: string | null; allowed:
     // Durations: "N months" / "N weeks" next to exactly one program must be that program's duration.
     if (named.length === 1) {
       const p = named[0]
-      const months = [...s.matchAll(/\b(\d{1,2})\s?(?:-| )?months?\b/gi)].map((m) => Number(m[1]))
+      // "Job-ready in 5–6 months" is not the program's length: it is checked against the program's job-ready time.
+      // First "job-ready in 5–6 months", then "5–6 months to job-ready" (only when the two sit right next to each other).
+      const READY_AFTER = /job[- ]?ready\b[^.,;]{0,20}?\b(?:in|within|after)\s(?:about\s|around\s|roughly\s|just\s)?(\d{1,2})(?:\s?(?:–|-|to)\s?(\d{1,2}))?\s?months?/gi
+      const READY_BEFORE = /\b(\d{1,2})(?:\s?(?:–|-|to)\s?(\d{1,2}))?\s?months?\s(?:to|until|till)\s(?:be(?:come)?\s)?job[- ]?ready/gi
+      const ready = [...s.matchAll(READY_AFTER), ...s.replace(READY_AFTER, ' ').matchAll(READY_BEFORE)].flatMap((m) => [m[1], m[2]].filter(Boolean).map(Number))
+      const [lo, hi] = jobReadyRange(p.code)
+      if (ready.some((n) => n < lo || n > hi)) add('Wrong job-ready time', `${p.name}: learners are job-ready in about ${jobReadyLabel(p.code)}`)
+      const months = [...s.replace(READY_AFTER, ' ').replace(READY_BEFORE, ' ').matchAll(/\b(\d{1,2})\s?(?:-| )?months?\b/gi)].map((m) => Number(m[1]))
       const weeks = [...s.matchAll(/\b(\d{1,2})\s?weeks?\b/gi)].map((m) => Number(m[1]))
       // Only a statement of the program's length counts ("runs 6 months"), not a part of it ("12 weeks of DSA").
       const isLength = /\b(runs?|lasts?|long|duration|in total|overall|complete it in|finish it in|program is \d)\b/i.test(s)

@@ -24,7 +24,9 @@ import { PartnerLogos } from '../PartnerLogos'
 import { USPS } from '@/config/usps'
 import { track } from '@/lib/analytics'
 import { getJson, postJson } from '@/lib/client'
-import { COUNTRY_CODES, isValidPhone } from '@/lib/questions'
+import { suggestEmail } from '@/lib/email-suggest'
+import { isValidPhone } from '@/lib/questions'
+import { CountryPicker } from '../CountryPicker'
 import type { ReportCard } from '@/lib/report-card'
 import type { Booking, DaySlots } from '@/lib/sessions'
 import { getTool } from '@/lib/tools-meta'
@@ -129,6 +131,9 @@ function ContactCard({ answers, prefill, live, onDone }: { answers: object; pref
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
+  // Against bulk sign-ups by scripts: a field people never see (bots fill every field) and how long the form took.
+  const [website, setWebsite] = useState('')
+  const shownAt = useRef(Date.now())
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -142,7 +147,7 @@ function ContactCard({ answers, prefill, live, onDone }: { answers: object; pref
     let source: Record<string, string> = {}
     try { source = JSON.parse(window.sessionStorage.getItem(SOURCE_KEY) ?? '{}') } catch { /* ignore */ }
     const contact = { name, email, phoneCountry: cc, phone: digits, consent: true }
-    const res = await postJson('/api/onboarding', { answers, contact, source })
+    const res = await postJson('/api/onboarding', { answers, contact: { ...contact, website, tookMs: Date.now() - shownAt.current }, source })
     if (!res.ok) { setBusy(false); track('error', 'contact:server', { status: res.status }); return setError(res.error) }
     if (res.data.needsOtp) {
       const r = await postJson('/api/auth/request-otp', { email: String(res.data.email) })
@@ -169,16 +174,19 @@ function ContactCard({ answers, prefill, live, onDone }: { answers: object; pref
       <div className="tc-field">
         <label htmlFor="tc-email">Email</label>
         <input id="tc-email" type="email" inputMode="email" autoComplete="email" maxLength={254} value={email} readOnly={Boolean(prefill?.email)} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        {/* A typo in a big provider's name ("gmial.com"): one tap fixes it. */}
+        {!prefill?.email && /@[^@\s]+\.[a-z]{2,}$/i.test(email) && suggestEmail(email.trim()) && (
+          <button type="button" className="tc-email-fix" onClick={() => setEmail(suggestEmail(email.trim())!)}>Did you mean <b>{suggestEmail(email.trim())}</b>?</button>
+        )}
       </div>
       <div className="tc-field">
         <label htmlFor="tc-phone">Phone</label>
         <div className="tc-phone">
-          <select aria-label="Country code" value={cc} onChange={(e) => setCc(e.target.value)}>
-            {COUNTRY_CODES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
-          </select>
+          <CountryPicker value={cc} onChange={setCc} />
           <input id="tc-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s-]/g, ''))} placeholder="98765 43210" />
         </div>
       </div>
+      <input className="tc-hp" tabIndex={-1} autoComplete="off" aria-hidden="true" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} />
       <label className="tc-check">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
         <span>Send me my results and relevant learning updates by email and WhatsApp, and let Learnbay contact me.</span>
@@ -516,7 +524,9 @@ function SlotPicker({ days, current, onBooked, onCancel }: { days: DaySlots[]; c
     if (!res.ok && res.status === 409 && res.data.booking) return onBooked(res.data.booking as Booking)
     if (!res.ok) { track('error', current ? 'session_reschedule' : 'session_booking', { status: res.status }); return setError(res.error) }
     track('action', current ? 'session_rescheduled' : 'session_booked', { time, from: 'chat' })
-    onBooked(res.data.booking as Booking)
+    // Saved: show it as booked even if the reply carries no booking details (never fall back to the picker).
+    const when = typeof res.data.when === 'string' ? res.data.when : `${dateLabel(date)} at ${time}`
+    onBooked((res.data.booking as Booking | null) ?? { id: String(res.data.id ?? current?.id ?? ''), date, time, when, status: 'new', rescheduled: current ? current.rescheduled + 1 : 0 })
   }
 
   return (
@@ -534,7 +544,7 @@ function SlotPicker({ days, current, onBooked, onCancel }: { days: DaySlots[]; c
       </div>
       {day && (
         <>
-          <span className="tc-eyebrow">Pick a time (IST) · Senior Counsellors call between 10 AM and 8 PM</span>
+          <span className="tc-eyebrow">Pick a time (IST) · a 20-minute call, between 10 AM and 8 PM</span>
           <div className="tc-slots" role="radiogroup" aria-label="Time">
             {day.slots.map((s) => {
               const mine = current && current.date === day.date && current.time === s.time
@@ -659,9 +669,7 @@ function GuestCallCard() {
       <div className="tc-field">
         <label htmlFor="tc-call-phone">Phone</label>
         <div className="tc-phone">
-          <select aria-label="Country code" value={cc} onChange={(e) => setCc(e.target.value)}>
-            {COUNTRY_CODES.map((c) => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
-          </select>
+          <CountryPicker value={cc} onChange={setCc} />
           <input id="tc-call-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^\d\s-]/g, ''))} placeholder="98765 43210" />
         </div>
       </div>
@@ -1061,11 +1069,12 @@ function CurriculumCard({ interest, programId }: { interest: string; programId?:
     <div className="tc-card tc-curriculum tc-syllabus">
       <span className="tc-eyebrow">Syllabus · {p.name}</span>
       <div className="tc-cur-stats">
-        {cur.durationMonths && <span><Icon name="clock" size="0.95rem" /><b>{cur.durationMonths} months</b><small>{cur.totalWeeks} weeks</small></span>}
+        {cur.jobReady && <span className="tc-ready"><Icon name="target" size="0.95rem" /><b>{cur.jobReady}</b><small>to job-ready</small></span>}
         <span><Icon name="book" size="0.95rem" /><b>{modules.length}</b><small>modules</small></span>
         {projectCount > 0 && <span><Icon name="folder" size="0.95rem" /><b>{projectCount}+</b><small>module projects</small></span>}
         {cur.projects.length > 0 && <span><Icon name="target" size="0.95rem" /><b>{cur.projects.length}</b><small>capstone options</small></span>}
       </div>
+      {cur.durationMonths && <p className="tc-cur-length">Program length: {cur.durationMonths} months ({cur.totalWeeks} weeks).</p>}
       <ol className="tc-syl-list">
         {modules.map((m, n) => (
           <li key={m.name}>
@@ -1311,10 +1320,10 @@ function PathCard({ data }: { data: PathCardData }) {
           <li key={o.programId} className={`tc-path-row ${o.kind}${o.later ? ' later' : ''}`}>
             <span className="tc-path-step" aria-hidden="true">{n + 1}</span>
             <div className="tc-path-body">
-              <span className="tc-path-kind">{pathKindLabel(o.kind)}</span>
+              <span className="tc-path-kind">{n === 0 ? pathKindLabel(o.kind) : 'Or'}</span>
               <div className="tc-path-top"><b>{o.name}</b><span className="tc-path-fit">{o.fit}/10</span></div>
               <div className="tc-fit-bar" aria-hidden="true"><i style={{ width: `${o.fit * 10}%` }} /></div>
-              {n === 0 && <small>{o.why}</small>}
+              <small>{o.why}</small>
               {o.note && <small className="tc-path-note"><Icon name={o.later ? 'clock' : 'alert'} size="0.75rem" />{o.note}</small>}
             </div>
           </li>

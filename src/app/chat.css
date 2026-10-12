@@ -1956,3 +1956,32 @@
 }
 /* Reports: the last lines can always scroll clear of Bruce in the corner. */
 body:has(.rg-bruce) .ts-sheet-body { padding-bottom: 120px; }
+/* Syllabus card: time to job-ready is the highlight; the program's length is a quiet line */
+.tc-cur-stats .tc-ready { background: var(--v5-accent, #4338ca); color: #fff; }
+.tc-cur-stats .tc-ready b, .tc-cur-stats .tc-ready small, .tc-cur-stats .tc-ready svg { color: #fff; }
+.tc-cur-length { margin: 6px 0 0; font-size: 0.8rem; color: var(--tc-muted, #64748b); }
+
+/* ---------- Country code picker (searchable, every country) ---------- */
+.tc-phone { grid-template-columns: 108px 1fr; }
+.ccp { position: relative; }
+.ccp-btn { width: 100%; height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--tc-line, #e2e8f0); border-radius: 12px; background: #fff; font: inherit; font-size: 0.92rem; color: #0f172a; cursor: pointer; white-space: nowrap; }
+.ccp-btn:focus-visible, .ccp-btn[aria-expanded="true"] { border-color: #a5a8f5; box-shadow: 0 0 0 3px var(--tc-indigo-50, #eef2ff); outline: none; }
+.ccp-caret { margin-left: auto; color: #94a3b8; font-size: 0.75rem; }
+.ccp-pop { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; width: min(300px, calc(100vw - 48px)); background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18); padding: 8px; }
+.ccp-search { width: 100%; height: 40px; padding: 0 12px; border: 1px solid #e2e8f0; border-radius: 10px; font: inherit; font-size: 0.92rem; }
+.ccp-search:focus { outline: none; border-color: #a5a8f5; box-shadow: 0 0 0 3px #eef2ff; }
+.ccp-list { list-style: none; margin: 6px 0 0; padding: 0; max-height: 240px; overflow-y: auto; }
+.ccp-opt { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; color: #1e293b; }
+.ccp-opt.active { background: #f5f3ff; }
+.ccp-opt.on .ccp-name { font-weight: 700; color: #4338ca; }
+.ccp-code { color: #64748b; font-variant-numeric: tabular-nums; }
+.ccp-none { padding: 10px; color: #94a3b8; font-size: 0.88rem; }
+.tc-email-fix { justify-self: start; margin-top: 4px; border: none; background: #fff7ed; color: #9a3412; border-radius: 8px; padding: 5px 10px; font: inherit; font-size: 0.82rem; cursor: pointer; text-align: left; }
+.tc-email-fix b { color: #7c2d12; }
+.tc-hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+/* 30-minute slots (20 a day): compact, 3 to a row on phones, 4 or more on wider screens */
+.tc-booking .tc-slots { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)) !important; gap: 6px !important; }
+.tc-booking .tc-slot { padding: 7px 4px !important; min-height: 0 !important; }
+.tc-booking .tc-slot b { font-size: 0.86rem; }
+.tc-booking .tc-slot small { font-size: 0.72rem; }
+@media (max-width: 420px) { .tc-booking .tc-slots { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
