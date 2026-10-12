@@ -1954,3 +1954,5 @@
   .tc-rating-count, .tc-online { display: none; }
   .tc-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
+/* Reports: the last lines can always scroll clear of Bruce in the corner. */
+body:has(.rg-bruce) .ts-sheet-body { padding-bottom: 120px; }

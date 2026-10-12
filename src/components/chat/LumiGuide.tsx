@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Icon, type IconName } from '../Icon'
+import dynamic from 'next/dynamic'
 import { Avatar, type BruceMood } from './Avatar'
-import { BruceGames, type CodeLevel } from './BruceGames'
+import type { CodeLevel } from './BruceGames'
 import { track } from '@/lib/analytics'
 import { postJson } from '@/lib/client'
 import { canSpeak, nextVoice, setVoiceOn, speak, stopSpeaking, voiceOn, VOICE_EVENT } from '@/lib/bruce-voice'
 import { BOT_NAME, GUIDE_TITLE } from '@/lib/counsellors'
+
+// The games load only when someone opens them (not with every studio page).
+const BruceGames = dynamic(() => import('./BruceGames').then((m) => m.BruceGames), { ssr: false, loading: () => <p className="bg-intro">Setting up the games…</p> })
 
 export type GuideAction = { id: string; label: string; icon?: IconName; primary?: boolean }
 /** The feedback form Bruce shows under his message. */
@@ -29,7 +33,6 @@ const SEEN_KEY = 'lcn_lumi_hi'
 const NUDGED_KEY = 'lcn_lumi_nudged'
 const IDLE_KEY = 'lcn_lumi_idle'
 const IDLE_MS = 120_000
-const CHATTER_KEY = 'lcn_bruce_chatter'
 
 /** Where his answers can take the learner (from /api/guide). */
 const GO_ACTION: Record<string, GuideAction> = {
@@ -349,7 +352,7 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
         </div>
         </div>
       )}
-      <BruceFace open={Boolean(line)} grow={grow} who={who} first={first} quiet={() => Boolean(quietRef.current?.() || busyRef.current?.())} onOpen={() => (line ? close() : void say(withFun(help())))} />
+      <BruceFace open={Boolean(line)} grow={grow} first={first} onOpen={() => (line ? close() : void say(withFun(help())))} />
     </div>
   )
 }
@@ -367,32 +370,19 @@ const WAKE_UPS = [
 ]
 const DANCES = ['Watch my moves! A little sapling shuffle, just for you!', 'Leaf to the left, leaf to the right… I’ve got the groove!', 'Dancing for your progress! Every step counts, and so does every wiggle.']
 const GROW_LINES = [
-  (n: string) => `Look, ${n}! I grew a new leaf! You finished a step, so we both grew a little.`,
-  (n: string) => `Wow, I’m getting taller! That’s your progress, ${n}. Keep going!`,
-  (n: string) => `A flower! I bloomed, ${n}! You’ve done so much already. I’m so proud of us.`,
+  (n: string) => `I grew a new leaf! Nice progress, ${n}.`,
+  (n: string) => `I'm getting taller! Keep going, ${n}.`,
+  (n: string) => `I bloomed! Great work, ${n}.`,
 ]
-/** Little things he says now and then (a few times a visit, never over anything else). */
-const CHATTER = [
-  (n: string) => `Psst, ${n}! Fun fact: a tree grows a little every day, and so do skills. Small steps really add up.`,
-  () => 'Did you know? Nobody learns everything at once. Every expert started with one skill, then the next.',
-  (n: string) => `You’re doing great, ${n}. Taking time to plan your career is already a big step.`,
-  () => 'Tip from a tiny tree: your counsellor in the chat loves questions. There are no silly ones!',
-  () => 'Stretch break! Roll your shoulders, sip some water. I’ll wait right here.',
-  () => 'Fun fact: trees talk to each other through their roots. I talk to you through this little bubble!',
-  (n: string) => `Hey ${n}, if anything feels confusing, tap me and type your question. I love helping.`,
-  (n: string) => `Need a little break, ${n}? Tap me for a quick brain game: maths, logic, system design or Python!`,
-]
-const CHATTER_FIRST_MS = 90_000
-const CHATTER_EVERY_MS = 150_000
-const CHATTER_MAX = 3
 type Bubble = { text: string; ask?: boolean }
 
 /**
- * Bruce in his corner. He sits there with his eyes open, and now and then dozes off. One tap: he asks what you need.
+ * Bruce in his corner. He sits there with his eyes open, and now and then dozes off. He never starts small talk:
+ * he speaks when the learner taps, asks or plays, and when they finish a step (he grows). One tap: he asks what you need.
  * Several quick taps: he giggles. Drag and throw him: he flies, falls, says "Ouch!", then offers help; with no answer
  * in 5 seconds he goes back to his place. Tap him while he dozes: "I'm awake! I wasn't sleeping…", then he helps.
  */
-function BruceFace({ open, onOpen, grow, who, first, quiet }: { open: boolean; onOpen: () => void; grow: number; who: string; first: string; quiet: () => boolean }) {
+function BruceFace({ open, onOpen, grow, first }: { open: boolean; onOpen: () => void; grow: number; first: string }) {
   const [mood, setMood] = useState<BruceMood>('idle')
   const [talking, setTalking] = useState(false)
   const [bubble, setBubble] = useState<Bubble | null>(null)
@@ -457,27 +447,6 @@ function BruceFace({ open, onOpen, grow, who, first, quiet }: { open: boolean; o
     later(() => say(GROW_LINES[stage - 1](first), 'dance', 4200, () => setMood('idle')), 1200)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage])
-
-  // Now and then he says something friendly or fun (a few times a visit; never while anything else is going on).
-  useEffect(() => {
-    const key = `${CHATTER_KEY}:${who}`
-    const count = () => { try { return Number(window.sessionStorage.getItem(key) ?? 0) } catch { return CHATTER_MAX } }
-    let t = 0
-    const tick = () => {
-      const n = count()
-      if (n >= CHATTER_MAX) return
-      const free = !open && !awayRef.current && !flying.current && moodRef.current === 'idle' && !document.hidden && !quiet() && !document.querySelector('[role="dialog"]')
-      if (free) {
-        try { window.sessionStorage.setItem(key, String(n + 1)) } catch { /* ignore */ }
-        track('action', 'bruce_chatter')
-        say(CHATTER[Math.floor(Math.random() * CHATTER.length)](first), 'wave', 6500, () => setMood('idle'))
-      }
-      t = window.setTimeout(tick, free ? CHATTER_EVERY_MS : 30_000)
-    }
-    t = window.setTimeout(tick, CHATTER_FIRST_MS)
-    return () => window.clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, who, first])
 
   /** One tap: help (waking him first if he dozed off, or after a fall). */
   const primary = () => {

@@ -118,7 +118,7 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
     if (!el) return
     el.style.height = 'auto'
     el.style.height = `${Math.min(el.scrollHeight, 140)}px`
-  }, [text])
+  }, [text, shortHint])
 
   return (
     <section className="tc" aria-label={`Chat with ${nameOf(who)}, ${isBot ? 'your guide' : 'your career counsellor'}`}>
@@ -161,7 +161,8 @@ export function ChatWindow({ chat, onSend, onCall, headerRight, footer, onLink, 
       )}
       <div className="tc-body-wrap">
       <div className="tc-body" ref={bodyRef} aria-live="polite" onScroll={onScroll}>
-        {items.map((item, i) => <Row key={item.id} item={item} prev={items[i - 1]} next={items[i + 1]} chat={chat} onLink={onLink} onWho={openProfile} />)}
+        {/* A divider straight after another (a topic opened and left with nothing said) is not shown. */}
+        {items.map((item, i) => (item.kind === 'divider' && items[i + 1]?.kind === 'divider' ? null : <Row key={item.id} item={item} prev={items[i - 1]} next={items[i + 1]} chat={chat} onLink={onLink} onWho={openProfile} />))}
         {/* Never an empty box while the chat loads or the first line is on its way: typing dots from the first moment. */}
         {!items.length && <Row item={{ id: 'loading', kind: 'typing', by: who } as Item} chat={chat} onLink={onLink} onWho={openProfile} />}
 

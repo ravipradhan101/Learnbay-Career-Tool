@@ -517,7 +517,17 @@ export function useChat({ storageKey, signedIn, speaker, threadId = null, onProf
           replace(id, { id, at: Date.now(), kind: 'bot', by: whoRef.current, text, action: opts?.action ?? null })
         } else { lastSaid.current = text; add({ id, at: Date.now(), kind: 'bot', text, action: opts?.action ?? null }) }
       },
-      divider(text) { alive(); add({ id: newId(), at: Date.now(), kind: 'divider', text }) },
+      // A new topic right after another with nothing said in between replaces it (opening a page and leaving it
+      // again never stacks up empty dividers).
+      divider(text) {
+        alive()
+        const item: Item = { id: newId(), at: Date.now(), kind: 'divider', text }
+        setItems((list) => {
+          let i = list.length - 1
+          while (i >= 0 && (list[i].kind === 'typing' || list[i].kind === 'event')) i--
+          return i >= 0 && list[i].kind === 'divider' ? [...list.slice(0, i), item, ...list.slice(i + 1)] : [...list, item]
+        })
+      },
       card(card) { alive(); const id = newId(); add({ id, at: Date.now(), kind: 'card', card }); return id },
       async live<T>(card: Card) {
         alive()

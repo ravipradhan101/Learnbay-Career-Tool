@@ -2,13 +2,14 @@
 
 // Bruce's voice: the browser's own speech (no downloads, no cost per line). Off until the learner turns it on (the
 // choice is remembered on this device); every line Bruce says is spoken while it is on.
-// Voices differ a lot between devices, so the best one is picked automatically: the natural ("Online (Natural)",
-// neural, Google) voices first, and Edge's natural child voice (Ana) above all, which suits a little sapling. The
-// learner can switch to another voice with "Change voice" (remembered too). Lines are spoken a sentence at a time,
-// which sounds smoother and avoids Chrome cutting off long speech.
+// Bruce has a male voice. Voices differ a lot between devices, so the best male English voice is picked
+// automatically: natural ("Online (Natural)", neural) voices first, Indian English first (Edge: Prabhat; then Guy,
+// Andrew, Brian…; Chrome: Google UK English Male). "Change voice" moves through the other male voices (remembered).
+// Lines are spoken a sentence at a time, which sounds smoother and avoids Chrome cutting off long speech.
 
 const KEY = 'lcn_bruce_voice'
-const VOICE_KEY = 'lcn_bruce_voice_name'
+// A new key: choices saved before Bruce had a male voice (e.g. the child voice) are not reused.
+const VOICE_KEY = 'lcn_bruce_voice_male'
 export const VOICE_EVENT = 'lcn:bruce-voice'
 
 export const canSpeak = () => typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'
@@ -29,20 +30,25 @@ export function setVoiceOn(on: boolean) {
 }
 
 const natural = (v: SpeechSynthesisVoice) => /natural|neural|online/i.test(v.name)
-/** Higher is better: natural voices first (Edge's child voice Ana top), then Google's, Indian/British/US English. */
+const MALE = /\b(male|prabhat|guy|andrew|brian|christopher|eric|roger|steffan|davis|jason|tony|ryan|thomas|william|liam|connor|mitchell|neil|ravi|david|mark|george|daniel|rishi|james|alex|fred|oliver|arthur|aaron|reed|ralph)\b/i
+const FEMALE = /\b(female|ana|aria|jenny|michelle|emma|ava|libby|sonia|neerja|heera|zira|hazel|susan|samantha|karen|moira|tessa|natasha|clara|emily|sara|jane|nancy|kate|victoria|fiona|serena|veena|isha)\b/i
+const isMale = (v: SpeechSynthesisVoice) => MALE.test(v.name) && !FEMALE.test(v.name)
+/** Higher is better: male first, then natural voices, then Indian/British/US English. */
 function score(v: SpeechSynthesisVoice) {
-  return (/\bana\b/i.test(v.name) && natural(v) ? 40 : 0)
+  return (isMale(v) ? 40 : 0)
     + (natural(v) ? 20 : 0)
-    + (/google/i.test(v.name) ? 12 : 0)
+    + (/google/i.test(v.name) ? 8 : 0)
     + (/en[-_]IN/i.test(v.lang) ? 4 : /en[-_]GB/i.test(v.lang) ? 3 : /en[-_]US/i.test(v.lang) ? 2 : 0)
     // Old desktop voices sound robotic.
-    - (/zira|david|mark|hazel|heera|ravi|george|susan/i.test(v.name) && !natural(v) ? 6 : 0)
+    - (/david|mark|ravi|george/i.test(v.name) && !natural(v) ? 6 : 0)
 }
 
-/** The English voices worth offering, best first (at most 6). */
+/** The English voices worth offering, best first (at most 6): only male voices when the device has any. */
 export function voiceOptions(): SpeechSynthesisVoice[] {
   if (!canSpeak()) return []
-  return window.speechSynthesis.getVoices().filter((v) => /^en[-_]/i.test(v.lang)).sort((a, b) => score(b) - score(a)).slice(0, 6)
+  const en = window.speechSynthesis.getVoices().filter((v) => /^en[-_]/i.test(v.lang)).sort((a, b) => score(b) - score(a))
+  const male = en.filter(isMale)
+  return (male.length ? male : en).slice(0, 6)
 }
 
 function pickVoice(): SpeechSynthesisVoice | null {
@@ -100,9 +106,9 @@ export function speak(text: string, onTalk?: (talking: boolean) => void, force =
     parts.forEach((part, i) => {
       const u = new SpeechSynthesisUtterance(part)
       if (v) { u.voice = v; u.lang = v.lang }
-      // A young, bright voice: a child voice as it is, natural voices lifted a little, robotic ones a little more.
-      u.pitch = v && /\bana\b/i.test(v.name) ? 1.05 : v && (natural(v) || /google/i.test(v.name)) ? 1.2 : 1.35
-      u.rate = 0.98
+      // A warm, friendly male voice: natural voices as they are, the others a touch brighter.
+      u.pitch = v && natural(v) ? 1.0 : 1.08
+      u.rate = 1.0
       u.volume = 1
       if (i === 0) u.onstart = () => { if (id === current) onTalk?.(true) }
       if (i === parts.length - 1) u.onend = () => { if (id === current) onTalk?.(false) }

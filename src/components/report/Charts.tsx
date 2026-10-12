@@ -25,7 +25,8 @@ export function KpiTiles({ items }: { items: Kpi[] }) {
       {items.map((k) => (
         <div key={k.label} className={`kpi ${k.tone ?? 'primary'}`}>
           <span className="kpi-label">{k.label}</span>
-          <b className="kpi-value">{k.value}</b>
+          {/* Words ("Product companies") sit smaller than numbers, so they wrap between words, never mid-word. */}
+          <b className={`kpi-value${String(k.value).length > 12 && !/^[₹+\-\d]/.test(String(k.value)) ? ' kpi-words' : ''}`}>{k.value}</b>
           {k.sub && <span className="kpi-sub">{k.sub}</span>}
         </div>
       ))}
