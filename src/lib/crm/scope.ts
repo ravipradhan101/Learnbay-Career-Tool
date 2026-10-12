@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { query } from '../db'
+import { query, queryOne } from '../db'
 import type { StaffUser } from '../admin-auth'
 import type { StaffRole } from './roles'
 
@@ -89,4 +89,13 @@ export function canManage(me: StaffUser, target: StaffRow, dir: StaffRow[]): boo
 export function canSeeLead(me: StaffUser, ownerId: string | null, dir: StaffRow[]): boolean {
   if (me.role === 'admin') return true
   return ownerId !== null && visibleIds(me, dir).has(ownerId)
+}
+
+/**
+ * `canSeeLead`, plus anyone who has an open call or meeting on the lead (e.g. a round-robin ISM hosting another team's
+ * learner): they can open it to do that work and log the outcome. Access ends once their task is closed.
+ */
+export async function mayOpenLead(me: StaffUser, userId: string, ownerId: string | null, dir: StaffRow[]): Promise<boolean> {
+  if (canSeeLead(me, ownerId, dir)) return true
+  return Boolean(await queryOne(`SELECT 1 FROM lead_tasks WHERE user_id = $1 AND owner_id = $2 AND status = 'open' LIMIT 1`, [userId, me.id]))
 }

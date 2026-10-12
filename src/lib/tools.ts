@@ -1,5 +1,4 @@
-import { programForLearner, routeFor } from './segments'
-import { personaById } from '@/config/catalogue'
+import { programForLearner } from './segments'
 import { ALL_PROBES, ALL_TRIGGERS, PROBES, SEGMENT_LABEL, STUDY_STAGES, segmentOf } from './segments'
 import { PROGRAMS, programsForInterest, resolveProgramId } from '@/config/programs'
 import { PROGRAM_DETAILS } from '@/config/program-details'
@@ -58,10 +57,10 @@ function programCatalog(a: Answers): string {
   const preferred = programsForInterest(a.interest)
   const syllabus = chosen ? PROGRAM_DETAILS[chosen.id]?.moduleDetails.map((m) => `  - ${m.name}: ${m.topics.join('; ')}${m.projects.length ? ` (projects: ${m.projects.join('; ')})` : ''}`).join('\n') : ''
   const d = chosen ? PROGRAM_DETAILS[chosen.id] : undefined
-  const persona = personaById(routeFor(a).persona)
-  const later = persona?.upsell && persona.upsell !== chosen?.code ? PROGRAMS.find((p) => p.code === persona.upsell) : undefined
-  const length = d?.durationMonths ? ` It runs ${d.durationMonths} months (${d.totalWeeks} weeks).` : ''
-  return `${chosen ? `The learner's counsellor recommends ${chosen.name} (programId ${chosen.id}). Use programId ${chosen.id}, and build the plan, skills and projects around what that program teaches.${length}${later ? ` Learnbay's next step for them after it: ${later.name} (mention it only as a later step).` : ''}\nIts syllabus (2026), module by module:\n${syllabus}\n` : ''}` +
+  // One program only: learners are never shown a second program (no "next step" upsell) in their reports.
+  const length = d?.durationMonths ? ` The course runs ${d.durationMonths} months (${d.totalWeeks} weeks).` : ''
+  const ready = chosen ? ` Learners are usually job-ready in about ${chosen.jobReady}, before the course ends: that is the only job-ready time to state, and never in the same sentence as the course length.` : ''
+  return `${chosen ? `The learner's counsellor recommends ${chosen.name} (programId ${chosen.id}). Use programId ${chosen.id}, and build the plan, skills and projects around what that program teaches. Mention no other Learnbay program.${length}${ready}\nIts syllabus (2026), module by module:\n${syllabus}\n` : ''}` +
     `Learnbay program catalog (prefer these for their interest: ${preferred.map((p) => p.id).join(', ')}):\n` +
     PROGRAMS.map((p) => `- ${p.id}: ${p.name}. ${p.summary} Best for: ${p.bestFor}.`).join('\n')
 }
@@ -207,7 +206,7 @@ const SCHEMAS: Record<ToolId, Record<string, unknown>> = {
     properties: {
       targetRole: str('The target role.'),
       summary: str('2 sentences on the plan.'),
-      durationMonths: int('Months to be job-ready at their weekly hours.', 3, 18),
+      durationMonths: int('Months the recommended program\'s syllabus takes (the course length; job-readiness comes earlier).', 3, 18),
       weeklyHours: str('e.g. "8-10 hours/week".'),
       phases: {
         type: 'array', minItems: 4, maxItems: 4,

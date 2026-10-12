@@ -6,6 +6,7 @@ import { SESSION_COOKIE, type User } from './auth'
 import { sha256 } from './security'
 import { linkMatches } from './links'
 import type { Answers } from './questions'
+import { slotPassed } from './sessions'
 import type { ToolId } from './tools-meta'
 import type { ResumeAnalysis, ToolResultMap } from './tool-types'
 
@@ -103,6 +104,7 @@ export const getStudio = cache(async (): Promise<StudioData> => {
   // An emailed link meant for a different learner: never show or build this account's reports under it.
   if (!linkMatches(user.id, linkFor)) redirect(`/account/switch?next=${encodeURIComponent(safePath)}`)
   if (!answers || !answers.interest || !user.phone) redirect('/start')
-  // hasSession: an upcoming counselling call is booked (after that day passes, they can book another).
-  return { user, answers, tools: tools ?? [], hasSession: Boolean(latest_session), latestSession: latest_session }
+  // hasSession: an upcoming counselling call is booked. Once today's call is over, they can book another.
+  const upcoming = latest_session && !(latest_session.preferred_date && latest_session.preferred_time && slotPassed(latest_session.preferred_date, latest_session.preferred_time)) ? latest_session : null
+  return { user, answers, tools: tools ?? [], hasSession: Boolean(upcoming), latestSession: upcoming }
 })

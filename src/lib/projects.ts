@@ -78,13 +78,15 @@ const THEMES: { learner: RegExp; project: RegExp }[] = [
   { learner: /simulat|digital twin|virtual commission|cad|cae/i, project: /simulat|digital twin|cad|virtual|optimi[sz]/i },
   { learner: /automotive|vehicle|car\b|auto\b|oem/i, project: /vehicle|automotive|car\b|diagnos/i },
   { learner: /supply|logistic|warehouse|procure|inventory/i, project: /supply|logistic|warehouse|inventory|forecast|freight|procure/i },
-  { learner: /bank|credit|loan|risk|fraud|insur|financ/i, project: /bank|credit|loan|risk|fraud|insur|claim|financ/i },
+  // (Not "risk" on its own: every industry manages risk, so a healthcare learner's "risk" is no banking signal.)
+  { learner: /bank|credit|loan|fraud|insur|fintech|nbfc|lending|financ/i, project: /bank|credit|loan|fraud|insur|claim|financ/i },
   { learner: /hospital|clinic|pharma|health|medical|patient/i, project: /hospital|clinic|pharma|health|medical|patient|claim/i },
   { learner: /retail|e-?commerce|store|fmcg|merchandis/i, project: /retail|e-?commerce|store|product listing|recommend|basket|sku/i },
   { learner: /telecom|network|noc|bss|oss/i, project: /telecom|network|churn|outage|noc/i },
   { learner: /hr\b|recruit|talent|people ops/i, project: /hr\b|recruit|resume|talent|attrition|employee/i },
   { learner: /market|brand|campaign|seo|content/i, project: /market|campaign|brand|seo|content|ad\b/i },
-  { learner: /sales|crm|lead|account manag/i, project: /sales|crm|lead|pipeline|deal/i },
+  // Whole words: "Team Lead" is no sales signal, and a data or CI "pipeline" is no sales project.
+  { learner: /\bsales\b|\bcrm\b|lead gen|\bleads\b|account manag/i, project: /\bsales\b|\bcrm\b|lead scor|lead gen|sales pipeline|\bdeals?\b/i },
   { learner: /support|service desk|helpdesk|ticket/i, project: /support|ticket|helpdesk|service desk/i },
 ]
 

@@ -12,7 +12,7 @@ import { leadDetail } from '@/lib/crm/data'
 import { isUuid } from '@/lib/crm/guard'
 import { leadInsights } from '@/lib/crm/insights'
 import { EMAIL_TEMPLATES } from '@/lib/crm/lead-actions'
-import { assignableIds, byId, canSeeLead, staffDirectory } from '@/lib/crm/scope'
+import { assignableIds, byId, mayOpenLead, staffDirectory } from '@/lib/crm/scope'
 import { SOURCE_LABEL } from '@/lib/crm/roles'
 import { syncTasks } from '@/lib/crm/tasks'
 import {
@@ -33,7 +33,7 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
   await syncTasks()
   const [d, dir] = await Promise.all([leadDetail(id), staffDirectory()])
   // A lead outside your scope looks exactly like one that does not exist.
-  if (!d || !canSeeLead(me, d.user.owner_id, dir)) notFound()
+  if (!d || !(await mayOpenLead(me, id, d.user.owner_id, dir))) notFound()
   const [intel, external] = await Promise.all([
     leadInsights(id),
     queryOne<{ crm_id: string | null; existed: boolean; matched_by: string | null }>(`SELECT crm_id, existed, matched_by FROM lead_external WHERE user_id = $1`, [id]),

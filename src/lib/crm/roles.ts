@@ -3,7 +3,7 @@
 export type StaffRole = 'admin' | 'manager' | 'associate' | 'ism'
 export type ActorKind = StaffRole | 'system' | 'user'
 
-export const ROLE_LABEL: Record<StaffRole, string> = { admin: 'Admin', manager: 'Manager', associate: 'Associate', ism: 'ISM' }
+export const ROLE_LABEL: Record<StaffRole, string> = { admin: 'Admin', manager: 'BM', associate: 'ABM', ism: 'ISM' }
 export const ACTOR_LABEL: Record<ActorKind, string> = { ...ROLE_LABEL, system: 'System', user: 'Learner' }
 export const ROLE_ORDER: StaffRole[] = ['admin', 'manager', 'associate', 'ism']
 

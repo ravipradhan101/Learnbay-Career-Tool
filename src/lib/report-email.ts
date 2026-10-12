@@ -9,7 +9,7 @@ import { currentCtcRange } from './tools'
 import type { Answers } from './questions'
 import type { ToolMeta } from './tools-meta'
 import type { RoadmapResult, SalaryResult, SkillGapResult, ToolResultMap } from './tool-types'
-import { focusFor, moduleFor, weeksLabel } from './plan'
+import { focusFor } from './plan'
 import { capstonesFor, type Capstone } from './capstones'
 import { withCurriculum } from './curriculum-phases'
 import { curriculumOf } from './roles'
@@ -60,7 +60,7 @@ function chartBlocks(tool: ToolMeta['id'], data: ToolResultMap[ToolMeta['id']], 
   const totalWeeks = Math.max(4, Math.round(r.durationMonths * 4.3))
   const per = totalWeeks / Math.max(1, r.phases.length)
   return [
-    { type: 'h', text: 'Your plan at a glance' },
+    { type: 'h', text: 'Your plan, phase by phase' },
     { type: 'timeline', total: totalWeeks, unit: 'Week', rows: r.phases.map((p, i) => {
       const [a, b] = weekRange(p.weeks, [Math.round(i * per) + 1, Math.round((i + 1) * per)])
       return { label: p.title, from: a, to: Math.min(b, totalWeeks), note: p.weeks }
@@ -88,7 +88,8 @@ function detailBlocks(tool: ToolMeta['id'], data: ToolResultMap[ToolMeta['id']])
     out.push({ type: 'small', text: r.note || 'Indicative market ranges, not offers or guarantees.' })
   } else {
     const r = data as RoadmapResult
-    r.phases.forEach((p, i) => section(`Phase ${i + 1}: ${p.title} (${p.weeks})`, [p.focus, `Topics: ${p.topics.join(', ')}`, `Milestone: ${p.milestone}`, ...(p.deliverables ?? []).map((d) => `You will have: ${d}`)]))
+    // The plan, phase by phase, without the syllabus (modules and topics live on the program page).
+    r.phases.forEach((p, i) => section(`Phase ${i + 1}: ${p.title} (${p.weeks})`, [p.focus, `Milestone: ${p.milestone}`, ...(p.deliverables ?? []).map((d) => `You will have: ${d}`)]))
     section('Monthly checkpoints', (r.monthlyCheckpoints ?? []).map((m) => `Month ${m.month}: ${m.goal}`))
     section('Portfolio projects', r.projects.map((p) => `${p.title} (${p.difficulty}): ${p.description}`))
     section('Where plans stall, and what to do', (r.risks ?? []).map((k) => `${k.risk}: ${k.mitigation}`))
@@ -97,22 +98,17 @@ function detailBlocks(tool: ToolMeta['id'], data: ToolResultMap[ToolMeta['id']])
   return out
 }
 
-/** "Your plan with Learnbay" in the PDF: who they are, what to focus on and the module that teaches it, certificates, projects. */
+/** "Your plan with Learnbay" in the PDF: who they are, what to focus on, certificates, projects (no syllabus). */
 function planBlocks(opts: Opts, programId: string, programName: string): PdfBlock[] {
   const a = opts.answers
   const course = curriculumOf(programId)
   const about = [roleLabel(a), experienceLabel(a), domainLabel(a), targetRoleLabel(a) !== 'Not specified' ? `aiming for ${targetRoleLabel(a)}` : ''].filter((x) => x && x !== 'Not specified')
   const focus = focusFor(opts.meta.id, opts.data).slice(0, 4)
-  const used = new Set<string>()
   return [
     { type: 'h', text: `Your plan with Learnbay: ${programName}` },
     ...(about.length ? [{ type: 'small', text: `About you: ${about.join(' · ')}` } as PdfBlock] : []),
-    ...focus.map((f, i): PdfBlock => {
-      const m = moduleFor(f, course.moduleDetails, used)
-      if (m) used.add(m.name)
-      return { type: 'bullet', text: `${i + 1}. ${f}${m ? `: learnt in "${m.name}"${/\d/.test(m.weeks) ? ` (${weeksLabel(m.weeks)})` : ''}` : ': covered in your plan with your Senior Counsellor'}` }
-    }),
-    ...(course.durationMonths ? [{ type: 'bullet', text: `Program length: ${course.durationMonths} months (${course.totalWeeks} weeks), ${course.moduleDetails.length} modules.` } as PdfBlock] : []),
+    // What to focus on, in order (no syllabus or module names: the program page has the syllabus).
+    ...focus.map((f, i): PdfBlock => ({ type: 'bullet', text: `${i + 1}. ${f}` })),
     ...(course.certifications.length ? [{ type: 'bullet', text: `Certificates: ${course.certifications.join(' · ')}` } as PdfBlock] : []),
     ...(opts.capstones ?? []).map((x): PdfBlock => ({ type: 'bullet', text: `Capstone (${x.label.replace(/ · .*$/, '')}): ${x.title}. ${x.objective}${x.outcome ? ` You'll achieve: ${x.outcome}` : ''}` })),
   ]
@@ -134,8 +130,9 @@ export function toolReportPdf(opts: Opts): Buffer {
       text: `Book a free call with a Learnbay Senior Career Counsellor. Bring this report: you will leave knowing which role to target, what to learn first, and whether the ${p.name} fits you.`,
       button: { label: 'Book my free 1:1', url: learnerUrl(opts.userId, '/dashboard/sessions') },
     },
-    ...detailBlocks(opts.meta.id, opts.data),
+    // Their plan with Learnbay comes before the details.
     ...planBlocks(opts, p.id, p.name),
+    ...detailBlocks(opts.meta.id, opts.data),
     { type: 'h', text: `How Learnbay helps you get there` },
     ...(['customisation', 'domain', 'projects', 'mentors', 'certification', 'placement'] as const).map((id): PdfBlock => ({ type: 'bullet', text: `${USPS[id].title}: ${USPS[id].short}` })),
     { type: 'bullet', text: `Program details: ${p.url}` },
@@ -204,19 +201,21 @@ ${k.sub ? `<div style="font-size:11px;color:#64748b">${escapeHtml(k.sub)}</div>`
   const buttons = `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:18px 0 6px"><tr>
 <td style="padding:0 0 8px"><a href="${escapeHtml(sessionUrl)}" style="display:inline-block;background:#f97316;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px;font-size:14px">Book a free counselling call</a></td>
 </tr></table>`
+  // Salary figures are always indicative, in the email as in the report and PDF.
+  const salaryNote = opts.meta.id === 'salary' ? 'Salary figures are indicative market ranges, not offers or guarantees.' : ''
   const bodyHtml = `
 <div style="background:#eef2ff;border-radius:12px;padding:16px 18px;margin:4px 0">
 <span style="font-size:34px;font-weight:800;color:#4338ca;line-height:1">${escapeHtml(s.headline.value)}</span>
 <span style="font-size:14px;font-weight:700;color:#475569;margin-left:6px">${escapeHtml(s.headline.label.replace(/^\/100 /, 'out of 100 · '))}</span>
 <p style="margin:8px 0 0;font-size:14px;color:#334155;line-height:1.55">${escapeHtml(s.headline.note)}</p></div>
 ${kpiHtml}${miniChartHtml(opts.meta.id, opts.data)}${actionsHtml}${buttons}
-<p style="margin:10px 0 0;font-size:13px;color:#475569">📎 Your full report, with every detail and chart, is attached as a PDF.</p>
+<p style="margin:10px 0 0;font-size:13px;color:#475569">📎 Your full report, with every detail and chart, is attached as a PDF.</p>${salaryNote ? `<p style="margin:6px 0 0;font-size:12px;color:#64748b">${salaryNote}</p>` : ''}
 <p style="margin:14px 0 0;font-size:13px;color:#475569;border-top:1px solid #e2e8f0;padding-top:12px"><b style="color:#0f172a">Recommended for you:</b> ${escapeHtml(program.name)} · ${escapeHtml(program.features.join(' · '))}</p>`
   const bodyText = [
     `${s.headline.value} ${s.headline.label.replace(/^\/100 /, 'out of 100, ')}. ${s.headline.note}`,
     '', ...s.kpis.map((k) => `${k.label}: ${k.value}${k.sub ? ` (${k.sub})` : ''}`),
     '', `Your next ${s.actions.length} moves:`, ...s.actions.map((a, i) => `${i + 1}. ${a.title}${a.detail ? ` - ${a.detail}` : ''}`),
-    '', 'Your full report is attached as a PDF.', `Book a free counselling call: ${sessionUrl}`,
+    '', 'Your full report is attached as a PDF.', ...(salaryNote ? [salaryNote] : []), `Book a free counselling call: ${sessionUrl}`,
   ].join('\n')
 
   return {

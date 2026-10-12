@@ -26,9 +26,25 @@ export function addWorkingHours(from: Date, hours = CALL_REQUEST_HOURS): Date {
   return new Date((t + left) * 60_000)
 }
 
-/** SQL: is task `t` a missed call? (still open after its deadline, or closed only after it). */
+/**
+ * SQL: is task `t` a missed call? (still open after its deadline, or closed only after it). A call attempt logged in
+ * time ("No answer", "Busy") counts as attended to, even though the call stays open for another try.
+ */
 export const MISSED_SQL = `(t.kind IN ('call_booked', 'call_request', 'meeting') AND t.missed_at IS NOT NULL AND t.status <> 'cancelled'
-  AND ((t.status = 'open' AND t.missed_at < now()) OR (t.status = 'done' AND t.completed_at > t.missed_at)))`
+  AND ((t.status = 'open' AND t.missed_at < now()) OR (t.status = 'done' AND t.completed_at > t.missed_at))
+  AND NOT EXISTS (SELECT 1 FROM lead_activities la WHERE la.user_id = t.user_id AND la.action = 'call_logged'
+                  AND la.detail->>'task' = t.id::text AND la.created_at <= t.missed_at))`
+
+/**
+ * SQL: who works a call for the lead owner `owner` (a column or expression): the owner, or, if their account has been
+ * deactivated, their ABM, then their BM, then the admin. NULL when the lead has no owner.
+ */
+const WORKER = (owner: string) => `(SELECT coalesce(
+    CASE WHEN o.active THEN o.id END,
+    (SELECT x.id FROM admin_users x WHERE x.id = o.associate_id AND x.active),
+    (SELECT x.id FROM admin_users x WHERE x.active AND x.id = coalesce(o.manager_id, (SELECT y.manager_id FROM admin_users y WHERE y.id = o.associate_id))),
+    (SELECT x.id FROM admin_users x WHERE x.role = 'admin' AND x.active ORDER BY x.created_at LIMIT 1))
+  FROM admin_users o WHERE o.id = ${owner})`
 
 let lastSync = 0
 
@@ -50,6 +66,14 @@ export async function syncTasks(force = false): Promise<void> {
         WHERE t.kind = 'call_booked' AND t.source_id = cr.id AND t.status = 'open' AND t.missed_at < now()
           AND ((cr.preferred_date::text || ' ' || cr.preferred_time)::timestamp AT TIME ZONE 'Asia/Kolkata') <> t.due_at`,
     )
+    // A call already done stays on record as it was when the learner books a new time; the new slot gets its own task.
+    await query(
+      `UPDATE lead_tasks t SET source_id = NULL
+         FROM counsellor_requests cr
+        WHERE t.kind = 'call_booked' AND t.source_id = cr.id AND t.status <> 'open'
+          AND cr.preferred_date IS NOT NULL AND cr.preferred_time ~ '^[0-9]{1,2}:[0-9]{2} (AM|PM)$'
+          AND ((cr.preferred_date::text || ' ' || cr.preferred_time)::timestamp AT TIME ZONE 'Asia/Kolkata') <> t.due_at`,
+    )
     // Booked calls (only slots from when allocation started, so old bookings never show up as missed).
     await query(
       `WITH b AS (
@@ -59,18 +83,18 @@ export async function syncTasks(force = false): Promise<void> {
             AND cr.preferred_date >= (now() AT TIME ZONE 'Asia/Kolkata')::date - 30
        )
        INSERT INTO lead_tasks (user_id, owner_id, kind, title, due_at, missed_at, source_id)
-       SELECT b.user_id, lo.owner_id, 'call_booked', 'Counselling call (booked by the learner)', b.slot, b.slot + make_interval(mins => $1), b.id
+       SELECT b.user_id, ${WORKER('lo.owner_id')}, 'call_booked', 'Counselling call (booked by the learner)', b.slot, b.slot + make_interval(mins => $1), b.id
          FROM b LEFT JOIN lead_owners lo ON lo.user_id = b.user_id
         WHERE b.slot >= (SELECT (value #>> '{}')::timestamptz FROM crm_settings WHERE key = 'allocation_started_at')
        ON CONFLICT (kind, source_id) DO UPDATE SET due_at = EXCLUDED.due_at, missed_at = EXCLUDED.missed_at, status = 'open',
               outcome = NULL, outcome_note = NULL, completed_at = NULL, completed_by = NULL,
-              owner_id = coalesce((SELECT owner_id FROM lead_owners WHERE user_id = lead_tasks.user_id), lead_tasks.owner_id)
-        WHERE lead_tasks.due_at IS DISTINCT FROM EXCLUDED.due_at`,
+              owner_id = coalesce(${WORKER('(SELECT owner_id FROM lead_owners WHERE user_id = lead_tasks.user_id)')}, lead_tasks.owner_id)
+        WHERE lead_tasks.due_at IS DISTINCT FROM EXCLUDED.due_at AND lead_tasks.status = 'open'`,
       [BOOKED_GRACE_MINUTES],
     )
     // Call requests ("call me"), due within 1 working day.
     const requests = await query<{ id: string; user_id: string; created_at: Date; owner_id: string | null }>(
-      `SELECT c.id, c.user_id, c.created_at, lo.owner_id FROM call_requests c LEFT JOIN lead_owners lo ON lo.user_id = c.user_id
+      `SELECT c.id, c.user_id, c.created_at, ${WORKER('lo.owner_id')} AS owner_id FROM call_requests c LEFT JOIN lead_owners lo ON lo.user_id = c.user_id
         WHERE c.user_id IS NOT NULL
           AND c.created_at >= (SELECT (value #>> '{}')::timestamptz FROM crm_settings WHERE key = 'allocation_started_at')
           AND NOT EXISTS (SELECT 1 FROM lead_tasks t WHERE t.kind = 'call_request' AND t.source_id = c.id)
@@ -84,10 +108,21 @@ export async function syncTasks(force = false): Promise<void> {
         [r.user_id, r.owner_id, due, r.id, r.created_at],
       )
     }
-    // Calls that arrived before the lead had an owner go to the owner once there is one.
+    // Calls that arrived before the lead had an owner go to the owner once there is one (not ones already missed:
+    // those stay unassigned on record rather than counting against someone who never had them).
     await query(
-      `UPDATE lead_tasks t SET owner_id = lo.owner_id FROM lead_owners lo
-        WHERE lo.user_id = t.user_id AND t.owner_id IS NULL AND t.status = 'open' AND lo.owner_id IS NOT NULL`,
+      `UPDATE lead_tasks t SET owner_id = w.worker FROM (
+         SELECT t2.id, ${WORKER('lo.owner_id')} AS worker FROM lead_tasks t2 JOIN lead_owners lo ON lo.user_id = t2.user_id
+          WHERE t2.owner_id IS NULL AND t2.status = 'open' AND lo.owner_id IS NOT NULL AND (t2.missed_at IS NULL OR t2.missed_at > now())
+       ) w WHERE w.id = t.id AND w.worker IS NOT NULL`,
+    )
+    // Open calls and reminders of someone whose account was deactivated go to the person above them, so nothing waits
+    // on an account nobody uses (meetings are moved or cancelled before deactivation).
+    await query(
+      `UPDATE lead_tasks t SET owner_id = w.worker FROM (
+         SELECT t2.id, ${WORKER('t2.owner_id')} AS worker FROM lead_tasks t2 JOIN admin_users a ON a.id = t2.owner_id AND NOT a.active
+          WHERE t2.status = 'open' AND t2.kind <> 'meeting' AND (t2.missed_at IS NULL OR t2.missed_at > now())
+       ) w WHERE w.id = t.id AND w.worker IS NOT NULL AND w.worker <> t.owner_id`,
     )
   } catch (err) {
     console.error('[crm] task sync failed', (err as Error).message)

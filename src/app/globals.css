@@ -1026,3 +1026,10 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 .lp-partners > span { font-size: 0.72rem; }
 .kpi-value { overflow-wrap: break-word; hyphens: manual; }
 .kpi-value.kpi-words { font-size: 1.02rem; line-height: 1.3; }
+
+/* Phase timeline: the weeks label always fits inside its coloured bar. */
+.pt-track i { min-width: max-content; justify-content: center; }
+.pt-track i span { padding-inline: 0.45rem; }
+
+/* "Bring your own project" always takes the full row (never half a row after two capstones). */
+.plan-lb-projects .plan-project.own { grid-column: 1 / -1; }

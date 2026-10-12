@@ -81,6 +81,9 @@ export async function capstonesFor(programId: string, a: Answers, ideas: { title
     const theme = Math.min(3, relevance(p, a)) * 3
     const at = p.industry ? industries.indexOf(p.industry) : -1
     const industry = at === 0 ? 6 : at > 0 ? 4 : 0
+    // A project from another known industry never shows because one word matched (it would be labelled with that
+    // industry, e.g. "Banking & BFSI · capstone" for a healthcare learner).
+    if (industries.length && p.industry && p.industry !== 'Cross-industry leadership' && at < 0 && !profile) return []
     const lead = leader && p.industry === 'Cross-industry leadership' ? 2 : 0
     const personal = profile + theme + industry + lead
     if (!personal) return []

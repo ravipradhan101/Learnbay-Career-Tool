@@ -30,15 +30,15 @@ function placement(me: StaffUser, role: StaffRole, managerIn: string | null, ass
   if (role === 'manager') return { manager_id: null, associate_id: null }
   if (role === 'associate') {
     const manager = me.role === 'manager' ? me.id : managerIn
-    if (!activeOf(manager, 'manager')) return { error: 'Choose an active manager, or leave the associate independent.' }
+    if (!activeOf(manager, 'manager')) return { error: 'Choose an active BM, or leave the ABM independent.' }
     return { manager_id: manager, associate_id: null }
   }
   // ISM
-  if (associateIn && managerIn) return { error: 'An ISM sits under an associate or directly under a manager, not both.' }
-  if (associateIn && !activeOf(associateIn, 'associate')) return { error: 'Choose an active associate.' }
-  if (managerIn && !activeOf(managerIn, 'manager')) return { error: 'Choose an active manager.' }
+  if (associateIn && managerIn) return { error: 'An ISM sits under an ABM or directly under a BM, not both.' }
+  if (associateIn && !activeOf(associateIn, 'associate')) return { error: 'Choose an active ABM.' }
+  if (managerIn && !activeOf(managerIn, 'manager')) return { error: 'Choose an active BM.' }
   if (me.role === 'manager') {
-    if (associateIn) return managerOf(ids.get(associateIn), ids)?.id === me.id ? { manager_id: null, associate_id: associateIn } : { error: 'You can only place ISMs under associates in your team.' }
+    if (associateIn) return managerOf(ids.get(associateIn), ids)?.id === me.id ? { manager_id: null, associate_id: associateIn } : { error: 'You can only place ISMs under ABMs in your team.' }
     if (managerIn && managerIn !== me.id) return { error: 'You can only place ISMs in your own team.' }
     return { manager_id: me.id, associate_id: null }
   }
@@ -51,7 +51,7 @@ function inviteEmail(to: string, name: string, role: StaffRole, by: string) {
     subject: `You have been added to the Learnbay sales team as ${ROLE_LABEL[role]}`,
     heading: `Welcome${name ? `, ${name.split(' ')[0]}` : ''}`,
     paragraphs: [
-      `${by} added you to the Learnbay Career Studio team as ${ROLE_LABEL[role] === 'ISM' ? 'an' : 'a'} ${ROLE_LABEL[role]}.`,
+      `${by} added you to the Learnbay Career Studio team as ${/^[AEIOU]/.test(ROLE_LABEL[role]) ? 'an' : 'a'} ${ROLE_LABEL[role]}.`,
       'To sign in the first time, open the link below, choose “Set or reset password”, and enter the 6-digit code we email you. Nobody else ever sees your password.',
     ],
     cta: { label: 'Set your password', url: `${env.appUrl}/admin/login?next=/admin/crm` },
@@ -77,7 +77,7 @@ export async function createStaff(me: StaffUser, b: Record<string, unknown>): Pr
   )
   if (!row) return fail('Someone with this email is already on the team.', 409)
   await audit(me.id, row.id, 'created', { role: b.role, manager_id: place.manager_id, associate_id: place.associate_id })
-  inviteEmail(email, name, b.role, me.role === 'admin' ? 'The admin' : 'Your manager')
+  inviteEmail(email, name, b.role, me.role === 'admin' ? 'The admin' : 'Your BM')
   return { ok: true, id: row.id, message: `${name} added. We emailed them how to set a password.` }
 }
 
@@ -111,10 +111,12 @@ export async function updateStaff(me: StaffUser, targetId: string, b: Record<str
   let role: StaffRole = target.role
   if ('role' in b && b.role !== target.role) {
     if (!isAdmin) return fail('Only the admin can change roles.', 403)
-    if (!isRole(b.role)) return fail('Choose manager, associate or ISM.')
+    if (!isRole(b.role)) return fail('Choose BM, ABM or ISM.')
     if (reports.length) return fail(`Move the ${reports.length} people under ${target.name ?? target.email} first.`)
     role = b.role
     put('role', role)
+    // Only ISMs take round-robin leads: a new ISM joins it (the admin can pause them), anyone else leaves it.
+    if (!('inRotation' in b)) put('in_rotation', role === 'ism')
     signOut = true
   }
   if ('role' in b || 'managerId' in b || 'associateId' in b) {
@@ -133,6 +135,11 @@ export async function updateStaff(me: StaffUser, targetId: string, b: Record<str
   if ('active' in b && (b.active === true) !== target.active) {
     if (!isAdmin) return fail('Only the admin can deactivate or reactivate accounts.', 403)
     if (b.active !== true && reports.length) return fail(`Move the ${reports.length} people under ${target.name ?? target.email} first.`)
+    if (b.active !== true) {
+      // A learner would join a video call nobody hosts: their upcoming meetings are cancelled or handed over first.
+      const upcoming = (await queryOne<{ n: number }>(`SELECT count(*)::int AS n FROM meetings WHERE host_id = $1 AND status = 'scheduled' AND ends_at > now()`, [target.id]))?.n ?? 0
+      if (upcoming) return fail(`${target.name ?? target.email} hosts ${upcoming} upcoming meeting${upcoming === 1 ? '' : 's'}. Cancel ${upcoming === 1 ? 'it' : 'them'} on the lead page (or book another host) first.`)
+    }
     put('active', b.active === true)
     signOut = b.active !== true
   }
@@ -149,20 +156,23 @@ export async function updateStaff(me: StaffUser, targetId: string, b: Record<str
   }
   await audit(me.id, target.id, 'updated', changes)
 
-  // Leads of someone who leaves: to a named person, or back through round robin.
+  // Leads of someone who leaves: to a named person, or back through round robin. Their open calls follow the leads;
+  // calls on leads that stay (enrolled, lost, or kept) are worked by their ABM, BM or the admin (see syncTasks).
   if (changes.active === false && b.moveLeadsTo) {
+    const who = target.name ?? target.email
     const leads = await query<{ user_id: string }>(`SELECT user_id FROM lead_owners WHERE owner_id = $1 AND status NOT IN ('enrolled', 'lost')`, [target.id])
     if (b.moveLeadsTo === 'round_robin') {
       const n = await rotateLeads(me, leads.map((l) => l.user_id))
       await audit(me.id, target.id, 'leads_moved', { to: 'round_robin', count: n })
-    } else {
-      const to = optId(b.moveLeadsTo)
-      const dest = to ? dir.find((s) => s.id === to && s.active && s.role !== 'admin') ?? (to === me.id ? dir.find((s) => s.id === me.id) : undefined) : undefined
-      if (dest) {
-        for (const l of leads) await reassignLead(me, l.user_id, dest.id, `${target.name ?? target.email} left the team`)
-        await audit(me.id, target.id, 'leads_moved', { to: dest.id, count: leads.length })
-      }
+      if (n < leads.length) return { ok: true, message: `Saved. ${n} of ${leads.length} leads moved; the other ${leads.length - n} stay with ${who} because no ISM is free in the round robin. Move them from the Leads page.` }
+      return { ok: true, message: `Saved. ${n} lead${n === 1 ? '' : 's'} moved through round robin.` }
     }
+    const to = optId(b.moveLeadsTo)
+    const dest = to ? dir.find((s) => s.id === to && s.active && s.role !== 'admin') ?? (to === me.id ? dir.find((s) => s.id === me.id) : undefined) : undefined
+    if (!dest) return { ok: true, message: `Saved, but the leads were not moved: that person isn’t an active team member. They stay with ${who}.` }
+    for (const l of leads) await reassignLead(me, l.user_id, dest.id, `${who} left the team`)
+    await audit(me.id, target.id, 'leads_moved', { to: dest.id, count: leads.length })
+    return { ok: true, message: `Saved. ${leads.length} lead${leads.length === 1 ? '' : 's'} moved to ${dest.name ?? dest.email}.` }
   }
   return { ok: true, message: 'Saved.' }
 }

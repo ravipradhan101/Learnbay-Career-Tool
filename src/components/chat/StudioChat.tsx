@@ -13,6 +13,7 @@ import { StudioPanel } from './StudioPanel'
 import { LumiGuide, type GuideHandle, type GuideLine } from './LumiGuide'
 import { LumiTour, type TourStep } from './LumiTour'
 import { CounsellorProfile } from './CounsellorProfile'
+import { SHEET_BACK_KEY } from './Sheet'
 import { askForNotifications, canAskForNotifications, useAwayAlert } from './useAwayAlert'
 import { track as trackEvent } from '@/lib/analytics'
 import { Avatar } from './Avatar'
@@ -57,6 +58,8 @@ function topicOf(path: string): Topic {
   return 'other'
 }
 const contextOf = (t: Topic) => (t === 'home' || t === 'other' ? 'advisor' : t)
+/** Full reports open as a sheet over the chat (/dashboard/<tool>/report). */
+const isSheetPath = (path: string) => /^\/dashboard\/[^/]+\/report\/?$/.test(path)
 
 export function StudioChat({ data, children }: { data: StudioData; children: React.ReactNode }) {
   const pathname = usePathname()
@@ -295,9 +298,24 @@ export function StudioChat({ data, children }: { data: StudioData; children: Rea
   useEffect(() => { setDrawer(null) }, [pathname])
   // Moving to another section opens that section's chat (the first page load is handled when the chats arrive).
   const lastPath = useRef(pathname)
+  // A full report is a sheet over the chat, not a topic: opening it leaves the chat exactly as it is, and closing it
+  // goes back to where the learner was (the Sheet reads SHEET_BACK_KEY), without starting that topic again.
+  const sheetFrom = useRef<string | null>(null)
   useEffect(() => {
     if (lastPath.current === pathname) return
+    const prev = lastPath.current
     lastPath.current = pathname
+    if (isSheetPath(pathname)) {
+      if (!isSheetPath(prev)) {
+        sheetFrom.current = prev
+        try { window.sessionStorage.setItem(SHEET_BACK_KEY, prev) } catch { /* ignore */ }
+      }
+      return
+    }
+    const from = sheetFrom.current
+    sheetFrom.current = null
+    try { window.sessionStorage.removeItem(SHEET_BACK_KEY) } catch { /* ignore */ }
+    if (from !== null && (from === pathname || topicOf(from) === topicOf(pathname))) return
     const t = topicOf(pathname)
     if (t === 'other') return
     void openChat(t)

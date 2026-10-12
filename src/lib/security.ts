@@ -141,10 +141,14 @@ export async function overLimit(key: string, limit: number, windowSeconds: numbe
   return (row?.count ?? 0) >= limit
 }
 
-/** Checks several limits; all must pass. Use with a per-identity key plus a global circuit breaker. */
+/**
+ * Checks several limits in order; all must pass. List the per-identity keys first and the global circuit breaker last:
+ * checking stops at the first limit hit, so requests already refused for one person or network never use up the
+ * site-wide allowance (otherwise one script could lock everyone out).
+ */
 export async function rateLimits(checks: [key: string, limit: number, windowSeconds: number][]): Promise<boolean> {
-  const results = await Promise.all(checks.map(([k, l, w]) => rateLimit(k, l, w)))
-  return results.every(Boolean)
+  for (const [k, l, w] of checks) if (!(await rateLimit(k, l, w))) return false
+  return true
 }
 
 /** Strips control characters and angle brackets from free text and trims it to a max length. */

@@ -21,7 +21,7 @@ export default async function TeamPage() {
   const audit = me.role === 'admin' ? await staffAudit(40) : []
   const mine = (await query<{ name: string | null; phone: string | null; meet_url: string | null }>(`SELECT name, phone, meet_url FROM admin_users WHERE id = $1`, [me.id]))[0]
   const members: Member[] = people.map((p) => ({ id: p.id, name: p.name, email: p.email, phone: p.phone, role: p.role, team: p.team, manager_id: p.manager_id, associate_id: p.associate_id, active: p.active, in_rotation: p.in_rotation }))
-  const rotation = dir.filter((s) => s.role === 'ism' && s.active && s.in_rotation).length
+  const rotation = dir.filter((s) => s.role === 'ism' && s.active && s.in_rotation && s.has_password).length
 
   const Row = ({ s, depth }: { s: StaffRow; depth: number }) => (
     <li className={`crm-tree-row${s.active ? '' : ' inactive'}`} style={{ ['--depth' as string]: depth }}>
@@ -29,7 +29,7 @@ export default async function TeamPage() {
         <Person s={s} />
         {s.role === 'admin' && <span className="pill" title="Cannot be changed or deleted by anyone">🔒 Protected</span>}
         {s.role === 'manager' && s.team && <span className="pill primary">{s.team}</span>}
-        {s.role === 'ism' && s.active && <span className={`pill ${s.in_rotation ? 'success' : 'warning'}`}>{s.in_rotation ? 'In round robin' : 'Round robin paused'}</span>}
+        {s.role === 'ism' && s.active && <span className={`pill ${s.in_rotation && s.has_password ? 'success' : 'warning'}`}>{!s.in_rotation ? 'Round robin paused' : s.has_password ? 'In round robin' : 'Joins round robin after setting a password'}</span>}
         {!s.has_password && s.active && <span className="pill">Invited, no password yet</span>}
       </div>
       <div className="crm-tree-meta small muted">
@@ -62,9 +62,9 @@ export default async function TeamPage() {
           <h1>Team</h1>
           <p className="muted small">
             {me.role === 'admin' ? 'Everyone on the sales team. You manage all accounts except your own, which is protected.'
-              : me.role === 'manager' ? 'Your team. You can add associates and ISMs and move them within your team; the admin changes roles and deactivates accounts.'
+              : me.role === 'manager' ? 'Your team. You can add ABMs and ISMs and move them within your team; the admin changes roles and deactivates accounts.'
                 : 'The people you work with.'}
-            {' '}{rotation} ISM{rotation === 1 ? '' : 's'} in the round robin. ★ = independent associate.
+            {' '}{rotation} ISM{rotation === 1 ? '' : 's'} in the round robin. ★ = independent ABM.
           </p>
         </div>
         <AddStaff me={{ id: me.id, role: me.role }} people={members} />

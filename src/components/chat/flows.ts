@@ -1318,7 +1318,11 @@ export async function programFitFlow(bot: Bot, ctx: StudioCtx) {
   await bot.say(already ? `You’re already set up for the ${program.name}. Shall we carry on?` : `Shall we go ahead with the ${program.name}? It fits your profile ${best.score}/10. I’ll set your track and program to it, and all your reports will follow.`)
   const c = await bot.choose([
     { id: 'yes', label: already ? 'Yes, carry on' : `Yes, go ahead with the ${program.name}`, icon: 'check' },
-    ...fits.slice(1).filter((f) => eligibility(f.programId, ctx.answers).ok).slice(0, 1).map((f) => ({ id: `other:${f.programId}`, label: `I’d rather do the ${f.name} (${f.score}/10)`, icon: 'arrowLeft' as IconName })),
+    // Only a program the learner already sees on their path (the second one, for experienced non-programmers):
+    // backups stay with the counsellor.
+    ...(() => { const p = pathFor(ctx.answers); return p.options.slice(1, p.show) })()
+      .filter((o) => !o.later && o.programId !== program.id && eligibility(o.programId, ctx.answers).ok).slice(0, 1)
+      .map((o) => ({ id: `other:${o.programId}`, label: `I’d rather do the ${o.name} (${o.fit}/10)`, icon: 'arrowLeft' as IconName })),
     { id: 'call', label: 'Help me decide on a quick call', icon: 'phone' },
   ])
   if (c.id === 'call') { ctx.call('chat'); return }

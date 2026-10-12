@@ -135,14 +135,14 @@ function ContactCard({ answers, prefill, replaces, live, onDone }: { answers: ob
   const [sent, setSent] = useState(false)
   // Against bulk sign-ups by scripts: a field people never see (bots fill every field) and how long the form took.
   const [website, setWebsite] = useState('')
-  const shownAt = useRef(Date.now())
+  // Correcting an email continues a form they already filled in (name and phone are kept), so it isn't a fresh start.
+  const shownAt = useRef(Date.now() - (replaces ? 1500 : 0))
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     const digits = phone.replace(/[\s-]/g, '')
     if (name.trim().length < 2) return setError('Please enter your full name.')
     if (!/\S+@\S+\.\S+/.test(email)) return setError('Please enter a valid email address.')
-    if (replaces && email.trim().toLowerCase() === replaces.toLowerCase()) return setError('That’s the same email as before. Please type the correct one.')
     if (!isValidPhone(cc, digits)) return setError('Please enter a valid phone number.')
     if (!consent) return setError('Please tick the box so I can send you your results.')
     setBusy(true)
@@ -321,7 +321,7 @@ function ReportCardView({ card }: { card: ReportCard }) {
       <div className="tc-chart">
         {card.chart.kind === 'skills' && <><span className="tc-eyebrow">Biggest gaps · bar = you, line = needed</span><SkillBars skills={card.chart.skills} limit={4} /></>}
         {card.chart.kind === 'ranges' && <><span className="tc-eyebrow">What you could earn · ₹ lakh per year</span><RangeChart rows={card.chart.rows} /></>}
-        {card.chart.kind === 'phases' && <><span className="tc-eyebrow">Your plan at a glance</span><PhaseTimeline phases={card.chart.phases} months={card.chart.months} /></>}
+        {card.chart.kind === 'phases' && <><span className="tc-eyebrow">Your plan, phase by phase</span><PhaseTimeline phases={card.chart.phases} months={card.chart.months} /></>}
       </div>
       <ActionPlan tool={card.tool} actions={card.summary.actions} />
       <div className="tc-actions">
@@ -470,6 +470,14 @@ function BookingCard({ live, onDone }: { live: boolean; onDone: Done }) {
     else setError(r.error || 'Please sign in again.')
   }, [])
   useEffect(() => { void load() }, [load])
+  // Already booked when the card first loads (another tab, or a booking the chat didn't know about): the chat moves
+  // on with that booking instead of waiting on a card with nothing left to pick.
+  const firstLoad = useRef(true)
+  useEffect(() => {
+    if (!data || !firstLoad.current) return
+    firstLoad.current = false
+    if (live && data.booking) onDone({ when: data.booking.when })
+  }, [data, live, onDone])
 
   // Couldn't load: try again, or move on (the chat never waits on a card that can't load).
   if (error && !data) {
@@ -527,6 +535,11 @@ function SlotPicker({ days, current, onBooked, onCancel }: { days: DaySlots[]; c
   const [error, setError] = useState('')
   const day = days.find((d) => d.date === date)
   const dateLabel = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  // Once a time is picked, the button comes into view on its own (no scrolling to find it).
+  const actions = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (time) actions.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [time])
 
   async function save() {
     setBusy(true)
@@ -578,7 +591,7 @@ function SlotPicker({ days, current, onBooked, onCancel }: { days: DaySlots[]; c
         <input className="tc-note" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anything to discuss? e.g. fees, EMI, weekend batches (optional)" aria-label="Anything to discuss" />
       )}
       {error && <p className="tc-error" role="alert">{error}</p>}
-      <div className="tc-actions">
+      <div className="tc-actions" ref={actions}>
         <button type="button" className="tc-btn tc-btn-accent" disabled={busy || !date || !time} onClick={save}>
           {busy ? <span className="spinner" /> : <><Icon name="calendar" size="1rem" /> {current ? 'Move my call' : 'Book my free call'}</>}
         </button>

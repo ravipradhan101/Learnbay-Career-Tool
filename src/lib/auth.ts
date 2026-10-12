@@ -131,21 +131,24 @@ export async function verifyOtp(email: string, code: string): Promise<{ ok: true
   if (!/^\d{6}$/.test(code)) return { ok: false, error: 'Enter the 6-digit code from your email.' }
   // Across all codes for this email: at most 15 wrong guesses a day, so codes can't be ground down by requesting new ones.
   if (await overLimit(`otpfail:${email}`, OTP_DAILY_FAILURES, 86_400)) return { ok: false, error: 'Too many wrong codes today. Please try again tomorrow, or contact Learnbay support.' }
-  const row = await queryOne<{ id: number; code_hash: string; attempts: number }>(
-    `SELECT id, code_hash, attempts FROM otp_codes
-      WHERE email = $1 AND consumed_at IS NULL AND expires_at > now()
-      ORDER BY created_at DESC LIMIT 1`,
+  const latest = await queryOne<{ id: number }>(
+    `SELECT id FROM otp_codes WHERE email = $1 AND consumed_at IS NULL AND expires_at > now() ORDER BY created_at DESC LIMIT 1`,
     [email],
   )
-  if (!row) return { ok: false, error: 'This code has expired. Request a new one.' }
-  if (row.attempts >= OTP_MAX_ATTEMPTS) {
-    await query(`UPDATE otp_codes SET consumed_at = now() WHERE id = $1`, [row.id])
+  if (!latest) return { ok: false, error: 'This code has expired. Request a new one.' }
+  // The attempt is counted before the code is compared, in one statement, so guesses sent in parallel can't all slip
+  // in under the limit. `attempts` comes back already including this one.
+  const row = await queryOne<{ id: number; code_hash: string; attempts: number }>(
+    `UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1 AND attempts < $2 RETURNING id, code_hash, attempts`,
+    [latest.id, OTP_MAX_ATTEMPTS],
+  )
+  if (!row) {
+    await query(`UPDATE otp_codes SET consumed_at = now() WHERE id = $1`, [latest.id])
     return { ok: false, error: 'Too many wrong attempts. Request a new code.' }
   }
   if (!safeEqualHex(row.code_hash, hmac(`${email}:${code}`))) {
-    await query(`UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1`, [row.id])
     await rateLimit(`otpfail:${email}`, OTP_DAILY_FAILURES, 86_400)
-    const left = OTP_MAX_ATTEMPTS - row.attempts - 1
+    const left = OTP_MAX_ATTEMPTS - row.attempts
     return { ok: false, error: left > 0 ? `That code is not right. ${left} attempt${left === 1 ? '' : 's'} left.` : 'Too many wrong attempts. Request a new code.' }
   }
   // Consume atomically so the same code cannot be used twice in parallel.

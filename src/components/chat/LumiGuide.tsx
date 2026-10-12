@@ -245,6 +245,8 @@ export function LumiGuide({ first, who, hello, help, nudge, quiet, busy, grow = 
       if ((busyRef.current?.() || lineRef.current || typing) && tries++ < 28) { t = window.setTimeout(attempt, 1000); return }
       if (typing) return
       setFlag(seen)
+      // They already opened him (a game, an answer, his menu): they know he's here, and that panel is never replaced.
+      if (lineRef.current) return
       void say(helloRef.current?.() ?? { text: `Hi ${first}! I’m ${BOT_NAME}, your guide here. I’m always in the corner and in the menu, so tap me whenever you need help.` })
     }
     t = window.setTimeout(attempt, 2500)
@@ -363,11 +365,6 @@ const WAKE_UPS = [
   'Oh hi! I was dreaming about growing a whole forest of skills with you.',
 ]
 const DANCES = ['Watch my moves! A little sapling shuffle, just for you!', 'Leaf to the left, leaf to the right… I’ve got the groove!', 'Dancing for your progress! Every step counts, and so does every wiggle.']
-const GROW_LINES = [
-  (n: string) => `I grew a new leaf! Nice progress, ${n}.`,
-  (n: string) => `I'm getting taller! Keep going, ${n}.`,
-  (n: string) => `I bloomed! Great work, ${n}.`,
-]
 type Bubble = { text: string; ask?: boolean }
 
 /**
@@ -438,7 +435,8 @@ function BruceFace({ open, onOpen, grow, first }: { open: boolean; onOpen: () =>
     grown.current = stage
     if (before === null || stage <= before || open || flying.current) return
     track('action', 'bruce_grew', { stage })
-    later(() => say(GROW_LINES[stage - 1](first), 'dance', 4200, () => setMood('idle')), 1200)
+    // A silent happy dance: he never talks unless the learner calls him.
+    later(() => { setMood('dance'); later(() => setMood('idle'), 4200) }, 1200)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage])
 

@@ -120,19 +120,17 @@ export function PhaseTimeline({ phases, months }: { phases: { title: string; wee
         const left = ((p.a - 1) / totalWeeks) * 100
         const width = Math.max(4, ((p.b - p.a + 1) / totalWeeks) * 100)
         const label = p.weeks.replace(/^weeks?\s*/i, 'Wk ')
-        // Short bars can't hold their label: it sits just after the bar (or before it, near the end of the track).
-        const inside = width >= 26
-        const after = !inside && left + width <= 74
+        // The weeks always sit inside the bar: a short bar grows just enough to hold them, from its start in the first
+        // half of the track, or back from its end in the second half (so it never runs past the track).
+        const late = left + width / 2 > 50
+        const place = late ? { right: `${Math.max(0, 100 - left - width)}%`, width: `${width}%` } : { left: `${left}%`, width: `${width}%` }
         return (
           <div className="pt-row" key={p.title + i}>
             <span className="pt-label"><b>{i + 1}</b>{p.title}</span>
             <div className="pt-track">
-              <i className={`c${i % 4}`} style={{ left: `${left}%`, width: `${width}%` }} title={`${p.weeks}: ${p.milestone}`}>
-                {inside && <span>{label}</span>}
+              <i className={`c${i % 4}`} style={place} title={`${p.weeks}: ${p.milestone}`}>
+                <span>{label}</span>
               </i>
-              {!inside && (
-                <span className={`pt-out ${after ? 'after' : 'before'}`} style={after ? { left: `calc(${left + width}% + 6px)` } : { right: `calc(${100 - left}% + 6px)` }}>{label}</span>
-              )}
             </div>
           </div>
         )

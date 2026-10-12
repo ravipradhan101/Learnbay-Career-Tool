@@ -25,7 +25,7 @@ const ALIASES: Record<string, RegExp> = {
   'GAI-CD': /genai (&|and) agentic ai for cloud/i,
   CD: /cloud (&|and) devops engineering(?! master)/i,
   'CD-M': /ai-powered cloud (&|and) devops master/i,
-  AIL: /ai leadership program/i,
+  AIL: /ai leadership program|program for managers (&|and) leaders/i,
   MCS: /master'?s degree in cs|woolf/i,
 }
 

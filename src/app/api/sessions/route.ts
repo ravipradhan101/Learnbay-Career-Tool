@@ -4,7 +4,7 @@ import type { PoolClient } from 'pg'
 import { triggerFlows } from '@/lib/email/flows'
 import { sendSessionEmails } from '@/lib/mailer'
 import { experienceLabel, interestLabel, roleLabel, type Answers } from '@/lib/questions'
-import { cleanText, isSameOrigin, jsonError, jsonOk, rateLimit, readJson } from '@/lib/security'
+import { cleanText, isSameOrigin, jsonError, jsonOk, overLimit, rateLimit, readJson } from '@/lib/security'
 import { background } from '@/lib/background'
 import { emitLeadEvent } from '@/lib/crm/webhooks'
 import {
@@ -99,7 +99,8 @@ export async function POST(request: Request) {
   if (!user.phone) return jsonError(400, 'Please complete the quick start first.', { redirect: '/start?tool=sessions' })
   const existing = await activeBooking(user.id)
   if (existing) return jsonError(409, `Your call is already booked for ${existing.when}. You can reschedule it instead.`, { booking: existing })
-  if (!(await rateLimit(`session:user:${user.id}`, 6, 24 * 60 * 60))) return jsonError(429, 'We already have your booking. A Senior Counsellor will call you as scheduled.')
+  // At most 6 bookings a day; only bookings that went through count (a full or past slot doesn't use one up).
+  if (await overLimit(`session:user:${user.id}`, 6, 24 * 60 * 60)) return jsonError(429, 'You’ve booked several calls today. Please try again tomorrow, or ask for a call back.')
   const body = await readJson<{ date?: unknown; time?: unknown; note?: unknown }>(request, 4_000)
   const slot = await checkSlot(body)
   if ('error' in slot) return jsonError(400, slot.error)
@@ -126,6 +127,7 @@ export async function POST(request: Request) {
     return jsonError(409, booking ? `Your call is already booked for ${booking.when}.` : 'Your call is already booked.', { booking })
   }
   if (!created) return jsonError(409, 'That slot just filled up. Please pick another time.')
+  await rateLimit(`session:user:${user.id}`, 6, 24 * 60 * 60)
   triggerFlows(user.id, 'session_booked')
   emitLeadEvent('call.booked', user.id, { date: slot.date, time: slot.time, ...(note ? { note } : {}) })
   const when = whenLabel(slot.date, slot.time)

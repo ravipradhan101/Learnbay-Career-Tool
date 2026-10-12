@@ -14,8 +14,8 @@ export function Person({ s, role = true }: { s: StaffRow | null | undefined; rol
   if (!s) return <span className="muted">Unassigned</span>
   const independent = s.role === 'associate' && !s.manager_id
   return (
-    <span className="crm-person" title={`${s.email}${independent ? ' · independent associate' : ''}`}>
-      {displayName(s)}{independent && <span className="crm-star" aria-label="Independent associate">★</span>}
+    <span className="crm-person" title={`${s.email}${independent ? ' · independent ABM' : ''}`}>
+      {displayName(s)}{independent && <span className="crm-star" aria-label="Independent ABM">★</span>}
       {role && <span className={`crm-role crm-role-${s.role}`}>{ROLE_LABEL[s.role]}</span>}
       {!s.active && <span className="pill danger">Inactive</span>}
     </span>

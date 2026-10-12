@@ -27,12 +27,12 @@ function PlaceSelect({ me, role, value, onChange, people }: { me: Me; role: Staf
   const associates = people.filter((p) => p.role === 'associate' && p.active)
   return (
     <div className="field">
-      <label className="label" htmlFor="tm-place">{role === 'associate' ? 'Manager' : 'Works under'}</label>
+      <label className="label" htmlFor="tm-place">{role === 'associate' ? 'BM' : 'Works under'}</label>
       <select id="tm-place" className="select" value={value} onChange={(e) => onChange(e.target.value)}>
-        {role === 'associate' && me.role === 'admin' && <option value="">Independent associate ★</option>}
+        {role === 'associate' && me.role === 'admin' && <option value="">Independent ABM ★</option>}
         {role === 'ism' && me.role === 'admin' && <option value="">Nobody yet (admin’s pool)</option>}
-        {(me.role === 'admin' ? managers : managers.filter((m) => m.id === me.id)).map((m) => <option key={m.id} value={`manager:${m.id}`}>{role === 'ism' ? 'Directly under manager ' : ''}{nameOf(m)}{m.team ? ` (${m.team})` : ''}</option>)}
-        {role === 'ism' && associates.map((a) => <option key={a.id} value={`associate:${a.id}`}>Associate {nameOf(a)}</option>)}
+        {(me.role === 'admin' ? managers : managers.filter((m) => m.id === me.id)).map((m) => <option key={m.id} value={`manager:${m.id}`}>{role === 'ism' ? 'Directly under BM ' : ''}{nameOf(m)}{m.team ? ` (${m.team})` : ''}</option>)}
+        {role === 'ism' && associates.map((a) => <option key={a.id} value={`associate:${a.id}`}>ABM {nameOf(a)}</option>)}
       </select>
     </div>
   )

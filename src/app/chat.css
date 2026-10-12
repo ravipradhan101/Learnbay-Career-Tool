@@ -1986,3 +1986,13 @@ body:has(.rg-bruce) .ts-sheet-body { padding-bottom: 120px; }
 .tc-booking .tc-slot b { font-size: 0.86rem; }
 .tc-booking .tc-slot small { font-size: 0.72rem; }
 @media (max-width: 420px) { .tc-booking .tc-slots { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+
+/* Booking: the two days as an even pair, label and date on the left, "No slots left" on the right. */
+.tc-booking .tc-days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; overflow: visible; padding-bottom: 0; }
+.tc-booking .tc-day {
+  width: auto; display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: start; column-gap: 8px; row-gap: 0;
+  padding: 9px 14px; text-align: left;
+}
+.tc-booking .tc-day small, .tc-booking .tc-day b { grid-column: 1; }
+.tc-booking .tc-day em { grid-column: 2; grid-row: 1 / span 2; font-size: 0.74rem; }
+.tc-booking .tc-day[aria-checked='true'] { box-shadow: inset 0 0 0 1px #a5a8f5; }

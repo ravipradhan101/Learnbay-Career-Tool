@@ -10,8 +10,11 @@ import type { Answers } from '@/lib/questions'
 
 export const LOGIN_EVENT = 'lcn:chat-login'
 
-/** "wrong email", "change my email id", "I entered an incorrect mail", "not my email", "update email"… */
-const CHANGE_EMAIL = /\b(wrong|incorrect|mistake|typo|change|update|edit|correct|different|another|other|not my|fix)\b.*\b(e-?mail|mail|id)\b|\b(e-?mail|mail)\b.*\b(wrong|incorrect|mistake|typo|change|not mine)\b/i
+/**
+ * "wrong email", "change my email id", "I entered an incorrect mail", "not my email", "update email"… but not
+ * "I entered the correct email but no code came" (that learner needs the code, not a new email).
+ */
+const CHANGE_EMAIL = /\b(wrong|incorrect|mistake|typo|change|update|edit|different|another|not my|fix)\b.*\b(e-?mail|mail)\b|\b(e-?mail|mail)\b.*\b(wrong|incorrect|mistake|typo|change|not mine)\b/i
 
 /** Bruce, the guide: a few questions, sign-up with an email code, then he finds the right counsellor. */
 export function GuestChat({ signedIn, initial, track, mode }: { signedIn: GuestCtx['signedIn']; initial: Answers; track: string | null; mode: 'start' | 'login' }) {

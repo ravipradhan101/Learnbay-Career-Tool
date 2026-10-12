@@ -1,6 +1,7 @@
 import { env } from './env'
 import { queryOne, query } from './db'
 import { sendMail } from './mailer'
+import { background } from './background'
 import { CALL_HOURS } from './sessions'
 
 export type CallRequest = {
@@ -45,7 +46,8 @@ export async function requestCall(r: CallRequest): Promise<{ calling: boolean; m
 
   const notify = env.counsellorNotifyEmail
   if (notify) {
-    sendMail({
+    // After the reply, but kept alive until sent (a serverless function may otherwise stop before the email goes out).
+    background('calls notify', () => sendMail({
       to: notify,
       subject: `${calling ? 'AI call placed' : 'Call back now'}: ${r.name || 'a visitor'} (${r.phoneCountry} ${r.phone})`,
       heading: calling ? 'The AI counsellor is calling this learner' : 'A learner asked for a call: please call back',
@@ -58,7 +60,7 @@ export async function requestCall(r: CallRequest): Promise<{ calling: boolean; m
         ...(url && !calling ? ['The automatic call could not be placed, so please call manually.'] : []),
       ],
       ...(r.userId ? { cta: { label: 'Open this learner in admin', url: `${env.appUrl}/admin/users/${r.userId}` } } : {}),
-    }).catch((err) => console.error('[calls] notify failed', (err as Error).message))
+    }))
   }
   const masked = `${r.phoneCountry} ••••• ${r.phone.slice(-4)}`
   return {

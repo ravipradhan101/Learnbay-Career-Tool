@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg'
 import { getCurrentUser } from '@/lib/auth'
 import { queryOne, transaction } from '@/lib/db'
 import { cleanText, clientIp, isSameOrigin, jsonError, jsonOk, normalizeEmail, rateLimits, readJson } from '@/lib/security'
@@ -69,15 +70,21 @@ export async function POST(request: Request) {
       )
       await queryOne(`DELETE FROM pending_signups WHERE email = $1 AND phone = $2 AND phone_country = $3`, [replaces, contact.phone, contact.phoneCountry])
     }
-    // 4. One phone number, at most 3 accounts in 30 days.
-    const others = await queryOne<{ n: number }>(
+  }
+
+  // 4. One phone number, at most 3 accounts in 30 days. Checked and saved under a lock on the number, so sign-ups
+  // arriving in the same second can't all pass the count before any of them is saved.
+  const PHONE_FULL = 'This phone number is already linked to other accounts. Please log in with your existing email, or use your own number.'
+  const phoneFull = async (db: PoolClient, email: string) => {
+    await db.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`signup-phone:${contact.phoneCountry}${contact.phone}`])
+    const r = await db.query<{ n: number }>(
       `SELECT count(DISTINCT email)::int AS n FROM (
          SELECT email FROM users WHERE phone = $1 AND phone_country = $2 AND created_at > now() - interval '30 days'
          UNION SELECT email FROM pending_signups WHERE phone = $1 AND phone_country = $2 AND created_at > now() - interval '30 days'
        ) x WHERE email <> $3`,
-      [contact.phone, contact.phoneCountry, contact.email],
+      [contact.phone, contact.phoneCountry, email],
     )
-    if ((others?.n ?? 0) >= 3) return jsonError(400, 'This phone number is already linked to other accounts. Please log in with your existing email, or use your own number.', { field: 'phone' })
+    return (r.rows[0]?.n ?? 0) >= 3
   }
 
   if (!current) {
@@ -86,36 +93,44 @@ export async function POST(request: Request) {
     // An email that already exists is never changed here (anyone could type someone else's email): what they sent is
     // held in pending_signups and applied by /api/auth/verify-otp once the code proves the email is theirs.
     const source = JSON.stringify(sanitizeSource(body.source))
-    const saved = await queryOne<{ id: string }>(
-      `WITH u AS (
-         INSERT INTO users (email, name, phone_country, phone, consent, consent_at, source)
-         VALUES ($1, $2, $3, $4, true, now(), $5)
-         ON CONFLICT (email) DO NOTHING
-         RETURNING id
-       ), a AS (
-         INSERT INTO assessments (user_id, answers) SELECT id, $6 FROM u
-         ON CONFLICT (user_id) DO NOTHING
-         RETURNING user_id
-       )
-       SELECT id FROM u`,
-      [contact.email, contact.name, contact.phoneCountry, contact.phone, source, JSON.stringify(answers)],
-    )
-    if (saved) crmNewLead(saved.id)
-    else {
-      await queryOne(
-        `INSERT INTO pending_signups (email, name, phone_country, phone, answers, source) VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, phone_country = EXCLUDED.phone_country, phone = EXCLUDED.phone,
-           answers = EXCLUDED.answers, source = EXCLUDED.source, created_at = now()`,
-        [contact.email, contact.name, contact.phoneCountry, contact.phone, JSON.stringify(answers), source],
-      )
-    }
+    const result = await transaction(async (db) => {
+      if (await phoneFull(db, contact.email)) return { full: true as const }
+      const saved = (await db.query<{ id: string }>(
+        `WITH u AS (
+           INSERT INTO users (email, name, phone_country, phone, consent, consent_at, source)
+           VALUES ($1, $2, $3, $4, true, now(), $5)
+           ON CONFLICT (email) DO NOTHING
+           RETURNING id
+         ), a AS (
+           INSERT INTO assessments (user_id, answers) SELECT id, $6 FROM u
+           ON CONFLICT (user_id) DO NOTHING
+           RETURNING user_id
+         )
+         SELECT id FROM u`,
+        [contact.email, contact.name, contact.phoneCountry, contact.phone, source, JSON.stringify(answers)],
+      )).rows[0]
+      if (!saved) {
+        await db.query(
+          `INSERT INTO pending_signups (email, name, phone_country, phone, answers, source) VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, phone_country = EXCLUDED.phone_country, phone = EXCLUDED.phone,
+             answers = EXCLUDED.answers, source = EXCLUDED.source, created_at = now()`,
+          [contact.email, contact.name, contact.phoneCountry, contact.phone, JSON.stringify(answers), source],
+        )
+      }
+      return { full: false as const, id: saved?.id ?? null }
+    })
+    if (result.full) return jsonError(400, PHONE_FULL, { field: 'phone' })
+    if (result.id) crmNewLead(result.id)
     // The same answer either way, so nobody can tell from it whether an email has an account.
     return jsonOk({ needsOtp: true, email: contact.email })
   }
 
-  // Signed-in learner finishing onboarding (e.g. logged in first): fill in what is missing.
+  // Signed-in learner finishing onboarding (e.g. logged in first): fill in what is missing. A phone added for the first
+  // time meets the same 3-accounts-per-number rule as sign-up.
   const userId = current.id
-  await transaction(async (db) => {
+  const full = await transaction(async (db) => {
+    const had = (await db.query<{ phone: string | null }>(`SELECT phone FROM users WHERE id = $1 FOR UPDATE`, [userId])).rows[0]
+    if (!had?.phone && (await phoneFull(db, current.email))) return true
     await db.query(
       `UPDATE users SET name = COALESCE(name, $2), phone_country = COALESCE(phone_country, $3), phone = COALESCE(phone, $4),
               consent = true, consent_at = COALESCE(consent_at, now()),
@@ -130,6 +145,8 @@ export async function POST(request: Request) {
        ON CONFLICT (user_id) DO UPDATE SET answers = EXCLUDED.answers, updated_at = now()`,
       [userId, JSON.stringify(merged)],
     )
+    return false
   })
+  if (full) return jsonError(400, PHONE_FULL, { field: 'phone' })
   return jsonOk({ redirect: landing(body.next) })
 }

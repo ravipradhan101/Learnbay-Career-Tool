@@ -6,7 +6,7 @@ import { getProgram } from '@/config/programs'
 import { USPS, type UspId } from '@/config/usps'
 import { curriculumOf } from '@/lib/roles'
 import type { Capstone } from '@/lib/capstones'
-import { moduleFor, weeksLabel } from '@/lib/plan'
+import { moduleFor } from '@/lib/plan'
 import type { ReportSummary } from '@/lib/report-summary'
 
 /** Top of every report: the one number that matters, what it means, and 3-4 key numbers. */
@@ -182,7 +182,7 @@ export function PlanWithLearnbay({ profile, focus, programId, capstones = [] }: 
                 <span className="plan-n">{i + 1}</span>
                 <div>
                   <b>{x.focus}</b>
-                  <small>{x.module ? <>Learnt in <em>{x.module.name}</em>{/\d/.test(x.module.weeks) ? ` (${weeksLabel(x.module.weeks)})` : ''}</> : 'Covered in your plan with your Senior Counsellor'}</small>
+                  <small>{x.module ? `Covered in the ${p.name}` : 'Covered in your plan with your Senior Counsellor'}</small>
                 </div>
               </li>
             ))}

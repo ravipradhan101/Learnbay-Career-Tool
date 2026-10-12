@@ -1,7 +1,7 @@
 import { getCurrentStaff, type StaffUser } from '../admin-auth'
 import { queryOne } from '../db'
 import { isSameOrigin, jsonError, rateLimit, readJson } from '../security'
-import { canSeeLead, staffDirectory } from './scope'
+import { mayOpenLead, staffDirectory } from './scope'
 
 export const isUuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
 
@@ -31,6 +31,6 @@ export async function leadFor(me: StaffUser, userId: unknown): Promise<LeadRef |
        FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id WHERE u.id = $1`,
     [userId],
   )
-  if (!lead || !canSeeLead(me, lead.owner_id, await staffDirectory())) return jsonError(404, 'Lead not found.')
+  if (!lead || !(await mayOpenLead(me, lead.id, lead.owner_id, await staffDirectory()))) return jsonError(404, 'Lead not found.')
   return lead
 }

@@ -205,8 +205,11 @@ const g = globalThis as unknown as { __emailRunning?: boolean }
 /** Sends everything that is due. Safe to run from several servers at once (rows are claimed with SKIP LOCKED). */
 export async function processDueEmails(limit = MAX_PER_TICK, onlyUser: string | null = null): Promise<{ sent: number; skipped: number; failed: number; waiting: number }> {
   const stats = { sent: 0, skipped: 0, failed: 0, waiting: 0 }
-  if (g.__emailRunning) return stats
-  g.__emailRunning = true
+  // One general run at a time per server. A single learner's emails (e.g. the welcome right after sign-up) never wait
+  // for it: rows are claimed with SKIP LOCKED, so the two can't send the same email.
+  const general = onlyUser === null
+  if (general && g.__emailRunning) return stats
+  if (general) g.__emailRunning = true
   try {
     const claimed = await query<Claimed>(
       `UPDATE email_enrollments SET locked_until = now() + interval '5 minutes'
@@ -232,7 +235,7 @@ export async function processDueEmails(limit = MAX_PER_TICK, onlyUser: string | 
     }
     if (claimed.length) console.info(`[email] run: ${JSON.stringify(stats)}`)
   } finally {
-    g.__emailRunning = false
+    if (general) g.__emailRunning = false
   }
   return stats
 }

@@ -340,6 +340,10 @@ export function pathFor(a: Answers): LeadPath {
     if (['DSG-C', 'DSG-M'].includes(order[0])) {
       if (wantsDataScience(a)) order = [order[0], 'GAI-M', ...order.slice(1).filter((c) => c !== 'GAI-M')]
       else if (gaiOpen) { order = ['GAI-M', ...order.filter((c) => c !== 'GAI-M')]; routed = 'genai' }
+    } else if (order[0] === 'DABA' && wantsDataScience(a)) {
+      // They clearly asked for data science (ML models, deeper data science): the data science program comes first.
+      const ds = ['DSG-C', 'DSG-M'].find((c) => !avoid.has(c) && eligibility(CODE_TO_ID[c], a).ok)
+      if (ds) order = [ds, ...order.filter((c) => c !== ds)]
     } else if (order[0] === 'DABA' && !wantsAnalytics(a)) {
       // (Lead types the map never sends to the Applied AI Practitioner Program, e.g. industry professionals, get the
       // GenAI & Agentic AI Master instead.)
@@ -371,6 +375,10 @@ export function pathFor(a: Answers): LeadPath {
     now.push(open)
   }
   const kinds: PathKind[] = ['recommend', 'next', 'more']
+  /** Why the first program fits: always about that program, even when the answers moved a different one to the top. */
+  const firstWhy = (code: string) => routed === 'genai' && code === 'GAI-M' ? EXPERIENCED_WHY
+    : (routed === 'nocode' || routed === 'aap') && code === 'AAP' ? NOCODE_WHY
+      : code === persona.primary ? persona.why : REORDER_WHY[code] ?? `${getProgram(CODE_TO_ID[code]).name}: ${catalogueWho(code)}`
   const picked: { code: string; reason: string }[] = [...now.map((code) => ({ code, reason: '' })), ...later].slice(0, 3)
   const options: PathOption[] = picked.map((x, i) => {
     const id = CODE_TO_ID[x.code]
@@ -382,7 +390,7 @@ export function pathFor(a: Answers): LeadPath {
       code: x.code, programId: id, name: program.name, kind,
       // The match with their lead type sets the top score; each later option sits one below.
       fit: Math.max(5, Math.min(10, FIT[kind] + (i === 0 && top.score >= 80 ? 1 : 0) - (e.confirm ? 1 : 0) - (reason ? 2 : 0))),
-      why: i === 0 ? (routed === 'genai' && x.code === 'GAI-M' ? EXPERIENCED_WHY : (routed === 'nocode' || routed === 'aap') && x.code === 'AAP' ? NOCODE_WHY : persona.why)
+      why: i === 0 ? firstWhy(x.code)
         : routed === 'nocode' && i === 1 && x.code === 'GAI-M' ? NOCODE_SECOND_WHY : KIND_WHY[kind],
       ...(reason ? { later: reason } : {}),
       ...(e.confirm ? { confirm: e.confirm } : {}),
@@ -393,7 +401,7 @@ export function pathFor(a: Answers): LeadPath {
   // Learners see one program; experienced non-programmers see two (no-code, or coding from scratch). The rest stays
   // in the background for the counsellor's context and the CRM.
   const show = routed === 'nocode' && options[1]?.code === 'GAI-M' && !options[1].later ? 2 : 1
-  return { persona: top, match, ranked, options, show, why: routed === 'genai' && options[0].code === 'GAI-M' ? EXPERIENCED_WHY : (routed === 'nocode' || routed === 'aap') && options[0].code === 'AAP' ? NOCODE_WHY : options[0].code === persona.primary ? persona.why : REORDER_WHY[options[0].code] ?? `${options[0].name}: ${catalogueWho(options[0].code)}`, note: persona.note }
+  return { persona: top, match, ranked, options, show, why: firstWhy(options[0].code), note: persona.note }
 }
 
 function years1(f: Facts) {

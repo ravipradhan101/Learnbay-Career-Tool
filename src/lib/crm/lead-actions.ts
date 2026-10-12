@@ -298,7 +298,10 @@ export async function completeTask(me: StaffUser, lead: LeadRef, taskId: unknown
       if (next) {
         const from = lead.status ?? 'new'
         const r = await db.query(
-          `UPDATE lead_owners SET status = $2, updated_at = now() WHERE user_id = $1 AND (status = 'new' OR $2 IN ('enrolled', 'not_interested')) AND status <> $2 RETURNING user_id`,
+          // Forward only: a call never moves a lead out of Enrolled or Lost (those are set by the main CRM).
+          `UPDATE lead_owners SET status = $2, updated_at = now()
+            WHERE user_id = $1 AND status NOT IN ('enrolled', 'lost') AND (status = 'new' OR $2 IN ('enrolled', 'not_interested')) AND status <> $2
+            RETURNING user_id`,
           [lead.id, next],
         )
         if (r.rowCount) {

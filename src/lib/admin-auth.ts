@@ -98,7 +98,7 @@ export async function adminLogin(email: string, password: string, ip: string): P
     await rateLimit(lockKey, LOCK_AFTER_FAILURES, LOCK_MINUTES * 60)
     return { ok: false, status: 401, error: `${WRONG_PASSWORD} First time here? Use “Set or reset password” below.` }
   }
-  if (!admin.active) return { ok: false, status: 403, error: 'This account has been deactivated. Please ask your manager or the admin.' }
+  if (!admin.active) return { ok: false, status: 403, error: 'This account has been deactivated. Please ask your BM or the admin.' }
   await query(`UPDATE admin_users SET failed_attempts = 0, locked_until = NULL, last_login_at = now() WHERE id = $1`, [admin.id])
   await startAdminSession(admin.id)
   return { ok: true }

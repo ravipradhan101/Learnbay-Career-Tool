@@ -1,7 +1,7 @@
 import { getCurrentStaff } from '@/lib/admin-auth'
 import { queryOne } from '@/lib/db'
 import { isUuid } from '@/lib/crm/guard'
-import { canSeeLead, staffDirectory } from '@/lib/crm/scope'
+import { mayOpenLead, staffDirectory } from '@/lib/crm/scope'
 import type { Answers } from '@/lib/questions'
 import { buildReportEmail, toolReportPdf, withCapstones } from '@/lib/report-email'
 import { renderHtml } from '@/lib/mailer'
@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       WHERE t.user_id = $1 AND t.tool = $2 AND t.status = 'ready'`,
     [id, meta.id],
   )
-  if (!row || !canSeeLead(me, row.owner_id, await staffDirectory())) return new Response('Not found', { status: 404 })
+  if (!row || !(await mayOpenLead(me, id, row.owner_id, await staffDirectory()))) return new Response('Not found', { status: 404 })
   const opts = await withCapstones({ userId: id, to: '', name: firstName(row.name), meta, data: row.data, answers: row.answers })
   if (new URL(request.url).searchParams.get('as') === 'email') {
     return new Response(renderHtml(buildReportEmail(opts)), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; img-src data:" } })

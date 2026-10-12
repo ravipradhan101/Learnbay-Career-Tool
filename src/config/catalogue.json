@@ -17,7 +17,7 @@
    "notFor": [
     "Anyone who wants to switch into an analyst job (→ DABA)",
     "Developers who want to build AI systems in code (→ GenAI for Software Developers)",
-    "Managers who need AI strategy and governance (→ AI Leadership Program)"
+    "Managers who need AI strategy and governance (→ GenAI & Agentic AI Program for Managers & Leaders)"
    ],
    "entry": "No work experience required. No coding. Comfortable with a laptop, email and spreadsheets. Graduation not required for the course itself; confirm IIT Patna certificate eligibility.",
    "targetRoles": [
@@ -1751,7 +1751,7 @@
     "Professionals who want to build AI systems and agents but haven't picked a role yet"
    ],
    "notFor": [
-    "People who only want to use AI tools in their current job without building anything (→ Applied AI Practitioner or AI Leadership Program)",
+    "People who only want to use AI tools in their current job without building anything (→ Applied AI Practitioner or GenAI & Agentic AI Program for Managers & Leaders)",
     "Developers who only need one developer track in 5 months (→ GenAI for Software Developers)"
    ],
    "entry": "1+ year of work experience, in tech or in a domain (BFSI, healthcare, manufacturing, retail and more). No coding background needed: Python is taught from scratch.",
@@ -3190,7 +3190,7 @@
     "Skills feel outdated"
    ],
    "primary": "DABA",
-   "why": "Non-tech returnees → DABA; tech returnees → Data Science & GenAI Program. Both give fresh projects that explain the gap.",
+   "why": "Fresh, recent projects that explain the gap: analytics for returnees from non-tech roles, data science and GenAI for returnees from tech roles.",
    "upsell": "DSG-C",
    "alternative": "DSG-C",
    "avoid": [
@@ -3228,7 +3228,7 @@
     "Do you want to grow in this role or switch?",
     "Freelance or salaried?"
    ],
-   "note": "Upsell to DABA (Marketing analytics track) if they want a marketing-analyst job. Offer the AI Leadership Program to creative heads who manage teams.",
+   "note": "Upsell to DABA (Marketing analytics track) if they want a marketing-analyst job. Offer the GenAI & Agentic AI Program for Managers & Leaders to creative heads who manage teams.",
    "fdePriority": false
   },
   {
@@ -3523,7 +3523,7 @@
     "Team is ahead of them on AI"
    ],
    "primary": "AIL",
-   "why": "Strategy, ROI, governance and AI delivery management, no coding.",
+   "why": "Strategy, ROI, governance and AI delivery management, with Python taught from scratch so they can lead AI work hands-on.",
    "upsell": "GAI-M",
    "alternative": "FDE-M",
    "avoid": [
@@ -3548,7 +3548,7 @@
     "Can't judge vendors or proposals"
    ],
    "primary": "AIL",
-   "why": "No-code leadership program with a capstone on their own organisation's AI plan.",
+   "why": "A leadership program (Python taught from scratch) with a capstone on their own organisation's AI plan.",
    "upsell": null,
    "alternative": "AAP",
    "avoid": [

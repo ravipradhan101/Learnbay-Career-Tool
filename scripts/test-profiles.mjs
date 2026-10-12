@@ -28,7 +28,7 @@ const LEVEL_PROGRAMS = {
   nocode: ['applied-ai-practitioner'], lead: ['genai-agentic-ai-managers-leaders', 'applied-ai-practitioner'],
   analytics: ['data-business-analytics-genai', 'data-science-genai-program'], build: ['genai-agentic-ai-master'],
   ml: ['data-science-genai-master', 'ms-cs-data-science-ai', 'data-science-genai-program'],
-  cloud: ['cloud-devops-engineering', 'cloud-devops-network', 'ai-cloud-devops-master'],
+  cloud: ['cloud-devops-engineering', 'ai-cloud-devops-master'],
 }
 
 const w = (experience, roleOther, domain, programmer, interest = 'ai', extra = {}) => ({ experience, role: 'other', roleOther, domain, programmer, interest, goal: 'switch', ...extra })

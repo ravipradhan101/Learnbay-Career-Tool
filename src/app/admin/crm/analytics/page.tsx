@@ -99,7 +99,7 @@ export default async function CrmAnalytics({ searchParams }: { searchParams: Pro
       </div>
 
       <section className="card stack">
-        <div className="row between"><h2 className="card-title">Missed calls, traced</h2><span className="help-note">Owner → associate → manager at the time</span></div>
+        <div className="row between"><h2 className="card-title">Missed calls, traced</h2><span className="help-note">Owner → ABM → BM at the time</span></div>
         {missed.length ? (
           <div className="table-scroll">
             <table className="admin-table compact">

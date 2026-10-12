@@ -119,7 +119,8 @@ export async function apiListLeads(opts: { updatedSince: string | null; limit: n
     `SELECT * FROM (
        SELECT u.id, u.email, u.name, CASE WHEN u.phone IS NULL THEN NULL ELSE coalesce(u.phone_country, '') || u.phone END AS phone,
               coalesce(lo.status, 'new') AS status, s.email AS owner_email, li.intent, li.band, u.created_at,
-              greatest(u.updated_at, u.created_at, coalesce(u.last_login_at, u.created_at), coalesce(lo.updated_at, u.created_at), coalesce(li.updated_at, u.created_at)) AS changed_at
+              -- Whole milliseconds, the same precision as the paging cursor, so a page never repeats its last row.
+              date_trunc('milliseconds', greatest(u.updated_at, u.created_at, coalesce(u.last_login_at, u.created_at), coalesce(lo.updated_at, u.created_at), coalesce(li.updated_at, u.created_at))) AS changed_at
          FROM users u LEFT JOIN lead_owners lo ON lo.user_id = u.id LEFT JOIN admin_users s ON s.id = lo.owner_id LEFT JOIN lead_insights li ON li.user_id = u.id
      ) x
      WHERE x.changed_at >= $1 AND ($2::timestamptz IS NULL OR (x.changed_at, x.id) > ($2::timestamptz, $3::uuid))

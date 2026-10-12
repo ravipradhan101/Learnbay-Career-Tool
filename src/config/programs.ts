@@ -31,7 +31,7 @@ const DEFS: Def[] = [
     code: 'AAP', interests: ['ai', 'analytics'],
     url: 'https://www.learnbay.co/artificial-intelligence/applied-ai-practitioner-program',
     summary: 'Use AI in the job you already do, without coding: AI reasoning and LLM workflows, generative and multimodal AI, Claude connectors and MCP, Claude Code for non-developers, agentic AI and automation, no-code AI apps, AIOps and a startup capstone through the AI CoLab.',
-    features: ['No coding, no experience needed', 'Startup capstone through the AI CoLab', 'IBM, IIT Patna and AI CoLab certificates'],
+    features: ['No coding, no experience needed', 'Startup capstone through the AI CoLab', 'IBM and AI CoLab certificates, plus IIT Patna for graduates'],
     focusAreas: ['AI reasoning & LLM workflows', 'Generative & multimodal AI', 'Connectors, MCP & Claude Code', 'Agentic AI & automation', 'No-code AI apps'],
     bestFor: 'Non-tech professionals, freelancers, business owners and students who want to use AI in their own work',
   },

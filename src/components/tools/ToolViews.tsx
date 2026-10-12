@@ -2,7 +2,6 @@ import { Icon } from '../Icon'
 import { ActionPlan } from '../report/ActionPlan'
 import { LadderChart, PhaseTimeline, RangeChart, Ring, SkillBars } from '../report/Charts'
 import type { Capstone } from '@/lib/capstones'
-import { moduleTopics } from '@/lib/curriculum-phases'
 import { ChartCard, EligibilityStrip, LearnbayEdge, More, OutcomePath, PlanWithLearnbay, ReportHero } from '../report/ReportParts'
 import { PublishedStory } from '../usp/UspNote'
 import { getProgram } from '@/config/programs'
@@ -58,6 +57,11 @@ export function SkillGapView({ r, shared = false, extras }: { r: SkillGapResult;
         />
       )}
       {!shared && <ActionPlan tool="skill-gap" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
+      {/* Their plan with Learnbay comes before the details. */}
+      {!shared && extras && (
+        <PlanWithLearnbay profile={extras.profile ?? []} capstones={extras.capstones ?? []} programId={r.programId}
+          focus={r.gapDetails?.length ? r.gapDetails.map((g) => g.skill) : [...r.skills].sort((a, b) => (b.requiredLevel - b.currentLevel) - (a.requiredLevel - a.currentLevel)).map((x) => x.name)} />
+      )}
 
       <div className="grid-2 report-grid">
         <ChartCard title="Where you stand" sub="Your level vs what the role needs. Biggest gaps first.">
@@ -127,8 +131,6 @@ export function SkillGapView({ r, shared = false, extras }: { r: SkillGapResult;
             <Ring value={programCovers} total={totalGaps} label="gaps covered by your recommended program" />
             <Ring value={genericCovers} total={totalGaps} label="covered by a typical generic course" />
           </div>
-          <PlanWithLearnbay profile={extras.profile ?? []} capstones={extras.capstones ?? []} programId={r.programId}
-            focus={r.gapDetails?.length ? r.gapDetails.map((g) => g.skill) : [...r.skills].sort((a, b) => (b.requiredLevel - b.currentLevel) - (a.requiredLevel - a.currentLevel)).map((x) => x.name)} />
           <LearnbayEdge booked={extras.hasSession} ids={['hybrid']} programId={r.programId} coverage={{ covers: programCovers, total: totalGaps }} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
           <PublishedStory />
@@ -160,6 +162,11 @@ export function SalaryView({ r, current, shared = false, extras }: { r: SalaryRe
         />
       )}
       {!shared && <ActionPlan tool="salary" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
+      {/* Their plan with Learnbay comes before the details. */}
+      {!shared && extras && (
+        <PlanWithLearnbay profile={extras.profile ?? []} capstones={extras.capstones ?? []} programId={r.programId}
+          focus={r.skillPremiums?.length ? [...r.skillPremiums].sort((a, b) => (a.impact === b.impact ? 0 : a.impact === 'High' ? -1 : 1)).map((x) => x.skill) : r.drivers} />
+      )}
 
       <ChartCard title="What you could earn" sub="Indicative market ranges in ₹ lakh per year for your experience and city">
         <RangeChart rows={rows} />
@@ -198,8 +205,6 @@ export function SalaryView({ r, current, shared = false, extras }: { r: SalaryRe
 
       {!shared && extras && (
         <>
-          <PlanWithLearnbay profile={extras.profile ?? []} capstones={extras.capstones ?? []} programId={r.programId}
-            focus={r.skillPremiums?.length ? [...r.skillPremiums].sort((a, b) => (a.impact === b.impact ? 0 : a.impact === 'High' ? -1 : 1)).map((x) => x.skill) : r.drivers} />
           <LearnbayEdge booked={extras.hasSession} ids={['hybrid']} programId={r.programId} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
         </>
@@ -224,8 +229,12 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
         />
       )}
       {!shared && <ActionPlan tool="roadmap" actions={withBooking(s, Boolean(extras?.hasSession)).actions} />}
+      {/* Their plan with Learnbay comes first; the phases follow. */}
+      {!shared && extras && <PlanWithLearnbay profile={extras.profile ?? []} capstones={extras.capstones ?? []} programId={r.programId} focus={r.phases.map((x) => x.title)} />}
 
-      <ChartCard title="Your plan at a glance" sub={`Job-ready in about ${getProgram(r.programId).jobReady} · ${r.weeklyHours} · each phase ends with a milestone you can show`}>
+      {/* Phases and milestones only: no syllabus (modules and topics are on the program page), and no second "time
+          to job" figure next to job-ready. */}
+      <ChartCard title="Your plan, phase by phase" sub={`${r.weeklyHours} · each phase ends with a milestone you can show`}>
         <PhaseTimeline phases={r.phases} months={r.durationMonths} />
         {(r.monthlyCheckpoints?.length ?? 0) > 0 && (
           <div className="checkpoint-dots">
@@ -238,17 +247,6 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
         {r.phases.map((p, i) => (
           <More key={p.title + i} title={`Phase ${i + 1}: ${p.title}`} open={!shared && i === 0}>
             <p className="small muted">{p.weeks} · {p.focus}</p>
-            {(p.modules?.length ?? 0) > 0 ? (
-              // Every module in the phase, with its weeks and all its topics (nothing hidden behind another module).
-              <div className="phase-mods">
-                {p.modules!.map((m) => (
-                  <div key={m} className="phase-mod">
-                    <b>{m}</b>
-                    <div className="tag-list">{moduleTopics(r.programId, m).map((t) => <span key={t} className="pill">{t}</span>)}</div>
-                  </div>
-                ))}
-              </div>
-            ) : <div className="tag-list">{p.topics.map((t) => <span key={t} className="pill">{t}</span>)}</div>}
             {p.milestone && <p className="small"><b>Milestone:</b> {p.milestone}</p>}
             {(p.deliverables?.length ?? 0) > 0 && <Bullets items={p.deliverables!} />}
             {p.practice && <p className="small muted"><b>Practice:</b> {p.practice}</p>}
@@ -290,7 +288,6 @@ export function RoadmapView({ r, shared = false, extras }: { r: RoadmapResult; s
 
       {!shared && extras && (
         <>
-          <PlanWithLearnbay profile={extras.profile ?? []} capstones={extras.capstones ?? []} programId={r.programId} focus={r.phases.map((x) => x.title)} />
           <LearnbayEdge booked={extras.hasSession} ids={['hybrid']} programId={r.programId} />
           {!extras.eligibilityDone && <EligibilityStrip area={extras.area} />}
           <PublishedStory />

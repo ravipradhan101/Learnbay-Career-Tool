@@ -38,7 +38,7 @@ export function AdminLoginForm({ next = '/admin' }: { next?: string }) {
 
   const title = mode === 'login' ? 'Team sign-in' : 'Set or reset password'
   const sub = mode === 'login'
-    ? 'Admin, managers, associates and ISMs sign in here.'
+    ? 'Admin, BMs, ABMs and ISMs sign in here.'
     : mode === 'request'
       ? 'We’ll email a 6-digit code to your work address.'
       : info

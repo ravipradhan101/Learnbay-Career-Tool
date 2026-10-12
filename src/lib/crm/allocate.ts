@@ -23,7 +23,8 @@ export async function logActivity(db: Db | null, actor: Actor, userId: string, a
 async function roundRobin(db: Db, userId: string, by: Actor, fromId: string | null = null): Promise<{ ownerId: string | null; assigned: boolean }> {
   await db.query(`SELECT pg_advisory_xact_lock(hashtext('crm:round-robin'))`)
   const ism = (await db.query<{ id: string }>(
-    `SELECT id FROM admin_users WHERE role = 'ism' AND active AND in_rotation ORDER BY rr_last_assigned_at ASC NULLS FIRST, created_at LIMIT 1`,
+    // Only ISMs who can sign in (an invited ISM joins once they have set their password).
+    `SELECT id FROM admin_users WHERE role = 'ism' AND active AND in_rotation AND password_hash IS NOT NULL ORDER BY rr_last_assigned_at ASC NULLS FIRST, created_at LIMIT 1`,
   )).rows[0]
   const saved = await db.query(
     `INSERT INTO lead_owners (user_id, owner_id, source, assigned_by) VALUES ($1, $2, 'round_robin', $3)
@@ -157,12 +158,20 @@ export async function allocateMissed(limit = 20): Promise<void> {
   for (const r of rows) await allocateNewLead(r.id).catch((err) => console.error('[crm] allocate failed', (err as Error).message))
 }
 
-/** Puts specific leads back through round robin (e.g. when their owner leaves). Returns how many found a new owner. */
+/**
+ * Puts specific leads back through round robin (e.g. when their owner leaves). Returns how many found a new owner.
+ * A lead only leaves its owner once an ISM takes it; if no ISM is free, it stays where it was.
+ */
 export async function rotateLeads(me: StaffUser, userIds: string[]): Promise<number> {
   let n = 0
   for (const id of userIds) {
-    const from = (await queryOne<{ owner_id: string | null }>(`UPDATE lead_owners lo SET owner_id = NULL FROM lead_owners old WHERE old.user_id = lo.user_id AND lo.user_id = $1 RETURNING old.owner_id`, [id]))?.owner_id ?? null
-    const r = await transaction((db) => roundRobin(db, id, me, from))
+    const r = await transaction(async (db) => {
+      const from = (await db.query<{ owner_id: string | null }>(`SELECT owner_id FROM lead_owners WHERE user_id = $1 FOR UPDATE`, [id])).rows[0]?.owner_id ?? null
+      await db.query(`UPDATE lead_owners SET owner_id = NULL WHERE user_id = $1`, [id])
+      const rr = await roundRobin(db, id, me, from)
+      if (!rr.assigned) await db.query(`UPDATE lead_owners SET owner_id = $2 WHERE user_id = $1`, [id, from])
+      return rr
+    })
     if (!r.assigned) break
     emitLeadEvent('lead.assigned', id, { by: 'round_robin', reassigned: true })
     await query(`UPDATE lead_tasks SET owner_id = $2 WHERE user_id = $1 AND status = 'open' AND kind <> 'meeting' AND (missed_at IS NULL OR missed_at > now())`, [id, r.ownerId])
